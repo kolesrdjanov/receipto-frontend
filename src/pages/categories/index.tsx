@@ -1,16 +1,25 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoriesTable } from '@/components/categories/categories-table'
+import { CategoryModal } from '@/components/categories/category-modal'
+import type { Category } from '@/hooks/categories/use-categories'
 
 export default function Categories() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+
   const handleAddCategory = () => {
-    // TODO: Implement add category modal/form
-    console.log('Add category clicked')
+    setSelectedCategory(null)
+    setModalMode('create')
+    setIsModalOpen(true)
   }
 
-  const handleEditCategory = (category: any) => {
-    // TODO: Implement edit category modal/form
-    console.log('Edit category:', category)
+  const handleEditCategory = (category: Category) => {
+    setSelectedCategory(category)
+    setModalMode('edit')
+    setIsModalOpen(true)
   }
 
   return (
@@ -24,6 +33,13 @@ export default function Categories() {
       </div>
 
       <CategoriesTable onEdit={handleEditCategory} />
+
+      <CategoryModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        category={selectedCategory}
+        mode={modalMode}
+      />
     </AppLayout>
   )
 }

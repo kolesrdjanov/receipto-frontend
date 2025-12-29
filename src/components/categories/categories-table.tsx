@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useCategories, useDeleteCategory, type Category } from '@/hooks/categories/use-categories'
-import { Trash2, Edit } from 'lucide-react'
+import { useCategories, type Category } from '@/hooks/categories/use-categories'
+import { Edit } from 'lucide-react'
 
 interface CategoriesTableProps {
   onEdit?: (category: Category) => void
@@ -17,13 +17,6 @@ interface CategoriesTableProps {
 
 export function CategoriesTable({ onEdit }: CategoriesTableProps) {
   const { data: categories, isLoading, error } = useCategories()
-  const deleteMutation = useDeleteCategory()
-
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      deleteMutation.mutate(id)
-    }
-  }
 
   if (isLoading) {
     return (
@@ -110,26 +103,15 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    {onEdit && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(category)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    )}
+                  {onEdit && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(category.id)}
-                      disabled={deleteMutation.isPending}
+                      onClick={() => onEdit(category)}
                     >
-                      <Trash2 className="w-4 h-4 text-destructive" />
+                      <Edit className="w-4 h-4" />
                     </Button>
-                  </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
