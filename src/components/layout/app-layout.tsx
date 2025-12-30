@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
+import { useLogout } from '@/hooks/auth/use-logout'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Settings } from 'lucide-react'
@@ -19,7 +20,8 @@ const navItems = [
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
+  const logout = useLogout()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const closeSidebar = () => setSidebarOpen(false)

@@ -123,6 +123,65 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ============================================
+   ACCENT COLOR THEMES
+   ============================================ */
+
+/* Blue accent */
+.accent-blue {
+  --primary: oklch(0.55 0.2 250);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.55 0.2 250);
+}
+.accent-blue.dark, .dark .accent-blue {
+  --primary: oklch(0.65 0.2 250);
+  --primary-foreground: oklch(0.15 0 0);
+}
+
+/* Green accent */
+.accent-green {
+  --primary: oklch(0.55 0.17 155);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.55 0.17 155);
+}
+.accent-green.dark, .dark .accent-green {
+  --primary: oklch(0.65 0.2 155);
+  --primary-foreground: oklch(0.15 0 0);
+}
+
+/* Purple accent */
+.accent-purple {
+  --primary: oklch(0.55 0.2 290);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.55 0.2 290);
+}
+.accent-purple.dark, .dark .accent-purple {
+  --primary: oklch(0.7 0.18 290);
+  --primary-foreground: oklch(0.15 0 0);
+}
+
+/* Orange accent */
+.accent-orange {
+  --primary: oklch(0.65 0.2 50);
+  --primary-foreground: oklch(0.15 0 0);
+  --ring: oklch(0.65 0.2 50);
+}
+.accent-orange.dark, .dark .accent-orange {
+  --primary: oklch(0.7 0.18 50);
+  --primary-foreground: oklch(0.15 0 0);
+}
+
+/* Rose accent */
+.accent-rose {
+  --primary: oklch(0.6 0.2 10);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.6 0.2 10);
+}
+.accent-rose.dark, .dark .accent-rose {
+  --primary: oklch(0.7 0.18 10);
+  --primary-foreground: oklch(0.15 0 0);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

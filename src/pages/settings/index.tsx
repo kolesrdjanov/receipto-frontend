@@ -8,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettingsStore, type Currency, type Theme } from '@/store/settings'
-import { Settings as SettingsIcon, Palette, DollarSign } from 'lucide-react'
+import { useSettingsStore, type Currency, type Theme, type AccentColor } from '@/store/settings'
+import { Settings as SettingsIcon, Palette, DollarSign, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const currencies: { value: Currency; label: string; symbol: string }[] = [
   { value: 'RSD', label: 'Serbian Dinar', symbol: 'РСД' },
@@ -24,8 +25,17 @@ const themes: { value: Theme; label: string }[] = [
   { value: 'system', label: 'System' },
 ]
 
+const accentColors: { value: AccentColor; label: string; color: string }[] = [
+  { value: 'zinc', label: 'Zinc', color: 'bg-zinc-600' },
+  { value: 'blue', label: 'Blue', color: 'bg-blue-500' },
+  { value: 'green', label: 'Green', color: 'bg-green-500' },
+  { value: 'purple', label: 'Purple', color: 'bg-purple-500' },
+  { value: 'orange', label: 'Orange', color: 'bg-orange-500' },
+  { value: 'rose', label: 'Rose', color: 'bg-rose-500' },
+]
+
 export default function Settings() {
-  const { currency, theme, setCurrency, setTheme } = useSettingsStore()
+  const { currency, theme, accentColor, setCurrency, setTheme, setAccentColor } = useSettingsStore()
 
   return (
     <AppLayout>
@@ -51,12 +61,12 @@ export default function Settings() {
               Customize how the application looks
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="space-y-0.5">
                 <Label htmlFor="theme">Theme</Label>
                 <p className="text-sm text-muted-foreground">
-                  Select your preferred color theme
+                  Select light or dark mode
                 </p>
               </div>
               <Select value={theme} onValueChange={(value: Theme) => setTheme(value)}>
@@ -71,6 +81,35 @@ export default function Settings() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-0.5">
+                <Label>Accent Color</Label>
+                <p className="text-sm text-muted-foreground">
+                  Choose your preferred accent color
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {accentColors.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => setAccentColor(c.value)}
+                    className={cn(
+                      'w-6 h-6 rounded-full flex items-center justify-center transition-all',
+                      c.color,
+                      accentColor === c.value
+                        ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110'
+                        : 'hover:scale-101'
+                    )}
+                    title={c.label}
+                  >
+                    {accentColor === c.value && (
+                      <Check className="h-5 w-5 text-white" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
