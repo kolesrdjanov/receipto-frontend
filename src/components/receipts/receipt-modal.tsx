@@ -27,6 +27,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import { useGroups } from '@/hooks/groups/use-groups'
 import { toast } from 'sonner'
 
 interface ReceiptModalProps {
@@ -43,6 +44,7 @@ type ReceiptFormData = {
   receiptDate: string
   receiptNumber: string
   categoryId: string
+  groupId: string
 }
 
 
@@ -61,11 +63,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       receiptDate: new Date().toISOString().split('T')[0],
       receiptNumber: '',
       categoryId: '',
+      groupId: '',
     },
   })
 
   const { data: categories = [] } = useCategories()
   const { data: currencies = [] } = useCurrencies()
+  const { data: groups = [] } = useGroups()
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
@@ -81,6 +85,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
           : '',
         receiptNumber: receipt.receiptNumber || '',
         categoryId: receipt.categoryId || '',
+        groupId: receipt.groupId || '',
       })
     } else if (open && mode === 'create') {
       reset({
@@ -90,6 +95,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
         receiptDate: new Date().toISOString().split('T')[0],
         receiptNumber: '',
         categoryId: '',
+        groupId: '',
       })
     }
   }, [open, receipt, mode, reset])
@@ -103,6 +109,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
         receiptDate: data.receiptDate || undefined,
         receiptNumber: data.receiptNumber || undefined,
         categoryId: data.categoryId || undefined,
+        groupId: data.groupId || undefined,
       }
 
       if (mode === 'create') {
@@ -246,6 +253,32 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
               )}
             />
           </div>
+
+          {groups.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="groupId">Group (optional)</Label>
+              <Controller
+                name="groupId"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No group</SelectItem>
+                      {groups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.icon && <span className="mr-2">{group.icon}</span>}
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          )}
 
           <DialogFooter className="gap-2 sm:gap-0">
             {mode === 'edit' && (

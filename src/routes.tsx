@@ -8,6 +8,7 @@ const SignUp = lazy(() => import('./pages/auth/sign-up'))
 const Dashboard = lazy(() => import('./pages/dashboard'))
 const Categories = lazy(() => import('./pages/categories'))
 const Receipts = lazy(() => import('./pages/receipts'))
+const Groups = lazy(() => import('./pages/groups'))
 const Settings = lazy(() => import('./pages/settings'))
 
 export const routes: RouteObject[] = [
@@ -44,6 +45,14 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <Receipts />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/groups',
+    element: (
+      <ProtectedRoute>
+        <Groups />
       </ProtectedRoute>
     ),
   },

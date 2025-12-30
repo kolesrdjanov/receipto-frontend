@@ -7,6 +7,7 @@ export interface Receipt {
   id: string
   userId: string
   categoryId?: string
+  groupId?: string
   qrCodeUrl?: string
   storeName?: string
   totalAmount?: number
@@ -16,6 +17,12 @@ export interface Receipt {
   scrapedData?: Record<string, unknown>
   status: 'pending' | 'scraped' | 'failed'
   category?: {
+    id: string
+    name: string
+    color?: string
+    icon?: string
+  }
+  group?: {
     id: string
     name: string
     color?: string
@@ -33,6 +40,7 @@ export interface CreateReceiptInput {
   receiptDate?: string
   receiptNumber?: string
   categoryId?: string
+  groupId?: string
 }
 
 export interface UpdateReceiptInput {
@@ -42,6 +50,7 @@ export interface UpdateReceiptInput {
   receiptDate?: string
   receiptNumber?: string
   categoryId?: string
+  groupId?: string
 }
 
 export interface ReceiptsFilters {

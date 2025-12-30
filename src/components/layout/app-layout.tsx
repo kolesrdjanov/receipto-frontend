@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Settings } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Settings } from 'lucide-react'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -13,6 +13,7 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/receipts', label: 'Receipts', icon: Receipt },
   { path: '/categories', label: 'Categories', icon: FolderOpen },
+  { path: '/groups', label: 'Groups', icon: Users },
   { path: '/settings', label: 'Settings', icon: Settings },
 ]
 

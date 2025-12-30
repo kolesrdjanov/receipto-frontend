@@ -34,6 +34,17 @@ export const queryKeys = {
     list: () => [...queryKeys.currencies.lists()] as const,
   },
 
+  // Groups
+  groups: {
+    all: ['groups'] as const,
+    lists: () => [...queryKeys.groups.all, 'list'] as const,
+    list: () => [...queryKeys.groups.lists()] as const,
+    details: () => [...queryKeys.groups.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.groups.details(), id] as const,
+    stats: (id: string) => [...queryKeys.groups.detail(id), 'stats'] as const,
+    invites: () => [...queryKeys.groups.all, 'invites'] as const,
+  },
+
   // Dashboard stats (if needed)
   dashboard: {
     all: ['dashboard'] as const,
