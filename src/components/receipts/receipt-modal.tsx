@@ -23,7 +23,6 @@ import {
   useUpdateReceipt,
   useDeleteReceipt,
   type Receipt,
-  type CreateReceiptInput,
 } from '@/hooks/receipts/use-receipts'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
@@ -115,14 +114,14 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
 
   const onSubmit = async (data: ReceiptFormData) => {
     try {
-      const payload: CreateReceiptInput = {
+      const payload = {
         storeName: data.storeName || undefined,
         totalAmount: data.totalAmount ? parseFloat(data.totalAmount) : undefined,
         currency: data.currency || undefined,
         receiptDate: data.receiptDate || undefined,
         receiptNumber: data.receiptNumber || undefined,
-        categoryId: data.categoryId || undefined,
-        groupId: data.groupId || undefined,
+        categoryId: data.categoryId || null,
+        groupId: data.groupId || null,
       }
 
       if (mode === 'create') {

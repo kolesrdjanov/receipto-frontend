@@ -39,8 +39,8 @@ export interface CreateReceiptInput {
   currency?: string
   receiptDate?: string
   receiptNumber?: string
-  categoryId?: string
-  groupId?: string
+  categoryId?: string | null
+  groupId?: string | null
 }
 
 export interface UpdateReceiptInput {
@@ -49,8 +49,8 @@ export interface UpdateReceiptInput {
   currency?: string
   receiptDate?: string
   receiptNumber?: string
-  categoryId?: string
-  groupId?: string
+  categoryId?: string | null
+  groupId?: string | null
 }
 
 export interface ReceiptsFilters {
