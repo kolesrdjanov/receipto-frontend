@@ -89,7 +89,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: 'RSD',
+      currency: group.currency || 'RSD',
       minimumFractionDigits: 0,
     }).format(amount)
   }
@@ -112,6 +112,10 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           {group.description && (
             <DialogDescription>{group.description}</DialogDescription>
           )}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
+            <span>Currency:</span>
+            <span className="font-medium text-foreground">{group.currency}</span>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

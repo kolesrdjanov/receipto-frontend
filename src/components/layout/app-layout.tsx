@@ -25,7 +25,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const closeSidebar = () => setSidebarOpen(false)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       {/* Mobile header */}
       <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
         <h1 className="text-xl font-bold">Receipto</h1>

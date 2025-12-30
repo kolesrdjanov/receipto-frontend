@@ -54,6 +54,8 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
     handleSubmit,
     reset,
     control,
+    watch,
+    setValue,
     formState: { isSubmitting },
   } = useForm<ReceiptFormData>({
     defaultValues: {
@@ -73,6 +75,17 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
+
+  // Watch groupId to auto-set currency
+  const selectedGroupId = watch('groupId')
+  const selectedGroup = groups.find((g) => g.id === selectedGroupId)
+
+  // Kada se promeni grupa, postavi currency iz grupe
+  useEffect(() => {
+    if (selectedGroup) {
+      setValue('currency', selectedGroup.currency)
+    }
+  }, [selectedGroupId, selectedGroup, setValue])
 
   useEffect(() => {
     if (open && receipt && mode === 'edit') {
@@ -196,7 +209,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                 name="currency"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={!!selectedGroup}
+                  >
                     <SelectTrigger id="currency">
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -210,6 +227,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                   </Select>
                 )}
               />
+              {selectedGroup && (
+                <p className="text-xs text-muted-foreground">
+                  Currency set by group
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -261,12 +283,15 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                 name="groupId"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
+                    value={field.value || '__none__'}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a group" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No group</SelectItem>
+                      <SelectItem value="__none__">No group</SelectItem>
                       {groups.map((group) => (
                         <SelectItem key={group.id} value={group.id}>
                           {group.icon && <span className="mr-2">{group.icon}</span>}

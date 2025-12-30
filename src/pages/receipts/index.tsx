@@ -65,12 +65,12 @@ export default function Receipts() {
     return new Date(dateString).toLocaleDateString()
   }
 
-  const formatAmount = (amount?: number) => {
+  const formatAmount = (receipt: Receipt) => {
+    const currency: string = receipt.currency || 'RSD'
+    const amount = receipt.totalAmount
     if (amount === undefined || amount === null) return '-'
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: 'RSD',
-    }).format(amount)
+
+    return `${currency} ${amount}`
   }
 
   const getStatusBadge = (status: string) => {
@@ -155,7 +155,7 @@ export default function Receipts() {
                   <TableCell className="font-medium">
                     {receipt.storeName || 'Unknown Store'}
                   </TableCell>
-                  <TableCell>{formatAmount(receipt.totalAmount)}</TableCell>
+                  <TableCell>{formatAmount(receipt)}</TableCell>
                   <TableCell>{formatDate(receipt.receiptDate)}</TableCell>
                   <TableCell>
                     {receipt.category ? (

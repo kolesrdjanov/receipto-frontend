@@ -19,7 +19,7 @@ export function useCurrencies() {
   return useQuery({
     queryKey: queryKeys.currencies.list(),
     queryFn: fetchCurrencies,
-    staleTime: 1000 * 60 * 60, // 1 sat - valute se retko menjaju
+    staleTime: 1000 * 60 * 60
   })
 }
 

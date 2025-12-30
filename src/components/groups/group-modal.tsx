@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import {
   Dialog,
   DialogContent,
@@ -13,12 +13,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   useCreateGroup,
   useUpdateGroup,
   useDeleteGroup,
   type Group,
   type CreateGroupInput,
 } from '@/hooks/groups/use-groups'
+import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { toast } from 'sonner'
 
 interface GroupModalProps {
@@ -31,6 +39,7 @@ interface GroupModalProps {
 type GroupFormData = {
   name: string
   description: string
+  currency: string
   icon: string
 }
 
@@ -39,15 +48,18 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
     register,
     handleSubmit,
     reset,
+    control,
     formState: { isSubmitting },
   } = useForm<GroupFormData>({
     defaultValues: {
       name: '',
       description: '',
+      currency: 'RSD',
       icon: '',
     },
   })
 
+  const { data: currencies = [] } = useCurrencies()
   const createGroup = useCreateGroup()
   const updateGroup = useUpdateGroup()
   const deleteGroup = useDeleteGroup()
@@ -57,12 +69,14 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       reset({
         name: group.name || '',
         description: group.description || '',
+        currency: group.currency || 'RSD',
         icon: group.icon || '',
       })
     } else if (open && mode === 'create') {
       reset({
         name: '',
         description: '',
+        currency: 'RSD',
         icon: '',
       })
     }
@@ -73,6 +87,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       const payload: CreateGroupInput = {
         name: data.name,
         description: data.description || undefined,
+        currency: data.currency,
         icon: data.icon || undefined,
       }
 
@@ -80,7 +95,9 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
         await createGroup.mutateAsync(payload)
         toast.success('Group created successfully')
       } else if (mode === 'edit' && group) {
-        await updateGroup.mutateAsync({ id: group.id, data: payload })
+        // Ne šaljemo currency pri edit-u jer se ne može menjati
+        const { currency, ...updatePayload } = payload
+        await updateGroup.mutateAsync({ id: group.id, data: updatePayload })
         toast.success('Group updated successfully')
       }
       onOpenChange(false)
@@ -150,6 +167,41 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
               placeholder="Optional description"
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="currency">Currency *</Label>
+            {mode === 'create' ? (
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="currency">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((c) => (
+                        <SelectItem key={c.id} value={c.code}>
+                          {c.code} - {c.symbol}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            ) : (
+              <Input
+                value={group?.currency || 'RSD'}
+                disabled
+                className="bg-muted"
+              />
+            )}
+            {mode === 'edit' && (
+              <p className="text-xs text-muted-foreground">
+                Currency cannot be changed after group creation
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

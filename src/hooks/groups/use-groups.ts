@@ -27,6 +27,7 @@ export interface Group {
   id: string
   name: string
   description?: string
+  currency: string
   color?: string
   icon?: string
   createdById: string
@@ -47,6 +48,7 @@ export interface GroupInvite extends GroupMember {
 export interface CreateGroupInput {
   name: string
   description?: string
+  currency: string
   color?: string
   icon?: string
 }

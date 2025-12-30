@@ -110,10 +110,9 @@ export function useCreateReceipt() {
   return useMutation({
     mutationFn: createReceipt,
     onSuccess: () => {
-      // Invalidate all receipt lists to refetch
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      // Also invalidate dashboard stats if they exist
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
 }
@@ -124,12 +123,10 @@ export function useUpdateReceipt() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateReceiptInput }) => updateReceipt(id, data),
     onSuccess: (updatedReceipt) => {
-      // Update the specific receipt in cache
       queryClient.setQueryData(queryKeys.receipts.detail(updatedReceipt.id), updatedReceipt)
-      // Invalidate all receipt lists
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      // Invalidate dashboard stats
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
 }
@@ -140,12 +137,10 @@ export function useDeleteReceipt() {
   return useMutation({
     mutationFn: deleteReceipt,
     onSuccess: (_, deletedId) => {
-      // Remove from cache
       queryClient.removeQueries({ queryKey: queryKeys.receipts.detail(deletedId) })
-      // Invalidate all receipt lists
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      // Invalidate dashboard stats
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
 }
