@@ -55,6 +55,8 @@ export interface UpdateReceiptInput {
 
 export interface ReceiptsFilters {
   categoryId?: string
+  minAmount?: number
+  maxAmount?: number
   startDate?: string
   endDate?: string
 }
@@ -63,6 +65,8 @@ export interface ReceiptsFilters {
 const fetchReceipts = async (filters?: ReceiptsFilters): Promise<Receipt[]> => {
   const params = new URLSearchParams()
   if (filters?.categoryId) params.append('categoryId', filters.categoryId)
+  if (filters?.minAmount !== undefined) params.append('minAmount', filters.minAmount.toString())
+  if (filters?.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())
   if (filters?.startDate) params.append('startDate', filters.startDate)
   if (filters?.endDate) params.append('endDate', filters.endDate)
 

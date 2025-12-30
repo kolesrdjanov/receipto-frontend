@@ -12,12 +12,14 @@ import {
 import { AppLayout } from '@/components/layout/app-layout'
 import { ReceiptModal } from '@/components/receipts/receipt-modal'
 import { QrScanner } from '@/components/receipts/qr-scanner'
+import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
   useCreateReceipt,
   type Receipt,
+  type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
-import { Camera, Plus, Pencil, Loader2 } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Receipts() {
@@ -25,8 +27,10 @@ export default function Receipts() {
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<ReceiptsFilters>({})
 
-  const { data: receipts = [], isLoading } = useReceipts()
+  const { data: receipts = [], isLoading } = useReceipts(filters)
   const createReceipt = useCreateReceipt()
 
   const handleAddManually = () => {
@@ -106,6 +110,14 @@ export default function Receipts() {
           <p className="text-sm text-muted-foreground sm:text-base">View and manage all your receipts</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant={showFilters ? 'secondary' : 'outline'}
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex-1 sm:flex-none"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
           <Button variant="outline" onClick={handleAddManually} className="flex-1 sm:flex-none">
             <Plus className="h-4 w-4 mr-2" />
             <span className="hidden xs:inline">Add </span>Manually
@@ -120,6 +132,10 @@ export default function Receipts() {
           </Button>
         </div>
       </div>
+
+      {showFilters && (
+        <ReceiptsFiltersBar filters={filters} onFiltersChange={setFilters} />
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
