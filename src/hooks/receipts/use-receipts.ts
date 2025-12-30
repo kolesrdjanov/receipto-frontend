@@ -15,7 +15,7 @@ export interface Receipt {
   receiptDate?: string
   receiptNumber?: string
   scrapedData?: Record<string, unknown>
-  status: 'pending' | 'scraped' | 'failed'
+  status: 'pending' | 'scraped' | 'failed' | 'completed'
   category?: {
     id: string
     name: string
