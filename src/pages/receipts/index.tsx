@@ -100,23 +100,23 @@ export default function Receipts() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Receipts</h2>
-          <p className="text-muted-foreground">View and manage all your receipts</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">Receipts</h2>
+          <p className="text-sm text-muted-foreground sm:text-base">View and manage all your receipts</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleAddManually}>
+          <Button variant="outline" onClick={handleAddManually} className="flex-1 sm:flex-none">
             <Plus className="h-4 w-4 mr-2" />
-            Add Manually
+            <span className="hidden xs:inline">Add </span>Manually
           </Button>
-          <Button onClick={handleScanQr} disabled={createReceipt.isPending}>
+          <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none">
             {createReceipt.isPending ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Camera className="h-4 w-4 mr-2" />
             )}
-            Scan QR Code
+            Scan<span className="hidden xs:inline"> QR</span>
           </Button>
         </div>
       </div>

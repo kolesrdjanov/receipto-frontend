@@ -5,12 +5,12 @@ import { AppLayout } from '@/components/layout/app-layout'
 export default function Dashboard() {
   return (
     <AppLayout>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight mb-2">Dashboard</h2>
-        <p className="text-muted-foreground">Manage your receipts and categories</p>
+      <div className="mb-6 md:mb-8">
+        <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">Dashboard</h2>
+        <p className="text-sm text-muted-foreground md:text-base">Manage your receipts and categories</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
         <Link to="/receipts">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>

@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Menu, X } from 'lucide-react'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -16,21 +18,59 @@ const navItems = [
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
   const { user, logout } = useAuthStore()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const closeSidebar = () => setSidebarOpen(false)
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Mobile header */}
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
+        <h1 className="text-xl font-bold">Receipto</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+      </header>
+
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 border-r bg-card">
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-50 h-full w-64 border-r bg-card transition-transform duration-200 ease-in-out md:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
-          <div className="border-b px-6 py-4">
+          <div className="flex items-center justify-between border-b px-6 py-4">
             <h1 className="text-2xl font-bold">Receipto</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={closeSidebar}
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
             {navItems.map((item) => (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={item.path} onClick={closeSidebar}>
                 <div
                   className={cn(
                     'flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
@@ -59,8 +99,8 @@ export function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="pl-64">
-        <main className="container mx-auto px-8 py-8">{children}</main>
+      <div className="pt-14 md:pl-64 md:pt-0">
+        <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
   )

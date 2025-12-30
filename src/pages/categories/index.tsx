@@ -24,12 +24,12 @@ export default function Categories() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Categories</h2>
-          <p className="text-muted-foreground">Organize your receipts by category</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">Categories</h2>
+          <p className="text-sm text-muted-foreground sm:text-base">Organize your receipts by category</p>
         </div>
-        <Button onClick={handleAddCategory}>Add Category</Button>
+        <Button onClick={handleAddCategory} className="w-full sm:w-auto">Add Category</Button>
       </div>
 
       <CategoriesTable onEdit={handleEditCategory} />
