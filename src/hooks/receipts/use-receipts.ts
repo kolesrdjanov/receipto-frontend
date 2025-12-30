@@ -111,7 +111,7 @@ export function useCreateReceipt() {
     mutationFn: createReceipt,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
@@ -125,7 +125,7 @@ export function useUpdateReceipt() {
     onSuccess: (updatedReceipt) => {
       queryClient.setQueryData(queryKeys.receipts.detail(updatedReceipt.id), updatedReceipt)
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
@@ -139,7 +139,7 @@ export function useDeleteReceipt() {
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: queryKeys.receipts.detail(deletedId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })

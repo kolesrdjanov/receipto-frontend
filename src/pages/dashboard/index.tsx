@@ -1,6 +1,13 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Link } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import {
@@ -10,6 +17,7 @@ import {
   useMonthlyStats,
   useTopStores,
 } from '@/hooks/dashboard/use-dashboard'
+import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import {
   Loader2,
   Receipt,
@@ -21,6 +29,7 @@ import {
   Store,
   PieChart as PieChartIcon,
   BarChart3,
+  Coins,
 } from 'lucide-react'
 import {
   PieChart,
@@ -43,18 +52,20 @@ const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', 
 export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedCurrency, setSelectedCurrency] = useState('RSD')
 
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: categoryStats, isLoading: categoryLoading } = useCategoryStats(selectedYear, selectedMonth)
-  const { data: dailyStats, isLoading: dailyLoading } = useDailyStats(selectedYear, selectedMonth)
-  const { data: monthlyStats, isLoading: monthlyLoading } = useMonthlyStats(selectedYear)
-  const { data: topStores, isLoading: storesLoading } = useTopStores(5)
+  const { data: currencies = [] } = useCurrencies()
+  const { data: stats, isLoading: statsLoading } = useDashboardStats(selectedCurrency)
+  const { data: categoryStats, isLoading: categoryLoading } = useCategoryStats(selectedYear, selectedMonth, selectedCurrency)
+  const { data: dailyStats, isLoading: dailyLoading } = useDailyStats(selectedYear, selectedMonth, selectedCurrency)
+  const { data: monthlyStats, isLoading: monthlyLoading } = useMonthlyStats(selectedYear, selectedCurrency)
+  const { data: topStores, isLoading: storesLoading } = useTopStores(5, selectedCurrency)
 
-  const formatAmount = (amount?: number, currency?: string) => {
+  const formatAmount = (amount?: number) => {
     if (amount === undefined || amount === null) return '0'
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: currency || 'RSD',
+      currency: selectedCurrency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
@@ -149,11 +160,28 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="mb-6 md:mb-8">
-        <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">Dashboard</h2>
-        <p className="text-sm text-muted-foreground md:text-base">
-          Overview of your expenses and spending patterns
-        </p>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">Dashboard</h2>
+          <p className="text-sm text-muted-foreground md:text-base">
+            Overview of your expenses and spending patterns
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Coins className="h-4 w-4 text-muted-foreground" />
+          <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map((c) => (
+                <SelectItem key={c.id} value={c.code}>
+                  {c.code} ({c.symbol})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -172,7 +200,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold">{stats?.totalReceipts ?? 0}</p>
-                  <p className="text-xs text-muted-foreground mt-1">All time</p>
+                  <p className="text-xs text-muted-foreground mt-1">in {selectedCurrency}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -183,8 +211,8 @@ export default function Dashboard() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(stats?.totalAmount, stats?.currency)}</p>
-                <p className="text-xs text-muted-foreground mt-1">All time</p>
+                <p className="text-2xl font-bold">{formatAmount(stats?.totalAmount)}</p>
+                <p className="text-xs text-muted-foreground mt-1">in {selectedCurrency}</p>
               </CardContent>
             </Card>
 
@@ -194,7 +222,7 @@ export default function Dashboard() {
                 <PieChartIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(totalMonthAmount, stats?.currency)}</p>
+                <p className="text-2xl font-bold">{formatAmount(totalMonthAmount)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{monthName}</p>
               </CardContent>
             </Card>
@@ -404,7 +432,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Clock className="h-4 w-4" />
-                Recent Activity
+                Recent Activity ({selectedCurrency})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -417,7 +445,7 @@ export default function Dashboard() {
                       className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border"
                     >
                       <span className="font-medium truncate">{receipt.storeName || 'Unknown Store'}</span>
-                      <span className="text-lg font-bold">{formatAmount(receipt.totalAmount, receipt.currency)}</span>
+                      <span className="text-lg font-bold">{formatAmount(receipt.totalAmount)}</span>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(receipt.receiptDate || receipt.createdAt)}
                       </span>
@@ -425,7 +453,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No recent activity</p>
+                <p className="text-sm text-muted-foreground">No receipts in {selectedCurrency}</p>
               )}
             </CardContent>
           </Card>

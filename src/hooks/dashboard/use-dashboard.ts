@@ -38,58 +38,67 @@ export interface TopStore {
   receiptCount: number
 }
 
-const fetchDashboardStats = async (): Promise<DashboardStats> => {
-  return api.get<DashboardStats>('/dashboard/stats')
+const fetchDashboardStats = async (currency?: string): Promise<DashboardStats> => {
+  const params = currency ? `?currency=${currency}` : ''
+  return api.get<DashboardStats>(`/dashboard/stats${params}`)
 }
 
-const fetchCategoryStats = async (year: number, month: number): Promise<CategoryStats[]> => {
-  return api.get<CategoryStats[]>(`/dashboard/category-stats?year=${year}&month=${month}`)
+const fetchCategoryStats = async (year: number, month: number, currency?: string): Promise<CategoryStats[]> => {
+  let url = `/dashboard/category-stats?year=${year}&month=${month}`
+  if (currency) url += `&currency=${currency}`
+  return api.get<CategoryStats[]>(url)
 }
 
-const fetchDailyStats = async (year: number, month: number): Promise<DailyStats[]> => {
-  return api.get<DailyStats[]>(`/dashboard/daily-stats?year=${year}&month=${month}`)
+const fetchDailyStats = async (year: number, month: number, currency?: string): Promise<DailyStats[]> => {
+  let url = `/dashboard/daily-stats?year=${year}&month=${month}`
+  if (currency) url += `&currency=${currency}`
+  return api.get<DailyStats[]>(url)
 }
 
-const fetchMonthlyStats = async (year: number): Promise<MonthlyStats[]> => {
-  return api.get<MonthlyStats[]>(`/dashboard/monthly-stats?year=${year}`)
+const fetchMonthlyStats = async (year: number, currency?: string): Promise<MonthlyStats[]> => {
+  let url = `/dashboard/monthly-stats?year=${year}`
+  if (currency) url += `&currency=${currency}`
+  return api.get<MonthlyStats[]>(url)
 }
 
-const fetchTopStores = async (limit: number = 5): Promise<TopStore[]> => {
-  return api.get<TopStore[]>(`/dashboard/top-stores?limit=${limit}`)
+const fetchTopStores = async (limit: number = 5, currency?: string): Promise<TopStore[]> => {
+  let url = `/dashboard/top-stores?limit=${limit}`
+  if (currency) url += `&currency=${currency}`
+  return api.get<TopStore[]>(url)
 }
 
-export function useDashboardStats() {
+export function useDashboardStats(currency?: string) {
   return useQuery({
-    queryKey: queryKeys.dashboard.stats(),
-    queryFn: fetchDashboardStats,
+    queryKey: [...queryKeys.dashboard.all, 'stats', currency],
+    queryFn: () => fetchDashboardStats(currency),
   })
 }
 
-export function useCategoryStats(year: number, month: number) {
+export function useCategoryStats(year: number, month: number, currency?: string) {
   return useQuery({
-    queryKey: [...queryKeys.dashboard.all, 'category-stats', year, month],
-    queryFn: () => fetchCategoryStats(year, month),
+    queryKey: [...queryKeys.dashboard.all, 'category-stats', year, month, currency],
+    queryFn: () => fetchCategoryStats(year, month, currency),
   })
 }
 
-export function useDailyStats(year: number, month: number) {
+export function useDailyStats(year: number, month: number, currency?: string) {
   return useQuery({
-    queryKey: [...queryKeys.dashboard.all, 'daily-stats', year, month],
-    queryFn: () => fetchDailyStats(year, month),
+    queryKey: [...queryKeys.dashboard.all, 'daily-stats', year, month, currency],
+    queryFn: () => fetchDailyStats(year, month, currency),
   })
 }
 
-export function useMonthlyStats(year: number) {
+export function useMonthlyStats(year: number, currency?: string) {
   return useQuery({
-    queryKey: [...queryKeys.dashboard.all, 'monthly-stats', year],
-    queryFn: () => fetchMonthlyStats(year),
+    queryKey: [...queryKeys.dashboard.all, 'monthly-stats', year, currency],
+    queryFn: () => fetchMonthlyStats(year, currency),
   })
 }
 
-export function useTopStores(limit: number = 5) {
+export function useTopStores(limit: number = 5, currency?: string) {
   return useQuery({
-    queryKey: [...queryKeys.dashboard.all, 'top-stores', limit],
-    queryFn: () => fetchTopStores(limit),
+    queryKey: [...queryKeys.dashboard.all, 'top-stores', limit, currency],
+    queryFn: () => fetchTopStores(limit, currency),
   })
 }
 
