@@ -8,16 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettingsStore, type Currency, type Theme, type AccentColor } from '@/store/settings'
+import { useSettingsStore, type Theme, type AccentColor } from '@/store/settings'
+import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { Settings as SettingsIcon, Palette, DollarSign, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-const currencies: { value: Currency; label: string; symbol: string }[] = [
-  { value: 'RSD', label: 'Serbian Dinar', symbol: 'РСД' },
-  { value: 'EUR', label: 'Euro', symbol: '€' },
-  { value: 'USD', label: 'US Dollar', symbol: '$' },
-  { value: 'BAM', label: 'Convertible Mark', symbol: 'KM' },
-]
 
 const themes: { value: Theme; label: string }[] = [
   { value: 'light', label: 'Light' },
@@ -36,6 +30,7 @@ const accentColors: { value: AccentColor; label: string; color: string }[] = [
 
 export default function Settings() {
   const { currency, theme, accentColor, setCurrency, setTheme, setAccentColor } = useSettingsStore()
+  const { currencies } = useCurrencies()
 
   return (
     <AppLayout>
@@ -133,16 +128,16 @@ export default function Settings() {
                   Choose which currency to use throughout the app
                 </p>
               </div>
-              <Select value={currency} onValueChange={(value: Currency) => setCurrency(value)}>
+              <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
                 <SelectTrigger id="currency" className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
                   {currencies.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
+                    <SelectItem key={c.code} value={c.code}>
                       <span className="flex items-center gap-2">
                         <span className="font-mono text-muted-foreground">{c.symbol}</span>
-                        {c.label}
+                        {c.name}
                       </span>
                     </SelectItem>
                   ))}

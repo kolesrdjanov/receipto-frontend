@@ -16,8 +16,16 @@ import {
   useDailyStats,
   useMonthlyStats,
   useTopStores,
+  useAggregatedStats,
+  useAggregatedCategoryStats,
+  useAggregatedDailyStats,
+  useAggregatedMonthlyStats,
+  useAggregatedTopStores,
+  type CurrencyBreakdown,
 } from '@/hooks/dashboard/use-dashboard'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
+import { useSettingsStore } from '@/store/settings'
 import {
   Loader2,
   Receipt,
@@ -30,6 +38,7 @@ import {
   PieChart as PieChartIcon,
   BarChart3,
   Coins,
+  RefreshCw,
 } from 'lucide-react'
 import {
   PieChart,
@@ -49,23 +58,64 @@ import { format, getDaysInMonth } from 'date-fns'
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
+const ALL_CONVERTED = 'ALL'
+
 export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedCurrency, setSelectedCurrency] = useState('RSD')
+  const [currencyMode, setCurrencyMode] = useState<string>('RSD')
 
+  const { currency: preferredCurrency } = useSettingsStore()
   const { data: currencies = [] } = useCurrencies()
-  const { data: stats, isLoading: statsLoading } = useDashboardStats(selectedCurrency)
-  const { data: categoryStats, isLoading: categoryLoading } = useCategoryStats(selectedYear, selectedMonth, selectedCurrency)
-  const { data: dailyStats, isLoading: dailyLoading } = useDailyStats(selectedYear, selectedMonth, selectedCurrency)
-  const { data: monthlyStats, isLoading: monthlyLoading } = useMonthlyStats(selectedYear, selectedCurrency)
-  const { data: topStores, isLoading: storesLoading } = useTopStores(5, selectedCurrency)
+
+  const isConvertedMode = currencyMode === ALL_CONVERTED
+  const displayCurrency = isConvertedMode ? preferredCurrency : currencyMode
+
+  const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(preferredCurrency)
+
+  const { data: stats, isLoading: statsLoading } = useDashboardStats(
+    isConvertedMode ? undefined : currencyMode
+  )
+  const { data: categoryStats, isLoading: categoryLoading } = useCategoryStats(
+    selectedYear, selectedMonth, isConvertedMode ? undefined : currencyMode
+  )
+  const { data: dailyStats, isLoading: dailyLoading } = useDailyStats(
+    selectedYear, selectedMonth, isConvertedMode ? undefined : currencyMode
+  )
+  const { data: monthlyStats, isLoading: monthlyLoading } = useMonthlyStats(
+    selectedYear, isConvertedMode ? undefined : currencyMode
+  )
+  const { data: topStores, isLoading: storesLoading } = useTopStores(
+    5, isConvertedMode ? undefined : currencyMode
+  )
+
+  const { data: aggStats, isLoading: aggStatsLoading } = useAggregatedStats()
+  const { data: aggCategoryStats, isLoading: aggCategoryLoading } = useAggregatedCategoryStats(
+    selectedYear, selectedMonth
+  )
+  const { data: aggDailyStats, isLoading: aggDailyLoading } = useAggregatedDailyStats(
+    selectedYear, selectedMonth
+  )
+  const { data: aggMonthlyStats, isLoading: aggMonthlyLoading } = useAggregatedMonthlyStats(selectedYear)
+  const { data: aggTopStores, isLoading: aggStoresLoading } = useAggregatedTopStores(5)
+
+  const convertBreakdownToTotal = (breakdown: CurrencyBreakdown[] | undefined): number => {
+    if (!breakdown || !exchangeRates) return 0
+    return breakdown.reduce((sum, item) => {
+      if (item.currency === preferredCurrency) {
+        return sum + item.totalAmount
+      }
+      const rate = exchangeRates[item.currency]
+      if (!rate || rate === 0) return sum + item.totalAmount
+      return sum + (item.totalAmount / rate)
+    }, 0)
+  }
 
   const formatAmount = (amount?: number) => {
     if (amount === undefined || amount === null) return '0'
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: selectedCurrency,
+      currency: displayCurrency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
@@ -96,40 +146,94 @@ export default function Dashboard() {
     }
   }
 
-  // Prepare daily data with all days of month
+  const isLoading = isConvertedMode
+    ? (aggStatsLoading || ratesLoading)
+    : statsLoading
+
+  const totalReceipts = isConvertedMode
+    ? (aggStats?.totalReceipts ?? 0)
+    : (stats?.totalReceipts ?? 0)
+
+  const totalCategories = isConvertedMode
+    ? (aggStats?.totalCategories ?? 0)
+    : (stats?.totalCategories ?? 0)
+
+  const totalAmount = isConvertedMode
+    ? convertBreakdownToTotal(aggStats?.byCurrency)
+    : (stats?.totalAmount ?? 0)
+
+  const recentReceipts = isConvertedMode
+    ? (aggStats?.recentReceipts ?? [])
+    : (stats?.recentReceipts ?? [])
+
   const dailyChartData = useMemo(() => {
     const daysInMonth = getDaysInMonth(new Date(selectedYear, selectedMonth - 1))
     const data = []
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      const found = dailyStats?.find((d) => d.date === dateStr)
-      data.push({
-        day: day,
-        date: dateStr,
-        totalAmount: found?.totalAmount || 0,
-        receiptCount: found?.receiptCount || 0,
-      })
+
+    if (isConvertedMode && aggDailyStats) {
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+        const found = aggDailyStats.find((d) => d.date === dateStr)
+        data.push({
+          day,
+          date: dateStr,
+          totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
+          receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
+        })
+      }
+    } else {
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+        const found = dailyStats?.find((d) => d.date === dateStr)
+        data.push({
+          day,
+          date: dateStr,
+          totalAmount: found?.totalAmount || 0,
+          receiptCount: found?.receiptCount || 0,
+        })
+      }
     }
     return data
-  }, [dailyStats, selectedYear, selectedMonth])
+  }, [dailyStats, aggDailyStats, selectedYear, selectedMonth, isConvertedMode, exchangeRates])
 
-  // Prepare monthly data with all months
   const monthlyChartData = useMemo(() => {
     const months = []
-    for (let m = 1; m <= 12; m++) {
-      const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
-      const found = monthlyStats?.find((d) => d.month === monthStr)
-      months.push({
-        month: format(new Date(selectedYear, m - 1), 'MMM'),
-        totalAmount: found?.totalAmount || 0,
-        receiptCount: found?.receiptCount || 0,
-      })
+
+    if (isConvertedMode && aggMonthlyStats) {
+      for (let m = 1; m <= 12; m++) {
+        const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
+        const found = aggMonthlyStats.find((d) => d.month === monthStr)
+        months.push({
+          month: format(new Date(selectedYear, m - 1), 'MMM'),
+          totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
+          receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
+        })
+      }
+    } else {
+      for (let m = 1; m <= 12; m++) {
+        const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
+        const found = monthlyStats?.find((d) => d.month === monthStr)
+        months.push({
+          month: format(new Date(selectedYear, m - 1), 'MMM'),
+          totalAmount: found?.totalAmount || 0,
+          receiptCount: found?.receiptCount || 0,
+        })
+      }
     }
     return months
-  }, [monthlyStats, selectedYear])
+  }, [monthlyStats, aggMonthlyStats, selectedYear, isConvertedMode, exchangeRates])
 
-  // Category chart data
   const categoryChartData = useMemo(() => {
+    if (isConvertedMode && aggCategoryStats) {
+      return aggCategoryStats.map((c, index) => ({
+        name: c.categoryName,
+        value: convertBreakdownToTotal(c.byCurrency),
+        icon: c.categoryIcon,
+        color: c.categoryColor || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+        count: c.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
+      }))
+    }
+
     if (!categoryStats || categoryStats.length === 0) return []
     return categoryStats.map((c, index) => ({
       name: c.categoryName,
@@ -138,9 +242,20 @@ export default function Dashboard() {
       color: c.categoryColor || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
       count: c.receiptCount,
     }))
-  }, [categoryStats])
+  }, [categoryStats, aggCategoryStats, isConvertedMode, exchangeRates])
 
-  const totalMonthAmount = categoryStats?.reduce((sum, c) => sum + c.totalAmount, 0) || 0
+  const totalMonthAmount = categoryChartData.reduce((sum, c) => sum + c.value, 0)
+
+  const topStoresData = useMemo(() => {
+    if (isConvertedMode && aggTopStores) {
+      return aggTopStores.map((s) => ({
+        storeName: s.storeName,
+        totalAmount: convertBreakdownToTotal(s.byCurrency),
+        receiptCount: s.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
+      })).sort((a, b) => b.totalAmount - a.totalAmount)
+    }
+    return topStores || []
+  }, [topStores, aggTopStores, isConvertedMode, exchangeRates])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -169,11 +284,17 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Coins className="h-4 w-4 text-muted-foreground" />
-          <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-            <SelectTrigger className="w-[120px]">
+          <Select value={currencyMode} onValueChange={setCurrencyMode}>
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Currency" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={ALL_CONVERTED}>
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="h-3 w-3" />
+                  All → {preferredCurrency}
+                </span>
+              </SelectItem>
               {currencies.map((c) => (
                 <SelectItem key={c.id} value={c.code}>
                   {c.code} ({c.symbol})
@@ -184,8 +305,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {isConvertedMode && (
+        <div className="mb-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Amounts converted to {preferredCurrency} using approximate exchange rates
+        </div>
+      )}
+
       {/* Stats Cards */}
-      {statsLoading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -199,8 +327,10 @@ export default function Dashboard() {
                   <Receipt className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">{stats?.totalReceipts ?? 0}</p>
-                  <p className="text-xs text-muted-foreground mt-1">in {selectedCurrency}</p>
+                  <p className="text-2xl font-bold">{totalReceipts}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {isConvertedMode ? 'All currencies' : `in ${currencyMode}`}
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -211,8 +341,10 @@ export default function Dashboard() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(stats?.totalAmount)}</p>
-                <p className="text-xs text-muted-foreground mt-1">in {selectedCurrency}</p>
+                <p className="text-2xl font-bold">{formatAmount(totalAmount)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isConvertedMode ? `≈ in ${preferredCurrency}` : `in ${currencyMode}`}
+                </p>
               </CardContent>
             </Card>
 
@@ -234,7 +366,7 @@ export default function Dashboard() {
                   <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">{stats?.totalCategories ?? 0}</p>
+                  <p className="text-2xl font-bold">{totalCategories}</p>
                   <p className="text-xs text-muted-foreground mt-1">Available</p>
                 </CardContent>
               </Card>
@@ -265,7 +397,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {categoryLoading ? (
+                {(isConvertedMode ? aggCategoryLoading : categoryLoading) ? (
                   <div className="flex items-center justify-center h-[250px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -321,7 +453,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {dailyLoading ? (
+                {(isConvertedMode ? aggDailyLoading : dailyLoading) ? (
                   <div className="flex items-center justify-center h-[250px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -360,7 +492,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {monthlyLoading ? (
+                {(isConvertedMode ? aggMonthlyLoading : monthlyLoading) ? (
                   <div className="flex items-center justify-center h-[200px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -399,13 +531,13 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {storesLoading ? (
+                {(isConvertedMode ? aggStoresLoading : storesLoading) ? (
                   <div className="flex items-center justify-center h-[200px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
-                ) : topStores && topStores.length > 0 ? (
+                ) : topStoresData && topStoresData.length > 0 ? (
                   <div className="space-y-3">
-                    {topStores.map((store, index) => (
+                    {topStoresData.slice(0, 5).map((store, index) => (
                       <div key={store.storeName} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-muted-foreground w-4">{index + 1}.</span>
@@ -432,20 +564,27 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Clock className="h-4 w-4" />
-                Recent Activity ({selectedCurrency})
+                Recent Activity
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stats?.recentReceipts && stats.recentReceipts.length > 0 ? (
+              {recentReceipts && recentReceipts.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                  {stats.recentReceipts.slice(0, 5).map((receipt) => (
+                  {recentReceipts.slice(0, 5).map((receipt) => (
                     <Link
                       key={receipt.id}
                       to="/receipts"
                       className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border"
                     >
                       <span className="font-medium truncate">{receipt.storeName || 'Unknown Store'}</span>
-                      <span className="text-lg font-bold">{formatAmount(receipt.totalAmount)}</span>
+                      <span className="text-lg font-bold">
+                        {new Intl.NumberFormat('sr-RS', {
+                          style: 'currency',
+                          currency: receipt.currency || 'RSD',
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(receipt.totalAmount || 0)}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(receipt.receiptDate || receipt.createdAt)}
                       </span>
@@ -453,7 +592,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No receipts in {selectedCurrency}</p>
+                <p className="text-sm text-muted-foreground">No recent activity</p>
               )}
             </CardContent>
           </Card>

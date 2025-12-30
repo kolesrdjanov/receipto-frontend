@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type Currency = 'RSD' | 'EUR' | 'USD' | 'BAM'
+// Currency is now a runtime string to support dynamic currencies from the backend
+// Default/fallback currencies: 'RSD' | 'EUR' | 'USD' | 'BAM'
+export type Currency = string
 export type Theme = 'light' | 'dark' | 'system'
 export type AccentColor = 'zinc' | 'blue' | 'green' | 'purple' | 'orange' | 'rose'
 
