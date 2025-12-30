@@ -3,21 +3,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AuthLayout } from '@/components/layout/auth-layout'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
   const { formData, errors, apiError, isLoading, handleChange, handleSubmit } = useSignUp()
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+    <AuthLayout>
+      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>
-            Already have an account?{' '}
-            <Link to="/sign-in" className="font-medium text-primary hover:underline">
-              Sign in
-            </Link>
+            Get started with Receipto today
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -28,34 +26,38 @@ export default function SignUp() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First name</Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                type="text"
-                autoComplete="given-name"
-                placeholder="John"
-                value={formData.firstName}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-              {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  placeholder="John"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className="bg-background/50"
+                />
+                {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last name</Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                type="text"
-                autoComplete="family-name"
-                placeholder="Doe"
-                value={formData.lastName}
-                onChange={handleChange}
-                disabled={isLoading}
-              />
-              {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className="bg-background/50"
+                />
+                {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -69,8 +71,9 @@ export default function SignUp() {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
+                className="bg-background/50"
               />
-              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -83,8 +86,9 @@ export default function SignUp() {
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isLoading}
+                className="bg-background/50"
               />
-              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -97,14 +101,15 @@ export default function SignUp() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 disabled={isLoading}
+                className="bg-background/50"
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 pt-2">
+              <div className="flex items-start space-x-2 pt-2">
                 <input
                   id="terms"
                   name="terms"
@@ -112,24 +117,35 @@ export default function SignUp() {
                   checked={formData.terms}
                   onChange={handleChange}
                   disabled={isLoading}
-                  className="h-4 w-4 rounded border-input"
+                  className="h-4 w-4 rounded border-input mt-0.5"
                 />
-                <Label htmlFor="terms" className="font-normal cursor-pointer">
+                <Label htmlFor="terms" className="font-normal cursor-pointer text-sm leading-tight">
                   I agree to the{' '}
                   <Link to="#" className="font-medium text-primary hover:underline">
-                    Terms and Conditions
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link to="#" className="font-medium text-primary hover:underline">
+                    Privacy Policy
                   </Link>
                 </Label>
               </div>
-              {errors.terms && <p className="text-sm text-destructive">{errors.terms}</p>}
+              {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
+
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link to="/sign-in" className="font-medium text-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>
-    </div>
+    </AuthLayout>
   )
 }
