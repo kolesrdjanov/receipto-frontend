@@ -7,34 +7,38 @@ export interface Receipt {
   id: string
   userId: string
   categoryId?: string
-  merchantName: string
-  amount: number
-  currency: string
-  date: string
-  description?: string
-  imageUrl?: string
+  qrCodeUrl?: string
+  storeName?: string
+  totalAmount?: number
+  receiptDate?: string
+  receiptNumber?: string
+  scrapedData?: Record<string, unknown>
+  status: 'pending' | 'scraped' | 'failed'
+  category?: {
+    id: string
+    name: string
+    color?: string
+    icon?: string
+  }
   createdAt: string
   updatedAt: string
 }
 
 export interface CreateReceiptInput {
+  qrCodeUrl?: string
+  storeName?: string
+  totalAmount?: number
+  receiptDate?: string
+  receiptNumber?: string
   categoryId?: string
-  merchantName: string
-  amount: number
-  currency?: string
-  date: string
-  description?: string
-  imageUrl?: string
 }
 
 export interface UpdateReceiptInput {
+  storeName?: string
+  totalAmount?: number
+  receiptDate?: string
+  receiptNumber?: string
   categoryId?: string
-  merchantName?: string
-  amount?: number
-  currency?: string
-  date?: string
-  description?: string
-  imageUrl?: string
 }
 
 export interface ReceiptsFilters {
@@ -65,7 +69,7 @@ const createReceipt = async (data: CreateReceiptInput): Promise<Receipt> => {
 }
 
 const updateReceipt = async (id: string, data: UpdateReceiptInput): Promise<Receipt> => {
-  return api.put<Receipt>(`/receipts/${id}`, data)
+  return api.patch<Receipt>(`/receipts/${id}`, data)
 }
 
 const deleteReceipt = async (id: string): Promise<void> => {

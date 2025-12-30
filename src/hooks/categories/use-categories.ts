@@ -42,7 +42,7 @@ const createCategory = async (data: CreateCategoryInput): Promise<Category> => {
 }
 
 const updateCategory = async (id: string, data: UpdateCategoryInput): Promise<Category> => {
-  return api.put<Category>(`/categories/${id}`, data)
+  return api.patch<Category>(`/categories/${id}`, data)
 }
 
 const deleteCategory = async (id: string): Promise<void> => {
