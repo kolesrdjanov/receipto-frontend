@@ -59,21 +59,37 @@ export interface ReceiptsFilters {
   maxAmount?: number
   startDate?: string
   endDate?: string
+  page?: number
+  limit?: number
+}
+
+export interface PaginationMeta {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+export interface PaginatedReceipts {
+  data: Receipt[]
+  meta: PaginationMeta
 }
 
 // API functions
-const fetchReceipts = async (filters?: ReceiptsFilters): Promise<Receipt[]> => {
+const fetchReceipts = async (filters?: ReceiptsFilters): Promise<PaginatedReceipts> => {
   const params = new URLSearchParams()
   if (filters?.categoryId) params.append('categoryId', filters.categoryId)
   if (filters?.minAmount !== undefined) params.append('minAmount', filters.minAmount.toString())
   if (filters?.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())
   if (filters?.startDate) params.append('startDate', filters.startDate)
   if (filters?.endDate) params.append('endDate', filters.endDate)
+  if (filters?.page !== undefined) params.append('page', filters.page.toString())
+  if (filters?.limit !== undefined) params.append('limit', filters.limit.toString())
 
   const queryString = params.toString()
   const endpoint = `/receipts${queryString ? `?${queryString}` : ''}`
 
-  return api.get<Receipt[]>(endpoint)
+  return api.get<PaginatedReceipts>(endpoint)
 }
 
 const fetchReceipt = async (id: string): Promise<Receipt> => {

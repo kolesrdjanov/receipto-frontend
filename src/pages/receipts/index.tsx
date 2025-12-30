@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Pagination } from '@/components/ui/pagination'
 import { AppLayout } from '@/components/layout/app-layout'
 import { ReceiptModal } from '@/components/receipts/receipt-modal'
 import { QrScanner } from '@/components/receipts/qr-scanner'
@@ -29,9 +30,17 @@ export default function Receipts() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<ReceiptsFilters>({})
+  const [page, setPage] = useState(1)
 
-  const { data: receipts = [], isLoading } = useReceipts(filters)
+  const { data: response, isLoading } = useReceipts({ ...filters, page })
+  const receipts = response?.data ?? []
+  const meta = response?.meta
   const createReceipt = useCreateReceipt()
+
+  const handleFiltersChange = (newFilters: ReceiptsFilters) => {
+    setFilters(newFilters)
+    setPage(1) // Reset to first page when filters change
+  }
 
   const handleAddManually = () => {
     setSelectedReceipt(null)
@@ -134,7 +143,7 @@ export default function Receipts() {
       </div>
 
       {showFilters && (
-        <ReceiptsFiltersBar filters={filters} onFiltersChange={setFilters} />
+        <ReceiptsFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
       )}
 
       {isLoading ? (
@@ -205,6 +214,17 @@ export default function Receipts() {
               ))}
             </TableBody>
           </Table>
+          {meta && meta.totalPages > 1 && (
+            <div className="px-4">
+              <Pagination
+                page={meta.page}
+                totalPages={meta.totalPages}
+                total={meta.total}
+                limit={meta.limit}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </Card>
       )}
 
