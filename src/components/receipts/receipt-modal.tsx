@@ -26,6 +26,7 @@ import {
   type CreateReceiptInput,
 } from '@/hooks/receipts/use-receipts'
 import { useCategories } from '@/hooks/categories/use-categories'
+import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { toast } from 'sonner'
 
 interface ReceiptModalProps {
@@ -38,10 +39,12 @@ interface ReceiptModalProps {
 type ReceiptFormData = {
   storeName: string
   totalAmount: string
+  currency: string
   receiptDate: string
   receiptNumber: string
   categoryId: string
 }
+
 
 export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModalProps) {
   const {
@@ -54,6 +57,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
     defaultValues: {
       storeName: '',
       totalAmount: '',
+      currency: 'RSD',
       receiptDate: new Date().toISOString().split('T')[0],
       receiptNumber: '',
       categoryId: '',
@@ -61,6 +65,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
   })
 
   const { data: categories = [] } = useCategories()
+  const { data: currencies = [] } = useCurrencies()
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
@@ -70,6 +75,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       reset({
         storeName: receipt.storeName || '',
         totalAmount: receipt.totalAmount?.toString() || '',
+        currency: receipt.currency || 'RSD',
         receiptDate: receipt.receiptDate
           ? new Date(receipt.receiptDate).toISOString().split('T')[0]
           : '',
@@ -80,6 +86,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       reset({
         storeName: '',
         totalAmount: '',
+        currency: 'RSD',
         receiptDate: new Date().toISOString().split('T')[0],
         receiptNumber: '',
         categoryId: '',
@@ -92,6 +99,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       const payload: CreateReceiptInput = {
         storeName: data.storeName || undefined,
         totalAmount: data.totalAmount ? parseFloat(data.totalAmount) : undefined,
+        currency: data.currency || undefined,
         receiptDate: data.receiptDate || undefined,
         receiptNumber: data.receiptNumber || undefined,
         categoryId: data.categoryId || undefined,
@@ -163,7 +171,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="totalAmount">Total Amount</Label>
               <Input
@@ -172,6 +180,28 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                 step="0.01"
                 {...register('totalAmount')}
                 placeholder="0.00"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="currency">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((currency) => (
+                        <SelectItem key={currency.id} value={currency.code}>
+                          {currency.code} - {currency.symbol}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
             </div>
 

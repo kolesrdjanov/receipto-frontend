@@ -27,6 +27,13 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.categories.details(), id] as const,
   },
 
+  // Currencies
+  currencies: {
+    all: ['currencies'] as const,
+    lists: () => [...queryKeys.currencies.all, 'list'] as const,
+    list: () => [...queryKeys.currencies.lists()] as const,
+  },
+
   // Dashboard stats (if needed)
   dashboard: {
     all: ['dashboard'] as const,

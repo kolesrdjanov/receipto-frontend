@@ -3,16 +3,17 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Settings } from 'lucide-react'
 
 interface AppLayoutProps {
   children: React.ReactNode
 }
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard' },
-  { path: '/receipts', label: 'Receipts' },
-  { path: '/categories', label: 'Categories' },
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/receipts', label: 'Receipts', icon: Receipt },
+  { path: '/categories', label: 'Categories', icon: FolderOpen },
+  { path: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -73,12 +74,13 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Link key={item.path} to={item.path} onClick={closeSidebar}>
                 <div
                   className={cn(
-                    'flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                     location.pathname === item.path
                       ? 'bg-primary text-primary-foreground'
                       : 'hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
+                  <item.icon className="h-4 w-4" />
                   {item.label}
                 </div>
               </Link>

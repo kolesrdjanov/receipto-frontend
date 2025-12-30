@@ -10,6 +10,7 @@ export interface Receipt {
   qrCodeUrl?: string
   storeName?: string
   totalAmount?: number
+  currency?: string
   receiptDate?: string
   receiptNumber?: string
   scrapedData?: Record<string, unknown>
@@ -28,6 +29,7 @@ export interface CreateReceiptInput {
   qrCodeUrl?: string
   storeName?: string
   totalAmount?: number
+  currency?: string
   receiptDate?: string
   receiptNumber?: string
   categoryId?: string
@@ -36,6 +38,7 @@ export interface CreateReceiptInput {
 export interface UpdateReceiptInput {
   storeName?: string
   totalAmount?: number
+  currency?: string
   receiptDate?: string
   receiptNumber?: string
   categoryId?: string
