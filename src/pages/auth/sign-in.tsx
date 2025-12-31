@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import { useSignIn } from '@/hooks/auth/use-sign-in'
 
 export default function SignIn() {
   const { t } = useTranslation()
+  const location = useLocation()
   const { email, setEmail, password, setPassword, error, isLoading, handleSubmit } = useSignIn()
 
   return (
@@ -84,7 +85,7 @@ export default function SignIn() {
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signIn.noAccount')}{' '}
-              <Link to="/sign-up" className="font-medium text-primary hover:underline">
+              <Link to="/sign-up" state={location.state} className="font-medium text-primary hover:underline">
                 {t('auth.signIn.signUp')}
               </Link>
             </p>

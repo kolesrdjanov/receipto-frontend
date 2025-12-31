@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
@@ -37,6 +37,7 @@ interface RegisterResponse {
 
 export function useSignUp() {
   const navigate = useNavigate()
+  const location = useLocation()
   const login = useAuthStore((state) => state.login)
   const [formData, setFormData] = useState<SignUpFormData>({
     firstName: '',
@@ -94,7 +95,10 @@ export function useSignUp() {
       )
 
       login(response.user, response.accessToken)
-      navigate('/dashboard')
+
+      // Redirect to the page they were trying to access, or dashboard
+      const from = (location.state as { from?: string })?.from || '/dashboard'
+      navigate(from, { replace: true })
     } catch (err) {
       setApiError(err instanceof Error ? err.message : 'Failed to create account. Please try again.')
     } finally {

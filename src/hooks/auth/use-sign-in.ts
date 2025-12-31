@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
@@ -16,6 +16,7 @@ interface LoginResponse {
 
 export function useSignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const login = useAuthStore((state) => state.login)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,7 +39,10 @@ export function useSignIn() {
       )
 
       login(response.user, response.accessToken)
-      navigate('/dashboard')
+
+      // Redirect to the page they were trying to access, or dashboard
+      const from = (location.state as { from?: string })?.from || '/dashboard'
+      navigate(from, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.')
     } finally {
