@@ -240,7 +240,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 overflow-x-hidden">
+      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'create'
@@ -320,7 +320,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
               </Button>
               <Button type="button" variant="outline" asChild className="shrink-0">
                 <Label htmlFor="warranty-camera" className="cursor-pointer">
-                  Take photo
+                  {t('warranties.modal.captureImage')}
                 </Label>
               </Button>
               <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
@@ -384,7 +384,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
             )}
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 sticky bottom-0 bg-background pt-3 pb-2 border-t">
             {mode === 'edit' && (
               <Button
                 type="button"

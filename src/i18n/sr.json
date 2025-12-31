@@ -372,7 +372,8 @@
       "deleteSuccess": "Garancija uspešno obrisana",
       "createError": "Greška pri dodavanju garancije",
       "updateError": "Greška pri ažuriranju garancije",
-      "deleteError": "Greška pri brisanju garancije"
+      "deleteError": "Greška pri brisanju garancije",
+      "captureImage": "Slikaj kamerom"
     }
   }
 }
