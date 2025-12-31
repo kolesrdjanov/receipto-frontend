@@ -21,7 +21,7 @@ import {
   type CreateWarrantyData,
 } from '@/hooks/warranties/use-warranties'
 import { toast } from 'sonner'
-import { X } from 'lucide-react'
+import { Info, X } from 'lucide-react'
 
 interface WarrantyModalProps {
   open: boolean
@@ -30,10 +30,23 @@ interface WarrantyModalProps {
   mode: 'create' | 'edit'
 }
 
+// Helper type for preview items
+type PreviewItem = {
+  type: 'remote1' | 'remote2' | 'local'
+  src: string
+  localIndex?: number
+}
+
 export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyModalProps) {
   const { t } = useTranslation()
-  const [selectedImages, setSelectedImages] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+
+  // Track which original remote images should be removed
+  const [removeImage1, setRemoveImage1] = useState(false)
+  const [removeImage2, setRemoveImage2] = useState(false)
+
+  // New local images to upload
+  const [localImages, setLocalImages] = useState<File[]>([])
+  const [localPreviews, setLocalPreviews] = useState<string[]>([])
 
   const {
     register,
@@ -54,13 +67,32 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   const updateWarranty = useUpdateWarranty()
   const deleteWarranty = useDeleteWarranty()
 
-  // Remote (already uploaded) images in edit mode.
-  const remotePreviews = mode === 'edit'
-    ? [warranty?.imageUrl, warranty?.imageUrl2].filter(Boolean)
-    : []
+  // Build combined preview list: remaining remote images + new local images
+  const buildPreviewItems = (): PreviewItem[] => {
+    const items: PreviewItem[] = []
 
-  const previewsToShow = selectedImages.length > 0 ? imagePreviews : (remotePreviews as string[])
-  const slotCount = previewsToShow.length
+    // Add remote image 1 if exists and not removed
+    if (mode === 'edit' && warranty?.imageUrl && !removeImage1) {
+      items.push({ type: 'remote1', src: warranty.imageUrl })
+    }
+
+    // Add remote image 2 if exists and not removed
+    if (mode === 'edit' && warranty?.imageUrl2 && !removeImage2) {
+      items.push({ type: 'remote2', src: warranty.imageUrl2 })
+    }
+
+    // Add local images
+    localPreviews.forEach((src, idx) => {
+      items.push({ type: 'local', src, localIndex: idx })
+    })
+
+    return items
+  }
+
+  const previewItems = buildPreviewItems()
+  const totalImageCount = previewItems.length
+  const remainingSlots = Math.max(0, 2 - totalImageCount)
+  const canAddMore = remainingSlots > 0
 
   const revokePreviews = (previews: string[]) => {
     previews.forEach((p) => {
@@ -75,9 +107,11 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     if (cam) cam.value = ''
   }
 
-  const clearSelected = () => {
-    setSelectedImages([])
-    setImagePreviews((prev) => {
+  const clearAll = () => {
+    setRemoveImage1(false)
+    setRemoveImage2(false)
+    setLocalImages([])
+    setLocalPreviews((prev) => {
       revokePreviews(prev)
       return []
     })
@@ -107,41 +141,49 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
       })
     }
 
-    // Always clear local selection when modal opens.
-    clearSelected()
+    // Always clear state when modal opens
+    clearAll()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode, warranty?.id])
 
-  const convertIfHeic = async (file: File): Promise<File> => {
-    const isHeic =
+  const isHeicFile = (file: File): boolean => {
+    return (
       file.type === 'image/heic' ||
       file.type === 'image/heif' ||
       file.name.toLowerCase().endsWith('.heic') ||
       file.name.toLowerCase().endsWith('.heif')
-
-    if (!isHeic) return file
-
-    const { default: heic2any } = await import('heic2any')
-
-    const convertedBlob = (await heic2any({
-      blob: file,
-      toType: 'image/jpeg',
-      quality: 0.85,
-    })) as Blob
-
-    return new File(
-      [convertedBlob],
-      file.name.replace(/\.(heic|heif)$/i, '.jpg'),
-      { type: 'image/jpeg' }
     )
+  }
+
+  const convertIfHeic = async (file: File): Promise<File> => {
+    if (!isHeicFile(file)) return file
+
+    try {
+      const { default: heic2any } = await import('heic2any')
+
+      const convertedBlob = (await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.85,
+      })) as Blob
+
+      return new File(
+        [convertedBlob],
+        file.name.replace(/\.(heic|heif)$/i, '.jpg'),
+        { type: 'image/jpeg' }
+      )
+    } catch {
+      // If conversion fails, return original file - Cloudinary will handle it
+      return file
+    }
   }
 
   const addFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
+    if (!canAddMore) return
 
     try {
       const incoming = Array.from(files)
-      const remainingSlots = Math.max(0, 2 - selectedImages.length)
       const toAdd = incoming.slice(0, remainingSlots)
 
       const processed = await Promise.all(toAdd.map(convertIfHeic))
@@ -149,18 +191,19 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
       // Clear inputs so selecting the same file again triggers onChange
       resetFileInputs()
 
-      // Single source of truth: update selectedImages once, then rebuild previews from that exact list.
-      setSelectedImages((prev) => {
-        const nextImages = [...prev, ...processed].slice(0, 2)
-
-        setImagePreviews((prevPreviews) => {
-          revokePreviews(prevPreviews)
-          return nextImages.map((f) => URL.createObjectURL(f))
-        })
-
-        return nextImages
-      })
-    } catch {
+      // Add to local images
+      setLocalImages((prev) => [...prev, ...processed])
+      setLocalPreviews((prev) => [
+        ...prev,
+        ...processed.map((f) => {
+          if (isHeicFile(f)) {
+            return 'heic-placeholder'
+          }
+          return URL.createObjectURL(f)
+        }),
+      ])
+    } catch (error) {
+      console.log(error)
       toast.error(t('warranties.modal.createError'), {
         description: 'Failed to process image. Please try a different file format.',
       })
@@ -175,15 +218,20 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     await addFiles(e.target.files)
   }
 
-  const removeImageAt = (index: number) => {
-    setSelectedImages((prevImages) => prevImages.filter((_, i) => i !== index))
-
-    setImagePreviews((prevPreviews) => {
-      const removed = prevPreviews[index]
-      if (removed?.startsWith('blob:')) URL.revokeObjectURL(removed)
-      return prevPreviews.filter((_, i) => i !== index)
-    })
-
+  const removePreviewItem = (item: PreviewItem) => {
+    if (item.type === 'remote1') {
+      setRemoveImage1(true)
+    } else if (item.type === 'remote2') {
+      setRemoveImage2(true)
+    } else if (item.type === 'local' && item.localIndex !== undefined) {
+      const idx = item.localIndex
+      setLocalImages((prev) => prev.filter((_, i) => i !== idx))
+      setLocalPreviews((prev) => {
+        const removed = prev[idx]
+        if (removed?.startsWith('blob:')) URL.revokeObjectURL(removed)
+        return prev.filter((_, i) => i !== idx)
+      })
+    }
     resetFileInputs()
   }
 
@@ -192,20 +240,22 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
       if (mode === 'create') {
         await createWarranty.mutateAsync({
           data,
-          images: selectedImages.length ? selectedImages : undefined,
+          images: localImages.length ? localImages : undefined,
         })
         toast.success(t('warranties.modal.createSuccess'))
       } else if (mode === 'edit' && warranty) {
         await updateWarranty.mutateAsync({
           id: warranty.id,
           data,
-          images: selectedImages.length ? selectedImages : undefined,
+          images: localImages.length ? localImages : undefined,
+          removeImage1: removeImage1 || undefined,
+          removeImage2: removeImage2 || undefined,
         })
         toast.success(t('warranties.modal.updateSuccess'))
       }
       onOpenChange(false)
       reset()
-      clearSelected()
+      clearAll()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       toast.error(
@@ -236,12 +286,12 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   const handleClose = () => {
     onOpenChange(false)
     reset()
-    clearSelected()
+    clearAll()
   }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 overflow-x-hidden h-[90dvh] p-0">
+      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0">
         <div className="flex h-full flex-col">
           <div className="px-4 pt-4 sm:px-6 sm:pt-6">
             <DialogHeader>
@@ -319,28 +369,33 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                   <Label>{t('warranties.modal.image')}</Label>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <Button type="button" variant="outline" asChild className="shrink-0">
-                      <Label htmlFor="warranty-images" className="cursor-pointer">
-                        {t('warranties.modal.uploadImage')}
-                      </Label>
-                    </Button>
-                    <Button type="button" variant="outline" asChild className="shrink-0">
-                      <Label htmlFor="warranty-camera" className="cursor-pointer">
-                        {t('warranties.modal.captureImage')}
-                      </Label>
-                    </Button>
+                    {canAddMore && (
+                      <>
+                        <Button type="button" variant="outline" asChild className="shrink-0">
+                          <Label htmlFor="warranty-images" className="cursor-pointer">
+                            {t('warranties.modal.uploadImage')}
+                          </Label>
+                        </Button>
+                        <Button type="button" variant="outline" asChild className="shrink-0">
+                          <Label htmlFor="warranty-camera" className="cursor-pointer">
+                            {t('warranties.modal.captureImage')}
+                          </Label>
+                        </Button>
+                      </>
+                    )}
                     <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
-                      {slotCount}/2
+                      {totalImageCount}/2
                     </p>
                   </div>
 
                   <input
                     id="warranty-images"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif,image/heic,image/heif"
                     multiple
                     onChange={handleLibrarySelect}
                     className="hidden"
+                    disabled={!canAddMore}
                   />
 
                   <input
@@ -350,33 +405,34 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                     capture="environment"
                     onChange={handleCameraCapture}
                     className="hidden"
+                    disabled={!canAddMore}
                   />
 
-                  {previewsToShow.length > 0 ? (
+                  {previewItems.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {previewsToShow.map((src, idx) => (
-                        <div key={idx} className="relative overflow-hidden rounded-lg border">
-                          <img
-                            src={
-                              src.startsWith('blob:')
-                                ? src
-                                : `${src}${src.includes('?') ? '&' : '?'}f_auto,q_auto`
-                            }
-                            alt={`Preview ${idx + 1}`}
-                            className="w-full h-48 object-cover"
-                          />
+                      {previewItems.map((item, idx) => (
+                        <div key={`${item.type}-${idx}`} className="relative overflow-hidden rounded-lg border">
+                          {item.src === 'heic-placeholder' ? (
+                            <div className="w-full h-48 bg-muted flex items-center justify-center">
+                              <span className="text-sm text-muted-foreground">HEIC Image</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={
+                                item.src.startsWith('blob:')
+                                  ? item.src
+                                  : `${item.src}${item.src.includes('?') ? '&' : '?'}f_auto,q_auto`
+                              }
+                              alt={`Preview ${idx + 1}`}
+                              className="w-full h-48 object-cover"
+                            />
+                          )}
                           <Button
                             type="button"
                             variant="destructive"
                             size="icon"
                             className="absolute top-2 right-2"
-                            onClick={() => removeImageAt(idx)}
-                            disabled={selectedImages.length === 0}
-                            title={
-                              selectedImages.length === 0
-                                ? 'Removing already-uploaded images is not supported yet'
-                                : undefined
-                            }
+                            onClick={() => removePreviewItem(item)}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -385,14 +441,19 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                     </div>
                   ) : (
                     <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
-                      Add up to 2 images (library or camera)
+                      {t('warranties.modal.imageSlots')}
                     </div>
                   )}
+
+                  <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground mt-4">
+                    <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p>{t('warranties.modal.heicNotice')}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="shrink-0 border-t bg-background px-4 py-3 sm:px-6">
+            <div className="shrink-0 bg-background px-4 py-3 sm:px-6 mt-4">
               <DialogFooter className="gap-2 sm:gap-0">
                 {mode === 'edit' && (
                   <Button

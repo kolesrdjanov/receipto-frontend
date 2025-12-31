@@ -148,7 +148,9 @@ const createWarranty = async (data: CreateWarrantyData, images?: File[]): Promis
 const updateWarranty = async (
   id: string,
   data: Partial<CreateWarrantyData>,
-  images?: File[]
+  images?: File[],
+  removeImage1?: boolean,
+  removeImage2?: boolean
 ): Promise<Warranty> => {
   const formData = new FormData()
 
@@ -157,6 +159,13 @@ const updateWarranty = async (
       formData.append(key, String(value))
     }
   })
+
+  if (removeImage1) {
+    formData.append('removeImage1', 'true')
+  }
+  if (removeImage2) {
+    formData.append('removeImage2', 'true')
+  }
 
   ;(images ?? []).slice(0, 2).forEach((img) => {
     formData.append('images', img)
@@ -224,11 +233,15 @@ export function useUpdateWarranty() {
       id,
       data,
       images,
+      removeImage1,
+      removeImage2,
     }: {
       id: string
       data: Partial<CreateWarrantyData>
       images?: File[]
-    }) => updateWarranty(id, data, images),
+      removeImage1?: boolean
+      removeImage2?: boolean
+    }) => updateWarranty(id, data, images, removeImage1, removeImage2),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.warranties.all })
     },

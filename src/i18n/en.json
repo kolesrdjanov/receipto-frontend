@@ -398,7 +398,7 @@
       "notes": "Notes",
       "notesPlaceholder": "Additional notes about the product or warranty",
       "image": "Warranty Image",
-      "uploadImage": "Click to upload warranty document or receipt",
+      "uploadImage": "Upload Image",
       "deleteConfirm": "Are you sure you want to delete this warranty?",
       "createSuccess": "Warranty added successfully",
       "updateSuccess": "Warranty updated successfully",
@@ -406,7 +406,9 @@
       "createError": "Failed to add warranty",
       "updateError": "Failed to update warranty",
       "deleteError": "Failed to delete warranty",
-      "captureImage": "Take Photo"
+      "captureImage": "Take Photo",
+      "imageSlots": "Add up to 2 images (library or camera)",
+      "heicNotice": "HEIC images cannot be previewed but will be converted after upload."
     }
   }
 }

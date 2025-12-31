@@ -398,7 +398,7 @@
       "notes": "Beleške",
       "notesPlaceholder": "Dodatne beleške o proizvodu ili garanciji",
       "image": "Slika garancije",
-      "uploadImage": "Kliknite da učitate garantni list ili račun",
+      "uploadImage": "Dodaj sliku",
       "deleteConfirm": "Da li ste sigurni da želite da obrišete ovu garanciju?",
       "createSuccess": "Garancija uspešno dodata",
       "updateSuccess": "Garancija uspešno ažurirana",
@@ -406,7 +406,9 @@
       "createError": "Greška pri dodavanju garancije",
       "updateError": "Greška pri ažuriranju garancije",
       "deleteError": "Greška pri brisanju garancije",
-      "captureImage": "Slikaj kamerom"
+      "captureImage": "Slikaj kamerom",
+      "imageSlots": "Dodajte do 2 slike (galerija ili kamera)",
+      "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada."
     }
   }
 }

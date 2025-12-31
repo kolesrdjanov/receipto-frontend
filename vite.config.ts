@@ -13,5 +13,6 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    chunkSizeWarningLimit: 1500, // heic2any is ~1.3MB, recharts ~400kB
   },
 })
