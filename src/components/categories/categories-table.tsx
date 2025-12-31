@@ -70,6 +70,7 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
               <TableHead>{t('categories.table.color')}</TableHead>
               <TableHead>{t('categories.table.icon')}</TableHead>
               <TableHead>{t('categories.table.description')}</TableHead>
+              <TableHead>{t('categories.table.monthlyBudget')}</TableHead>
               <TableHead className="text-right">{t('categories.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -104,6 +105,13 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
                     <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
+                  <TableCell>
+                      {category.monthlyBudget ? (
+                          <span className="text-sm">{category.monthlyBudget}</span>
+                      ) : (
+                          <span className="text-muted-foreground">-</span>
+                      )}
+                  </TableCell>
                 <TableCell className="text-right">
                   {onEdit && (
                     <Button

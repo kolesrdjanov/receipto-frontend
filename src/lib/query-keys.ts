@@ -51,6 +51,12 @@ export const queryKeys = {
     stats: () => [...queryKeys.dashboard.all, 'stats'] as const,
   },
 
+  // Users
+  users: {
+    all: ['users'] as const,
+    me: () => [...queryKeys.users.all, 'me'] as const,
+  },
+
   // Warranties
   warranties: {
     all: ['warranties'] as const,

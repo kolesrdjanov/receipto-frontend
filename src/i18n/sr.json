@@ -116,7 +116,21 @@
     "recentActivity": "Nedavne aktivnosti",
     "noRecentActivity": "Nema nedavnih aktivnosti",
     "receiptsCount": "{{count}} računa",
-    "unknownStore": "Nepoznat objekat"
+    "unknownStore": "Nepoznat objekat",
+    "budgetProgress": {
+      "title": "Praćenje budžeta",
+      "selectCategory": "Izaberite kategoriju",
+      "noCategoriesWithBudget": "Nema kategorija sa postavljenim budžetom",
+      "spent": "Potrošeno",
+      "overBudget": "Prekoračen budžet!",
+      "nearingLimit": "Blizu limita",
+      "onTrack": "U okviru budžeta",
+      "remaining": "Preostalo {{amount}}",
+      "exceededBy": "Prekoračeno za {{amount}}",
+      "selectToView": "Izaberite kategoriju da vidite status budžeta",
+      "setBudgetHint": "Postavite budžete u podešavanjima kategorija",
+      "currencyNote": "Svi iznosi konvertovani u {{currency}}"
+    }
   },
   "receipts": {
     "title": "Računi",
@@ -200,6 +214,7 @@
       "color": "Boja",
       "icon": "Ikona",
       "description": "Opis",
+        "monthlyBudget": "Mesečni budžet",
       "actions": "Akcije"
     },
     "modal": {
@@ -223,7 +238,10 @@
       "deleteSuccess": "Kategorija uspešno obrisana",
       "createError": "Greška pri kreiranju kategorije",
       "updateError": "Greška pri ažuriranju kategorije",
-      "deleteError": "Greška pri brisanju kategorije"
+      "deleteError": "Greška pri brisanju kategorije",
+      "monthlyBudget": "Mesečni budžet",
+      "monthlyBudgetPlaceholder": "npr. 50000",
+      "monthlyBudgetHelp": "Postavite mesečni limit potrošnje za ovu kategoriju (opciono)"
     }
   },
   "groups": {
@@ -323,6 +341,21 @@
       "help": "Izaberite jezik za prikaz interfejsa",
       "en": "Engleski",
       "sr": "Srpski"
+    },
+    "profile": {
+      "title": "Profil",
+      "description": "Ažurirajte svoje lične podatke",
+      "email": "Email",
+      "firstName": "Ime",
+      "lastName": "Prezime",
+      "picture": "Profilna slika",
+      "pictureHelp": "Dodavanje slike uskoro stiže. Trenutno možete obrisati postojeću sliku.",
+      "upload": "Dodaj",
+      "remove": "Ukloni",
+      "pictureUploadComingSoon": "Dodavanje profilne slike još nije dostupno.",
+      "saved": "Profil je ažuriran",
+      "saveError": "Greška pri ažuriranju profila",
+      "pictureRemoved": "Profilna slika je uklonjena"
     }
   },
   "warranties": {

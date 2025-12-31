@@ -6,6 +6,7 @@ interface User {
   email: string
   firstName: string
   lastName: string
+  profileImageUrl?: string | null
 }
 
 interface AuthState {
@@ -16,11 +17,12 @@ interface AuthState {
   login: (user: User, accessToken: string, refreshToken?: string) => void
   logout: () => void
   setAccessToken: (token: string) => void
+  updateUser: (patch: Partial<User>) => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -40,6 +42,11 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
         }),
       setAccessToken: (token) => set({ accessToken: token }),
+      updateUser: (patch) => {
+        const current = get().user
+        if (!current) return
+        set({ user: { ...current, ...patch } })
+      },
     }),
     {
       name: 'auth-storage',

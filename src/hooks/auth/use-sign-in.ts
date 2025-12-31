@@ -10,6 +10,7 @@ interface LoginResponse {
     email: string
     firstName: string
     lastName: string
+    profileImageUrl?: string | null
   }
 }
 

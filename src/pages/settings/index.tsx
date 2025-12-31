@@ -11,8 +11,14 @@ import {
 } from '@/components/ui/select'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/store/auth'
+import { useMe, useUpdateMe } from '@/hooks/users/use-me'
+import { toast } from 'sonner'
+import { useMemo, useState } from 'react'
 
 const themes: { value: Theme; labelKey: string }[] = [
   { value: 'light', labelKey: 'settings.appearance.light' },
@@ -38,6 +44,62 @@ export default function Settings() {
   const { t } = useTranslation()
   const { currency, theme, accentColor, language, setCurrency, setTheme, setAccentColor, setLanguage } = useSettingsStore()
   const { currencies } = useCurrencies()
+
+  const authUser = useAuthStore((s) => s.user)
+
+  const { data: me } = useMe(true)
+  const updateMe = useUpdateMe()
+
+  const effectiveUser = me ?? authUser
+
+  const initial = useMemo(
+    () => ({
+      firstName: effectiveUser?.firstName ?? '',
+      lastName: effectiveUser?.lastName ?? '',
+      profileImageUrl: effectiveUser?.profileImageUrl ?? null,
+      userId: effectiveUser?.id ?? null,
+    }),
+    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.profileImageUrl, effectiveUser?.id]
+  )
+
+  // Keep a per-user draft without using setState inside an effect (lint rule).
+  const [draft, setDraft] = useState<{ firstName: string; lastName: string }>(() => ({
+    firstName: initial.firstName,
+    lastName: initial.lastName,
+  }))
+
+  const profileKey = initial.userId ?? 'no-user'
+
+  const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName
+
+  const handleSaveProfile = async () => {
+    if (!effectiveUser) return
+
+    try {
+      await updateMe.mutateAsync({
+        firstName: draft.firstName.trim(),
+        lastName: draft.lastName.trim(),
+      })
+      toast.success(t('settings.profile.saved'))
+    } catch (err) {
+      toast.error(t('settings.profile.saveError'), {
+        description: err instanceof Error ? err.message : 'An error occurred',
+      })
+    }
+  }
+
+  const handleRemoveProfileImage = async () => {
+    if (!effectiveUser) return
+
+    try {
+      await updateMe.mutateAsync({ removeProfileImage: true })
+      toast.success(t('settings.profile.pictureRemoved'))
+    } catch (err) {
+      toast.error(t('settings.profile.saveError'), {
+        description: err instanceof Error ? err.message : 'An error occurred',
+      })
+    }
+  }
 
   return (
     <AppLayout>
@@ -171,7 +233,7 @@ export default function Settings() {
                 </p>
               </div>
               <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
-                <SelectTrigger id="currency" className="w-full sm:w-[auto]">
+                <SelectTrigger id="currency" className="w-full sm:w-auto">
                   <SelectValue placeholder={t('settings.currency.label')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -187,6 +249,112 @@ export default function Settings() {
                 </SelectContent>
               </Select>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Profile */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserIcon className="h-5 w-5" />
+              {t('settings.profile.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('settings.profile.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4" key={profileKey}>
+            {!effectiveUser ? (
+              <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+            ) : (
+              <>
+                {/* Profile picture (top) */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-0.5">
+                    <Label>{t('settings.profile.picture')}</Label>
+                    <p className="text-sm text-muted-foreground">{t('settings.profile.pictureHelp')}</p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    {effectiveUser.profileImageUrl ? (
+                      <img
+                        src={effectiveUser.profileImageUrl}
+                        alt={t('settings.profile.picture')}
+                        className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-muted flex items-center justify-center border">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="default"
+                        disabled
+                        title={t('settings.profile.pictureUploadComingSoon')}
+                      >
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                        {t('settings.profile.upload')}
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="default"
+                        onClick={handleRemoveProfileImage}
+                        disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {t('settings.profile.remove')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Names */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">{t('settings.profile.firstName')}</Label>
+                    <Input
+                      id="firstName"
+                      value={draft.firstName}
+                      onChange={(e) => setDraft((p) => ({ ...p, firstName: e.target.value }))}
+                      autoComplete="given-name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">{t('settings.profile.lastName')}</Label>
+                    <Input
+                      id="lastName"
+                      value={draft.lastName}
+                      onChange={(e) => setDraft((p) => ({ ...p, lastName: e.target.value }))}
+                      autoComplete="family-name"
+                    />
+                  </div>
+                </div>
+
+                {/* Email (below names) */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('settings.profile.email')}</Label>
+                  <Input id="email" value={effectiveUser.email} disabled />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={!isDirty || updateMe.isPending}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {updateMe.isPending ? t('common.saving') : t('common.save')}
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

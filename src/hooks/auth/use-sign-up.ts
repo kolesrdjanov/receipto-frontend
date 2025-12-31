@@ -31,6 +31,7 @@ interface RegisterResponse {
     email: string
     firstName: string
     lastName: string
+    profileImageUrl?: string | null
   }
 }
 

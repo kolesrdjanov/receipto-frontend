@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Scanner } from '@yudiel/react-qr-scanner'
 import {
   Dialog,
   DialogContent,
@@ -17,11 +16,47 @@ interface QrScannerProps {
   onScan: (url: string) => void
 }
 
+type ScannerResult = { rawValue: string }
+
+type ScannerProps = {
+  onScan: (result: ScannerResult[]) => void
+  onError: (err: unknown) => void
+  scanDelay?: number
+  constraints?: unknown
+  styles?: unknown
+  components?: unknown
+}
+
 export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
+  const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
 
-  const handleScan = (result: { rawValue: string }[]) => {
+  useEffect(() => {
+    let cancelled = false
+
+    if (!open) {
+      setScannerComponent(null)
+      return
+    }
+
+    ;(async () => {
+      try {
+        const mod = await import('@yudiel/react-qr-scanner')
+        if (cancelled) return
+        setScannerComponent(() => mod.Scanner as ComponentType<ScannerProps>)
+      } catch {
+        if (cancelled) return
+        setError(t('receipts.qrScanner.cameraError'))
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, t])
+
+  const handleScan = (result: ScannerResult[]) => {
     if (result && result.length > 0) {
       const scannedText = result[0].rawValue
       if (scannedText) {
@@ -73,30 +108,36 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
               </Button>
             </div>
           ) : open ? (
-            <Scanner
-              onScan={handleScan}
-              onError={handleError}
-              scanDelay={100}
-              constraints={{
-                facingMode: 'environment',
-                width: { min: 1280, ideal: 1920, max: 2560 },
-                height: { min: 720, ideal: 1080, max: 1440 },
-              }}
-              styles={{
-                container: {
-                  width: '100%',
-                  height: '350px',
-                },
-                video: {
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                },
-              }}
-              components={{
-                finder: false,
-              }}
-            />
+            ScannerComponent ? (
+              <ScannerComponent
+                onScan={handleScan}
+                onError={handleError}
+                scanDelay={100}
+                constraints={{
+                  facingMode: 'environment',
+                  width: { min: 1280, ideal: 1920, max: 2560 },
+                  height: { min: 720, ideal: 1080, max: 1440 },
+                }}
+                styles={{
+                  container: {
+                    width: '100%',
+                    height: '350px',
+                  },
+                  video: {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  },
+                }}
+                components={{
+                  finder: false,
+                }}
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
+                <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
+              </div>
+            )
           ) : null}
         </div>
 

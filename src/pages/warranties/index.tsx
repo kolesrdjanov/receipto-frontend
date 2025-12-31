@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,8 +11,9 @@ import {
   getRemainingDays,
   type Warranty,
 } from '@/hooks/warranties/use-warranties'
-import { WarrantyModal } from '@/components/warranties/warranty-modal'
-import { WarrantyGalleryModal } from '@/components/warranties/warranty-gallery-modal'
+const WarrantyModal = lazy(() => import('@/components/warranties/warranty-modal').then(m => ({ default: m.WarrantyModal })))
+const WarrantyGalleryModal = lazy(() => import('@/components/warranties/warranty-gallery-modal').then(m => ({ default: m.WarrantyGalleryModal })))
+
 import {
   Plus,
   Shield,
@@ -280,21 +281,29 @@ export default function WarrantiesPage() {
           </CardContent>
         </Card>
 
-        <WarrantyGalleryModal
-          open={galleryOpen}
-          onOpenChange={setGalleryOpen}
-          title={galleryTitle}
-          images={galleryImages}
-          initialIndex={galleryIndex}
-        />
+        <Suspense fallback={null}>
+          {galleryOpen && (
+            <WarrantyGalleryModal
+              open={galleryOpen}
+              onOpenChange={setGalleryOpen}
+              title={galleryTitle}
+              images={galleryImages}
+              initialIndex={galleryIndex}
+            />
+          )}
+        </Suspense>
 
         {/* Modal */}
-        <WarrantyModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          warranty={selectedWarranty}
-          mode={modalMode}
-        />
+        <Suspense fallback={null}>
+          {modalOpen && (
+            <WarrantyModal
+              open={modalOpen}
+              onOpenChange={setModalOpen}
+              warranty={selectedWarranty}
+              mode={modalMode}
+            />
+          )}
+        </Suspense>
       </div>
     </AppLayout>
   )

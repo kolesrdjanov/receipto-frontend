@@ -116,7 +116,21 @@
     "recentActivity": "Recent Activity",
     "noRecentActivity": "No recent activity",
     "receiptsCount": "{{count}} receipts",
-    "unknownStore": "Unknown Store"
+    "unknownStore": "Unknown Store",
+    "budgetProgress": {
+      "title": "Budget Tracker",
+      "selectCategory": "Select a category",
+      "noCategoriesWithBudget": "No categories with budget set",
+      "spent": "Spent",
+      "overBudget": "Over budget!",
+      "nearingLimit": "Nearing limit",
+      "onTrack": "On track",
+      "remaining": "{{amount}} remaining",
+      "exceededBy": "Exceeded by {{amount}}",
+      "selectToView": "Select a category to view budget status",
+      "setBudgetHint": "Set budgets in category settings",
+      "currencyNote": "All amounts converted to {{currency}}"
+    }
   },
   "receipts": {
     "title": "Receipts",
@@ -200,6 +214,7 @@
       "color": "Color",
       "icon": "Icon",
       "description": "Description",
+      "monthlyBudget": "Monthly Budget",
       "actions": "Actions"
     },
     "modal": {
@@ -223,7 +238,10 @@
       "deleteSuccess": "Category deleted successfully",
       "createError": "Failed to create category",
       "updateError": "Failed to update category",
-      "deleteError": "Failed to delete category"
+      "deleteError": "Failed to delete category",
+      "monthlyBudget": "Monthly Budget",
+      "monthlyBudgetPlaceholder": "e.g., 50000",
+      "monthlyBudgetHelp": "Set a monthly spending limit for this category (optional)"
     }
   },
   "groups": {
@@ -323,6 +341,21 @@
       "help": "Select the language for the interface",
       "en": "English",
       "sr": "Serbian"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Update your personal information",
+      "email": "Email",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "picture": "Profile picture",
+      "pictureHelp": "Upload support is coming soon. You can remove the current picture.",
+      "upload": "Upload",
+      "remove": "Remove",
+      "pictureUploadComingSoon": "Uploading profile pictures is not available yet.",
+      "saved": "Profile updated",
+      "saveError": "Failed to update profile",
+      "pictureRemoved": "Profile picture removed"
     }
   },
   "warranties": {

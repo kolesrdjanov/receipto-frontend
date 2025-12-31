@@ -20,6 +20,7 @@ import {
   type Category,
   type CreateCategoryInput,
 } from '@/hooks/categories/use-categories'
+import { useSettingsStore } from '@/store/settings'
 import { toast } from 'sonner'
 
 interface CategoryModalProps {
@@ -33,6 +34,7 @@ type CategoryFormData = CreateCategoryInput
 
 export function CategoryModal({ open, onOpenChange, category, mode }: CategoryModalProps) {
   const { t } = useTranslation()
+  const { currency: preferredCurrency } = useSettingsStore()
   const {
     register,
     handleSubmit,
@@ -44,6 +46,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
       color: '#3b82f6',
       icon: '',
       description: '',
+      monthlyBudget: undefined,
     },
   })
 
@@ -58,6 +61,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
         color: category.color || '#3b82f6',
         icon: category.icon || '',
         description: category.description || '',
+        monthlyBudget: category.monthlyBudget ?? undefined,
       })
     } else if (open && mode === 'create') {
       reset({
@@ -65,17 +69,34 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
         color: '#3b82f6',
         icon: '',
         description: '',
+        monthlyBudget: undefined,
       })
     }
   }, [open, category, mode, reset])
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
+      // If budget is set/changed, update the currency
+      const submitData = { ...data }
+      if (submitData.monthlyBudget && submitData.monthlyBudget > 0) {
+        // For new budget or when budget value changes, use current preferred currency
+        // For edit mode, keep existing currency unless budget is being newly set
+        if (mode === 'create' || !category?.budgetCurrency) {
+          submitData.budgetCurrency = preferredCurrency
+        } else {
+          // Keep existing budget currency when editing
+          submitData.budgetCurrency = category.budgetCurrency
+        }
+      } else {
+        // Clear budget currency if budget is removed
+        submitData.budgetCurrency = undefined
+      }
+
       if (mode === 'create') {
-        await createCategory.mutateAsync(data)
+        await createCategory.mutateAsync(submitData)
         toast.success(t('categories.modal.createSuccess'))
       } else if (mode === 'edit' && category) {
-        await updateCategory.mutateAsync({ id: category.id, data })
+        await updateCategory.mutateAsync({ id: category.id, data: submitData })
         toast.success(t('categories.modal.updateSuccess'))
       }
       onOpenChange(false)
@@ -180,6 +201,34 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               placeholder={t('categories.modal.descriptionPlaceholder')}
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="monthlyBudget">
+              {t('categories.modal.monthlyBudget')}
+              {mode === 'edit' && category?.budgetCurrency && (
+                <span className="ml-1 text-muted-foreground font-normal">
+                  ({category.budgetCurrency})
+                </span>
+              )}
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="monthlyBudget"
+                type="number"
+                min={0}
+                step="0.01"
+                {...register('monthlyBudget', { valueAsNumber: true })}
+                placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
+                className="flex-1"
+              />
+              <div className="flex items-center px-3 bg-muted rounded-md text-sm text-muted-foreground">
+                {mode === 'edit' && category?.budgetCurrency ? category.budgetCurrency : preferredCurrency}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t('categories.modal.monthlyBudgetHelp')}
+            </p>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">

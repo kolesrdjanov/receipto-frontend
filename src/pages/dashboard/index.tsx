@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Link } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
+import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import {
   useDashboardStats,
   useCategoryStats,
@@ -393,7 +394,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2 mb-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
             {/* Category Pie Chart */}
             <Card>
               <CardHeader>
@@ -486,6 +487,13 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Budget Progress */}
+            <CategoryBudgetProgress
+              aggCategoryStats={aggCategoryStats}
+              exchangeRates={exchangeRates}
+              preferredCurrency={preferredCurrency}
+            />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3 mb-6">

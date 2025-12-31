@@ -22,7 +22,6 @@ import {
 } from '@/hooks/warranties/use-warranties'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
-import heic2any from 'heic2any'
 
 interface WarrantyModalProps {
   open: boolean
@@ -121,6 +120,8 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
       file.name.toLowerCase().endsWith('.heif')
 
     if (!isHeic) return file
+
+    const { default: heic2any } = await import('heic2any')
 
     const convertedBlob = (await heic2any({
       blob: file,

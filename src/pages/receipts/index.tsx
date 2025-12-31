@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
 import { AppLayout } from '@/components/layout/app-layout'
-import { ReceiptModal } from '@/components/receipts/receipt-modal'
-import { QrScanner } from '@/components/receipts/qr-scanner'
+const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
+const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
@@ -232,18 +232,26 @@ export default function Receipts() {
         </Card>
       )}
 
-      <ReceiptModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        receipt={selectedReceipt}
-        mode={modalMode}
-      />
+      <Suspense fallback={null}>
+        {isModalOpen && (
+          <ReceiptModal
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            receipt={selectedReceipt}
+            mode={modalMode}
+          />
+        )}
+      </Suspense>
 
-      <QrScanner
-        open={isScannerOpen}
-        onOpenChange={setIsScannerOpen}
-        onScan={handleQrScan}
-      />
+      <Suspense fallback={null}>
+        {isScannerOpen && (
+          <QrScanner
+            open={isScannerOpen}
+            onOpenChange={setIsScannerOpen}
+            onScan={handleQrScan}
+          />
+        )}
+      </Suspense>
     </AppLayout>
   )
 }

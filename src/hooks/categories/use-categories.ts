@@ -10,6 +10,8 @@ export interface Category {
   color?: string
   icon?: string
   description?: string
+  monthlyBudget?: number
+  budgetCurrency?: string
   createdAt: string
   updatedAt: string
 }
@@ -19,6 +21,8 @@ export interface CreateCategoryInput {
   color?: string
   icon?: string
   description?: string
+  monthlyBudget?: number
+  budgetCurrency?: string
 }
 
 export interface UpdateCategoryInput {
@@ -26,6 +30,8 @@ export interface UpdateCategoryInput {
   color?: string
   icon?: string
   description?: string
+  monthlyBudget?: number
+  budgetCurrency?: string
 }
 
 // API functions
