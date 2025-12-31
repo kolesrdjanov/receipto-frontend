@@ -240,184 +240,194 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create'
-              ? t('warranties.modal.createTitle')
-              : t('warranties.modal.editTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'create'
-              ? t('warranties.modal.createDescription')
-              : t('warranties.modal.editDescription')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="productName">{t('warranties.modal.productName')}</Label>
-            <Input
-              id="productName"
-              {...register('productName', { required: true })}
-              placeholder={t('warranties.modal.productNamePlaceholder')}
-            />
+      <DialogContent className="sm:max-w-125 overflow-x-hidden h-[90dvh] p-0">
+        <div className="flex h-full flex-col">
+          <div className="px-4 pt-4 sm:px-6 sm:pt-6">
+            <DialogHeader>
+              <DialogTitle>
+                {mode === 'create'
+                  ? t('warranties.modal.createTitle')
+                  : t('warranties.modal.editTitle')}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === 'create'
+                  ? t('warranties.modal.createDescription')
+                  : t('warranties.modal.editDescription')}
+              </DialogDescription>
+            </DialogHeader>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="storeName">{t('warranties.modal.storeName')}</Label>
-            <Input
-              id="storeName"
-              {...register('storeName')}
-              placeholder={t('warranties.modal.storeNamePlaceholder')}
-            />
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="productName">{t('warranties.modal.productName')}</Label>
+                  <Input
+                    id="productName"
+                    {...register('productName', { required: true })}
+                    placeholder={t('warranties.modal.productNamePlaceholder')}
+                  />
+                </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="purchaseDate">{t('warranties.modal.purchaseDate')}</Label>
-              <Input
-                id="purchaseDate"
-                type="date"
-                {...register('purchaseDate', { required: true })}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="storeName">{t('warranties.modal.storeName')}</Label>
+                  <Input
+                    id="storeName"
+                    {...register('storeName')}
+                    placeholder={t('warranties.modal.storeNamePlaceholder')}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="warrantyDuration">{t('warranties.modal.duration')}</Label>
-              <Input
-                id="warrantyDuration"
-                type="number"
-                min="1"
-                {...register('warrantyDuration', { valueAsNumber: true })}
-                placeholder="24"
-              />
-              <p className="text-xs text-muted-foreground">
-                {t('warranties.modal.durationHelp')}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t('warranties.modal.notes')}</Label>
-            <Textarea
-              id="notes"
-              {...register('notes')}
-              placeholder={t('warranties.modal.notesPlaceholder')}
-              rows={2}
-            />
-          </div>
-
-          {/* Image Upload */}
-          <div className="space-y-2">
-            <Label>{t('warranties.modal.image')}</Label>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button type="button" variant="outline" asChild className="shrink-0">
-                <Label htmlFor="warranty-images" className="cursor-pointer">
-                  {t('warranties.modal.uploadImage')}
-                </Label>
-              </Button>
-              <Button type="button" variant="outline" asChild className="shrink-0">
-                <Label htmlFor="warranty-camera" className="cursor-pointer">
-                  {t('warranties.modal.captureImage')}
-                </Label>
-              </Button>
-              <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
-                {slotCount}/2
-              </p>
-            </div>
-
-            <input
-              id="warranty-images"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleLibrarySelect}
-              className="hidden"
-            />
-
-            <input
-              id="warranty-camera"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleCameraCapture}
-              className="hidden"
-            />
-
-            {previewsToShow.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {previewsToShow.map((src, idx) => (
-                  <div key={idx} className="relative overflow-hidden rounded-lg border">
-                    <img
-                      src={
-                        src.startsWith('blob:')
-                          ? src
-                          : `${src}${src.includes('?') ? '&' : '?'}f_auto,q_auto`
-                      }
-                      alt={`Preview ${idx + 1}`}
-                      className="w-full h-48 object-cover"
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="purchaseDate">{t('warranties.modal.purchaseDate')}</Label>
+                    <Input
+                      id="purchaseDate"
+                      type="date"
+                      {...register('purchaseDate', { required: true })}
                     />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2"
-                      onClick={() => removeImageAt(idx)}
-                      disabled={selectedImages.length === 0}
-                      title={
-                        selectedImages.length === 0
-                          ? 'Removing already-uploaded images is not supported yet'
-                          : undefined
-                      }
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
-                Add up to 2 images (library or camera)
-              </div>
-            )}
-          </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 sticky bottom-0 bg-background pt-3 pb-2 border-t">
-            {mode === 'edit' && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={deleteWarranty.isPending || isSubmitting}
-                className="sm:mr-auto"
-              >
-                {deleteWarranty.isPending ? t('common.deleting') : t('common.delete')}
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
-            >
-              {isSubmitting || createWarranty.isPending || updateWarranty.isPending
-                ? mode === 'create'
-                  ? t('common.creating')
-                  : t('common.updating')
-                : mode === 'create'
-                ? t('common.create')
-                : t('common.update')}
-            </Button>
-          </DialogFooter>
-        </form>
+                  <div className="space-y-2">
+                    <Label htmlFor="warrantyDuration">{t('warranties.modal.duration')}</Label>
+                    <Input
+                      id="warrantyDuration"
+                      type="number"
+                      min="1"
+                      {...register('warrantyDuration', { valueAsNumber: true })}
+                      placeholder="24"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t('warranties.modal.durationHelp')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">{t('warranties.modal.notes')}</Label>
+                  <Textarea
+                    id="notes"
+                    {...register('notes')}
+                    placeholder={t('warranties.modal.notesPlaceholder')}
+                    rows={2}
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>{t('warranties.modal.image')}</Label>
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <Button type="button" variant="outline" asChild className="shrink-0">
+                      <Label htmlFor="warranty-images" className="cursor-pointer">
+                        {t('warranties.modal.uploadImage')}
+                      </Label>
+                    </Button>
+                    <Button type="button" variant="outline" asChild className="shrink-0">
+                      <Label htmlFor="warranty-camera" className="cursor-pointer">
+                        {t('warranties.modal.captureImage')}
+                      </Label>
+                    </Button>
+                    <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
+                      {slotCount}/2
+                    </p>
+                  </div>
+
+                  <input
+                    id="warranty-images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleLibrarySelect}
+                    className="hidden"
+                  />
+
+                  <input
+                    id="warranty-camera"
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleCameraCapture}
+                    className="hidden"
+                  />
+
+                  {previewsToShow.length > 0 ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {previewsToShow.map((src, idx) => (
+                        <div key={idx} className="relative overflow-hidden rounded-lg border">
+                          <img
+                            src={
+                              src.startsWith('blob:')
+                                ? src
+                                : `${src}${src.includes('?') ? '&' : '?'}f_auto,q_auto`
+                            }
+                            alt={`Preview ${idx + 1}`}
+                            className="w-full h-48 object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2"
+                            onClick={() => removeImageAt(idx)}
+                            disabled={selectedImages.length === 0}
+                            title={
+                              selectedImages.length === 0
+                                ? 'Removing already-uploaded images is not supported yet'
+                                : undefined
+                            }
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
+                      Add up to 2 images (library or camera)
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 border-t bg-background px-4 py-3 sm:px-6">
+              <DialogFooter className="gap-2 sm:gap-0">
+                {mode === 'edit' && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={deleteWarranty.isPending || isSubmitting}
+                    className="sm:mr-auto"
+                  >
+                    {deleteWarranty.isPending ? t('common.deleting') : t('common.delete')}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
+                >
+                  {isSubmitting || createWarranty.isPending || updateWarranty.isPending
+                    ? mode === 'create'
+                      ? t('common.creating')
+                      : t('common.updating')
+                    : mode === 'create'
+                    ? t('common.create')
+                    : t('common.update')}
+                </Button>
+              </DialogFooter>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   )

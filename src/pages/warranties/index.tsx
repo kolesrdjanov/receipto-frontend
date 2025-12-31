@@ -176,20 +176,22 @@ export default function WarrantiesPage() {
         <Card>
           <CardHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="all">
-                  {t('warranties.tabs.all')} ({allWarranties.length})
-                </TabsTrigger>
-                <TabsTrigger value="active">
-                  {t('warranties.tabs.active')} ({activeWarranties.length})
-                </TabsTrigger>
-                <TabsTrigger value="expiring">
-                  {t('warranties.tabs.expiring')} ({expiringWarranties.length})
-                </TabsTrigger>
-                <TabsTrigger value="expired">
-                  {t('warranties.tabs.expired')} ({expiredWarranties.length})
-                </TabsTrigger>
-              </TabsList>
+              <div className="w-full overflow-hidden rounded-md bg-muted p-1">
+                <TabsList className="w-full bg-transparent p-0 overflow-x-auto whitespace-nowrap flex flex-nowrap gap-2 justify-start scroll-smooth snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <TabsTrigger value="all" className="shrink-0 snap-start">
+                    {t('warranties.tabs.all')} ({allWarranties.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="active" className="shrink-0 snap-start">
+                    {t('warranties.tabs.active')} ({activeWarranties.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="expiring" className="shrink-0 snap-start">
+                    {t('warranties.tabs.expiring')} ({expiringWarranties.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="expired" className="shrink-0 snap-start">
+                    {t('warranties.tabs.expired')} ({expiredWarranties.length})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
           </CardHeader>
           <CardContent>
