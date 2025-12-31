@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+import { applyRuntimeGuards } from '@/lib/runtime-guards'
 import '@/i18n'
 import '@/store/settings'
 import { ErrorBoundary } from '@/components/error-boundary'
+
+applyRuntimeGuards()
 
 // Global crash reporting for production blank-screen issues.
 window.addEventListener('error', (e) => {
