@@ -177,6 +177,7 @@
     "qrScanner": {
       "title": "Scan QR Code",
       "description": "Point your camera at the receipt QR code to scan it.",
+      "privacyNotice": "Your image is not stored. We only extract the data from the QR code to create your receipt.",
       "cameraError": "Failed to access camera",
       "tryAgain": "Try Again",
       "scanSuccess": "Receipt scanned successfully",

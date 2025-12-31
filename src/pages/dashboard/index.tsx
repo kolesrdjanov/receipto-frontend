@@ -24,7 +24,7 @@ import {
   useAggregatedTopStores,
   type CurrencyBreakdown,
 } from '@/hooks/dashboard/use-dashboard'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import {
@@ -299,7 +299,11 @@ export default function Dashboard() {
               </SelectItem>
               {currencies.map((c) => (
                 <SelectItem key={c.id} value={c.code}>
-                  {c.code} ({c.symbol})
+                  <div className="flex items-center gap-2">
+                    <span>{getCurrencyFlag(c.icon)}</span>
+                    <span>{c.code}</span>
+                    <span>({c.symbol})</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

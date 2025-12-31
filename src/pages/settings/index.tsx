@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
 import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -171,15 +171,16 @@ export default function Settings() {
                 </p>
               </div>
               <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
-                <SelectTrigger id="currency" className="w-full sm:w-[180px]">
+                <SelectTrigger id="currency" className="w-full sm:w-[auto]">
                   <SelectValue placeholder={t('settings.currency.label')} />
                 </SelectTrigger>
                 <SelectContent>
                   {currencies.map((c) => (
                     <SelectItem key={c.code} value={c.code}>
                       <span className="flex items-center gap-2">
+                        <span>{getCurrencyFlag(c.icon)}</span>
+                        <span>{c.name}</span>
                         <span className="font-mono text-muted-foreground">{c.symbol}</span>
-                        {c.name}
                       </span>
                     </SelectItem>
                   ))}

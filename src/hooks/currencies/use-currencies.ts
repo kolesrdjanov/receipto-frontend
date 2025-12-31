@@ -8,8 +8,25 @@ export interface Currency {
   code: string
   name: string
   symbol: string
+  icon?: string
   isActive: boolean
   sortOrder: number
+}
+
+export const FLAG_EMOJI_MAP: Record<string, string> = {
+  'flag-rs': '🇷🇸',
+  'flag-mk': '🇲🇰',
+  'flag-us': '🇺🇸',
+  'flag-eu': '🇪🇺',
+  'flag-ba': '🇧🇦',
+  'flag-ro': '🇷🇴',
+  'flag-hu': '🇭🇺',
+  'flag-bg': '🇧🇬',
+}
+
+export function getCurrencyFlag(icon?: string): string {
+  if (!icon) return ''
+  return FLAG_EMOJI_MAP[icon] ?? ''
 }
 
 // Fallback currencies used when API is unavailable

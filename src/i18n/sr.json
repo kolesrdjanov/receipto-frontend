@@ -177,6 +177,7 @@
     "qrScanner": {
       "title": "Skeniraj QR kod",
       "description": "Usmerite kameru ka QR kodu na računu da biste ga skenirali.",
+      "privacyNotice": "Vaša slika se ne čuva. Skeniranjem samo uzimamo podatke sa QR koda za kreiranje računa.",
       "cameraError": "Greška pri pristupu kameri",
       "tryAgain": "Pokušaj ponovo",
       "scanSuccess": "Račun uspešno skeniran",

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, X } from 'lucide-react'
+import { Camera, X, Info } from 'lucide-react'
 
 interface QrScannerProps {
   open: boolean
@@ -98,6 +98,11 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
               }}
             />
           ) : null}
+        </div>
+
+        <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+          <Info className="h-4 w-4 mt-0.5 shrink-0" />
+          <p>{t('receipts.qrScanner.privacyNotice')}</p>
         </div>
 
         <div className="flex justify-end">
