@@ -123,13 +123,13 @@ export default function SignUp() {
                 />
                 <Label htmlFor="terms" className="font-normal cursor-pointer text-sm leading-tight">
                   {t('auth.signUp.agreeToTerms')}{' '}
-                  <Link to="#" className="font-medium text-primary hover:underline">
+                  <a href="https://receipto.io/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
                     {t('auth.signUp.termsOfService')}
-                  </Link>{' '}
+                  </a>{' '}
                   {t('auth.signUp.and')}{' '}
-                  <Link to="#" className="font-medium text-primary hover:underline">
+                  <a href="https://receipto.io/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
                     {t('auth.signUp.privacyPolicy')}
-                  </Link>
+                  </a>
                 </Label>
               </div>
               {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}

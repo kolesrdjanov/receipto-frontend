@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Settings } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings } from 'lucide-react'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -16,6 +16,7 @@ const navItems = [
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
+  { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
 

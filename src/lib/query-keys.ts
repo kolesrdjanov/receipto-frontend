@@ -50,4 +50,15 @@ export const queryKeys = {
     all: ['dashboard'] as const,
     stats: () => [...queryKeys.dashboard.all, 'stats'] as const,
   },
+
+  // Warranties
+  warranties: {
+    all: ['warranties'] as const,
+    lists: () => [...queryKeys.warranties.all, 'list'] as const,
+    list: (status?: string) => [...queryKeys.warranties.lists(), status] as const,
+    details: () => [...queryKeys.warranties.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.warranties.details(), id] as const,
+    stats: () => [...queryKeys.warranties.all, 'stats'] as const,
+    expiringSoon: (days?: number) => [...queryKeys.warranties.all, 'expiring', days] as const,
+  },
 } as const

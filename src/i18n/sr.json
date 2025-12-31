@@ -25,6 +25,7 @@
     "receipts": "Računi",
     "categories": "Kategorije",
     "groups": "Grupe",
+    "warranties": "Garancije",
     "settings": "Podešavanja",
     "logout": "Odjava"
   },
@@ -322,6 +323,56 @@
       "help": "Izaberite jezik za prikaz interfejsa",
       "en": "Engleski",
       "sr": "Srpski"
+    }
+  },
+  "warranties": {
+    "title": "Garancije",
+    "subtitle": "Pratite i upravljajte garancijama proizvoda",
+    "addWarranty": "Dodaj garanciju",
+    "noWarranties": "Nema garancija",
+    "noWarrantiesText": "Dodajte prvu garanciju da biste pratili datume isteka",
+    "tabs": {
+      "all": "Sve",
+      "active": "Aktivne",
+      "expiring": "Ističu uskoro",
+      "expired": "Istekle"
+    },
+    "stats": {
+      "total": "Ukupno garancija",
+      "active": "Aktivne",
+      "expiringSoon": "Ističu uskoro",
+      "expired": "Istekle"
+    },
+    "status": {
+      "active": "Aktivna",
+      "expiring": "Ističe",
+      "expired": "Istekla",
+      "daysLeft": "dana preostalo"
+    },
+    "modal": {
+      "createTitle": "Dodaj garanciju",
+      "editTitle": "Izmeni garanciju",
+      "createDescription": "Dodajte novu garanciju proizvoda za praćenje.",
+      "editDescription": "Ažurirajte detalje garancije ili dodajte novu sliku.",
+      "productName": "Naziv proizvoda",
+      "productNamePlaceholder": "npr. Samsung TV 55\", iPhone 15 Pro",
+      "storeName": "Prodavnica",
+      "storeNamePlaceholder": "npr. Gigatron, Tehnomanija",
+      "purchaseDate": "Datum kupovine",
+      "duration": "Trajanje garancije (meseci)",
+      "durationHelp": "Trajanje u mesecima",
+      "expiresDate": "Datum isteka",
+      "notes": "Beleške",
+      "notesPlaceholder": "Dodatne beleške o proizvodu ili garanciji",
+      "image": "Slika garancije",
+      "uploadImage": "Kliknite da učitate garantni list ili račun",
+      "deleteConfirm": "Da li ste sigurni da želite da obrišete ovu garanciju?",
+      "createSuccess": "Garancija uspešno dodata",
+      "updateSuccess": "Garancija uspešno ažurirana",
+      "deleteSuccess": "Garancija uspešno obrisana",
+      "createError": "Greška pri dodavanju garancije",
+      "updateError": "Greška pri ažuriranju garancije",
+      "deleteError": "Greška pri brisanju garancije"
     }
   }
 }

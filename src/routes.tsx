@@ -11,6 +11,7 @@ const Dashboard = lazy(() => import('./pages/dashboard'))
 const Categories = lazy(() => import('./pages/categories'))
 const Receipts = lazy(() => import('./pages/receipts'))
 const Groups = lazy(() => import('./pages/groups'))
+const Warranties = lazy(() => import('./pages/warranties'))
 const Settings = lazy(() => import('./pages/settings'))
 
 export const routes: RouteObject[] = [
@@ -63,6 +64,14 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <Groups />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/warranties',
+    element: (
+      <ProtectedRoute>
+        <Warranties />
       </ProtectedRoute>
     ),
   },
