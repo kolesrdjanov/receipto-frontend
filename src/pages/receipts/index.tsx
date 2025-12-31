@@ -21,6 +21,7 @@ import {
   type Receipt,
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { Camera, Plus, Pencil, Loader2, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -34,7 +35,8 @@ export default function Receipts() {
   const [filters, setFilters] = useState<ReceiptsFilters>({})
   const [page, setPage] = useState(1)
 
-  const { data: response, isLoading } = useReceipts({ ...filters, page })
+  const debouncedFilters = useDebouncedValue(filters, 400)
+  const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page })
   const receipts = response?.data ?? []
   const meta = response?.meta
   const createReceipt = useCreateReceipt()
