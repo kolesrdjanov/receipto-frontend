@@ -11,6 +11,7 @@
     "updating": "Updating...",
     "save": "Save",
     "saving": "Saving...",
+    "uploading": "Uploading...",
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
@@ -18,7 +19,8 @@
     "success": "Success",
     "actions": "Actions",
     "noData": "No data",
-    "allRightsReserved": "All rights reserved."
+    "allRightsReserved": "All rights reserved.",
+    "unknown": "Unknown"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -349,13 +351,16 @@
       "firstName": "First name",
       "lastName": "Last name",
       "picture": "Profile picture",
-      "pictureHelp": "Upload support is coming soon. You can remove the current picture.",
+      "pictureHelp": "Upload a profile picture or use your initials",
       "upload": "Upload",
       "remove": "Remove",
-      "pictureUploadComingSoon": "Uploading profile pictures is not available yet.",
       "saved": "Profile updated",
       "saveError": "Failed to update profile",
-      "pictureRemoved": "Profile picture removed"
+      "pictureRemoved": "Profile picture removed",
+      "pictureUploaded": "Profile picture uploaded successfully",
+      "uploadError": "Failed to upload profile picture",
+      "invalidFileType": "Invalid file type. Please upload JPEG, PNG, WebP, or HEIC image.",
+      "fileTooLarge": "File is too large. Maximum size is 5MB."
     }
   },
   "warranties": {

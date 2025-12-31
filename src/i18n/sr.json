@@ -11,6 +11,7 @@
     "updating": "Ažuriranje...",
     "save": "Sačuvaj",
     "saving": "Čuvanje...",
+    "uploading": "Dodavanje...",
     "confirm": "Potvrdi",
     "yes": "Da",
     "no": "Ne",
@@ -18,7 +19,8 @@
     "success": "Uspeh",
     "actions": "Akcije",
     "noData": "Nema podataka",
-    "allRightsReserved": "Sva prava zadržana."
+    "allRightsReserved": "Sva prava zadržana.",
+    "unknown": "Nepoznato"
   },
   "nav": {
     "dashboard": "Kontrolna tabla",
@@ -349,13 +351,16 @@
       "firstName": "Ime",
       "lastName": "Prezime",
       "picture": "Profilna slika",
-      "pictureHelp": "Dodavanje slike uskoro stiže. Trenutno možete obrisati postojeću sliku.",
+      "pictureHelp": "Dodajte profilnu sliku ili koristite inicijale",
       "upload": "Dodaj",
       "remove": "Ukloni",
-      "pictureUploadComingSoon": "Dodavanje profilne slike još nije dostupno.",
       "saved": "Profil je ažuriran",
       "saveError": "Greška pri ažuriranju profila",
-      "pictureRemoved": "Profilna slika je uklonjena"
+      "pictureRemoved": "Profilna slika je uklonjena",
+      "pictureUploaded": "Profilna slika je uspešno dodata",
+      "uploadError": "Greška pri dodavanju profilne slike",
+      "invalidFileType": "Nevažeći tip fajla. Molimo dodajte JPEG, PNG, WebP ili HEIC sliku.",
+      "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB."
     }
   },
   "warranties": {

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings } from 'lucide-react'
 
@@ -95,9 +96,21 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* User section */}
           <div className="border-t p-4">
-            <div className="mb-2 px-3 text-sm">
-              <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <div className="mb-3 flex items-center gap-3 px-3">
+              <Avatar
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+                imageUrl={user?.profileImageUrl}
+                size="md"
+              />
+              <div className="flex-1 overflow-hidden text-sm">
+                <p className="truncate font-medium">
+                  {user?.firstName || user?.lastName
+                    ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+                    : user?.email}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+              </div>
             </div>
             <Button variant="outline" className="w-full" onClick={logout}>
               {t('nav.logout')}

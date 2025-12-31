@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Avatar } from '@/components/ui/avatar'
 import {
   useGroupStats,
   useInviteMember,
@@ -163,14 +164,24 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                   key={member.id}
                   className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
                 >
-                  <div className="flex items-center gap-2">
-                    {member.role === 'owner' && <Crown className="h-4 w-4 text-yellow-500" />}
-                    <span>
-                      {member.user?.firstName} {member.user?.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      ({member.role})
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      firstName={member.user?.firstName}
+                      lastName={member.user?.lastName}
+                      imageUrl={member.user?.profileImageUrl}
+                      size="sm"
+                    />
+                    <div className="flex items-center gap-2">
+                      {member.role === 'owner' && <Crown className="h-4 w-4 text-yellow-500" />}
+                      <span>
+                        {member.user?.firstName || member.user?.lastName
+                          ? `${member.user?.firstName || ''} ${member.user?.lastName || ''}`.trim()
+                          : member.user?.email || t('common.unknown')}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ({member.role})
+                      </span>
+                    </div>
                   </div>
                   {isAdmin && member.role !== 'owner' && member.userId !== user?.id && (
                     <Button

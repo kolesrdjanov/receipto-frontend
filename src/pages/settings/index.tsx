@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { Avatar } from '@/components/ui/avatar'
 import {
   Select,
   SelectContent,
@@ -16,9 +17,9 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
-import { useMe, useUpdateMe } from '@/hooks/users/use-me'
+import { useMe, useUpdateMe, useUploadProfileImage } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
 
 const themes: { value: Theme; labelKey: string }[] = [
   { value: 'light', labelKey: 'settings.appearance.light' },
@@ -49,6 +50,8 @@ export default function Settings() {
 
   const { data: me } = useMe(true)
   const updateMe = useUpdateMe()
+  const uploadProfileImage = useUploadProfileImage()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const effectiveUser = me ?? authUser
 
@@ -96,6 +99,41 @@ export default function Settings() {
       toast.success(t('settings.profile.pictureRemoved'))
     } catch (err) {
       toast.error(t('settings.profile.saveError'), {
+        description: err instanceof Error ? err.message : 'An error occurred',
+      })
+    }
+  }
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic']
+    if (!validTypes.includes(file.type)) {
+      toast.error(t('settings.profile.invalidFileType'))
+      return
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t('settings.profile.fileTooLarge'))
+      return
+    }
+
+    try {
+      await uploadProfileImage.mutateAsync(file)
+      toast.success(t('settings.profile.pictureUploaded'))
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (err) {
+      toast.error(t('settings.profile.uploadError'), {
         description: err instanceof Error ? err.message : 'An error occurred',
       })
     }
@@ -276,28 +314,31 @@ export default function Settings() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    {effectiveUser.profileImageUrl ? (
-                      <img
-                        src={effectiveUser.profileImageUrl}
-                        alt={t('settings.profile.picture')}
-                        className="h-20 w-20 sm:h-24 sm:w-24 rounded-full object-cover border"
-                      />
-                    ) : (
-                      <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-muted flex items-center justify-center border">
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
+                    <Avatar
+                      firstName={effectiveUser.firstName}
+                      lastName={effectiveUser.lastName}
+                      imageUrl={effectiveUser.profileImageUrl}
+                      size="2xl"
+                      className=""
+                    />
 
                     <div className="flex gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
                       <Button
                         type="button"
                         variant="outline"
                         size="default"
-                        disabled
-                        title={t('settings.profile.pictureUploadComingSoon')}
+                        onClick={handleFileSelect}
+                        disabled={uploadProfileImage.isPending}
                       >
                         <ImageIcon className="h-4 w-4 mr-2" />
-                        {t('settings.profile.upload')}
+                        {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
                       </Button>
 
                       <Button

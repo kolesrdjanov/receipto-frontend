@@ -14,6 +14,7 @@ export interface GroupMember {
     email: string
     firstName: string
     lastName: string
+    profileImageUrl?: string
   }
   invitedBy?: {
     id: string
