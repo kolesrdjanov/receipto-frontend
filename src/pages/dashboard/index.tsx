@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -61,6 +62,7 @@ const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', 
 const ALL_CONVERTED = 'ALL'
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [currencyMode, setCurrencyMode] = useState<string>('RSD')
@@ -277,22 +279,22 @@ export default function Dashboard() {
     <AppLayout>
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">Dashboard</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">{t('dashboard.title')}</h2>
           <p className="text-sm text-muted-foreground md:text-base">
-            Overview of your expenses and spending patterns
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Coins className="h-4 w-4 text-muted-foreground" />
           <Select value={currencyMode} onValueChange={setCurrencyMode}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Currency" />
+              <SelectValue placeholder={t('dashboard.currency')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL_CONVERTED}>
                 <span className="flex items-center gap-2">
                   <RefreshCw className="h-3 w-3" />
-                  All → {preferredCurrency}
+                  {t('dashboard.allTo', { currency: preferredCurrency })}
                 </span>
               </SelectItem>
               {currencies.map((c) => (
@@ -308,7 +310,7 @@ export default function Dashboard() {
       {isConvertedMode && (
         <div className="mb-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground flex items-center gap-2">
           <RefreshCw className="h-4 w-4" />
-          Amounts converted to {preferredCurrency} using approximate exchange rates
+          {t('dashboard.convertedAmounts', { currency: preferredCurrency })}
         </div>
       )}
 
@@ -323,13 +325,13 @@ export default function Dashboard() {
             <Link to="/receipts">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Total Receipts</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
                   <Receipt className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold">{totalReceipts}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {isConvertedMode ? 'All currencies' : `in ${currencyMode}`}
+                    {isConvertedMode ? t('dashboard.inCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
                   </p>
                 </CardContent>
               </Card>
@@ -337,20 +339,20 @@ export default function Dashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">{formatAmount(totalAmount)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {isConvertedMode ? `≈ in ${preferredCurrency}` : `in ${currencyMode}`}
+                  {isConvertedMode ? t('dashboard.approxInCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">This Month</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('dashboard.thisMonth')}</CardTitle>
                 <PieChartIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -362,12 +364,12 @@ export default function Dashboard() {
             <Link to="/categories">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.categories')}</CardTitle>
                   <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold">{totalCategories}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Available</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.available')}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -375,7 +377,7 @@ export default function Dashboard() {
 
           {/* Month Selector */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Spending Analysis</h3>
+            <h3 className="text-lg font-semibold">{t('dashboard.spendingAnalysis')}</h3>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={handlePrevMonth}>
                 <ChevronLeft className="h-4 w-4" />
@@ -393,7 +395,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <PieChartIcon className="h-4 w-4" />
-                  Spending by Category
+                  {t('dashboard.spendingByCategory')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -403,7 +405,7 @@ export default function Dashboard() {
                   </div>
                 ) : categoryChartData.length === 0 ? (
                   <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    No data for this month
+                    {t('dashboard.noDataThisMonth')}
                   </div>
                 ) : (
                   <div className="flex flex-col lg:flex-row items-center gap-4">
@@ -449,7 +451,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BarChart3 className="h-4 w-4" />
-                  Daily Spending
+                  {t('dashboard.dailySpending')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -488,7 +490,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <TrendingUp className="h-4 w-4" />
-                  Monthly Trend ({selectedYear})
+                  {t('dashboard.monthlyTrend', { year: selectedYear })}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -527,7 +529,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Store className="h-4 w-4" />
-                  Top Stores
+                  {t('dashboard.topStores')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -545,14 +547,14 @@ export default function Dashboard() {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium">{formatAmount(store.totalAmount)}</p>
-                          <p className="text-xs text-muted-foreground">{store.receiptCount} receipts</p>
+                          <p className="text-xs text-muted-foreground">{t('dashboard.receiptsCount', { count: store.receiptCount })}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-                    No store data
+                    {t('dashboard.noStoreData')}
                   </div>
                 )}
               </CardContent>
@@ -564,7 +566,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Clock className="h-4 w-4" />
-                Recent Activity
+                {t('dashboard.recentActivity')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -576,7 +578,7 @@ export default function Dashboard() {
                       to="/receipts"
                       className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border"
                     >
-                      <span className="font-medium truncate">{receipt.storeName || 'Unknown Store'}</span>
+                      <span className="font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</span>
                       <span className="text-lg font-bold">
                         {new Intl.NumberFormat('sr-RS', {
                           style: 'currency',
@@ -592,7 +594,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No recent activity</p>
+                <p className="text-sm text-muted-foreground">{t('dashboard.noRecentActivity')}</p>
               )}
             </CardContent>
           </Card>
@@ -601,4 +603,3 @@ export default function Dashboard() {
     </AppLayout>
   )
 }
-

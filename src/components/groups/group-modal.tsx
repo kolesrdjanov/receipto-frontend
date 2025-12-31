@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ type GroupFormData = {
 }
 
 export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps) {
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -93,19 +95,19 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
 
       if (mode === 'create') {
         await createGroup.mutateAsync(payload)
-        toast.success('Group created successfully')
+        toast.success(t('groups.modal.createSuccess'))
       } else if (mode === 'edit' && group) {
         // Ne šaljemo currency pri edit-u jer se ne može menjati
         const { currency, ...updatePayload } = payload
         await updateGroup.mutateAsync({ id: group.id, data: updatePayload })
-        toast.success('Group updated successfully')
+        toast.success(t('groups.modal.updateSuccess'))
       }
       onOpenChange(false)
       reset()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
-      toast.error(mode === 'create' ? 'Failed to create group' : 'Failed to update group', {
+      toast.error(mode === 'create' ? t('groups.modal.createError') : t('groups.modal.updateError'), {
         description: errorMessage,
       })
     }
@@ -114,16 +116,16 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
   const handleDelete = async () => {
     if (!group) return
 
-    if (window.confirm('Are you sure you want to delete this group? All receipts will be removed from this group.')) {
+    if (window.confirm(t('groups.modal.deleteConfirm'))) {
       try {
         await deleteGroup.mutateAsync(group.id)
-        toast.success('Group deleted successfully')
+        toast.success(t('groups.modal.deleteSuccess'))
         onOpenChange(false)
         reset()
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'An error occurred'
-        toast.error('Failed to delete group', {
+        toast.error(t('groups.modal.deleteError'), {
           description: errorMessage,
         })
       }
@@ -140,37 +142,37 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create Group' : 'Edit Group'}
+            {mode === 'create' ? t('groups.modal.createTitle') : t('groups.modal.editTitle')}
           </DialogTitle>
           <DialogDescription>
             {mode === 'create'
-              ? 'Create a new expense group to share with others.'
-              : 'Update the group details.'}
+              ? t('groups.modal.createDescription')
+              : t('groups.modal.editDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">{t('groups.modal.name')} *</Label>
             <Input
               id="name"
               {...register('name', { required: true })}
-              placeholder="e.g., Vacation Trip, Household"
+              placeholder={t('groups.modal.namePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('groups.modal.description')}</Label>
             <Textarea
               id="description"
               {...register('description')}
-              placeholder="Optional description"
+              placeholder={t('groups.modal.descriptionPlaceholder')}
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="currency">Currency *</Label>
+            <Label htmlFor="currency">{t('groups.modal.currency')} *</Label>
             {mode === 'create' ? (
               <Controller
                 name="currency"
@@ -178,7 +180,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger id="currency">
-                      <SelectValue placeholder="Select currency" />
+                      <SelectValue placeholder={t('groups.modal.currency')} />
                     </SelectTrigger>
                     <SelectContent>
                       {currencies.map((c) => (
@@ -199,17 +201,17 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
             )}
             {mode === 'edit' && (
               <p className="text-xs text-muted-foreground">
-                Currency cannot be changed after group creation
+                {t('groups.modal.currencyLocked')}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="icon">Icon (emoji)</Label>
+            <Label htmlFor="icon">{t('groups.modal.icon')}</Label>
             <Input
               id="icon"
               {...register('icon')}
-              placeholder="e.g., 🏠, ✈️, 🛒"
+              placeholder={t('groups.modal.iconPlaceholder')}
               maxLength={4}
             />
           </div>
@@ -223,7 +225,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
                 disabled={deleteGroup.isPending || isSubmitting}
                 className="sm:mr-auto"
               >
-                {deleteGroup.isPending ? 'Deleting...' : 'Delete'}
+                {deleteGroup.isPending ? t('common.deleting') : t('common.delete')}
               </Button>
             )}
             <Button
@@ -232,7 +234,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
               onClick={handleClose}
               disabled={isSubmitting || createGroup.isPending || updateGroup.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -240,11 +242,11 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
             >
               {isSubmitting || createGroup.isPending || updateGroup.isPending
                 ? mode === 'create'
-                  ? 'Creating...'
-                  : 'Updating...'
+                  ? t('common.creating')
+                  : t('common.updating')
                 : mode === 'create'
-                ? 'Create'
-                : 'Update'}
+                ? t('common.create')
+                : t('common.update')}
             </Button>
           </DialogFooter>
         </form>
@@ -252,4 +254,3 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
     </Dialog>
   )
 }
-

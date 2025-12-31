@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -18,6 +19,7 @@ interface ReceiptsFiltersProps {
 }
 
 export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFiltersProps) {
+  const { t } = useTranslation()
   const { data: categories = [] } = useCategories()
 
   const handleCategoryChange = (value: string) => {
@@ -68,13 +70,13 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
     <div className="flex flex-col gap-4 p-4 bg-muted/50 rounded-lg mb-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t('receipts.filters.category')}</Label>
           <Select value={filters.categoryId || 'all'} onValueChange={handleCategoryChange}>
             <SelectTrigger id="category">
-              <SelectValue placeholder="All categories" />
+              <SelectValue placeholder={t('receipts.filters.allCategories')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
+              <SelectItem value="all">{t('receipts.filters.allCategories')}</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.icon && <span className="mr-2">{category.icon}</span>}
@@ -86,11 +88,11 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="minAmount">Min Amount</Label>
+          <Label htmlFor="minAmount">{t('receipts.filters.minAmount')}</Label>
           <Input
             id="minAmount"
             type="number"
-            placeholder="0"
+            placeholder={t('receipts.filters.minAmountPlaceholder')}
             min={0}
             value={filters.minAmount ?? ''}
             onChange={handleMinAmountChange}
@@ -98,11 +100,11 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="maxAmount">Max Amount</Label>
+          <Label htmlFor="maxAmount">{t('receipts.filters.maxAmount')}</Label>
           <Input
             id="maxAmount"
             type="number"
-            placeholder="No limit"
+            placeholder={t('receipts.filters.maxAmountPlaceholder')}
             min={0}
             value={filters.maxAmount ?? ''}
             onChange={handleMaxAmountChange}
@@ -110,7 +112,7 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="startDate">From Date</Label>
+          <Label htmlFor="startDate">{t('receipts.filters.fromDate')}</Label>
           <Input
             id="startDate"
             type="date"
@@ -120,7 +122,7 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="endDate">To Date</Label>
+          <Label htmlFor="endDate">{t('receipts.filters.toDate')}</Label>
           <Input
             id="endDate"
             type="date"
@@ -134,7 +136,7 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
         <div className="flex justify-end">
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             <X className="h-4 w-4 mr-1" />
-            Clear filters
+            {t('receipts.filters.clearFilters')}
           </Button>
         </div>
       )}

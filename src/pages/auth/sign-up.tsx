@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,15 +8,16 @@ import { AuthLayout } from '@/components/layout/auth-layout'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
+  const { t } = useTranslation()
   const { formData, errors, apiError, isLoading, handleChange, handleSubmit } = useSignUp()
 
   return (
     <AuthLayout>
       <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.signUp.title')}</CardTitle>
           <CardDescription>
-            Get started with Receipto today
+            {t('auth.signUp.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -28,13 +30,13 @@ export default function SignUp() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
+                <Label htmlFor="firstName">{t('auth.signUp.firstName')}</Label>
                 <Input
                   id="firstName"
                   name="firstName"
                   type="text"
                   autoComplete="given-name"
-                  placeholder="John"
+                  placeholder={t('auth.signUp.firstNamePlaceholder')}
                   value={formData.firstName}
                   onChange={handleChange}
                   disabled={isLoading}
@@ -44,13 +46,13 @@ export default function SignUp() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
+                <Label htmlFor="lastName">{t('auth.signUp.lastName')}</Label>
                 <Input
                   id="lastName"
                   name="lastName"
                   type="text"
                   autoComplete="family-name"
-                  placeholder="Doe"
+                  placeholder={t('auth.signUp.lastNamePlaceholder')}
                   value={formData.lastName}
                   onChange={handleChange}
                   disabled={isLoading}
@@ -61,13 +63,13 @@ export default function SignUp() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">{t('auth.signUp.email')}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="name@example.com"
+                placeholder={t('auth.signUp.emailPlaceholder')}
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isLoading}
@@ -77,7 +79,7 @@ export default function SignUp() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.signUp.password')}</Label>
               <Input
                 id="password"
                 name="password"
@@ -92,7 +94,7 @@ export default function SignUp() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.signUp.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -120,13 +122,13 @@ export default function SignUp() {
                   className="h-4 w-4 rounded border-input mt-0.5"
                 />
                 <Label htmlFor="terms" className="font-normal cursor-pointer text-sm leading-tight">
-                  I agree to the{' '}
+                  {t('auth.signUp.agreeToTerms')}{' '}
                   <Link to="#" className="font-medium text-primary hover:underline">
-                    Terms of Service
+                    {t('auth.signUp.termsOfService')}
                   </Link>{' '}
-                  and{' '}
+                  {t('auth.signUp.and')}{' '}
                   <Link to="#" className="font-medium text-primary hover:underline">
-                    Privacy Policy
+                    {t('auth.signUp.privacyPolicy')}
                   </Link>
                 </Label>
               </div>
@@ -134,13 +136,13 @@ export default function SignUp() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{' '}
+              {t('auth.signUp.hasAccount')}{' '}
               <Link to="/sign-in" className="font-medium text-primary hover:underline">
-                Sign in
+                {t('auth.signUp.signIn')}
               </Link>
             </p>
           </form>

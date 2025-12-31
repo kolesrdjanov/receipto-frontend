@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,13 +17,14 @@ interface CategoriesTableProps {
 }
 
 export function CategoriesTable({ onEdit }: CategoriesTableProps) {
+  const { t } = useTranslation()
   const { data: categories, isLoading, error } = useCategories()
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-8">
-          <p className="text-center text-muted-foreground">Loading categories...</p>
+          <p className="text-center text-muted-foreground">{t('categories.loading')}</p>
         </CardContent>
       </Card>
     )
@@ -33,7 +35,7 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
       <Card>
         <CardContent className="p-8">
           <p className="text-center text-destructive">
-            Error loading categories: {error instanceof Error ? error.message : 'Unknown error'}
+            {t('categories.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
           </p>
         </CardContent>
       </Card>
@@ -44,11 +46,11 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-center text-muted-foreground">No categories yet</CardTitle>
+          <CardTitle className="text-center text-muted-foreground">{t('categories.noCategories')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-center text-muted-foreground">
-            Create your first category to get started
+            {t('categories.noCategoriesText')}
           </p>
         </CardContent>
       </Card>
@@ -58,17 +60,17 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Categories ({categories.length})</CardTitle>
+        <CardTitle>{t('categories.categoriesCount', { count: categories.length })}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Color</TableHead>
-              <TableHead>Icon</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('categories.table.name')}</TableHead>
+              <TableHead>{t('categories.table.color')}</TableHead>
+              <TableHead>{t('categories.table.icon')}</TableHead>
+              <TableHead>{t('categories.table.description')}</TableHead>
+              <TableHead className="text-right">{t('categories.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,21 +87,21 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
                       <span className="text-sm text-muted-foreground">{category.color}</span>
                     </div>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {category.icon ? (
                     <span className="text-lg">{category.icon}</span>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {category.description ? (
                     <span className="text-sm">{category.description}</span>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right">

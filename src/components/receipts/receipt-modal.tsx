@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,7 @@ type ReceiptFormData = {
 
 
 export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModalProps) {
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -126,17 +128,17 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
 
       if (mode === 'create') {
         await createReceipt.mutateAsync(payload)
-        toast.success('Receipt created successfully')
+        toast.success(t('receipts.modal.createSuccess'))
       } else if (mode === 'edit' && receipt) {
         await updateReceipt.mutateAsync({ id: receipt.id, data: payload })
-        toast.success('Receipt updated successfully')
+        toast.success(t('receipts.modal.updateSuccess'))
       }
       onOpenChange(false)
       reset()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
-      toast.error(mode === 'create' ? 'Failed to create receipt' : 'Failed to update receipt', {
+      toast.error(mode === 'create' ? t('receipts.modal.createError') : t('receipts.modal.updateError'), {
         description: errorMessage,
       })
     }
@@ -145,16 +147,16 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
   const handleDelete = async () => {
     if (!receipt) return
 
-    if (window.confirm('Are you sure you want to delete this receipt?')) {
+    if (window.confirm(t('receipts.modal.deleteConfirm'))) {
       try {
         await deleteReceipt.mutateAsync(receipt.id)
-        toast.success('Receipt deleted successfully')
+        toast.success(t('receipts.modal.deleteSuccess'))
         onOpenChange(false)
         reset()
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'An error occurred'
-        toast.error('Failed to delete receipt', {
+        toast.error(t('receipts.modal.deleteError'), {
           description: errorMessage,
         })
       }
@@ -171,28 +173,28 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Add Receipt' : 'Edit Receipt'}
+            {mode === 'create' ? t('receipts.modal.addTitle') : t('receipts.modal.editTitle')}
           </DialogTitle>
           <DialogDescription>
             {mode === 'create'
-              ? 'Manually add a new receipt.'
-              : 'Update the receipt details or delete it.'}
+              ? t('receipts.modal.addDescription')
+              : t('receipts.modal.editDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="storeName">Store Name</Label>
+            <Label htmlFor="storeName">{t('receipts.modal.storeName')}</Label>
             <Input
               id="storeName"
               {...register('storeName')}
-              placeholder="e.g., Grocery Store, Restaurant"
+              placeholder={t('receipts.modal.storeNamePlaceholder')}
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="totalAmount">Total Amount</Label>
+              <Label htmlFor="totalAmount">{t('receipts.modal.totalAmount')}</Label>
               <Input
                 id="totalAmount"
                 type="number"
@@ -203,7 +205,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency">{t('receipts.modal.currency')}</Label>
               <Controller
                 name="currency"
                 control={control}
@@ -214,7 +216,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                     disabled={!!selectedGroup}
                   >
                     <SelectTrigger id="currency">
-                      <SelectValue placeholder="Select currency" />
+                      <SelectValue placeholder={t('receipts.modal.currency')} />
                     </SelectTrigger>
                     <SelectContent>
                       {currencies.map((currency) => (
@@ -228,13 +230,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
               />
               {selectedGroup && (
                 <p className="text-xs text-muted-foreground">
-                  Currency set by group
+                  {t('receipts.modal.currencySetByGroup')}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="receiptDate">Date</Label>
+              <Label htmlFor="receiptDate">{t('receipts.modal.date')}</Label>
               <Input
                 id="receiptDate"
                 type="date"
@@ -244,23 +246,23 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="receiptNumber">Receipt Number</Label>
+            <Label htmlFor="receiptNumber">{t('receipts.modal.receiptNumber')}</Label>
             <Input
               id="receiptNumber"
               {...register('receiptNumber')}
-              placeholder="Optional receipt/invoice number"
+              placeholder={t('receipts.modal.receiptNumberPlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="categoryId">Category</Label>
+            <Label htmlFor="categoryId">{t('receipts.modal.category')}</Label>
             <Controller
               name="categoryId"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={t('receipts.modal.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
@@ -277,7 +279,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
 
           {groups.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="groupId">Group (optional)</Label>
+              <Label htmlFor="groupId">{t('receipts.modal.group')}</Label>
               <Controller
                 name="groupId"
                 control={control}
@@ -287,10 +289,10 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                     value={field.value || '__none__'}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a group" />
+                      <SelectValue placeholder={t('receipts.modal.group')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">No group</SelectItem>
+                      <SelectItem value="__none__">{t('receipts.modal.noGroup')}</SelectItem>
                       {groups.map((group) => (
                         <SelectItem key={group.id} value={group.id}>
                           {group.icon && <span className="mr-2">{group.icon}</span>}
@@ -313,7 +315,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
                 disabled={deleteReceipt.isPending || isSubmitting}
                 className="sm:mr-auto"
               >
-                {deleteReceipt.isPending ? 'Deleting...' : 'Delete'}
+                {deleteReceipt.isPending ? t('common.deleting') : t('common.delete')}
               </Button>
             )}
             <Button
@@ -322,7 +324,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
               onClick={handleClose}
               disabled={isSubmitting || createReceipt.isPending || updateReceipt.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -330,11 +332,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
             >
               {isSubmitting || createReceipt.isPending || updateReceipt.isPending
                 ? mode === 'create'
-                  ? 'Creating...'
-                  : 'Updating...'
+                  ? t('common.creating')
+                  : t('common.updating')
                 : mode === 'create'
-                ? 'Create'
-                : 'Update'}
+                ? t('common.create')
+                : t('common.update')}
             </Button>
           </DialogFooter>
         </form>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ interface GroupDetailModalProps {
 }
 
 export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDetailModalProps) {
+  const { t } = useTranslation()
   const [inviteEmail, setInviteEmail] = useState('')
   const { user } = useAuthStore()
 
@@ -48,35 +50,35 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
 
     try {
       await inviteMember.mutateAsync({ groupId: group.id, email: inviteEmail })
-      toast.success('Invite sent!')
+      toast.success(t('groups.detail.inviteSent'))
       setInviteEmail('')
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send invite'
+      const errorMessage = error instanceof Error ? error.message : t('groups.detail.inviteError')
       toast.error(errorMessage)
     }
   }
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return
+    if (!window.confirm(t('groups.detail.removeMemberConfirm'))) return
 
     try {
       await removeMember.mutateAsync({ groupId: group.id, memberId })
-      toast.success('Member removed')
+      toast.success(t('groups.detail.memberRemoved'))
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to remove member'
+      const errorMessage = error instanceof Error ? error.message : t('groups.detail.removeMemberError')
       toast.error(errorMessage)
     }
   }
 
   const handleLeave = async () => {
-    if (!window.confirm('Are you sure you want to leave this group?')) return
+    if (!window.confirm(t('groups.detail.leaveConfirm'))) return
 
     try {
       await leaveGroup.mutateAsync(group.id)
-      toast.success('You left the group')
+      toast.success(t('groups.detail.leftGroup'))
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to leave group'
+      const errorMessage = error instanceof Error ? error.message : t('groups.detail.leaveError')
       toast.error(errorMessage)
     }
   }
@@ -113,7 +115,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
             <DialogDescription>{group.description}</DialogDescription>
           )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
-            <span>Currency:</span>
+            <span>{t('groups.detail.currency')}</span>
             <span className="font-medium text-foreground">{group.currency}</span>
           </div>
         </DialogHeader>
@@ -121,22 +123,22 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
         <div className="space-y-6">
           {/* Stats */}
           <div className="p-4 rounded-lg bg-muted/50">
-            <h3 className="font-semibold mb-3">Statistics</h3>
+            <h3 className="font-semibold mb-3">{t('groups.detail.statistics')}</h3>
             {statsLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : stats ? (
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Receipts</span>
+                  <span className="text-muted-foreground">{t('groups.detail.totalReceipts')}</span>
                   <span className="font-medium">{stats.totalReceipts}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount</span>
+                  <span className="text-muted-foreground">{t('groups.detail.totalAmount')}</span>
                   <span className="font-medium">{formatAmount(stats.totalAmount)}</span>
                 </div>
                 {stats.perUser.length > 0 && (
                   <div className="pt-2 border-t">
-                    <p className="text-sm text-muted-foreground mb-2">Per member:</p>
+                    <p className="text-sm text-muted-foreground mb-2">{t('groups.detail.perMember')}</p>
                     {stats.perUser.map((u) => (
                       <div key={u.userId} className="flex justify-between text-sm">
                         <span>{u.firstName} {u.lastName}</span>
@@ -153,7 +155,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Members ({acceptedMembers.length})
+              {t('groups.detail.members', { count: acceptedMembers.length })}
             </h3>
             <div className="space-y-2">
               {acceptedMembers.map((member) => (
@@ -189,7 +191,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           {pendingMembers.length > 0 && (
             <div>
               <h3 className="font-semibold mb-3 text-muted-foreground">
-                Pending Invites ({pendingMembers.length})
+                {t('groups.detail.pendingInvites', { count: pendingMembers.length })}
               </h3>
               <div className="space-y-2">
                 {pendingMembers.map((member) => (
@@ -221,12 +223,12 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
             <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <UserPlus className="h-4 w-4" />
-                Invite Member
+                {t('groups.detail.inviteMember')}
               </h3>
               <div className="flex gap-2">
                 <Input
                   type="email"
-                  placeholder="Enter email address"
+                  placeholder={t('groups.detail.emailPlaceholder')}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
@@ -234,7 +236,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                   onClick={handleInvite}
                   disabled={!inviteEmail.trim() || inviteMember.isPending}
                 >
-                  {inviteMember.isPending ? 'Sending...' : 'Invite'}
+                  {inviteMember.isPending ? t('groups.detail.sending') : t('groups.detail.invite')}
                 </Button>
               </div>
             </div>
@@ -248,8 +250,8 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
               onClick={handleLeave}
               disabled={leaveGroup.isPending}
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              {leaveGroup.isPending ? 'Leaving...' : 'Leave Group'}
+              <LogOut className="h-4 w-4" />
+              {leaveGroup.isPending ? t('groups.detail.leaving') : t('groups.detail.leaveGroup')}
             </Button>
           )}
         </div>
@@ -257,4 +259,3 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
     </Dialog>
   )
 }
-

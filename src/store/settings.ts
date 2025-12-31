@@ -1,19 +1,23 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import i18n from '../i18n'
 
 // Currency is now a runtime string to support dynamic currencies from the backend
 // Default/fallback currencies: 'RSD' | 'EUR' | 'USD' | 'BAM'
 export type Currency = string
 export type Theme = 'light' | 'dark' | 'system'
 export type AccentColor = 'zinc' | 'blue' | 'green' | 'purple' | 'orange' | 'rose'
+export type Language = 'en' | 'sr'
 
 interface SettingsState {
   currency: Currency
   theme: Theme
   accentColor: AccentColor
+  language: Language
   setCurrency: (currency: Currency) => void
   setTheme: (theme: Theme) => void
   setAccentColor: (color: AccentColor) => void
+  setLanguage: (language: Language) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -22,6 +26,7 @@ export const useSettingsStore = create<SettingsState>()(
       currency: 'RSD',
       theme: 'system',
       accentColor: 'zinc',
+      language: 'en',
       setCurrency: (currency) => set({ currency }),
       setTheme: (theme) => {
         set({ theme })
@@ -31,6 +36,10 @@ export const useSettingsStore = create<SettingsState>()(
         set({ accentColor })
         applyAccentColor(accentColor)
       },
+      setLanguage: (language) => {
+        set({ language })
+        i18n.changeLanguage(language)
+      },
     }),
     {
       name: 'receipto-settings',
@@ -38,6 +47,9 @@ export const useSettingsStore = create<SettingsState>()(
         if (state) {
           applyTheme(state.theme)
           applyAccentColor(state.accentColor)
+          if (state.language) {
+            i18n.changeLanguage(state.language)
+          }
         }
       },
     }

@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoriesTable } from '@/components/categories/categories-table'
 import { CategoryModal } from '@/components/categories/category-modal'
 import type { Category } from '@/hooks/categories/use-categories'
+import { Plus } from "lucide-react";
 
 export default function Categories() {
+  const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
@@ -26,10 +29,13 @@ export default function Categories() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">Categories</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">Organize your receipts by category</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('categories.title')}</h2>
+          <p className="text-sm text-muted-foreground sm:text-base">{t('categories.subtitle')}</p>
         </div>
-        <Button onClick={handleAddCategory} className="w-full sm:w-auto">Add Category</Button>
+        <Button onClick={handleAddCategory} className="w-full sm:w-auto">
+          <Plus className="h-4 w-4" />
+          {t('categories.addCategory')}
+        </Button>
       </div>
 
       <CategoriesTable onEdit={handleEditCategory} />

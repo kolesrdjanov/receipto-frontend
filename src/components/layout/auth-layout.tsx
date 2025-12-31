@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Logo } from '@/components/ui/logo'
 
 interface AuthLayoutProps {
@@ -5,6 +6,8 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-dvh flex flex-col relative overflow-hidden">
       {/* Gradient background */}
@@ -37,7 +40,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Footer */}
         <footer className="p-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Receipto. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {t('common.appName')}. {t('common.allRightsReserved')}</p>
         </footer>
       </div>
     </div>

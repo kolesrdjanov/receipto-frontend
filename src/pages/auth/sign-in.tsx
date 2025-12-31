@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,15 +8,16 @@ import { AuthLayout } from '@/components/layout/auth-layout'
 import { useSignIn } from '@/hooks/auth/use-sign-in'
 
 export default function SignIn() {
+  const { t } = useTranslation()
   const { email, setEmail, password, setPassword, error, isLoading, handleSubmit } = useSignIn()
 
   return (
     <AuthLayout>
       <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.signIn.title')}</CardTitle>
           <CardDescription>
-            Sign in to your account to continue
+            {t('auth.signIn.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -27,13 +29,13 @@ export default function SignIn() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">{t('auth.signIn.email')}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="name@example.com"
+                placeholder={t('auth.signIn.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -43,7 +45,7 @@ export default function SignIn() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.signIn.password')}</Label>
               <Input
                 id="password"
                 name="password"
@@ -67,23 +69,23 @@ export default function SignIn() {
                   disabled={isLoading}
                 />
                 <Label htmlFor="remember-me" className="font-normal cursor-pointer text-sm">
-                  Remember me
+                  {t('auth.signIn.rememberMe')}
                 </Label>
               </div>
 
               <Link to="#" className="text-sm font-medium text-primary hover:underline">
-                Forgot password?
+                {t('auth.signIn.forgotPassword')}
               </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{' '}
+              {t('auth.signIn.noAccount')}{' '}
               <Link to="/sign-up" className="font-medium text-primary hover:underline">
-                Sign up
+                {t('auth.signIn.signUp')}
               </Link>
             </p>
           </form>

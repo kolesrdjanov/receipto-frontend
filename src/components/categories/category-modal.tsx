@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ interface CategoryModalProps {
 type CategoryFormData = CreateCategoryInput
 
 export function CategoryModal({ open, onOpenChange, category, mode }: CategoryModalProps) {
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -71,17 +73,17 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
     try {
       if (mode === 'create') {
         await createCategory.mutateAsync(data)
-        toast.success('Category created successfully')
+        toast.success(t('categories.modal.createSuccess'))
       } else if (mode === 'edit' && category) {
         await updateCategory.mutateAsync({ id: category.id, data })
-        toast.success('Category updated successfully')
+        toast.success(t('categories.modal.updateSuccess'))
       }
       onOpenChange(false)
       reset()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
-      toast.error(mode === 'create' ? 'Failed to create category' : 'Failed to update category', {
+      toast.error(mode === 'create' ? t('categories.modal.createError') : t('categories.modal.updateError'), {
         description: errorMessage,
       })
     }
@@ -90,16 +92,16 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
   const handleDelete = async () => {
     if (!category) return
 
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm(t('categories.modal.deleteConfirm'))) {
       try {
         await deleteCategory.mutateAsync(category.id)
-        toast.success('Category deleted successfully')
+        toast.success(t('categories.modal.deleteSuccess'))
         onOpenChange(false)
         reset()
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'An error occurred'
-        toast.error('Failed to delete category', {
+        toast.error(t('categories.modal.deleteError'), {
           description: errorMessage,
         })
       }
@@ -116,24 +118,24 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create Category' : 'Edit Category'}
+            {mode === 'create' ? t('categories.modal.createTitle') : t('categories.modal.editTitle')}
           </DialogTitle>
           <DialogDescription>
             {mode === 'create'
-              ? 'Add a new category to organize your receipts.'
-              : 'Update the category details or delete it.'}
+              ? t('categories.modal.createDescription')
+              : t('categories.modal.editDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">
-              Name <span className="text-destructive">*</span>
+              {t('categories.modal.name')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
-              {...register('name', { required: 'Name is required' })}
-              placeholder="e.g., Groceries, Travel, Entertainment"
+              {...register('name', { required: t('categories.modal.nameRequired') })}
+              placeholder={t('categories.modal.namePlaceholder')}
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -141,7 +143,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="color">Color</Label>
+            <Label htmlFor="color">{t('categories.modal.color')}</Label>
             <div className="flex gap-2 items-center">
               <Input
                 id="color"
@@ -152,30 +154,30 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               <Input
                 type="text"
                 {...register('color')}
-                placeholder="#3b82f6"
+                placeholder={t('categories.modal.colorPlaceholder')}
                 className="flex-1"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="icon">Icon</Label>
+            <Label htmlFor="icon">{t('categories.modal.icon')}</Label>
             <Input
               id="icon"
               {...register('icon')}
-              placeholder="e.g., 🛒, ✈️, 🎬"
+              placeholder={t('categories.modal.iconPlaceholder')}
             />
             <p className="text-xs text-muted-foreground">
-              Enter an emoji or icon name
+              {t('categories.modal.iconHelp')}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('categories.modal.description')}</Label>
             <Textarea
               id="description"
               {...register('description')}
-              placeholder="Optional description for this category"
+              placeholder={t('categories.modal.descriptionPlaceholder')}
               rows={3}
             />
           </div>
@@ -189,7 +191,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
                 disabled={deleteCategory.isPending || isSubmitting}
                 className="sm:mr-auto"
               >
-                {deleteCategory.isPending ? 'Deleting...' : 'Delete'}
+                {deleteCategory.isPending ? t('common.deleting') : t('common.delete')}
               </Button>
             )}
             <Button
@@ -198,7 +200,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               onClick={handleClose}
               disabled={isSubmitting || createCategory.isPending || updateCategory.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -206,11 +208,11 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
             >
               {isSubmitting || createCategory.isPending || updateCategory.isPending
                 ? mode === 'create'
-                  ? 'Creating...'
-                  : 'Updating...'
+                  ? t('common.creating')
+                  : t('common.updating')
                 : mode === 'create'
-                ? 'Create'
-                : 'Update'}
+                ? t('common.create')
+                : t('common.update')}
             </Button>
           </DialogFooter>
         </form>

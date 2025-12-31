@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Scanner } from '@yudiel/react-qr-scanner'
 import {
   Dialog,
@@ -17,6 +18,7 @@ interface QrScannerProps {
 }
 
 export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
 
   const handleScan = (result: { rawValue: string }[]) => {
@@ -34,7 +36,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     if (err instanceof Error) {
       setError(err.message)
     } else {
-      setError('Failed to access camera')
+      setError(t('receipts.qrScanner.cameraError'))
     }
   }
 
@@ -49,10 +51,10 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Scan QR Code
+            {t('receipts.qrScanner.title')}
           </DialogTitle>
           <DialogDescription>
-            Point your camera at the receipt QR code to scan it.
+            {t('receipts.qrScanner.description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,7 +69,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
                 onClick={() => setError(null)}
                 className="mt-4"
               >
-                Try Again
+                {t('receipts.qrScanner.tryAgain')}
               </Button>
             </div>
           ) : open ? (
@@ -100,7 +102,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
 
         <div className="flex justify-end">
           <Button variant="outline" onClick={handleClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
         </div>
       </DialogContent>

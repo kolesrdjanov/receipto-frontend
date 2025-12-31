@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
 import { Button } from '@/components/ui/button'
@@ -11,14 +12,15 @@ interface AppLayoutProps {
 }
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/receipts', label: 'Receipts', icon: Receipt },
-  { path: '/categories', label: 'Categories', icon: FolderOpen },
-  { path: '/groups', label: 'Groups', icon: Users },
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
+  { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
+  { path: '/groups', labelKey: 'nav.groups', icon: Users },
+  { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const { t } = useTranslation()
   const location = useLocation()
   const { user } = useAuthStore()
   const logout = useLogout()
@@ -30,7 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-dvh bg-background">
       {/* Mobile header */}
       <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
-        <h1 className="text-xl font-bold">Receipto</h1>
+        <h1 className="text-xl font-bold">{t('common.appName')}</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -59,7 +61,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between border-b px-6 py-4">
-            <h1 className="text-2xl font-bold">Receipto</h1>
+            <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
             <Button
               variant="ghost"
               size="icon"
@@ -84,7 +86,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   )}
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </div>
               </Link>
             ))}
@@ -97,7 +99,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <Button variant="outline" className="w-full" onClick={logout}>
-              Logout
+              {t('nav.logout')}
             </Button>
           </div>
         </div>

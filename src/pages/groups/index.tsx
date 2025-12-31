@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +16,7 @@ import { Plus, Users, Loader2, Mail, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Groups() {
+  const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
@@ -45,18 +47,18 @@ export default function Groups() {
   const handleAcceptInvite = async (groupId: string) => {
     try {
       await acceptInvite.mutateAsync(groupId)
-      toast.success('Invite accepted!')
+      toast.success(t('groups.inviteAccepted'))
     } catch {
-      toast.error('Failed to accept invite')
+      toast.error(t('groups.inviteAcceptError'))
     }
   }
 
   const handleDeclineInvite = async (groupId: string) => {
     try {
       await declineInvite.mutateAsync(groupId)
-      toast.success('Invite declined')
+      toast.success(t('groups.inviteDeclined'))
     } catch {
-      toast.error('Failed to decline invite')
+      toast.error(t('groups.inviteDeclineError'))
     }
   }
 
@@ -68,14 +70,14 @@ export default function Groups() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">Groups</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('groups.title')}</h2>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Create and manage expense groups
+            {t('groups.subtitle')}
           </p>
         </div>
         <Button onClick={handleCreateGroup}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Group
+          <Plus className="h-4 w-4" />
+          {t('groups.newGroup')}
         </Button>
       </div>
 
@@ -85,7 +87,7 @@ export default function Groups() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Pending Invites
+              {t('groups.pendingInvites')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -98,7 +100,7 @@ export default function Groups() {
                   <div>
                     <p className="font-medium">{invite.group.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      Invited by {invite.invitedBy?.firstName} {invite.invitedBy?.lastName}
+                      {t('groups.invitedBy', { name: `${invite.invitedBy?.firstName} ${invite.invitedBy?.lastName}` })}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -132,11 +134,11 @@ export default function Groups() {
       ) : groups.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">No groups yet</CardTitle>
+            <CardTitle className="text-center text-muted-foreground">{t('groups.noGroups')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-center text-muted-foreground">
-              Create a group to share expenses with others
+              {t('groups.noGroupsText')}
             </p>
           </CardContent>
         </Card>
@@ -164,7 +166,7 @@ export default function Groups() {
               <CardContent>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Users className="h-4 w-4" />
-                  <span>{getMemberCount(group)} members</span>
+                  <span>{t('groups.membersCount', { count: getMemberCount(group) })}</span>
                 </div>
               </CardContent>
             </Card>
@@ -188,4 +190,3 @@ export default function Groups() {
     </AppLayout>
   )
 }
-

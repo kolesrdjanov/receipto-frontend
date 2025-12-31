@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -24,6 +25,7 @@ import { Camera, Plus, Pencil, Loader2, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Receipts() {
+  const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
@@ -61,13 +63,13 @@ export default function Receipts() {
   const handleQrScan = async (url: string) => {
     try {
       await createReceipt.mutateAsync({ qrCodeUrl: url })
-      toast.success('Receipt scanned successfully', {
-        description: 'The receipt data will be extracted shortly.',
+      toast.success(t('receipts.qrScanner.scanSuccess'), {
+        description: t('receipts.qrScanner.scanSuccessDescription'),
       })
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
-      toast.error('Failed to create receipt from QR code', {
+      toast.error(t('receipts.qrScanner.scanError'), {
         description: errorMessage,
       })
     }
@@ -91,19 +93,19 @@ export default function Receipts() {
       case 'scraped':
         return (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            Completed
+            {t('receipts.status.completed')}
           </span>
         )
       case 'pending':
         return (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-            Pending
+            {t('receipts.status.pending')}
           </span>
         )
       case 'failed':
         return (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-            Failed
+            {t('receipts.status.failed')}
           </span>
         )
       default:
@@ -115,8 +117,8 @@ export default function Receipts() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">Receipts</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">View and manage all your receipts</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('receipts.title')}</h2>
+          <p className="text-sm text-muted-foreground sm:text-base">{t('receipts.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -124,20 +126,20 @@ export default function Receipts() {
             onClick={() => setShowFilters(!showFilters)}
             className="flex-1 sm:flex-none"
           >
-            <Filter className="h-4 w-4 mr-2" />
-            Filters
+            <Filter className="h-4 w-4" />
+            {t('receipts.filtersButton')}
           </Button>
           <Button variant="outline" onClick={handleAddManually} className="flex-1 sm:flex-none">
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="hidden xs:inline">Add </span>Manually
+            <Plus className="h-4 w-4" />
+            <span className="">{t('receipts.addManually')}</span>
           </Button>
           <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none">
             {createReceipt.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Camera className="h-4 w-4 mr-2" />
+              <Camera className="h-4 w-4" />
             )}
-            Scan<span className="hidden xs:inline"> QR</span>
+            {t('receipts.scanQr')}
           </Button>
         </div>
       </div>
@@ -153,11 +155,11 @@ export default function Receipts() {
       ) : receipts.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">No receipts yet</CardTitle>
+            <CardTitle className="text-center text-muted-foreground">{t('receipts.noReceipts')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-center text-muted-foreground">
-              Scan a QR code or add a receipt manually to get started
+              {t('receipts.noReceiptsText')}
             </p>
           </CardContent>
         </Card>
@@ -166,11 +168,11 @@ export default function Receipts() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Store</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t('receipts.table.store')}</TableHead>
+                <TableHead>{t('receipts.table.amount')}</TableHead>
+                <TableHead>{t('receipts.table.date')}</TableHead>
+                <TableHead>{t('receipts.table.category')}</TableHead>
+                <TableHead>{t('receipts.table.status')}</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -178,7 +180,7 @@ export default function Receipts() {
               {receipts.map((receipt) => (
                 <TableRow key={receipt.id}>
                   <TableCell className="font-medium">
-                    {receipt.storeName || 'Unknown Store'}
+                    {receipt.storeName || t('receipts.unknownStore')}
                   </TableCell>
                   <TableCell>{formatAmount(receipt)}</TableCell>
                   <TableCell>{formatDate(receipt.receiptDate)}</TableCell>
