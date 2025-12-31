@@ -73,7 +73,7 @@ export default function SignIn() {
                 </Label>
               </div>
 
-              <Link to="#" className="text-sm font-medium text-primary hover:underline">
+              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
                 {t('auth.signIn.forgotPassword')}
               </Link>
             </div>

@@ -61,6 +61,35 @@
       "submitting": "Kreiranje naloga...",
       "hasAccount": "Već imate nalog?",
       "signIn": "Prijavite se"
+    },
+    "forgotPassword": {
+      "title": "Zaboravljena lozinka",
+      "subtitle": "Unesite email i poslaćemo vam link za resetovanje",
+      "email": "Email adresa",
+      "emailPlaceholder": "ime@primer.com",
+      "submit": "Pošalji link",
+      "submitting": "Slanje...",
+      "successMessage": "Link za resetovanje lozinke je poslat! Proverite vaš email.",
+      "backToSignIn": "Nazad na prijavu",
+      "rememberPassword": "Sećate se lozinke?",
+      "signIn": "Prijavite se"
+    },
+    "resetPassword": {
+      "title": "Resetovanje lozinke",
+      "subtitle": "Unesite novu lozinku",
+      "password": "Nova lozinka",
+      "passwordPlaceholder": "Unesite novu lozinku",
+      "confirmPassword": "Potvrdite lozinku",
+      "confirmPasswordPlaceholder": "Potvrdite novu lozinku",
+      "submit": "Resetuj lozinku",
+      "submitting": "Resetovanje...",
+      "successMessage": "Lozinka uspešno resetovana!",
+      "redirecting": "Preusmeravanje na prijavu...",
+      "invalidLink": "Nevažeći link",
+      "invalidLinkMessage": "Ovaj link za resetovanje lozinke je nevažeći ili je istekao.",
+      "requestNewLink": "Zatraži novi link",
+      "rememberPassword": "Sećate se lozinke?",
+      "signIn": "Prijavite se"
     }
   },
   "dashboard": {

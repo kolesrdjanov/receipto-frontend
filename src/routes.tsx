@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/protected-route'
 
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
 const SignUp = lazy(() => import('./pages/auth/sign-up'))
+const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
+const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
 const Dashboard = lazy(() => import('./pages/dashboard'))
 const Categories = lazy(() => import('./pages/categories'))
 const Receipts = lazy(() => import('./pages/receipts'))
@@ -23,6 +25,14 @@ export const routes: RouteObject[] = [
   {
     path: '/sign-up',
     element: <SignUp />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />,
   },
   {
     path: '/dashboard',

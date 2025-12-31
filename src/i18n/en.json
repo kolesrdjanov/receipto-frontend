@@ -61,6 +61,35 @@
       "submitting": "Creating account...",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email address",
+      "emailPlaceholder": "name@example.com",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "successMessage": "Password reset link sent! Check your email inbox.",
+      "backToSignIn": "Back to sign in",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password",
+      "password": "New Password",
+      "passwordPlaceholder": "Enter your new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "submit": "Reset Password",
+      "submitting": "Resetting...",
+      "successMessage": "Password reset successful!",
+      "redirecting": "Redirecting to sign in...",
+      "invalidLink": "Invalid Reset Link",
+      "invalidLinkMessage": "This password reset link is invalid or has expired.",
+      "requestNewLink": "Request a new link",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in"
     }
   },
   "dashboard": {
