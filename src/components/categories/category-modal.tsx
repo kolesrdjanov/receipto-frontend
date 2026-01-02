@@ -41,6 +41,8 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormData>({
     defaultValues: {
@@ -55,6 +57,8 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
   const deleteCategory = useDeleteCategory()
+  
+  const colorValue = watch('color')
 
   useEffect(() => {
     if (open && category && mode === 'edit') {
@@ -174,12 +178,14 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               <Input
                 id="color"
                 type="color"
-                {...register('color')}
+                value={colorValue || '#3b82f6'}
+                onChange={(e) => setValue('color', e.target.value)}
                 className="w-20 h-10 cursor-pointer"
               />
               <Input
                 type="text"
-                {...register('color')}
+                value={colorValue || '#3b82f6'}
+                onChange={(e) => setValue('color', e.target.value)}
                 placeholder={t('categories.modal.colorPlaceholder')}
                 className="flex-1"
               />
