@@ -1,12 +1,16 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, lazy, Suspense } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
+import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode } from 'lucide-react'
+import { toast } from 'sonner'
+
+const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -24,11 +28,38 @@ const navItems = [
 export function AppLayout({ children }: AppLayoutProps) {
   const { t } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const logout = useLogout()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const createReceipt = useCreateReceipt()
 
   const closeSidebar = () => setSidebarOpen(false)
+
+  const handleScanQr = () => {
+    setIsScannerOpen(true)
+  }
+
+  const handleQrScan = async (url: string) => {
+    try {
+      await createReceipt.mutateAsync({ qrCodeUrl: url })
+      toast.success(t('receipts.qrScanner.scanSuccess'), {
+        description: t('receipts.qrScanner.scanSuccessDescription'),
+      })
+      setIsScannerOpen(false)
+      // Navigate to receipts page if not already there
+      if (location.pathname !== '/receipts') {
+        navigate('/receipts')
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.qrScanner.scanError'), {
+        description: errorMessage,
+      })
+    }
+  }
 
   return (
     <div className="min-h-dvh bg-background">
@@ -38,10 +69,20 @@ export function AppLayout({ children }: AppLayoutProps) {
         <Button
           variant="ghost"
           size="icon"
+          onClick={handleScanQr}
+          aria-label="Scan QR Code"
+          className="[&_svg]:!size-7"
+        >
+          <QrCode />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
+          className="[&_svg]:!size-7"
         >
-          <Menu className="h-6 w-6" />
+          <Menu />
         </Button>
       </header>
 
@@ -67,21 +108,21 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden [&_svg]:!size-7"
               onClick={closeSidebar}
               aria-label="Close menu"
             >
-              <X className="h-5 w-5" />
+              <X />
             </Button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-2 p-4">
             {navItems.map((item) => (
               <Link key={item.path} to={item.path} onClick={closeSidebar}>
                 <div
                   className={cn(
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
                     location.pathname === item.path
                       ? 'bg-primary text-primary-foreground'
                       : 'hover:bg-accent hover:text-accent-foreground'
@@ -123,6 +164,15 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="pt-14 md:pl-64 md:pt-0">
         <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
+
+      {/* QR Scanner */}
+      <Suspense fallback={null}>
+        <QrScanner
+          open={isScannerOpen}
+          onOpenChange={setIsScannerOpen}
+          onScan={handleQrScan}
+        />
+      </Suspense>
     </div>
   )
 }
