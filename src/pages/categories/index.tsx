@@ -5,9 +5,8 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { CategoriesTable } from '@/components/categories/categories-table'
 import { CategoryModal } from '@/components/categories/category-modal'
 import { CategoryDeleteModal } from '@/components/categories/category-delete-modal'
-import { useDeleteCategory, type Category } from '@/hooks/categories/use-categories'
+import type { Category } from '@/hooks/categories/use-categories'
 import { Plus } from "lucide-react"
-import { toast } from 'sonner'
 
 export default function Categories() {
   const { t } = useTranslation()
@@ -16,7 +15,6 @@ export default function Categories() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
-  const deleteCategory = useDeleteCategory()
 
   const handleAddCategory = () => {
     setSelectedCategory(null)
