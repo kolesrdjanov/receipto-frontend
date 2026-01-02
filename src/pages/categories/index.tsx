@@ -4,14 +4,19 @@ import { Button } from '@/components/ui/button'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoriesTable } from '@/components/categories/categories-table'
 import { CategoryModal } from '@/components/categories/category-modal'
-import type { Category } from '@/hooks/categories/use-categories'
-import { Plus } from "lucide-react";
+import { CategoryDeleteModal } from '@/components/categories/category-delete-modal'
+import { useDeleteCategory, type Category } from '@/hooks/categories/use-categories'
+import { Plus } from "lucide-react"
+import { toast } from 'sonner'
 
 export default function Categories() {
   const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+  const deleteCategory = useDeleteCategory()
 
   const handleAddCategory = () => {
     setSelectedCategory(null)
@@ -23,6 +28,16 @@ export default function Categories() {
     setSelectedCategory(category)
     setModalMode('edit')
     setIsModalOpen(true)
+  }
+
+  const handleDeleteCategory = (category: Category) => {
+    setCategoryToDelete(category)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDeleted = () => {
+    setCategoryToDelete(null)
+    setDeleteModalOpen(false)
   }
 
   return (
@@ -38,13 +53,20 @@ export default function Categories() {
         </Button>
       </div>
 
-      <CategoriesTable onEdit={handleEditCategory} />
+      <CategoriesTable onEdit={handleEditCategory} onDelete={handleDeleteCategory} />
 
       <CategoryModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         category={selectedCategory}
         mode={modalMode}
+      />
+
+      <CategoryDeleteModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        category={categoryToDelete}
+        onDeleted={handleDeleted}
       />
     </AppLayout>
   )

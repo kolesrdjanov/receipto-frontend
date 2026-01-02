@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
+import type { Receipt } from '@/hooks/receipts/use-receipts'
 
 // Types
 export interface Category {
@@ -55,6 +56,10 @@ const deleteCategory = async (id: string): Promise<void> => {
   return api.delete<void>(`/categories/${id}`)
 }
 
+const fetchCategoryReceipts = async (id: string): Promise<Receipt[]> => {
+  return api.get<Receipt[]>(`/categories/${id}/receipts`)
+}
+
 // Hooks
 export function useCategories() {
   return useQuery({
@@ -67,6 +72,14 @@ export function useCategory(id: string) {
   return useQuery({
     queryKey: queryKeys.categories.detail(id),
     queryFn: () => fetchCategory(id),
+    enabled: !!id,
+  })
+}
+
+export function useCategoryReceipts(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.categories.detail(id), 'receipts'],
+    queryFn: () => fetchCategoryReceipts(id),
     enabled: !!id,
   })
 }

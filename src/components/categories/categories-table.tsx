@@ -10,13 +10,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useCategories, type Category } from '@/hooks/categories/use-categories'
-import { Edit } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 
 interface CategoriesTableProps {
   onEdit?: (category: Category) => void
+  onDelete?: (category: Category) => void
 }
 
-export function CategoriesTable({ onEdit }: CategoriesTableProps) {
+export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
   const { t } = useTranslation()
   const { data: categories, isLoading, error } = useCategories()
 
@@ -113,15 +114,26 @@ export function CategoriesTable({ onEdit }: CategoriesTableProps) {
                       )}
                   </TableCell>
                 <TableCell className="text-right">
-                  {onEdit && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(category)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <div className="flex justify-end gap-1">
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(category)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(category)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

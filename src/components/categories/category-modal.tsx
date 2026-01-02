@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,6 +36,7 @@ type CategoryFormData = CreateCategoryInput
 export function CategoryModal({ open, onOpenChange, category, mode }: CategoryModalProps) {
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const {
     register,
     handleSubmit,
@@ -110,22 +112,25 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
     }
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    if (!category) return
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
     if (!category) return
 
-    if (window.confirm(t('categories.modal.deleteConfirm'))) {
-      try {
-        await deleteCategory.mutateAsync(category.id)
-        toast.success(t('categories.modal.deleteSuccess'))
-        onOpenChange(false)
-        reset()
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'An error occurred'
-        toast.error(t('categories.modal.deleteError'), {
-          description: errorMessage,
-        })
-      }
+    try {
+      await deleteCategory.mutateAsync(category.id)
+      toast.success(t('categories.modal.deleteSuccess'))
+      onOpenChange(false)
+      reset()
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('categories.modal.deleteError'), {
+        description: errorMessage,
+      })
     }
   }
 
@@ -266,6 +271,20 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
           </DialogFooter>
         </form>
       </DialogContent>
+      
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={confirmDelete}
+        title={t('categories.modal.deleteTitle')}
+        description={t('categories.modal.deleteConfirmWithReceipts', {
+          name: category?.name || '',
+        })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="destructive"
+        isLoading={deleteCategory.isPending}
+      />
     </Dialog>
   )
 }
