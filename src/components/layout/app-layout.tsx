@@ -105,6 +105,18 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Logo/Brand */}
           <div className="flex items-center justify-between border-b px-6 py-4">
             <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+            {!sidebarOpen && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleScanQr}
+                aria-label="Scan QR Code"
+                className="[&_svg]:!size-7"
+              >
+                <QrCode />
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
