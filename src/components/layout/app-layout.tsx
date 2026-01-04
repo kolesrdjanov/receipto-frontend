@@ -1,13 +1,13 @@
 import { useState, lazy, Suspense } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/store/auth'
+import { useAuthStore, useIsAdmin } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
 import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
@@ -16,7 +16,7 @@ interface AppLayoutProps {
   children: React.ReactNode
 }
 
-const navItems = [
+const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
@@ -25,12 +25,17 @@ const navItems = [
   { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
 
+const adminNavItems = [
+  { path: '/admin/users', labelKey: 'nav.users', icon: UserCog },
+]
+
 export function AppLayout({ children }: AppLayoutProps) {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const logout = useLogout()
+  const isAdmin = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const createReceipt = useCreateReceipt()
@@ -130,7 +135,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2 p-4">
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <Link key={item.path} to={item.path} onClick={closeSidebar}>
                 <div
                   className={cn(
@@ -145,6 +150,32 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </div>
               </Link>
             ))}
+
+            {/* Admin Navigation Section */}
+            {isAdmin && (
+              <>
+                <div className="pt-4 pb-2">
+                  <div className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('nav.admin')}
+                  </div>
+                </div>
+                {adminNavItems.map((item) => (
+                  <Link key={item.path} to={item.path} onClick={closeSidebar}>
+                    <div
+                      className={cn(
+                        'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
+                        location.pathname === item.path
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {t(item.labelKey)}
+                    </div>
+                  </Link>
+                ))}
+              </>
+            )}
           </nav>
 
           {/* User section */}

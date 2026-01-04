@@ -118,7 +118,7 @@ export default function WarrantiesPage() {
             <p className="text-muted-foreground">{t('warranties.subtitle')}</p>
           </div>
           <Button onClick={handleAddWarranty}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             {t('warranties.addWarranty')}
           </Button>
         </div>

@@ -11,6 +11,7 @@ interface LoginResponse {
     firstName: string
     lastName: string
     profileImageUrl?: string | null
+    role: 'user' | 'admin'
   }
 }
 

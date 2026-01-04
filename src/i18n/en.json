@@ -29,7 +29,9 @@
     "groups": "Groups",
     "warranties": "Warranties",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "admin": "Admin",
+    "users": "Users"
   },
   "auth": {
     "signIn": {
@@ -427,6 +429,50 @@
       "captureImage": "Take Photo",
       "imageSlots": "Add up to 2 images (library or camera)",
       "heicNotice": "HEIC images cannot be previewed but will be converted after upload."
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "Users",
+      "subtitle": "View and manage all registered users",
+      "createUser": "Create User",
+      "totalUsers": "Total Users: {{count}}",
+      "noUsers": "No users found",
+      "loadError": "Error loading users: {{message}}",
+      "createSuccess": "User created successfully",
+      "createError": "Failed to create user",
+      "deleteSuccess": "User deleted successfully",
+      "deleteError": "Failed to delete user",
+      "createTitle": "Create User",
+      "createDescription": "Add a new user to the system. Admin users have access to this panel.",
+      "deleteTitle": "Delete User",
+      "deleteConfirm": "Are you sure you want to delete the user {{email}}? All their data including receipts, groups, and warranties will be permanently deleted. This action cannot be undone.",
+      "table": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "role": "Role",
+        "receipts": "Receipts",
+        "joined": "Joined",
+        "delete": "Delete"
+      },
+      "form": {
+        "email": "Email",
+        "emailPlaceholder": "user@example.com",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address",
+        "password": "Password",
+        "passwordPlaceholder": "Minimum 6 characters",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "firstName": "First Name",
+        "firstNamePlaceholder": "John",
+        "lastName": "Last Name",
+        "lastNamePlaceholder": "Doe",
+        "role": "Role",
+        "roleUser": "User",
+        "roleAdmin": "Admin"
+      }
     }
   }
 }

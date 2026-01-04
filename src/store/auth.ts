@@ -7,6 +7,7 @@ interface User {
   firstName: string
   lastName: string
   profileImageUrl?: string | null
+  role: 'user' | 'admin'
 }
 
 interface AuthState {
@@ -53,3 +54,7 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 )
+
+export const useIsAdmin = () => {
+  return useAuthStore((state) => state.user?.role === 'admin')
+}
