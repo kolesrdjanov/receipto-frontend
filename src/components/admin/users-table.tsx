@@ -12,9 +12,12 @@ import {
 } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useAdminUsers, useDeleteUser } from '@/hooks/admin/use-admin-users'
-import { Loader2, Trash2 } from 'lucide-react'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { formatDateTime } from '@/lib/date-utils'
+import { Loader2, Trash2, Search, X } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
@@ -23,16 +26,20 @@ interface UsersTableProps {
 
 export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const { t } = useTranslation()
-  const { data: response, isLoading, error } = useAdminUsers({ page, limit: 20 })
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebouncedValue(search, 500)
+
+  const { data: response, isLoading, error } = useAdminUsers({
+    page,
+    limit: 20,
+    search: debouncedSearch || undefined
+  })
   const deleteUser = useDeleteUser()
   const users = response?.data ?? []
   const meta = response?.meta
 
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null)
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
 
   const handleDeleteClick = (user: { id: string; email: string }) => {
     setUserToDelete(user)
@@ -68,43 +75,72 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
     )
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-8">
-          <p className="text-center text-destructive">
-            {t('admin.users.loadError', {
-              message: error instanceof Error ? error.message : 'Unknown error',
-            })}
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (!users || users.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center text-muted-foreground">
-            {t('admin.users.noUsers')}
-          </CardTitle>
-        </CardHeader>
-      </Card>
-    )
-  }
-
   return (
     <>
+      {/* Search users filter - Always visible */}
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t('admin.users.searchPlaceholder')}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                if (e.target.value !== '' && page !== 1) {
+                  onPageChange(1)
+                }
+              }}
+              className="pl-10 pr-10"
+            />
+            {search && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearch('')}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <Card>
+          <CardContent className="p-8">
+            <p className="text-center text-destructive">
+              {t('admin.users.loadError', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+              })}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Users State */}
+      {!isLoading && !error && (!users || users.length === 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center text-muted-foreground">
+              {t('admin.users.noUsers')}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      )}
+
       {/* Mobile Card View */}
+      {!isLoading && !error && users && users.length > 0 && (
       <div className="md:hidden space-y-4">
         {users.map((user) => (
           <Card key={user.id}>
@@ -136,7 +172,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                     <span className="text-muted-foreground">
                       {t('admin.users.table.joined')}
                     </span>
-                    <span className="font-medium">{formatDate(user.createdAt)}</span>
+                    <span className="font-medium">{formatDateTime(user.createdAt)}</span>
                   </div>
                 </div>
 
@@ -168,8 +204,10 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
           </div>
         )}
       </div>
+      )}
 
       {/* Desktop Table View */}
+      {!isLoading && !error && users && users.length > 0 && (
       <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>
@@ -201,7 +239,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{user.receiptCount}</TableCell>
-                  <TableCell>{formatDate(user.createdAt)}</TableCell>
+                  <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -228,6 +266,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
           )}
         </CardContent>
       </Card>
+      )}
 
       <ConfirmDialog
         open={!!userToDelete}

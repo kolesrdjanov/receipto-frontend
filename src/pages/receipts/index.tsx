@@ -24,6 +24,7 @@ import {
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { formatDateTime } from '@/lib/date-utils'
 import { Camera, Plus, Pencil, Loader2, Filter, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -103,10 +104,6 @@ export default function Receipts() {
     }
   }
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-'
-    return new Date(dateString).toLocaleDateString()
-  }
 
   const formatAmount = (receipt: Receipt) => {
     const currency: string = receipt.currency || 'RSD'
@@ -231,7 +228,7 @@ export default function Receipts() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{t('receipts.table.date')}</span>
-                      <span className="font-medium">{formatDate(receipt.receiptDate)}</span>
+                      <span className="font-medium">{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</span>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -291,7 +288,7 @@ export default function Receipts() {
                       {receipt.storeName || t('receipts.unknownStore')}
                     </TableCell>
                     <TableCell>{formatAmount(receipt)}</TableCell>
-                    <TableCell>{formatDate(receipt.receiptDate)}</TableCell>
+                    <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
                     <TableCell>
                       {receipt.category ? (
                         <span className="inline-flex items-center gap-1">

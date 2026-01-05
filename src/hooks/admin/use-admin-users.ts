@@ -15,6 +15,7 @@ export interface AdminUser {
 export interface AdminUsersFilters {
   page?: number
   limit?: number
+  search?: string
 }
 
 export interface PaginationMeta {
@@ -35,6 +36,7 @@ const fetchAdminUsers = async (
   const params = new URLSearchParams()
   if (filters?.page !== undefined) params.append('page', filters.page.toString())
   if (filters?.limit !== undefined) params.append('limit', filters.limit.toString())
+  if (filters?.search?.length) params.append('search', filters.search)
 
   const queryString = params.toString()
   const endpoint = `/users${queryString ? `?${queryString}` : ''}`

@@ -24,7 +24,7 @@ import {
   Store,
   Clock,
 } from 'lucide-react'
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/date-utils'
 import { AppLayout } from '@/components/layout/app-layout'
 
 export default function WarrantiesPage() {
@@ -261,11 +261,11 @@ export default function WarrantiesPage() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(warranty.purchaseDate), 'dd.MM.yyyy')}
+                          {formatDate(warranty.purchaseDate)}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {format(new Date(warranty.warrantyExpires), 'dd.MM.yyyy')}
+                          {formatDate(warranty.warrantyExpires)}
                         </div>
                       </div>
                       {warranty.notes && (

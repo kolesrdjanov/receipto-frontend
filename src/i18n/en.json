@@ -439,6 +439,7 @@
       "totalUsers": "Total Users: {{count}}",
       "noUsers": "No users found",
       "loadError": "Error loading users: {{message}}",
+      "searchPlaceholder": "Search users by name or email...",
       "createSuccess": "User created successfully",
       "createError": "Failed to create user",
       "deleteSuccess": "User deleted successfully",
