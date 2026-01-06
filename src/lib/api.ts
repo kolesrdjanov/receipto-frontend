@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios'
 import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/auth'
+import { useSettingsStore } from '@/store/settings'
 
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3000/api'
 
@@ -16,7 +17,7 @@ const axiosInstance = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and language
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const requiresAuth = (config as any).requiresAuth !== false
@@ -27,6 +28,9 @@ axiosInstance.interceptors.request.use(
         config.headers.Authorization = `Bearer ${accessToken}`
       }
     }
+
+    // Add Accept-Language header from settings store
+    config.headers['Accept-Language'] = useSettingsStore.getState().language || 'en'
 
     return config
   },
