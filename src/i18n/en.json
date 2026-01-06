@@ -31,7 +31,8 @@
     "settings": "Settings",
     "logout": "Logout",
     "admin": "Admin",
-    "users": "Users"
+    "users": "Users",
+    "version": "Version"
   },
   "auth": {
     "signIn": {

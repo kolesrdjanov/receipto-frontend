@@ -29,7 +29,10 @@
     "groups": "Grupe",
     "warranties": "Garancije",
     "settings": "Podešavanja",
-    "logout": "Odjava"
+    "logout": "Odjava",
+    "admin": "Admin",
+    "users": "Korisnici",
+    "version": "Verzija"
   },
   "auth": {
     "signIn": {

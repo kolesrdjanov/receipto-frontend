@@ -199,6 +199,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Button variant="outline" className="w-full" onClick={logout}>
               {t('nav.logout')}
             </Button>
+            <div className="mt-3 text-center text-xs text-muted-foreground">
+              {t('nav.version')} {__APP_VERSION__}
+            </div>
           </div>
         </div>
       </aside>
