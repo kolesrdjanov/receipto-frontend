@@ -29,7 +29,6 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 
 export default function Receipts() {
   const { t } = useTranslation()
