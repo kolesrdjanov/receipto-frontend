@@ -70,7 +70,9 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-dvh bg-background">
       {/* Mobile header */}
       <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
-        <h1 className="text-xl font-bold">{t('common.appName')}</h1>
+        <Link to={'/dashboard'}>
+          <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+        </Link>
         <Button
           variant="ghost"
           size="icon"
@@ -109,7 +111,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between border-b px-6 py-4">
-            <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+            <Link to={'/dashboard'}>
+              <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+            </Link>
             {!sidebarOpen && (
               <Button
                 variant="ghost"
