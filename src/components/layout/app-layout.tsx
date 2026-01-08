@@ -135,21 +135,27 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2 p-4">
-            {mainNavItems.map((item) => (
-              <Link key={item.path} to={item.path} onClick={closeSidebar}>
-                <div
-                  className={cn(
-                    'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
-                    location.pathname === item.path
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {t(item.labelKey)}
-                </div>
-              </Link>
-            ))}
+            {mainNavItems.map((item) => {
+              // Highlight receipts when on templates page
+              const isActive = location.pathname === item.path ||
+                (item.path === '/receipts' && location.pathname === '/templates')
+
+              return (
+                <Link key={item.path} to={item.path} onClick={closeSidebar}>
+                  <div
+                    className={cn(
+                      'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {t(item.labelKey)}
+                  </div>
+                </Link>
+              )
+            })}
 
             {/* Admin Navigation Section */}
             {isAdmin && (

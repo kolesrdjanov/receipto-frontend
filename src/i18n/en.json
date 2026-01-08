@@ -139,9 +139,12 @@
   },
   "receipts": {
     "title": "Receipts",
-    "subtitle": "View and manage all your receipts",
+    "subtitle": "View and manage all your receipts.",
+    "manageTemplates": "Manage templates",
     "filtersButton": "Filters",
     "addManually": "Add Manually",
+    "addBlank": "Blank Receipt",
+    "addFromTemplate": "From Template",
     "scanQr": "Scan QR",
     "noReceipts": "No receipts yet",
     "noReceiptsText": "Scan a QR code or add a receipt manually to get started",
@@ -204,6 +207,58 @@
       "scanSuccess": "Receipt scanned successfully",
       "scanSuccessDescription": "The receipt data will be extracted shortly.",
       "scanError": "Failed to create receipt from QR code"
+    },
+    "templateSelector": {
+      "title": "Select Template",
+      "description": "Choose a template to prefill receipt details",
+      "noTemplates": "No templates yet",
+      "noTemplatesText": "Create templates in the Templates page to quickly add receipts",
+      "createTemplate": "Create Template",
+      "loadError": "Error loading templates: {{message}}",
+      "currency": "Currency"
+    }
+  },
+  "templates": {
+    "title": "Templates",
+    "subtitle": "Create templates for faster receipt entry",
+    "addTemplate": "Add Template",
+    "noTemplates": "No templates yet",
+    "noTemplatesText": "Create your first template to speed up receipt entry",
+    "templatesCount": "Templates ({{count}})",
+    "loading": "Loading templates...",
+    "loadError": "Error loading templates: {{message}}",
+    "table": {
+      "name": "Name",
+      "storeName": "Store Name",
+      "currency": "Currency",
+      "category": "Category",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "modal": {
+      "createTitle": "Create Template",
+      "editTitle": "Edit Template",
+      "createDescription": "Create a template for quick receipt entry",
+      "editDescription": "Update the template details",
+      "name": "Template Name",
+      "namePlaceholder": "e.g., Weekly Groceries, Gas Station",
+      "nameRequired": "Template name is required",
+      "storeName": "Store Name",
+      "storeNamePlaceholder": "e.g., Maxi, Idea, NIS Petrol",
+      "storeNameRequired": "Store name is required",
+      "currency": "Currency",
+      "selectCurrency": "Select currency",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "noCategory": "No category",
+      "deleteTitle": "Delete Template",
+      "deleteConfirm": "Are you sure you want to delete the template \"{{name}}\"? This action cannot be undone.",
+      "createSuccess": "Template created successfully",
+      "updateSuccess": "Template updated successfully",
+      "deleteSuccess": "Template deleted successfully",
+      "createError": "Failed to create template",
+      "updateError": "Failed to update template",
+      "deleteError": "Failed to delete template"
     }
   },
   "categories": {

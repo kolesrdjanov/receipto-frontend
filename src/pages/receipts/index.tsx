@@ -1,5 +1,6 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -15,6 +16,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
+const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
@@ -25,8 +27,9 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2 } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export default function Receipts() {
   const { t } = useTranslation()
@@ -39,6 +42,10 @@ export default function Receipts() {
   const [page, setPage] = useState(1)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
+  const [showAddDropdown, setShowAddDropdown] = useState(false)
+  const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false)
+  const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
   const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10 })
@@ -46,6 +53,23 @@ export default function Receipts() {
   const meta = response?.meta
   const createReceipt = useCreateReceipt()
   const deleteReceipt = useDeleteReceipt()
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowAddDropdown(false)
+      }
+    }
+
+    if (showAddDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showAddDropdown])
 
   const handleFiltersChange = (newFilters: ReceiptsFilters) => {
     setFilters(newFilters)
@@ -55,6 +79,25 @@ export default function Receipts() {
   const handleAddManually = () => {
     setSelectedReceipt(null)
     setModalMode('create')
+    setPrefillData(null)
+    setIsModalOpen(true)
+    setShowAddDropdown(false)
+  }
+
+  const handleAddFromTemplate = () => {
+    setTemplateSelectorOpen(true)
+    setShowAddDropdown(false)
+  }
+
+  const handleTemplateSelect = (template: any) => {
+    setPrefillData({
+      storeName: template.storeName,
+      currency: template.currency,
+      categoryId: template.categoryId,
+    })
+    setSelectedReceipt(null)
+    setModalMode('create')
+    setTemplateSelectorOpen(false)
     setIsModalOpen(true)
   }
 
@@ -143,7 +186,12 @@ export default function Receipts() {
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
           <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('receipts.title')}</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">{t('receipts.subtitle')}</p>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            {t('receipts.subtitle')}{' '}
+            <Link to="/templates" className="text-primary hover:underline">
+              {t('receipts.manageTemplates')}
+            </Link>
+          </p>
         </div>
         <div className="flex flex-wrap gap-4 lg:gap-2">
           <Button
@@ -155,10 +203,33 @@ export default function Receipts() {
             {t('receipts.filtersButton')}
           </Button>
           <div className="order-1 lg:order-2 flex gap-4 lg:gap-2 w-full lg:w-auto">
-            <Button variant="outline" onClick={handleAddManually} className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4" />
-              <span className="">{t('receipts.addManually')}</span>
-            </Button>
+            <div className="relative flex-1 sm:flex-none" ref={dropdownRef}>
+              <Button
+                variant="outline"
+                onClick={() => setShowAddDropdown(!showAddDropdown)}
+                className="w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4" />
+                <span>{t('receipts.addManually')}</span>
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+              {showAddDropdown && (
+                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-card border rounded-md shadow-lg z-50">
+                  <button
+                    onClick={handleAddManually}
+                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-t-md transition-colors"
+                  >
+                    {t('receipts.addBlank')}
+                  </button>
+                  <button
+                    onClick={handleAddFromTemplate}
+                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-b-md transition-colors"
+                  >
+                    {t('receipts.addFromTemplate')}
+                  </button>
+                </div>
+              )}
+            </div>
             <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none">
               {createReceipt.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -353,6 +424,7 @@ export default function Receipts() {
             onOpenChange={setIsModalOpen}
             receipt={selectedReceipt}
             mode={modalMode}
+            prefillData={prefillData}
           />
         )}
       </Suspense>
@@ -363,6 +435,16 @@ export default function Receipts() {
             open={isScannerOpen}
             onOpenChange={setIsScannerOpen}
             onScan={handleQrScan}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {templateSelectorOpen && (
+          <TemplateSelectorModal
+            open={templateSelectorOpen}
+            onOpenChange={setTemplateSelectorOpen}
+            onSelect={handleTemplateSelect}
           />
         )}
       </Suspense>

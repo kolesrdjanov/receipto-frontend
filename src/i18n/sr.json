@@ -139,9 +139,12 @@
   },
   "receipts": {
     "title": "Računi",
-    "subtitle": "Pregledajte i upravljajte svim svojim računima",
+    "subtitle": "Pregledajte i upravljajte svim svojim računima.",
+    "manageTemplates": "Upravljajte šablonima",
     "filtersButton": "Filteri",
     "addManually": "Dodaj ručno",
+    "addBlank": "Novi račun",
+    "addFromTemplate": "Iz šablona",
     "scanQr": "Skeniraj QR",
     "noReceipts": "Nema računa",
     "noReceiptsText": "Skenirajte QR kod ili dodajte račun ručno da biste počeli",
@@ -203,6 +206,58 @@
       "scanSuccess": "Račun uspešno skeniran",
       "scanSuccessDescription": "Podaci sa računa će uskoro biti izdvojeni.",
       "scanError": "Greška pri kreiranju računa iz QR koda"
+    },
+    "templateSelector": {
+      "title": "Izaberite šablon",
+      "description": "Odaberite šablon da unapred popunite detalje računa",
+      "noTemplates": "Nema šablona",
+      "noTemplatesText": "Kreirajte šablone na stranici Šabloni za brže dodavanje računa",
+      "createTemplate": "Kreiraj šablon",
+      "loadError": "Greška pri učitavanju šablona: {{message}}",
+      "currency": "Valuta"
+    }
+  },
+  "templates": {
+    "title": "Šabloni",
+    "subtitle": "Kreirajte šablone za brži unos računa",
+    "addTemplate": "Dodaj šablon",
+    "noTemplates": "Nema šablona",
+    "noTemplatesText": "Kreirajte prvi šablon za ubrzanje unosa računa",
+    "templatesCount": "Šabloni ({{count}})",
+    "loading": "Učitavanje šablona...",
+    "loadError": "Greška pri učitavanju šablona: {{message}}",
+    "table": {
+      "name": "Naziv",
+      "storeName": "Prodavnica",
+      "currency": "Valuta",
+      "category": "Kategorija",
+      "createdAt": "Kreirano",
+      "actions": "Akcije"
+    },
+    "modal": {
+      "createTitle": "Kreiraj šablon",
+      "editTitle": "Izmeni šablon",
+      "createDescription": "Kreirajte šablon za brzi unos računa",
+      "editDescription": "Ažurirajte detalje šablona",
+      "name": "Naziv šablona",
+      "namePlaceholder": "npr. Nedeljne namirnice, Benzinska pumpa",
+      "nameRequired": "Naziv šablona je obavezan",
+      "storeName": "Naziv prodavnice",
+      "storeNamePlaceholder": "npr. Maxi, Idea, NIS Petrol",
+      "storeNameRequired": "Naziv prodavnice je obavezan",
+      "currency": "Valuta",
+      "selectCurrency": "Izaberite valutu",
+      "category": "Kategorija",
+      "selectCategory": "Izaberite kategoriju",
+      "noCategory": "Bez kategorije",
+      "deleteTitle": "Obriši šablon",
+      "deleteConfirm": "Da li ste sigurni da želite da obrišete šablon \"{{name}}\"? Ova akcija se ne može poništiti.",
+      "createSuccess": "Šablon uspešno kreiran",
+      "updateSuccess": "Šablon uspešno ažuriran",
+      "deleteSuccess": "Šablon uspešno obrisan",
+      "createError": "Greška pri kreiranju šablona",
+      "updateError": "Greška pri ažuriranju šablona",
+      "deleteError": "Greška pri brisanju šablona"
     }
   },
   "categories": {

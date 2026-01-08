@@ -35,6 +35,7 @@ interface ReceiptModalProps {
   onOpenChange: (open: boolean) => void
   receipt?: Receipt | null
   mode: 'create' | 'edit'
+  prefillData?: Partial<Receipt> | null
 }
 
 type ReceiptFormData = {
@@ -48,7 +49,7 @@ type ReceiptFormData = {
 }
 
 
-export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModalProps) {
+export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }: ReceiptModalProps) {
   const { t } = useTranslation()
   const {
     register,
@@ -103,16 +104,16 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode }: ReceiptModal
       })
     } else if (open && mode === 'create') {
       reset({
-        storeName: '',
+        storeName: prefillData?.storeName || '',
         totalAmount: '',
-        currency: 'RSD',
+        currency: prefillData?.currency || 'RSD',
         receiptDate: new Date().toISOString().split('T')[0],
         receiptNumber: '',
-        categoryId: '',
+        categoryId: prefillData?.categoryId || '',
         groupId: '',
       })
     }
-  }, [open, receipt, mode, reset])
+  }, [open, receipt, mode, reset, prefillData])
 
   const onSubmit = async (data: ReceiptFormData) => {
     try {

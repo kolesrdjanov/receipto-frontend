@@ -70,4 +70,13 @@ export const queryKeys = {
     stats: () => [...queryKeys.warranties.all, 'stats'] as const,
     expiringSoon: (days?: number) => [...queryKeys.warranties.all, 'expiring', days] as const,
   },
+
+  // Templates
+  templates: {
+    all: ['templates'] as const,
+    lists: () => [...queryKeys.templates.all, 'list'] as const,
+    list: () => [...queryKeys.templates.lists()] as const,
+    details: () => [...queryKeys.templates.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.templates.details(), id] as const,
+  },
 } as const
