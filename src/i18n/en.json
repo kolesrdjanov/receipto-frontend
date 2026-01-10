@@ -19,6 +19,7 @@
     "error": "Error",
     "success": "Success",
     "actions": "Actions",
+    "view": "View",
     "noData": "No data",
     "allRightsReserved": "All rights reserved.",
     "unknown": "Unknown"
@@ -535,6 +536,7 @@
   },
   "admin": {
     "users": {
+      "receipts": "Receipts",
       "title": "Users",
       "subtitle": "View and manage all registered users",
       "createUser": "Create User",
@@ -550,6 +552,14 @@
       "createDescription": "Add a new user to the system. Admin users have access to this panel.",
       "deleteTitle": "Delete User",
       "deleteConfirm": "Are you sure you want to delete the user {{email}}? All their data including receipts, groups, and warranties will be permanently deleted. This action cannot be undone.",
+      "userDetails": "User Details",
+      "information": "User Information",
+      "categories": "Categories",
+      "noCategories": "No categories found",
+      "noReceipts": "No receipts found",
+      "noName": "No name",
+      "emailLabel": "Email",
+      "roleLabel": "Role",
       "table": {
         "firstName": "First Name",
         "lastName": "Last Name",

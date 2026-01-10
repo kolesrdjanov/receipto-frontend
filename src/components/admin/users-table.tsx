@@ -14,10 +14,11 @@ import { Pagination } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { UserDetailsDrawer } from '@/components/admin/user-details-drawer'
 import { useAdminUsers, useDeleteUser } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X } from 'lucide-react'
+import { Loader2, Trash2, Search, X, Eye } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
@@ -39,10 +40,17 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const meta = response?.meta
 
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
 
   const handleDeleteClick = (user: { id: string; email: string }) => {
     setUserToDelete(user)
+  }
+
+  const handleViewDetails = (userId: string) => {
+    setSelectedUserId(userId)
+    setDrawerOpen(true)
   }
 
   const handleDeleteConfirm = async () => {
@@ -176,11 +184,20 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t">
+                <div className="pt-3 border-t flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleViewDetails(user.id)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {t('common.view')}
+                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="w-full"
+                    className="flex-1"
                     onClick={() => handleDeleteClick({ id: user.id, email: user.email })}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -241,13 +258,22 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{user.receiptCount}</TableCell>
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick({ id: user.id, email: user.email })}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewDetails(user.id)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick({ id: user.id, email: user.email })}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -277,6 +303,12 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
         confirmText={t('common.delete')}
         variant="destructive"
         isLoading={deleteUser.isPending}
+      />
+
+      <UserDetailsDrawer
+        userId={selectedUserId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
       />
     </>
   )

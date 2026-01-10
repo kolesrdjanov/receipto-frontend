@@ -681,7 +681,7 @@ export default function Dashboard() {
                           currency: receipt.currency || 'RSD',
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 0,
-                        }).format(receipt.totalAmount || 0)}
+                        }).format(Number(receipt.totalAmount) || 0)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(receipt.receiptDate || receipt.createdAt)}

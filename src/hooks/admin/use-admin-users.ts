@@ -98,3 +98,102 @@ export function useDeleteUser() {
     },
   })
 }
+
+// Get user details
+export interface UserDetails {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: 'user' | 'admin'
+  profileImageUrl: string | null
+  createdAt: string
+  receiptCount: number
+}
+
+const fetchUserDetails = async (userId: string): Promise<UserDetails> => {
+  return api.get<UserDetails>(`/users/${userId}/details`)
+}
+
+export function useUserDetails(userId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.users.detail(userId!),
+    queryFn: () => fetchUserDetails(userId!),
+    enabled: !!userId,
+  })
+}
+
+// Get user categories
+export interface UserCategory {
+  id: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  createdAt: string
+}
+
+export interface PaginatedUserCategories {
+  data: UserCategory[]
+  meta: PaginationMeta
+}
+
+const fetchUserCategories = async (
+  userId: string,
+  page: number,
+  limit: number
+): Promise<PaginatedUserCategories> => {
+  return api.get<PaginatedUserCategories>(
+    `/users/${userId}/categories?page=${page}&limit=${limit}`
+  )
+}
+
+export function useUserCategories(userId: string | null, page: number, limit: number = 5) {
+  return useQuery({
+    queryKey: [...queryKeys.users.detail(userId!), 'categories', page, limit],
+    queryFn: () => fetchUserCategories(userId!, page, limit),
+    enabled: !!userId,
+  })
+}
+
+// Get user receipts
+export interface UserReceipt {
+  id: string
+  storeName: string
+  totalAmount: string | number
+  currency: string
+  receiptDate: string
+  receiptNumber: string
+  status: string
+  category: {
+    id: string
+    name: string
+    icon: string
+    color: string
+  } | null
+  createdAt: string
+}
+
+export interface PaginatedUserReceipts {
+  data: UserReceipt[]
+  meta: PaginationMeta
+}
+
+const fetchUserReceipts = async (
+  userId: string,
+  page: number,
+  limit: number
+): Promise<PaginatedUserReceipts> => {
+  return api.get<PaginatedUserReceipts>(
+    `/users/${userId}/receipts?page=${page}&limit=${limit}`
+  )
+}
+
+export function useUserReceipts(userId: string | null, page: number, limit: number = 10) {
+  return useQuery({
+    queryKey: [...queryKeys.users.detail(userId!), 'receipts', page, limit],
+    queryFn: () => fetchUserReceipts(userId!, page, limit),
+    enabled: !!userId,
+  })
+}
+

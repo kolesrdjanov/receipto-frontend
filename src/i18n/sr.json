@@ -19,6 +19,7 @@
     "error": "Greška",
     "success": "Uspeh",
     "actions": "Akcije",
+    "view": "Prikaži",
     "noData": "Nema podataka",
     "allRightsReserved": "Sva prava zadržana.",
     "unknown": "Nepoznato"
@@ -519,6 +520,59 @@
       "captureImage": "Slikaj kamerom",
       "imageSlots": "Dodajte do 2 slike (galerija ili kamera)",
       "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada."
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "Korisnici",
+      "subtitle": "Pregled i upravljanje svim registrovanim korisnicima",
+      "createUser": "Kreiraj korisnika",
+      "totalUsers": "Ukupno korisnika: {{count}}",
+      "noUsers": "Nema korisnika",
+      "loadError": "Greška pri učitavanju korisnika: {{message}}",
+      "searchPlaceholder": "Pretraži korisnike po imenu ili email-u...",
+      "createSuccess": "Korisnik uspešno kreiran",
+      "createError": "Greška pri kreiranju korisnika",
+      "deleteSuccess": "Korisnik uspešno obrisan",
+      "deleteError": "Greška pri brisanju korisnika",
+      "createTitle": "Kreiraj korisnika",
+      "createDescription": "Dodaj novog korisnika u sistem. Admin korisnici imaju pristup ovom panelu.",
+      "deleteTitle": "Obriši korisnika",
+      "deleteConfirm": "Da li ste sigurni da želite da obrišete korisnika {{email}}? Svi njihovi podaci uključujući račune, grupe i garancije će biti trajno obrisani. Ova akcija se ne može poništiti.",
+      "userDetails": "Detalji korisnika",
+      "information": "Informacije o korisniku",
+      "categories": "Kategorije",
+      "noCategories": "Nema kategorija",
+      "noReceipts": "Nema računa",
+      "noName": "Bez imena",
+      "emailLabel": "Email",
+      "roleLabel": "Uloga",
+      "table": {
+        "firstName": "Ime",
+        "lastName": "Prezime",
+        "email": "Email",
+        "role": "Uloga",
+        "receipts": "Računi",
+        "joined": "Pridružen",
+        "delete": "Obriši"
+      },
+      "form": {
+        "email": "Email",
+        "emailPlaceholder": "korisnik@primer.com",
+        "emailRequired": "Email je obavezan",
+        "emailInvalid": "Neispravna email adresa",
+        "password": "Lozinka",
+        "passwordPlaceholder": "Minimum 6 karaktera",
+        "passwordRequired": "Lozinka je obavezna",
+        "passwordMinLength": "Lozinka mora imati najmanje 6 karaktera",
+        "firstName": "Ime",
+        "firstNamePlaceholder": "Petar",
+        "lastName": "Prezime",
+        "lastNamePlaceholder": "Petrović",
+        "role": "Uloga",
+        "roleUser": "Korisnik",
+        "roleAdmin": "Admin"
+      }
     }
   }
 }

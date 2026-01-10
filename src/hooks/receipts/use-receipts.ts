@@ -43,7 +43,7 @@ export interface Receipt {
   groupId?: string
   qrCodeUrl?: string
   storeName?: string
-  totalAmount?: number
+  totalAmount?: string | number
   currency?: string
   receiptDate?: string
   receiptNumber?: string
