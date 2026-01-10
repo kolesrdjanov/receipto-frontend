@@ -26,7 +26,7 @@
   },
   "nav": {
     "dashboard": "Kontrolna tabla",
-    "receipts": "Računi",
+    "receipts": "Troškovi",
     "categories": "Kategorije",
     "groups": "Grupe",
     "warranties": "Garancije",
@@ -141,8 +141,8 @@
     }
   },
   "receipts": {
-    "title": "Računi",
-    "subtitle": "Pregledajte i upravljajte svim svojim računima.",
+    "title": "Troškovi",
+    "subtitle": "Pregledajte i upravljajte svim svojim troškovima.",
     "manageTemplates": "Upravljajte šablonima",
     "filtersButton": "Filteri",
     "addManually": "Dodaj ručno",
@@ -552,7 +552,7 @@
         "lastName": "Prezime",
         "email": "Email",
         "role": "Uloga",
-        "receipts": "Računi",
+        "receipts": "Troškovi",
         "joined": "Pridružen",
         "delete": "Obriši"
       },

@@ -26,7 +26,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "receipts": "Receipts",
+    "receipts": "Expenses",
     "categories": "Categories",
     "groups": "Groups",
     "warranties": "Warranties",
@@ -141,8 +141,8 @@
     }
   },
   "receipts": {
-    "title": "Receipts",
-    "subtitle": "View and manage all your receipts.",
+    "title": "Expenses",
+    "subtitle": "View and manage all your expenses.",
     "manageTemplates": "Manage templates",
     "filtersButton": "Filters",
     "addManually": "Add Manually",
@@ -536,7 +536,7 @@
   },
   "admin": {
     "users": {
-      "receipts": "Receipts",
+      "receipts": "Expenses",
       "title": "Users",
       "subtitle": "View and manage all registered users",
       "createUser": "Create User",
@@ -565,7 +565,7 @@
         "lastName": "Last Name",
         "email": "Email",
         "role": "Role",
-        "receipts": "Receipts",
+        "receipts": "Expenses",
         "joined": "Joined",
         "delete": "Delete"
       },
