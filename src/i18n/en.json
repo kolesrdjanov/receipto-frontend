@@ -3,6 +3,7 @@
     "appName": "Receipto",
     "loading": "Loading...",
     "cancel": "Cancel",
+    "close": "Close",
     "delete": "Delete",
     "deleting": "Deleting...",
     "create": "Create",
@@ -202,6 +203,10 @@
     "qrScanner": {
       "title": "Scan QR Code",
       "description": "Point your camera at the receipt QR code to scan it.",
+      "ocrTitle": "Scan PFR Values",
+      "ocrDescription": "Point your camera at the PFR section of the receipt. Make sure the text is clear and readable.",
+      "scanningPfr": "Scanning for PFR values... Hold steady",
+      "processing": "Processing...",
       "privacyNotice": "Your image is not stored. We only extract the data from the QR code to create your receipt.",
       "cameraError": "Failed to access camera",
       "tryAgain": "Try Again",
@@ -217,6 +222,20 @@
       "createTemplate": "Create Template",
       "loadError": "Error loading templates: {{message}}",
       "currency": "Currency"
+    },
+    "viewer": {
+      "title": "Receipt Copy",
+      "description": "Digital copy of the fiscal receipt. You can print or share it.",
+      "noData": "No receipt data available",
+      "print": "Print",
+      "share": "Share",
+      "printTitle": "Receipt",
+      "printError": "Failed to open print window",
+      "shareTitle": "Receipt",
+      "shareSuccess": "Receipt shared successfully",
+      "shareError": "Failed to share receipt",
+      "copiedToClipboard": "Receipt copied to clipboard",
+      "viewReceipt": "View Receipt"
     }
   },
   "templates": {

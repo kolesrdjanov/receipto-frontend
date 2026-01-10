@@ -3,6 +3,39 @@ import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 
 // Types
+export interface ScrapedData {
+  tin?: string
+  companyName?: string
+  storeName?: string
+  address?: string
+  city?: string
+  municipality?: string
+  totalAmount?: number
+  currency?: string
+  receiptNumber?: string
+  receiptDate?: string
+  invoiceType?: string
+  transactionType?: string
+  paymentMethod?: string
+  invoiceCounter?: string
+  totalCounter?: string
+  items?: Array<{
+    name: string
+    quantity: number
+    unitPrice: number
+    totalPrice: number
+    taxLabel: string
+  }>
+  taxes?: Array<{
+    label: string
+    name: string
+    rate: number
+    amount: number
+  }>
+  journal?: string // Full receipt text from fiscal portal
+  error?: string
+}
+
 export interface Receipt {
   id: string
   userId: string
@@ -14,7 +47,7 @@ export interface Receipt {
   currency?: string
   receiptDate?: string
   receiptNumber?: string
-  scrapedData?: Record<string, unknown>
+  scrapedData?: ScrapedData
   status: 'pending' | 'scraped' | 'failed' | 'completed'
   category?: {
     id: string

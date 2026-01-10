@@ -17,6 +17,8 @@ import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
+const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
+import type { PfrData } from '@/components/receipts/qr-scanner'
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
@@ -27,7 +29,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Receipts() {
@@ -44,6 +46,8 @@ export default function Receipts() {
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerReceipt, setViewerReceipt] = useState<Receipt | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
@@ -125,6 +129,24 @@ export default function Receipts() {
     }
   }
 
+  const handleOcrScan = (pfrData: PfrData) => {
+    // Open receipt modal with prefilled data from OCR
+    setPrefillData({
+      storeName: pfrData.storeName,
+      totalAmount: pfrData.totalAmount ? parseFloat(pfrData.totalAmount) : undefined,
+      receiptDate: pfrData.receiptDate ? new Date(pfrData.receiptDate).toISOString() : undefined,
+      receiptNumber: pfrData.receiptNumber,
+    })
+    setSelectedReceipt(null)
+    setModalMode('create')
+    setIsScannerOpen(false)
+    setIsModalOpen(true)
+
+    toast.success(t('receipts.qrScanner.scanSuccess'), {
+      description: t('receipts.qrScanner.scanSuccessDescription'),
+    })
+  }
+
   const handleDeleteReceipt = (receipt: Receipt) => {
     setReceiptToDelete(receipt)
     setDeleteConfirmOpen(true)
@@ -135,15 +157,20 @@ export default function Receipts() {
 
     try {
       await deleteReceipt.mutateAsync(receiptToDelete.id)
-      toast.success(t('receipts.deleteSuccess'))
+      toast.success(t('receipts.modal.deleteSuccess'))
       setReceiptToDelete(null)
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.deleteError'), {
+      toast.error(t('receipts.modal.deleteError'), {
         description: errorMessage,
       })
     }
+  }
+
+  const handleViewReceipt = (receipt: Receipt) => {
+    setViewerReceipt(receipt)
+    setViewerOpen(true)
   }
 
 
@@ -277,6 +304,16 @@ export default function Receipts() {
                       </p>
                     </div>
                     <div className="flex gap-1 shrink-0">
+                      {receipt.scrapedData?.journal && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewReceipt(receipt)}
+                          title={t('receipts.viewer.viewReceipt')}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -380,6 +417,16 @@ export default function Receipts() {
                     <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
+                        {receipt.scrapedData?.journal && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewReceipt(receipt)}
+                            title={t('receipts.viewer.viewReceipt')}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -434,6 +481,7 @@ export default function Receipts() {
             open={isScannerOpen}
             onOpenChange={setIsScannerOpen}
             onScan={handleQrScan}
+            onOcrScan={handleOcrScan}
           />
         )}
       </Suspense>
@@ -444,6 +492,17 @@ export default function Receipts() {
             open={templateSelectorOpen}
             onOpenChange={setTemplateSelectorOpen}
             onSelect={handleTemplateSelect}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {viewerOpen && (
+          <ReceiptViewerModal
+            open={viewerOpen}
+            onOpenChange={setViewerOpen}
+            journalText={viewerReceipt?.scrapedData?.journal ?? null}
+            receiptNumber={viewerReceipt?.receiptNumber}
           />
         )}
       </Suspense>

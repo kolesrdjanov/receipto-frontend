@@ -3,6 +3,7 @@
     "appName": "Receipto",
     "loading": "Učitavanje...",
     "cancel": "Otkaži",
+    "close": "Zatvori",
     "delete": "Obriši",
     "deleting": "Brisanje...",
     "create": "Kreiraj",
@@ -202,6 +203,10 @@
     "qrScanner": {
       "title": "Skeniraj QR kod",
       "description": "Usmerite kameru ka QR kodu na računu da biste ga skenirali.",
+      "ocrTitle": "Skeniraj PFR vrednosti",
+      "ocrDescription": "Usmerite kameru ka PFR delu računa. Uverite se da je tekst jasan i čitljiv.",
+      "scanningPfr": "Skeniranje PFR vrednosti... Držite telefon mirno",
+      "processing": "Obrađujem...",
       "privacyNotice": "Vaša slika se ne čuva. Skeniranjem samo uzimamo podatke sa QR koda za kreiranje računa.",
       "cameraError": "Greška pri pristupu kameri",
       "tryAgain": "Pokušaj ponovo",
@@ -217,6 +222,20 @@
       "createTemplate": "Kreiraj šablon",
       "loadError": "Greška pri učitavanju šablona: {{message}}",
       "currency": "Valuta"
+    },
+    "viewer": {
+      "title": "Kopija računa",
+      "description": "Digitalna kopija fiskalnog računa. Možete ga odštampati ili podeliti.",
+      "noData": "Nema podataka o računu",
+      "print": "Odštampaj",
+      "share": "Podeli",
+      "printTitle": "Račun",
+      "printError": "Nije moguće otvoriti prozor za štampanje",
+      "shareTitle": "Račun",
+      "shareSuccess": "Račun uspešno podeljen",
+      "shareError": "Greška pri deljenju računa",
+      "copiedToClipboard": "Račun kopiran u clipboard",
+      "viewReceipt": "Prikaži račun"
     }
   },
   "templates": {
