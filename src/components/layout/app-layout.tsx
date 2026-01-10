@@ -76,15 +76,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleScanQr}
-          aria-label="Scan QR Code"
-          className="[&_svg]:!size-7"
-        >
-          <QrCode />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
           className="[&_svg]:!size-7"

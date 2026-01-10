@@ -122,6 +122,7 @@
     "noRecentActivity": "Nema nedavnih aktivnosti",
     "receiptsCount": "{{count}} računa",
     "unknownStore": "Nepoznat objekat",
+    "scan_now": "Skeniraj QR kod odmah",
     "budgetProgress": {
       "title": "Praćenje budžeta",
       "selectCategory": "Izaberite kategoriju",

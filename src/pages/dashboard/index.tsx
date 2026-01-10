@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react'
+import {useState, useMemo, lazy, Suspense} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
+import { Tooltip as ButtonTooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Link } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import {
@@ -41,6 +43,7 @@ import {
   BarChart3,
   Coins,
   RefreshCw,
+  QrCode
 } from 'lucide-react'
 import {
   PieChart,
@@ -57,6 +60,9 @@ import {
   Line,
 } from 'recharts'
 import { format, getDaysInMonth } from 'date-fns'
+import {toast} from "sonner";
+import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
+const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
@@ -67,6 +73,9 @@ export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [currencyMode, setCurrencyMode] = useState<string>('RSD')
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const createReceipt = useCreateReceipt()
+  const navigate = useNavigate()
 
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: currencies = [] } = useCurrencies()
@@ -276,14 +285,57 @@ export default function Dashboard() {
     return null
   }
 
+  const handleScanQr = () => {
+    setIsScannerOpen(true)
+  }
+
+  const handleQrScan = async (url: string) => {
+    try {
+      await createReceipt.mutateAsync({ qrCodeUrl: url })
+      toast.success(t('receipts.qrScanner.scanSuccess'), {
+        description: t('receipts.qrScanner.scanSuccessDescription'),
+      })
+      setIsScannerOpen(false)
+      // Navigate to receipts page if not already there
+      if (location.pathname !== '/receipts') {
+        navigate('/receipts')
+      }
+    } catch (error) {
+      const errorMessage =
+          error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.qrScanner.scanError'), {
+        description: errorMessage,
+      })
+    }
+  }
+
   return (
     <AppLayout>
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">{t('dashboard.title')}</h2>
-          <p className="text-sm text-muted-foreground md:text-base">
-            {t('dashboard.subtitle')}
-          </p>
+        <div className={'flex items-start gap-4'}>
+          <div className={'flex gap-0 flex-col'}>
+            <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">{t('dashboard.title')}</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
+              {t('dashboard.subtitle')}
+            </p>
+          </div>
+          <ButtonTooltip>
+            <TooltipTrigger asChild>
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleScanQr}
+                  aria-label="Scan QR Code"
+                  className="[&_svg]:!size-7 ml-auto md:ml-0"
+              >
+                <QrCode />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t('dashboard.scan_now')}</p>
+            </TooltipContent>
+          </ButtonTooltip>
+
         </div>
         <div className="flex items-center gap-2">
           <Coins className="h-4 w-4 text-muted-foreground" />
@@ -610,6 +662,14 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+          <Suspense fallback={null}>
+            <QrScanner
+                open={isScannerOpen}
+                onOpenChange={setIsScannerOpen}
+                onScan={handleQrScan}
+            />
+          </Suspense>
         </>
       )}
     </AppLayout>

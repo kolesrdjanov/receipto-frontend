@@ -122,6 +122,7 @@
     "noRecentActivity": "No recent activity",
     "receiptsCount": "{{count}} receipts",
     "unknownStore": "Unknown Store",
+    "scan_now": "Scan QR Code now",
     "budgetProgress": {
       "title": "Budget Tracker",
       "selectCategory": "Select a category",
