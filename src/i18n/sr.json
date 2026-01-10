@@ -147,7 +147,7 @@
     "addManually": "Dodaj ručno",
     "addBlank": "Novi račun",
     "addFromTemplate": "Iz šablona",
-    "scanQr": "Skeniraj QR",
+    "scanQr": "Skeniraj",
     "noReceipts": "Nema računa",
     "noReceiptsText": "Skenirajte QR kod ili dodajte račun ručno da biste počeli",
     "table": {
@@ -201,6 +201,10 @@
       "clearFilters": "Obriši filtere"
     },
     "qrScanner": {
+      "scanTitle": "Skeniraj",
+      "scanDescription": "Izaberite način skeniranja i usmerite kameru ka računu.",
+      "qrMode": "QR Kod",
+      "pfrMode": "PFR",
       "title": "Skeniraj QR kod",
       "description": "Usmerite kameru ka QR kodu na računu da biste ga skenirali.",
       "ocrTitle": "Skeniraj PFR vrednosti",

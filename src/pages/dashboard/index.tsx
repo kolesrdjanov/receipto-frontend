@@ -1,6 +1,7 @@
 import {useState, useMemo, lazy, Suspense} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { PfrData } from '@/components/receipts/qr-scanner'
 
 import { Button } from '@/components/ui/button'
 import { Tooltip as ButtonTooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -63,6 +64,7 @@ import { format, getDaysInMonth } from 'date-fns'
 import {toast} from "sonner";
 import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
+const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
@@ -74,6 +76,8 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [currencyMode, setCurrencyMode] = useState<string>('RSD')
   const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [prefillData, setPrefillData] = useState<Partial<{ storeName?: string; totalAmount?: number; receiptDate?: string; receiptNumber?: string }> | null>(null)
   const createReceipt = useCreateReceipt()
   const navigate = useNavigate()
 
@@ -307,6 +311,22 @@ export default function Dashboard() {
         description: errorMessage,
       })
     }
+  }
+
+  const handleOcrScan = (pfrData: PfrData) => {
+    // Set prefill data and open receipt modal
+    setPrefillData({
+      storeName: pfrData.storeName,
+      totalAmount: pfrData.totalAmount ? parseFloat(pfrData.totalAmount) : undefined,
+      receiptDate: pfrData.receiptDate ? new Date(pfrData.receiptDate).toISOString() : undefined,
+      receiptNumber: pfrData.receiptNumber,
+    })
+    setIsScannerOpen(false)
+    setIsModalOpen(true)
+
+    toast.success(t('receipts.qrScanner.scanSuccess'), {
+      description: t('receipts.qrScanner.scanSuccessDescription'),
+    })
   }
 
   return (
@@ -668,7 +688,20 @@ export default function Dashboard() {
                 open={isScannerOpen}
                 onOpenChange={setIsScannerOpen}
                 onScan={handleQrScan}
+                onOcrScan={handleOcrScan}
             />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            {isModalOpen && (
+              <ReceiptModal
+                open={isModalOpen}
+                onOpenChange={setIsModalOpen}
+                receipt={null}
+                mode="create"
+                prefillData={prefillData}
+              />
+            )}
           </Suspense>
         </>
       )}

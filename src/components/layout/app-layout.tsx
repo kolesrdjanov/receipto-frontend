@@ -9,8 +9,10 @@ import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
+import type { PfrData } from '@/components/receipts/qr-scanner'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
+const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -38,6 +40,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isAdmin = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [prefillData, setPrefillData] = useState<Partial<{ storeName?: string; totalAmount?: number; receiptDate?: string; receiptNumber?: string }> | null>(null)
   const createReceipt = useCreateReceipt()
 
   const closeSidebar = () => setSidebarOpen(false)
@@ -64,6 +68,22 @@ export function AppLayout({ children }: AppLayoutProps) {
         description: errorMessage,
       })
     }
+  }
+
+  const handleOcrScan = (pfrData: PfrData) => {
+    // Set prefill data and open receipt modal
+    setPrefillData({
+      storeName: pfrData.storeName,
+      totalAmount: pfrData.totalAmount ? parseFloat(pfrData.totalAmount) : undefined,
+      receiptDate: pfrData.receiptDate ? new Date(pfrData.receiptDate).toISOString() : undefined,
+      receiptNumber: pfrData.receiptNumber,
+    })
+    setIsScannerOpen(false)
+    setIsModalOpen(true)
+
+    toast.success(t('receipts.qrScanner.scanSuccess'), {
+      description: t('receipts.qrScanner.scanSuccessDescription'),
+    })
   }
 
   return (
@@ -218,7 +238,21 @@ export function AppLayout({ children }: AppLayoutProps) {
           open={isScannerOpen}
           onOpenChange={setIsScannerOpen}
           onScan={handleQrScan}
+          onOcrScan={handleOcrScan}
         />
+      </Suspense>
+
+      {/* Receipt Modal */}
+      <Suspense fallback={null}>
+        {isModalOpen && (
+          <ReceiptModal
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            receipt={null}
+            mode="create"
+            prefillData={prefillData}
+          />
+        )}
       </Suspense>
     </div>
   )

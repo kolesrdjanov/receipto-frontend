@@ -48,85 +48,64 @@ export function QrScanner({ open, onOpenChange, onScan, onOcrScan }: QrScannerPr
   const qrTimeoutRef = useRef<number | null>(null)
   const lastScannedRef = useRef<string | null>(null)
   const scanningRef = useRef(false)
+  const workerRef = useRef<Tesseract.Worker | null>(null)
+  const isOcrInitializedRef = useRef(false)
 
   // Parse PFR data from OCR text
   const parsePfrData = (text: string): PfrData | null => {
     const lines = text.split('\n').map(line => line.trim())
     const data: PfrData = {}
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
+    // Join all lines for easier pattern matching
+    const fullText = lines.join(' ')
 
-      // Look for InvoiceNumberSe (format: XXXXX-XXXXX-XXXXX)
-      if (line.includes('InvoiceNumberSe') || /[A-Z0-9]+-[A-Z0-9]+-\d+/.test(line)) {
-        const match = line.match(/([A-Z0-9]+-[A-Z0-9]+-\d+)/)
-        if (match) data.invoiceNumberSe = match[1]
-      }
+    // Look for PFR broj (Invoice number): XXXXXXXX-XXXXXXXX-XXXXXX
+    // Example: ZWCAM9NM-ZWCAM9NM-22966
+    const pfrMatch = fullText.match(/([A-Z0-9]{8}-[A-Z0-9]{8}-\d{6})/i)
+    if (pfrMatch) {
+      data.invoiceNumberSe = pfrMatch[1]
+      data.receiptNumber = pfrMatch[1]
+    }
 
-      // Look for InvoiceCounter (format: XXXXX/XXXXX)
-      if (line.includes('InvoiceCounter') && !line.includes('Extension')) {
-        const nextLine = lines[i + 1]
-        const match = nextLine?.match(/(\d+\/\d+)/)
-        if (match) data.invoiceCounter = match[1]
-      }
-
-      // Look for TotalAmount (format: X,XXX.XX or X.XXX,XX)
-      if (line.includes('TotalAmount')) {
-        const nextLine = lines[i + 1]
-        const match = nextLine?.match(/([\d.,]+)/)
-        if (match) {
-          // Normalize the amount (replace comma with dot for Serbian format)
-          data.totalAmount = match[1].replace(',', '.')
-        }
-      }
-
-      // Look for SdcDateTime (format: DD.MM.YYYY. HH:MM)
-      if (line.includes('SdcDateTime')) {
-        const nextLine = lines[i + 1]
-        const match = nextLine?.match(/(\d{1,2}\.\d{1,2}\.\d{4}\.?\s+\d{1,2}:\d{2})/)
-        if (match) {
-          // Parse date format: DD.MM.YYYY. HH:MM -> YYYY-MM-DD
-          const dateParts = match[1].match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/)
-          if (dateParts) {
-            const day = dateParts[1].padStart(2, '0')
-            const month = dateParts[2].padStart(2, '0')
-            const year = dateParts[3]
-            data.receiptDate = `${year}-${month}-${day}`
-          }
-        }
+    // Look for Brojač računa: XXXXXX/XXXXXXПП (with Cyrillic ПП at the end)
+    // Example: 22895/22966ПП or with Latin PP
+    const counterMatch = fullText.match(/(\d{4,6}\/\d{4,6})(?:ПП|PP)/i)
+    if (counterMatch) {
+      data.invoiceCounter = counterMatch[1] + 'ПП'
+      if (!data.receiptNumber) {
+        data.receiptNumber = counterMatch[1]
       }
     }
 
-    // Use InvoiceCounter as receiptNumber if available
-    if (data.invoiceCounter) {
-      data.receiptNumber = data.invoiceCounter
-    } else if (data.invoiceNumberSe) {
-      data.receiptNumber = data.invoiceNumberSe
+    // Look for Vreme/Time: DD.MM.YYYY. HH:MM:SS
+    // Example: 10.1.2026. 17:52:18 or 10.01.2026. 17:52
+    const dateMatch = fullText.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\.?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/)
+    if (dateMatch) {
+      const day = dateMatch[1].padStart(2, '0')
+      const month = dateMatch[2].padStart(2, '0')
+      const year = dateMatch[3]
+      data.receiptDate = `${year}-${month}-${day}`
     }
 
-    // Check if we have at least some required data
-    if (data.totalAmount || data.receiptNumber) {
+    // Look for Ukupan iznos/Total amount: X,XXX.XX or X.XXX,XX
+    // Serbian format uses comma for decimals: 1.260,00
+    const amountMatch = fullText.match(/(?:укупан|ukupan|iznos|total).*?([\d.]+,\d{2})/i)
+    if (amountMatch) {
+      // Convert Serbian format (1.260,00) to standard (1260.00)
+      const amount = amountMatch[1].replace(/\./g, '').replace(',', '.')
+      data.totalAmount = amount
+    }
+
+    // Check if we have at least the invoice number or counter
+    if (data.invoiceNumberSe || data.invoiceCounter) {
       return data
     }
 
     return null
   }
 
-  // Start QR timeout to switch to OCR mode after 5 seconds
-  useEffect(() => {
-    if (open && scanMode === 'qr' && onOcrScan) {
-      qrTimeoutRef.current = setTimeout(() => {
-        setScanMode('ocr')
-      }, 5000)
-    }
-
-    return () => {
-      if (qrTimeoutRef.current) {
-        clearTimeout(qrTimeoutRef.current)
-        qrTimeoutRef.current = null
-      }
-    }
-  }, [open, scanMode, onOcrScan])
+  // User manually toggles between QR and PFR modes
+  // No automatic timeout anymore
 
   // Load QR scanner component
   useEffect(() => {
@@ -160,19 +139,51 @@ export function QrScanner({ open, onOpenChange, onScan, onOcrScan }: QrScannerPr
     }
   }, [open, t])
 
-  // OCR processing
+  // OCR processing with worker reuse
   useEffect(() => {
-    if (!open || scanMode !== 'ocr' || !onOcrScan) return
+    if (!open || scanMode !== 'ocr' || !onOcrScan) {
+      // Cleanup when not in OCR mode
+      if (ocrIntervalRef.current) {
+        clearInterval(ocrIntervalRef.current)
+        ocrIntervalRef.current = null
+      }
+      return
+    }
 
-    let processingRef = false // Use local ref instead of state to avoid re-renders
+    let isActive = true
+
+    // Initialize worker once
+    const initWorker = async () => {
+      if (!workerRef.current && !isOcrInitializedRef.current) {
+        isOcrInitializedRef.current = true
+        try {
+          const worker = await Tesseract.createWorker('srp', 1, {
+            logger: (m) => {
+              if (m.status === 'recognizing text') {
+                console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`)
+              }
+            },
+          })
+          if (isActive) {
+            workerRef.current = worker
+          } else {
+            await worker.terminate()
+          }
+        } catch (err) {
+          console.error('Failed to initialize OCR worker:', err)
+          isOcrInitializedRef.current = false
+        }
+      }
+    }
+
+    initWorker()
 
     const processOcr = async () => {
-      if (processingRef) return
+      if (!isActive || isProcessing || !workerRef.current) return
 
       const videoElement = document.querySelector('video')
-      if (!videoElement) return
+      if (!videoElement || videoElement.readyState !== videoElement.HAVE_ENOUGH_DATA) return
 
-      processingRef = true
       setIsProcessing(true)
 
       try {
@@ -183,24 +194,21 @@ export function QrScanner({ open, onOpenChange, onScan, onOcrScan }: QrScannerPr
         const ctx = canvas.getContext('2d')
 
         if (!ctx) {
-          processingRef = false
           setIsProcessing(false)
           return
         }
 
         ctx.drawImage(videoElement, 0, 0)
 
-        // Run OCR on the captured frame
-        const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
-          logger: (m) => console.log(m),
-        })
+        // Run OCR on the captured frame using the shared worker
+        const { data: { text } } = await workerRef.current.recognize(canvas)
 
         console.log('OCR Text:', text)
 
         // Parse PFR data from the extracted text
         const pfrData = parsePfrData(text)
 
-        if (pfrData) {
+        if (pfrData && isActive) {
           console.log('Parsed PFR Data:', pfrData)
           onOcrScan(pfrData)
           onOpenChange(false)
@@ -208,21 +216,23 @@ export function QrScanner({ open, onOpenChange, onScan, onOcrScan }: QrScannerPr
       } catch (err) {
         console.error('OCR Error:', err)
       } finally {
-        processingRef = false
-        setIsProcessing(false)
+        if (isActive) {
+          setIsProcessing(false)
+        }
       }
     }
 
-    // Process OCR every 2 seconds
-    ocrIntervalRef.current = setInterval(processOcr, 2000)
+    // Process OCR every 3 seconds (increased from 2s to reduce load)
+    ocrIntervalRef.current = window.setInterval(processOcr, 3000)
 
     return () => {
+      isActive = false
       if (ocrIntervalRef.current) {
         clearInterval(ocrIntervalRef.current)
         ocrIntervalRef.current = null
       }
     }
-  }, [open, scanMode, onOcrScan, onOpenChange])
+  }, [open, scanMode, onOcrScan, onOpenChange, isProcessing])
 
   const handleScan = (result: ScannerResult[]) => {
     if (result && result.length > 0) {
@@ -281,24 +291,55 @@ export function QrScanner({ open, onOpenChange, onScan, onOcrScan }: QrScannerPr
     onOpenChange(false)
   }
 
+  // Cleanup Tesseract worker when component unmounts
+  useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate().catch(console.error)
+        workerRef.current = null
+        isOcrInitializedRef.current = false
+      }
+    }
+  }, [])
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {scanMode === 'qr' ? (
-              <Camera className="h-5 w-5" />
-            ) : (
-              <ScanText className="h-5 w-5" />
-            )}
-            {scanMode === 'qr' ? t('receipts.qrScanner.title') : t('receipts.qrScanner.ocrTitle')}
+            <Camera className="h-5 w-5" />
+            {t('receipts.qrScanner.scanTitle')}
           </DialogTitle>
           <DialogDescription>
-            {scanMode === 'qr'
-              ? t('receipts.qrScanner.description')
-              : t('receipts.qrScanner.ocrDescription')}
+            {t('receipts.qrScanner.scanDescription')}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Mode Selector */}
+        {onOcrScan && (
+          <div className="flex gap-2 p-1 bg-muted rounded-lg">
+            <button
+              onClick={() => setScanMode('qr')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                scanMode === 'qr'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t('receipts.qrScanner.qrMode')}
+            </button>
+            <button
+              onClick={() => setScanMode('ocr')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                scanMode === 'ocr'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t('receipts.qrScanner.pfrMode')}
+            </button>
+          </div>
+        )}
 
         <div className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
           {/* Mode indicator overlay */}

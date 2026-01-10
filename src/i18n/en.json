@@ -147,7 +147,7 @@
     "addManually": "Add Manually",
     "addBlank": "Blank Receipt",
     "addFromTemplate": "From Template",
-    "scanQr": "Scan QR",
+    "scanQr": "Scan",
     "noReceipts": "No receipts yet",
     "noReceiptsText": "Scan a QR code or add a receipt manually to get started",
     "table": {
@@ -201,6 +201,10 @@
       "clearFilters": "Clear filters"
     },
     "qrScanner": {
+      "scanTitle": "Scan",
+      "scanDescription": "Choose scan mode and point your camera at the receipt.",
+      "qrMode": "QR Code",
+      "pfrMode": "PFR",
       "title": "Scan QR Code",
       "description": "Point your camera at the receipt QR code to scan it.",
       "ocrTitle": "Scan PFR Values",
