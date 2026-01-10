@@ -16,9 +16,10 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
+const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
 const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
-import type { PfrData } from '@/components/receipts/qr-scanner'
+import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
@@ -36,6 +37,7 @@ export default function Receipts() {
   const { t } = useTranslation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [showFilters, setShowFilters] = useState(false)
@@ -114,6 +116,11 @@ export default function Receipts() {
     setIsScannerOpen(true)
   }
 
+  const handlePfrEntry = () => {
+    setIsPfrEntryOpen(true)
+    setShowAddDropdown(false)
+  }
+
   const handleQrScan = async (url: string) => {
     try {
       await createReceipt.mutateAsync({ qrCodeUrl: url })
@@ -129,22 +136,29 @@ export default function Receipts() {
     }
   }
 
-  const handleOcrScan = (pfrData: PfrData) => {
-    // Open receipt modal with prefilled data from OCR
-    setPrefillData({
-      storeName: pfrData.storeName,
-      totalAmount: pfrData.totalAmount ? parseFloat(pfrData.totalAmount) : undefined,
-      receiptDate: pfrData.receiptDate ? new Date(pfrData.receiptDate).toISOString() : undefined,
-      receiptNumber: pfrData.receiptNumber,
-    })
-    setSelectedReceipt(null)
-    setModalMode('create')
-    setIsScannerOpen(false)
-    setIsModalOpen(true)
-
-    toast.success(t('receipts.qrScanner.scanSuccess'), {
-      description: t('receipts.qrScanner.scanSuccessDescription'),
-    })
+  const handleOcrScan = async (pfrData: PfrData) => {
+    // Call API with PFR data to fetch full receipt from fiscal system
+    try {
+      await createReceipt.mutateAsync({
+        pfrData: {
+          InvoiceNumberSe: pfrData.InvoiceNumberSe,
+          InvoiceCounter: pfrData.InvoiceCounter,
+          InvoiceCounterExtension: pfrData.InvoiceCounterExtension,
+          TotalAmount: pfrData.TotalAmount,
+          SdcDateTime: pfrData.SdcDateTime,
+        },
+      })
+      toast.success(t('receipts.qrScanner.scanSuccess'), {
+        description: t('receipts.qrScanner.scanSuccessDescription'),
+      })
+      setIsPfrEntryOpen(false)
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.qrScanner.scanError'), {
+        description: errorMessage,
+      })
+    }
   }
 
   const handleDeleteReceipt = (receipt: Receipt) => {
@@ -249,9 +263,15 @@ export default function Receipts() {
                   </button>
                   <button
                     onClick={handleAddFromTemplate}
-                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-b-md transition-colors"
+                    className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
                   >
                     {t('receipts.addFromTemplate')}
+                  </button>
+                  <button
+                    onClick={handlePfrEntry}
+                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-b-md transition-colors"
+                  >
+                    {t('receipts.addViaPfr')}
                   </button>
                 </div>
               )}
@@ -481,7 +501,16 @@ export default function Receipts() {
             open={isScannerOpen}
             onOpenChange={setIsScannerOpen}
             onScan={handleQrScan}
-            onOcrScan={handleOcrScan}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {isPfrEntryOpen && (
+          <PfrEntryModal
+            open={isPfrEntryOpen}
+            onOpenChange={setIsPfrEntryOpen}
+            onSubmit={handleOcrScan}
           />
         )}
       </Suspense>

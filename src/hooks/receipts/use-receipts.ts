@@ -67,6 +67,13 @@ export interface Receipt {
 
 export interface CreateReceiptInput {
   qrCodeUrl?: string
+  pfrData?: {
+    InvoiceNumberSe?: string
+    InvoiceCounter?: string
+    InvoiceCounterExtension?: string
+    TotalAmount?: string
+    SdcDateTime?: string
+  }
   storeName?: string
   totalAmount?: number
   currency?: string
