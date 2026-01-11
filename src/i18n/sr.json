@@ -615,5 +615,18 @@
       "topCategories": "Najbolje kategorije",
       "suggestions": "predloga"
     }
+  },
+  "support": {
+    "contactSupport": "Kontaktirajte podršku",
+    "title": "Kontaktirajte podršku",
+    "description": "Trebate pomoć? Imate predlog? Pronašli ste grešku? Javite nam!",
+    "subject": "Naslov",
+    "subjectPlaceholder": "Kratak opis vašeg problema",
+    "message": "Poruka",
+    "messagePlaceholder": "Detaljno opišite vaš problem, predlog ili povratne informacije...",
+    "send": "Pošalji poruku",
+    "sending": "Šaljem...",
+    "success": "Vaša poruka je uspešno poslata. Javićemo vam se uskoro!",
+    "error": "Neuspelo slanje poruke. Pokušajte ponovo."
   }
 }

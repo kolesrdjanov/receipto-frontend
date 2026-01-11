@@ -7,9 +7,10 @@ import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
+import { ContactSupportModal } from '@/components/support/contact-support-modal'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
@@ -41,6 +42,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const createReceipt = useCreateReceipt()
 
   const closeSidebar = () => setSidebarOpen(false)
@@ -232,6 +234,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Button variant="outline" className="w-full" onClick={logout}>
               {t('nav.logout')}
             </Button>
+            <Button
+              variant="ghost"
+              className="w-full mt-2"
+              onClick={() => setIsSupportModalOpen(true)}
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              {t('support.contactSupport')}
+            </Button>
             <div className="mt-3 text-center text-xs text-muted-foreground">
               {t('nav.version')} {__APP_VERSION__}
             </div>
@@ -261,6 +271,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           onSubmit={handleOcrScan}
         />
       </Suspense>
+
+      {/* Contact Support Modal */}
+      <ContactSupportModal
+        open={isSupportModalOpen}
+        onOpenChange={setIsSupportModalOpen}
+      />
     </div>
   )
 }

@@ -628,5 +628,18 @@
       "topCategories": "Top Performing Categories",
       "suggestions": "suggestions"
     }
+  },
+  "support": {
+    "contactSupport": "Contact Support",
+    "title": "Contact Support",
+    "description": "Need help? Have a suggestion? Found a bug? Let us know!",
+    "subject": "Subject",
+    "subjectPlaceholder": "Brief description of your issue",
+    "message": "Message",
+    "messagePlaceholder": "Describe your issue, suggestion, or feedback in detail...",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "success": "Your message has been sent successfully. We'll get back to you soon!",
+    "error": "Failed to send message. Please try again."
   }
 }
