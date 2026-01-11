@@ -157,6 +157,8 @@
       "amount": "Iznos",
       "date": "Datum",
       "category": "Kategorija",
+      "paidBy": "Platio",
+      "creator": "Kreator",
       "status": "Status"
     },
     "status": {
@@ -182,6 +184,9 @@
       "selectCategory": "Izaberite kategoriju",
       "group": "Grupa (opciono)",
       "noGroup": "Bez grupe",
+      "paidBy": "Platio",
+      "selectPaidBy": "Izaberite ko je platio",
+      "paidByHelp": "Ko je zapravo platio ovaj trošak",
       "deleteTitle": "Obriši račun",
       "deleteConfirm": "Da li ste sigurni da želite da obrišete račun iz {{store}}? Ova akcija se ne može poništiti.",
       "createSuccess": "Račun uspešno kreiran",
@@ -412,6 +417,21 @@
       "cancelInvite": "Otkaži pozivnicu",
       "inviteCanceled": "Pozivnica otkazana",
       "cancelInviteError": "Greška pri otkazivanju pozivnice"
+    },
+    "tabs": {
+      "summary": "Pregled",
+      "balances": "Bilans",
+      "members": "Članovi"
+    },
+    "balances": {
+      "totalSpent": "Ukupno potrošeno",
+      "memberBalances": "Bilans članova",
+      "noExpenses": "Nema troškova u ovoj grupi",
+      "paid": "Platio",
+      "owed": "Duguje",
+      "settled": "Poravnato",
+      "suggestedSettlements": "Predložena poravnanja",
+      "settlementsHelp": "Ovo su optimizovani predlozi plaćanja za poravnanje svih dugova sa minimalnim brojem transakcija."
     }
   },
   "settings": {

@@ -377,6 +377,17 @@ export default function Receipts() {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </div>
+
+                    {receipt.group && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t('receipts.table.paidBy')}</span>
+                        <span className="font-medium">
+                          {receipt.paidBy
+                            ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email
+                            : t('receipts.table.creator')}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -404,6 +415,7 @@ export default function Receipts() {
                   <TableHead>{t('receipts.table.amount')}</TableHead>
                   <TableHead>{t('receipts.table.date')}</TableHead>
                   <TableHead>{t('receipts.table.category')}</TableHead>
+                  <TableHead>{t('receipts.table.paidBy')}</TableHead>
                   <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
                   <TableHead style={{ width: '120px' }}></TableHead>
                 </TableRow>
@@ -430,6 +442,15 @@ export default function Receipts() {
                             {receipt.category.name}
                           </span>
                         </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {receipt.group ? (
+                        receipt.paidBy
+                          ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email
+                          : t('receipts.table.creator')
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}

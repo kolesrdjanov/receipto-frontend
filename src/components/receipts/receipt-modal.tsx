@@ -27,7 +27,8 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
-import { useGroups } from '@/hooks/groups/use-groups'
+import { useGroups, useGroup } from '@/hooks/groups/use-groups'
+import { useAuthStore } from '@/store/auth'
 import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
 
@@ -47,6 +48,7 @@ type ReceiptFormData = {
   receiptNumber: string
   categoryId: string
   groupId: string
+  paidById: string
 }
 
 
@@ -69,19 +71,25 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
       receiptNumber: '',
       categoryId: '',
       groupId: '',
+      paidById: '',
     },
   })
 
   const { data: categories = [] } = useCategories()
   const { data: currencies = [] } = useCurrencies()
   const { data: groups = [] } = useGroups()
+  const user = useAuthStore((state) => state.user)
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
 
-  // Watch groupId to auto-set currency
+  // Watch groupId to auto-set currency and fetch group details
   const selectedGroupId = watch('groupId')
+  const { data: selectedGroupDetails } = useGroup(selectedGroupId || '')
   const selectedGroup = groups.find((g) => g.id === selectedGroupId)
+
+  // Get accepted group members
+  const groupMembers = selectedGroupDetails?.members?.filter((m) => m.status === 'accepted') || []
 
   // Kada se promeni grupa, postavi currency iz grupe
   useEffect(() => {
@@ -102,6 +110,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         receiptNumber: receipt.receiptNumber || '',
         categoryId: receipt.categoryId || '',
         groupId: receipt.groupId || '',
+        paidById: receipt.paidById || '',
       })
     } else if (open && mode === 'create') {
       reset({
@@ -112,6 +121,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         receiptNumber: '',
         categoryId: prefillData?.categoryId || '',
         groupId: '',
+        paidById: '',
       })
     }
   }, [open, receipt, mode, reset, prefillData])
@@ -126,6 +136,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         receiptNumber: data.receiptNumber || undefined,
         categoryId: data.categoryId || null,
         groupId: data.groupId || null,
+        paidById: data.paidById || null,
       }
 
       if (mode === 'create') {
@@ -306,7 +317,16 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                 control={control}
                 render={({ field }) => (
                   <Select
-                    onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
+                    onValueChange={(val) => {
+                      field.onChange(val === '__none__' ? '' : val)
+                      // Reset paidById when group changes
+                      if (val === '__none__') {
+                        setValue('paidById', '')
+                      } else if (user) {
+                        // Default to current user when selecting a group
+                        setValue('paidById', user.id)
+                      }
+                    }}
                     value={field.value || '__none__'}
                   >
                     <SelectTrigger>
@@ -324,6 +344,42 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                   </Select>
                 )}
               />
+            </div>
+          )}
+
+          {selectedGroupId && groupMembers.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="paidById">{t('receipts.modal.paidBy')}</Label>
+              <Controller
+                name="paidById"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || user?.id}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('receipts.modal.selectPaidBy')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {groupMembers.map((member) => {
+                        const name = member.user?.firstName && member.user?.lastName
+                          ? `${member.user.firstName} ${member.user.lastName}`
+                          : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
+                        const isCurrentUser = member.userId === user?.id
+                        return (
+                          <SelectItem key={member.userId} value={member.userId}>
+                            {name} {isCurrentUser && '(Me)'}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('receipts.modal.paidByHelp')}
+              </p>
             </div>
           )}
 

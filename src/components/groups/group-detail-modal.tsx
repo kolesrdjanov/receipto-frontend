@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   useGroupStats,
   useInviteMember,
@@ -18,6 +19,7 @@ import {
   type Group,
 } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
+import { GroupBalancesTab } from './group-balances-tab'
 import { toast } from 'sonner'
 import { Users, UserPlus, Trash2, LogOut, Crown, Loader2, Pencil } from 'lucide-react'
 
@@ -99,7 +101,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] lg:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
@@ -121,9 +123,17 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Stats */}
-          <div className="p-4 rounded-lg bg-muted/50">
+        <Tabs defaultValue="summary" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="summary">{t('groups.tabs.summary')}</TabsTrigger>
+            <TabsTrigger value="balances">{t('groups.tabs.balances')}</TabsTrigger>
+            <TabsTrigger value="members">{t('groups.tabs.members')}</TabsTrigger>
+          </TabsList>
+
+          {/* Summary Tab */}
+          <TabsContent value="summary" className="space-y-6 mt-4">
+            {/* Stats */}
+            <div className="p-4 rounded-lg bg-muted/50">
             <h3 className="font-semibold mb-3">{t('groups.detail.statistics')}</h3>
             {statsLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -150,8 +160,16 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                 )}
               </div>
             ) : null}
-          </div>
+            </div>
+          </TabsContent>
 
+          {/* Balances Tab */}
+          <TabsContent value="balances" className="mt-4">
+            <GroupBalancesTab groupId={group.id} />
+          </TabsContent>
+
+          {/* Members Tab */}
+          <TabsContent value="members" className="space-y-6 mt-4">
           {/* Members */}
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -265,7 +283,8 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
               {leaveGroup.isPending ? t('groups.detail.leaving') : t('groups.detail.leaveGroup')}
             </Button>
           )}
-        </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )

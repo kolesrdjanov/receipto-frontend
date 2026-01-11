@@ -41,6 +41,7 @@ export interface Receipt {
   userId: string
   categoryId?: string
   groupId?: string
+  paidById?: string
   qrCodeUrl?: string
   storeName?: string
   totalAmount?: string | number
@@ -60,6 +61,12 @@ export interface Receipt {
     name: string
     color?: string
     icon?: string
+  }
+  paidBy?: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
   }
   // Auto-categorization fields
   merchantId?: string
@@ -97,6 +104,7 @@ export interface CreateReceiptInput {
   receiptNumber?: string
   categoryId?: string | null
   groupId?: string | null
+  paidById?: string | null
 }
 
 export interface UpdateReceiptInput {
@@ -107,6 +115,7 @@ export interface UpdateReceiptInput {
   receiptNumber?: string
   categoryId?: string | null
   groupId?: string | null
+  paidById?: string | null
 }
 
 export interface ReceiptsFilters {

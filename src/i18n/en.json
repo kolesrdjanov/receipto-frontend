@@ -157,6 +157,8 @@
       "amount": "Amount",
       "date": "Date",
       "category": "Category",
+      "paidBy": "Paid By",
+      "creator": "Creator",
       "status": "Status"
     },
     "status": {
@@ -182,6 +184,9 @@
       "selectCategory": "Select category",
       "group": "Group (optional)",
       "noGroup": "No group",
+      "paidBy": "Paid By",
+      "selectPaidBy": "Select who paid",
+      "paidByHelp": "Who actually paid for this expense",
       "deleteTitle": "Delete Receipt",
       "deleteConfirm": "Are you sure you want to delete the receipt from {{store}}? This action cannot be undone.",
       "createSuccess": "Receipt created successfully",
@@ -424,6 +429,21 @@
       "cancelInvite": "Cancel invite",
       "inviteCanceled": "Invite canceled",
       "cancelInviteError": "Failed to cancel invite"
+    },
+    "tabs": {
+      "summary": "Summary",
+      "balances": "Balances",
+      "members": "Members"
+    },
+    "balances": {
+      "totalSpent": "Total Spent",
+      "memberBalances": "Member Balances",
+      "noExpenses": "No expenses in this group yet",
+      "paid": "Paid",
+      "owed": "Owed",
+      "settled": "Settled",
+      "suggestedSettlements": "Suggested Settlements",
+      "settlementsHelp": "These are optimized payment suggestions to settle all balances with minimum transactions."
     }
   },
   "settings": {

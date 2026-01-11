@@ -73,6 +73,34 @@ export interface GroupStats {
   }[]
 }
 
+export interface MemberBalance {
+  userId: string
+  user: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+    profileImageUrl?: string
+  }
+  totalPaid: number
+  totalOwed: number
+  balance: number
+}
+
+export interface Settlement {
+  from: {
+    id: string
+    firstName: string
+    lastName: string
+  }
+  to: {
+    id: string
+    firstName: string
+    lastName: string
+  }
+  amount: number
+}
+
 // API functions
 const fetchGroups = async (): Promise<Group[]> => {
   return api.get<Group[]>('/groups')
@@ -84,6 +112,14 @@ const fetchGroup = async (id: string): Promise<Group> => {
 
 const fetchGroupStats = async (id: string): Promise<GroupStats> => {
   return api.get<GroupStats>(`/groups/${id}/stats`)
+}
+
+const fetchGroupBalances = async (id: string): Promise<MemberBalance[]> => {
+  return api.get<MemberBalance[]>(`/groups/${id}/balances`)
+}
+
+const fetchGroupSettlements = async (id: string): Promise<Settlement[]> => {
+  return api.get<Settlement[]>(`/groups/${id}/settlements`)
 }
 
 const fetchPendingInvites = async (): Promise<GroupInvite[]> => {
@@ -142,6 +178,22 @@ export function useGroupStats(id: string) {
   return useQuery({
     queryKey: queryKeys.groups.stats(id),
     queryFn: () => fetchGroupStats(id),
+    enabled: !!id,
+  })
+}
+
+export function useGroupBalances(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.groups.detail(id), 'balances'],
+    queryFn: () => fetchGroupBalances(id),
+    enabled: !!id,
+  })
+}
+
+export function useGroupSettlements(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.groups.detail(id), 'settlements'],
+    queryFn: () => fetchGroupSettlements(id),
     enabled: !!id,
   })
 }
