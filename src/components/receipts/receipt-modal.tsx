@@ -28,6 +28,7 @@ import {
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { useGroups } from '@/hooks/groups/use-groups'
+import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
 
 interface ReceiptModalProps {
@@ -277,6 +278,25 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               )}
             />
           </div>
+
+          {/* Show AI category suggestions if available */}
+          {receipt?.autoSuggestedCategoryId && mode === 'edit' && (
+            <CategorySuggestionCard
+              suggestions={[
+                {
+                  categoryId: receipt.autoSuggestedCategoryId,
+                  categoryName: receipt.autoSuggestedCategory?.name || 'Suggested',
+                  categoryIcon: receipt.autoSuggestedCategory?.icon,
+                  categoryColor: receipt.autoSuggestedCategory?.color,
+                  confidence: receipt.suggestionConfidence || 0,
+                  reason: 'Based on merchant and item analysis',
+                },
+              ]}
+              currentCategoryId={watch('categoryId')}
+              onAccept={(categoryId) => setValue('categoryId', categoryId)}
+              disabled={isSubmitting}
+            />
+          )}
 
           {groups.length > 0 && (
             <div className="space-y-2">

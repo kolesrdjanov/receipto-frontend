@@ -587,5 +587,26 @@
         "roleAdmin": "Admin"
       }
     }
+  },
+  "categorization": {
+    "aiSuggestion": "AI Category Suggestion",
+    "basedOnPurchases": "Based on your previous purchases and merchant data",
+    "highConfidence": "High",
+    "mediumConfidence": "Medium",
+    "lowConfidence": "Low",
+    "selected": "Selected",
+    "apply": "Apply",
+    "insights": {
+      "title": "AI Categorization Insights",
+      "description": "See how well the AI is learning your categorization patterns",
+      "noData": "No categorization data yet. Scan some receipts to see AI suggestions!",
+      "helpText": "The AI learns from your categorization choices and will start suggesting categories automatically.",
+      "acceptanceRate": "Acceptance Rate",
+      "acceptanceRateDesc": "{{accepted}} out of {{total}} suggestions accepted",
+      "avgConfidence": "Average Confidence",
+      "avgConfidenceDesc": "Higher confidence means more accurate predictions",
+      "topCategories": "Top Performing Categories",
+      "suggestions": "suggestions"
+    }
   }
 }

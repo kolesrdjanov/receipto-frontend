@@ -61,6 +61,22 @@ export interface Receipt {
     color?: string
     icon?: string
   }
+  // Auto-categorization fields
+  merchantId?: string
+  merchant?: {
+    id: string
+    companyName: string
+    storeName?: string
+  }
+  autoSuggestedCategoryId?: string
+  autoSuggestedCategory?: {
+    id: string
+    name: string
+    color?: string
+    icon?: string
+  }
+  suggestionConfidence?: number
+  suggestionAccepted?: boolean
   createdAt: string
   updatedAt: string
 }

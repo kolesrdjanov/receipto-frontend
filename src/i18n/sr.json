@@ -574,5 +574,26 @@
         "roleAdmin": "Admin"
       }
     }
+  },
+  "categorization": {
+    "aiSuggestion": "AI Predlog kategorije",
+    "basedOnPurchases": "Na osnovu vaših prethodnih kupovina i podataka o prodavnici",
+    "highConfidence": "Visoka",
+    "mediumConfidence": "Srednja",
+    "lowConfidence": "Niska",
+    "selected": "Izabrano",
+    "apply": "Primeni",
+    "insights": {
+      "title": "AI Kategorizacija - Uvid",
+      "description": "Pogledajte koliko dobro AI uči vaše obrasce kategorizacije",
+      "noData": "Još nema podataka o kategorizaciji. Skenirajte račune da vidite AI predloge!",
+      "helpText": "AI uči iz vaših izbora kategorizacije i automatski će početi da predlaže kategorije.",
+      "acceptanceRate": "Stopa prihvatanja",
+      "acceptanceRateDesc": "{{accepted}} od {{total}} predloga prihvaćeno",
+      "avgConfidence": "Prosečna sigurnost",
+      "avgConfidenceDesc": "Veća sigurnost znači preciznije predloge",
+      "topCategories": "Najbolje kategorije",
+      "suggestions": "predloga"
+    }
   }
 }

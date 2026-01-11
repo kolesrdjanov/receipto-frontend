@@ -15,6 +15,7 @@ import {
 import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
+import { CategoryInsights } from '@/components/dashboard/category-insights'
 import {
   useDashboardStats,
   useCategoryStats,
@@ -655,6 +656,11 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* AI Categorization Insights */}
+          <div className="mb-6">
+            <CategoryInsights />
           </div>
 
           {/* Recent Activity */}
