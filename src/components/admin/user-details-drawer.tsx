@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Calendar, Mail, ShieldCheck } from 'lucide-react'
+import { Loader2, Calendar, Mail, ShieldCheck, Receipt } from 'lucide-react'
 import { Drawer, DrawerHeader, DrawerTitle, DrawerContent } from '@/components/ui/drawer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -91,7 +91,7 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">{t('admin.users.emailLabel')}</p>
@@ -99,7 +99,7 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <ShieldCheck className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">{t('admin.users.roleLabel')}</p>
@@ -107,7 +107,7 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">
@@ -119,9 +119,9 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <div className="h-4 w-4 flex items-center justify-center text-muted-foreground">
-                      📄
+                      <Receipt className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">
@@ -155,8 +155,8 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                           <TableHeader>
                             <TableRow>
                               <TableHead className="w-12"></TableHead>
-                              <TableHead>{t('categories.name')}</TableHead>
-                              <TableHead>{t('categories.description')}</TableHead>
+                              <TableHead>{t('categories.table.name')}</TableHead>
+                              <TableHead>{t('categories.table.description')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>

@@ -155,7 +155,8 @@
     "table": {
       "store": "Store",
       "amount": "Amount",
-      "date": "Date",
+      "date": "Receipt Date",
+      "createdAt": "Date Created",
       "category": "Category",
       "paidBy": "Paid By",
       "creator": "Creator",
@@ -341,7 +342,7 @@
       "color": "Color",
       "colorPlaceholder": "#3b82f6",
       "icon": "Icon",
-      "iconPlaceholder": "e.g., shopping-cart, plane, film",
+      "iconPlaceholder": "Use an emoji for best visibility, e.g. 🛒, ✈️, 🍔",
       "iconHelp": "Enter an emoji or icon name",
       "description": "Description",
       "descriptionPlaceholder": "Optional description for this category",

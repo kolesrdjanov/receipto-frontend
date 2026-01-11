@@ -30,7 +30,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Receipts() {
@@ -50,10 +50,12 @@ export default function Receipts() {
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerReceipt, setViewerReceipt] = useState<Receipt | null>(null)
+  const [sortBy, setSortBy] = useState<'receiptDate' | 'createdAt'>('receiptDate')
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
-  const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10 })
+  const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10, sortBy, sortOrder })
   const receipts = response?.data ?? []
   const meta = response?.meta
   const createReceipt = useCreateReceipt()
@@ -185,6 +187,25 @@ export default function Receipts() {
   const handleViewReceipt = (receipt: Receipt) => {
     setViewerReceipt(receipt)
     setViewerOpen(true)
+  }
+
+  const handleSort = (column: 'receiptDate' | 'createdAt') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'DESC' ? 'ASC' : 'DESC')
+    } else {
+      setSortBy(column)
+      setSortOrder('DESC')
+    }
+    setPage(1)
+  }
+
+  const getSortIcon = (column: 'receiptDate' | 'createdAt') => {
+    if (sortBy !== column) {
+      return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />
+    }
+    return sortOrder === 'DESC'
+      ? <ArrowDown className="h-4 w-4 ml-1" />
+      : <ArrowUp className="h-4 w-4 ml-1" />
   }
 
 
@@ -357,7 +378,12 @@ export default function Receipts() {
                       <span className="text-muted-foreground">{t('receipts.table.date')}</span>
                       <span className="font-medium">{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</span>
                     </div>
-                    
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">{t('receipts.table.createdAt')}</span>
+                      <span className="font-medium">{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</span>
+                    </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{t('receipts.table.category')}</span>
                       {receipt.category ? (
@@ -378,16 +404,16 @@ export default function Receipts() {
                       )}
                     </div>
 
-                    {receipt.group && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">{t('receipts.table.paidBy')}</span>
-                        <span className="font-medium">
-                          {receipt.paidBy
-                            ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email
-                            : t('receipts.table.creator')}
-                        </span>
-                      </div>
-                    )}
+                    {/*{receipt.group && (*/}
+                    {/*  <div className="flex items-center justify-between">*/}
+                    {/*    <span className="text-muted-foreground">{t('receipts.table.paidBy')}</span>*/}
+                    {/*    <span className="font-medium">*/}
+                    {/*      {receipt.paidBy*/}
+                    {/*        ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
+                    {/*        : t('receipts.table.creator')}*/}
+                    {/*    </span>*/}
+                    {/*  </div>*/}
+                    {/*)}*/}
                   </div>
                 </CardContent>
               </Card>
@@ -413,9 +439,26 @@ export default function Receipts() {
                 <TableRow>
                   <TableHead>{t('receipts.table.store')}</TableHead>
                   <TableHead>{t('receipts.table.amount')}</TableHead>
-                  <TableHead>{t('receipts.table.date')}</TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort('receiptDate')}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      {t('receipts.table.date')}
+                      {getSortIcon('receiptDate')}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      onClick={() => handleSort('createdAt')}
+                      className="flex items-center hover:text-foreground transition-colors"
+                    >
+                      {t('receipts.table.createdAt')}
+                      {getSortIcon('createdAt')}
+                    </button>
+                  </TableHead>
                   <TableHead>{t('receipts.table.category')}</TableHead>
-                  <TableHead>{t('receipts.table.paidBy')}</TableHead>
+                  {/*<TableHead>{t('receipts.table.paidBy')}</TableHead>*/}
                   <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
                   <TableHead style={{ width: '120px' }}></TableHead>
                 </TableRow>
@@ -428,6 +471,7 @@ export default function Receipts() {
                     </TableCell>
                     <TableCell>{formatAmount(receipt)}</TableCell>
                     <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
+                    <TableCell>{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</TableCell>
                     <TableCell>
                       {receipt.category ? (
                         <span className="inline-flex items-center gap-1">
@@ -446,15 +490,15 @@ export default function Receipts() {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {receipt.group ? (
-                        receipt.paidBy
-                          ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email
-                          : t('receipts.table.creator')
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
+                    {/*<TableCell>*/}
+                    {/*  {receipt.group ? (*/}
+                    {/*    receipt.paidBy*/}
+                    {/*      ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
+                    {/*      : t('receipts.table.creator')*/}
+                    {/*  ) : (*/}
+                    {/*    <span className="text-muted-foreground">-</span>*/}
+                    {/*  )}*/}
+                    {/*</TableCell>*/}
                     <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">

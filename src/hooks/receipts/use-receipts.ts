@@ -126,6 +126,8 @@ export interface ReceiptsFilters {
   endDate?: string
   page?: number
   limit?: number
+  sortBy?: 'receiptDate' | 'createdAt'
+  sortOrder?: 'ASC' | 'DESC'
 }
 
 export interface PaginationMeta {
@@ -150,6 +152,8 @@ const fetchReceipts = async (filters?: ReceiptsFilters): Promise<PaginatedReceip
   if (filters?.endDate) params.append('endDate', filters.endDate)
   if (filters?.page !== undefined) params.append('page', filters.page.toString())
   if (filters?.limit !== undefined) params.append('limit', filters.limit.toString())
+  if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+  if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
 
   const queryString = params.toString()
   const endpoint = `/receipts${queryString ? `?${queryString}` : ''}`

@@ -155,7 +155,8 @@
     "table": {
       "store": "Prodavnica",
       "amount": "Iznos",
-      "date": "Datum",
+      "date": "Datum računa",
+      "createdAt": "Kreirano",
       "category": "Kategorija",
       "paidBy": "Platio",
       "creator": "Kreator",
@@ -341,7 +342,7 @@
       "color": "Boja",
       "colorPlaceholder": "#3b82f6",
       "icon": "Ikona",
-      "iconPlaceholder": "npr. shopping-cart, plane, film",
+      "iconPlaceholder": "Koristite emoji za ikonu, npr. 🏠, ✈️, 🛒",
       "iconHelp": "Unesite emoji ili naziv ikone",
       "description": "Opis",
       "descriptionPlaceholder": "Opcioni opis za ovu kategoriju",
