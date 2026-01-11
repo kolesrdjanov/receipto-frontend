@@ -11,10 +11,10 @@ export interface Warranty {
   purchaseDate: string
   warrantyExpires: string
   warrantyDuration?: number
-  imageUrl?: string
-  imagePublicId?: string
-  imageUrl2?: string
-  imagePublicId2?: string
+  fileUrl?: string
+  filePublicId?: string
+  fileUrl2?: string
+  filePublicId2?: string
   notes?: string
   userId: string
   receiptId?: string

@@ -51,13 +51,16 @@ export function WarrantyGalleryModal({
   }, [open, initialIndex, clampIndex])
 
   const current = safeImages[index]
+  const isPdf = useMemo(() => current?.toLowerCase().endsWith('.pdf') ?? false, [current])
 
   const currentDeliverUrl = useMemo(() => {
     if (!current) return ''
+    // PDFs don't need Cloudinary transformations
+    if (isPdf) return current
     // Use Cloudinary-friendly params when possible; keep blob/data URLs untouched.
     if (current.startsWith('blob:') || current.startsWith('data:')) return current
     return `${current}${current.includes('?') ? '&' : '?'}f_auto,q_auto`
-  }, [current])
+  }, [current, isPdf])
 
   const goPrev = useCallback(
     () => setIndex((i) => (safeImages.length ? (i - 1 + safeImages.length) % safeImages.length : 0)),
@@ -70,7 +73,8 @@ export function WarrantyGalleryModal({
 
   const handleDownload = () => {
     if (!current) return
-    downloadUrl(currentDeliverUrl, `warranty-${index + 1}.jpg`)
+    const extension = isPdf ? 'pdf' : 'jpg'
+    downloadUrl(currentDeliverUrl, `warranty-${index + 1}.${extension}`)
   }
 
   const handleOpenNewTab = () => {
@@ -132,16 +136,24 @@ export function WarrantyGalleryModal({
             </div>
           </DialogHeader>
 
-          {/* Main image */}
+          {/* Main content */}
           <div className="absolute inset-0 flex items-center justify-center">
             {current ? (
-              <img
-                src={currentDeliverUrl}
-                alt={`${title} ${index + 1}`}
-                className="max-h-dvh max-w-dvw object-contain"
-              />
+              isPdf ? (
+                <iframe
+                  src={currentDeliverUrl}
+                  title={`${title} ${index + 1}`}
+                  className="w-full h-full border-0"
+                />
+              ) : (
+                <img
+                  src={currentDeliverUrl}
+                  alt={`${title} ${index + 1}`}
+                  className="max-h-dvh max-w-dvw object-contain"
+                />
+              )
             ) : (
-              <div className="text-white/70">No images</div>
+              <div className="text-white/70">No files</div>
             )}
           </div>
 

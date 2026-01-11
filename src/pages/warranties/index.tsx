@@ -57,7 +57,7 @@ export default function WarrantiesPage() {
   }
 
   const openGallery = (warranty: Warranty, index: number) => {
-    const imgs = [warranty.imageUrl, warranty.imageUrl2].filter(Boolean) as string[]
+    const imgs = [warranty.fileUrl, warranty.fileUrl2].filter(Boolean) as string[]
     if (imgs.length === 0) return
 
     setGalleryImages(imgs)
@@ -235,9 +235,9 @@ export default function WarrantiesPage() {
                       )}
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {(warranty.imageUrl || warranty.imageUrl2) && (
+                      {(warranty.fileUrl || warranty.fileUrl2) && (
                         <div className="grid grid-cols-2 gap-2">
-                          {[warranty.imageUrl, warranty.imageUrl2]
+                          {[warranty.fileUrl, warranty.fileUrl2]
                             .filter(Boolean)
                             .map((img, i) => (
                               <button

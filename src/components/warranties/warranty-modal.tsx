@@ -21,7 +21,7 @@ import {
   type CreateWarrantyData,
 } from '@/hooks/warranties/use-warranties'
 import { toast } from 'sonner'
-import { Info, X } from 'lucide-react'
+import { Info, X, FileText } from 'lucide-react'
 
 interface WarrantyModalProps {
   open: boolean
@@ -72,13 +72,13 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     const items: PreviewItem[] = []
 
     // Add remote image 1 if exists and not removed
-    if (mode === 'edit' && warranty?.imageUrl && !removeImage1) {
-      items.push({ type: 'remote1', src: warranty.imageUrl })
+    if (mode === 'edit' && warranty?.fileUrl && !removeImage1) {
+      items.push({ type: 'remote1', src: warranty.fileUrl })
     }
 
     // Add remote image 2 if exists and not removed
-    if (mode === 'edit' && warranty?.imageUrl2 && !removeImage2) {
-      items.push({ type: 'remote2', src: warranty.imageUrl2 })
+    if (mode === 'edit' && warranty?.fileUrl2 && !removeImage2) {
+      items.push({ type: 'remote2', src: warranty.fileUrl2 })
     }
 
     // Add local images
@@ -186,16 +186,22 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
       const incoming = Array.from(files)
       const toAdd = incoming.slice(0, remainingSlots)
 
-      const processed = await Promise.all(toAdd.map(convertIfHeic))
+      // Only convert HEIC files, leave PDFs as-is
+      const processed = await Promise.all(
+        toAdd.map(file => file.type === 'application/pdf' ? file : convertIfHeic(file))
+      )
 
       // Clear inputs so selecting the same file again triggers onChange
       resetFileInputs()
 
-      // Add to local images
+      // Add to local files
       setLocalImages((prev) => [...prev, ...processed])
       setLocalPreviews((prev) => [
         ...prev,
         ...processed.map((f) => {
+          if (f.type === 'application/pdf') {
+            return 'pdf-placeholder'
+          }
           if (isHeicFile(f)) {
             return 'heic-placeholder'
           }
@@ -205,7 +211,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     } catch (error) {
       console.log(error)
       toast.error(t('warranties.modal.createError'), {
-        description: 'Failed to process image. Please try a different file format.',
+        description: 'Failed to process file. Please try a different format.',
       })
     }
   }
@@ -293,7 +299,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0">
         <div className="flex h-full flex-col">
-          <div className="px-4 pt-4 sm:px-6 sm:pt-6">
+          <div className="">
             <DialogHeader>
               <DialogTitle>
                 {mode === 'create'
@@ -309,7 +315,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="productName">{t('warranties.modal.productName')}</Label>
@@ -391,7 +397,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                   <input
                     id="warranty-images"
                     type="file"
-                    accept="image/*,.heic,.heif,image/heic,image/heif"
+                    accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                     multiple
                     onChange={handleLibrarySelect}
                     className="hidden"
@@ -410,34 +416,42 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
 
                   {previewItems.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {previewItems.map((item, idx) => (
-                        <div key={`${item.type}-${idx}`} className="relative overflow-hidden rounded-lg border">
-                          {item.src === 'heic-placeholder' ? (
-                            <div className="w-full h-48 bg-muted flex items-center justify-center">
-                              <span className="text-sm text-muted-foreground">HEIC Image</span>
-                            </div>
-                          ) : (
-                            <img
-                              src={
-                                item.src.startsWith('blob:')
-                                  ? item.src
-                                  : `${item.src}${item.src.includes('?') ? '&' : '?'}f_auto,q_auto`
-                              }
-                              alt={`Preview ${idx + 1}`}
-                              className="w-full h-48 object-cover"
-                            />
-                          )}
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2"
-                            onClick={() => removePreviewItem(item)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                      {previewItems.map((item, idx) => {
+                        const isPdf = item.src === 'pdf-placeholder' || item.src.toLowerCase().endsWith('.pdf')
+                        return (
+                          <div key={`${item.type}-${idx}`} className="relative overflow-hidden rounded-lg border">
+                            {item.src === 'heic-placeholder' ? (
+                              <div className="w-full h-48 bg-muted flex items-center justify-center">
+                                <span className="text-sm text-muted-foreground">HEIC Image</span>
+                              </div>
+                            ) : isPdf ? (
+                              <div className="w-full h-48 bg-muted flex flex-col items-center justify-center gap-2">
+                                <FileText className="h-12 w-12 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">PDF Document</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={
+                                  item.src.startsWith('blob:')
+                                    ? item.src
+                                    : `${item.src}${item.src.includes('?') ? '&' : '?'}f_auto,q_auto`
+                                }
+                                alt={`Preview ${idx + 1}`}
+                                className="w-full h-48 object-cover"
+                              />
+                            )}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-2 right-2"
+                              onClick={() => removePreviewItem(item)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )
+                      })}
                     </div>
                   ) : (
                     <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
@@ -453,7 +467,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
               </div>
             </div>
 
-            <div className="shrink-0 bg-background px-4 py-3 sm:px-6 mt-4">
+            <div className="shrink-0 bg-background mt-4">
               <DialogFooter className="gap-2 sm:gap-0">
                 {mode === 'edit' && (
                   <Button
