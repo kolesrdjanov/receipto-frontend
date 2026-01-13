@@ -14,17 +14,17 @@ export default function SignUp() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
+      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl" data-testid="signup-card">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.signUp.title')}</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold" data-testid="signup-title">{t('auth.signUp.title')}</CardTitle>
+          <CardDescription data-testid="signup-subtitle">
             {t('auth.signUp.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form" noValidate>
             {apiError && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm" data-testid="signup-error">
                 {apiError}
               </div>
             )}
@@ -42,8 +42,9 @@ export default function SignUp() {
                   onChange={handleChange}
                   disabled={isLoading}
                   className="bg-background/50"
+                  data-testid="signup-firstname-input"
                 />
-                {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
+                {errors.firstName && <p className="text-xs text-destructive" data-testid="signup-firstname-error">{errors.firstName}</p>}
               </div>
 
               <div className="space-y-2">
@@ -58,8 +59,9 @@ export default function SignUp() {
                   onChange={handleChange}
                   disabled={isLoading}
                   className="bg-background/50"
+                  data-testid="signup-lastname-input"
                 />
-                {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
+                {errors.lastName && <p className="text-xs text-destructive" data-testid="signup-lastname-error">{errors.lastName}</p>}
               </div>
             </div>
 
@@ -75,8 +77,9 @@ export default function SignUp() {
                 onChange={handleChange}
                 disabled={isLoading}
                 className="bg-background/50"
+                data-testid="signup-email-input"
               />
-              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-destructive" data-testid="signup-email-error">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -90,8 +93,9 @@ export default function SignUp() {
                 onChange={handleChange}
                 disabled={isLoading}
                 className="bg-background/50"
+                data-testid="signup-password-input"
               />
-              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+              {errors.password && <p className="text-xs text-destructive" data-testid="signup-password-error">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -105,9 +109,10 @@ export default function SignUp() {
                 onChange={handleChange}
                 disabled={isLoading}
                 className="bg-background/50"
+                data-testid="signup-confirm-password-input"
               />
               {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                <p className="text-xs text-destructive" data-testid="signup-confirm-password-error">{errors.confirmPassword}</p>
               )}
             </div>
 
@@ -121,28 +126,29 @@ export default function SignUp() {
                   onChange={handleChange}
                   disabled={isLoading}
                   className="h-4 w-4 rounded border-input mt-0.5"
+                  data-testid="signup-terms-checkbox"
                 />
                 <Label htmlFor="terms" className="font-normal cursor-pointer text-sm leading-tight">
                   {t('auth.signUp.agreeToTerms')}{' '}
-                  <a href="https://receipto.io/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                  <a href="https://receipto.io/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline" data-testid="signup-terms-link">
                     {t('auth.signUp.termsOfService')}
                   </a>{' '}
                   {t('auth.signUp.and')}{' '}
-                  <a href="https://receipto.io/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                  <a href="https://receipto.io/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline" data-testid="signup-privacy-link">
                     {t('auth.signUp.privacyPolicy')}
                   </a>
                 </Label>
               </div>
-              {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
+              {errors.terms && <p className="text-xs text-destructive" data-testid="signup-terms-error">{errors.terms}</p>}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading} data-testid="signup-submit-button">
               {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signUp.hasAccount')}{' '}
-              <Link to="/sign-in" state={location.state} className="font-medium text-primary hover:underline">
+              <Link to="/sign-in" state={location.state} className="font-medium text-primary hover:underline" data-testid="signup-signin-link">
                 {t('auth.signUp.signIn')}
               </Link>
             </p>

@@ -23,7 +23,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card data-testid="categories-loading">
         <CardContent className="p-8">
           <p className="text-center text-muted-foreground">{t('categories.loading')}</p>
         </CardContent>
@@ -33,7 +33,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
 
   if (error) {
     return (
-      <Card>
+      <Card data-testid="categories-error">
         <CardContent className="p-8">
           <p className="text-center text-destructive">
             {t('categories.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
@@ -45,7 +45,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
 
   if (!categories || categories.length === 0) {
     return (
-      <Card>
+      <Card data-testid="categories-empty">
         <CardHeader>
           <CardTitle className="text-center text-muted-foreground">{t('categories.noCategories')}</CardTitle>
         </CardHeader>
@@ -59,12 +59,12 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
   }
 
   return (
-    <Card>
+    <Card data-testid="categories-table-card">
       <CardHeader>
-        <CardTitle>{t('categories.categoriesCount', { count: categories.length })}</CardTitle>
+        <CardTitle data-testid="categories-count">{t('categories.categoriesCount', { count: categories.length })}</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
+        <Table data-testid="categories-table">
           <TableHeader>
             <TableRow>
               <TableHead>{t('categories.table.name')}</TableHead>
@@ -77,7 +77,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
           </TableHeader>
           <TableBody>
             {categories.map((category) => (
-              <TableRow key={category.id}>
+              <TableRow key={category.id} data-testid={`category-row-${category.id}`}>
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell>
                   {category.color ? (
@@ -120,6 +120,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => onEdit(category)}
+                        data-testid={`category-edit-${category.id}`}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -129,6 +130,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => onDelete(category)}
+                        data-testid={`category-delete-${category.id}`}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>

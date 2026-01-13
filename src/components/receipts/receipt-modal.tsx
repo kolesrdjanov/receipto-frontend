@@ -215,25 +215,26 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="receipt-modal">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle data-testid="receipt-modal-title">
             {mode === 'create' ? t('receipts.modal.addTitle') : t('receipts.modal.editTitle')}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription data-testid="receipt-modal-description">
             {mode === 'create'
               ? t('receipts.modal.addDescription')
               : t('receipts.modal.editDescription')}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="receipt-form">
           <div className="space-y-2">
             <Label htmlFor="storeName">{t('receipts.modal.storeName')}</Label>
             <Input
               id="storeName"
               {...register('storeName')}
               placeholder={t('receipts.modal.storeNamePlaceholder')}
+              data-testid="receipt-store-input"
             />
           </div>
 
@@ -246,6 +247,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                 step="0.01"
                 {...register('totalAmount')}
                 placeholder="0.00"
+                data-testid="receipt-amount-input"
               />
             </div>
 
@@ -260,12 +262,12 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                     value={field.value}
                     disabled={!!selectedGroup}
                   >
-                    <SelectTrigger id="currency">
+                    <SelectTrigger id="currency" data-testid="receipt-currency-select">
                       <SelectValue placeholder={t('receipts.modal.currency')} />
                     </SelectTrigger>
                     <SelectContent>
                       {currencies.map((currency) => (
-                        <SelectItem key={currency.id} value={currency.code}>
+                        <SelectItem key={currency.id} value={currency.code} data-testid={`receipt-currency-option-${currency.code}`}>
                           {currency.code} - {currency.symbol}
                         </SelectItem>
                       ))}
@@ -290,6 +292,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                     id="receiptDate"
                     value={field.value}
                     onChange={field.onChange}
+                    data-testid="receipt-date-picker"
                   />
                 )}
               />
@@ -302,6 +305,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               id="receiptNumber"
               {...register('receiptNumber')}
               placeholder={t('receipts.modal.receiptNumberPlaceholder')}
+              data-testid="receipt-number-input"
             />
           </div>
 
@@ -312,12 +316,12 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="receipt-category-select">
                     <SelectValue placeholder={t('receipts.modal.selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+                      <SelectItem key={category.id} value={category.id} data-testid={`receipt-category-option-${category.id}`}>
                         {category.icon && <span className="mr-2">{category.icon}</span>}
                         {category.name}
                       </SelectItem>
@@ -429,6 +433,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                 onClick={handleDelete}
                 disabled={deleteReceipt.isPending || isSubmitting}
                 className="sm:mr-auto"
+                data-testid="receipt-delete-button"
               >
                 {deleteReceipt.isPending ? t('common.deleting') : t('common.delete')}
               </Button>
@@ -438,12 +443,14 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting || createReceipt.isPending || updateReceipt.isPending}
+              data-testid="receipt-cancel-button"
             >
               {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || createReceipt.isPending || updateReceipt.isPending}
+              data-testid="receipt-submit-button"
             >
               {isSubmitting || createReceipt.isPending || updateReceipt.isPending
                 ? mode === 'create'

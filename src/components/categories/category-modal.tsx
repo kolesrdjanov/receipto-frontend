@@ -145,19 +145,19 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" data-testid="category-modal">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle data-testid="category-modal-title">
             {mode === 'create' ? t('categories.modal.createTitle') : t('categories.modal.editTitle')}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription data-testid="category-modal-description">
             {mode === 'create'
               ? t('categories.modal.createDescription')
               : t('categories.modal.editDescription')}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="category-form">
           <div className="space-y-2">
             <Label htmlFor="name">
               {t('categories.modal.name')} <span className="text-destructive">*</span>
@@ -166,9 +166,10 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               id="name"
               {...register('name', { required: t('categories.modal.nameRequired') })}
               placeholder={t('categories.modal.namePlaceholder')}
+              data-testid="category-name-input"
             />
             {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
+              <p className="text-sm text-destructive" data-testid="category-name-error">{errors.name.message}</p>
             )}
           </div>
 
@@ -181,6 +182,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
                 value={colorValue || '#3b82f6'}
                 onChange={(e) => setValue('color', e.target.value)}
                 className="w-20 h-10 cursor-pointer"
+                data-testid="category-color-picker"
               />
               <Input
                 type="text"
@@ -188,6 +190,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
                 onChange={(e) => setValue('color', e.target.value)}
                 placeholder={t('categories.modal.colorPlaceholder')}
                 className="flex-1"
+                data-testid="category-color-input"
               />
             </div>
           </div>
@@ -198,6 +201,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               id="icon"
               {...register('icon')}
               placeholder={t('categories.modal.iconPlaceholder')}
+              data-testid="category-icon-input"
             />
             <p className="text-xs text-muted-foreground">
               {t('categories.modal.iconHelp')}
@@ -211,6 +215,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               {...register('description')}
               placeholder={t('categories.modal.descriptionPlaceholder')}
               rows={3}
+              data-testid="category-description-input"
             />
           </div>
 
@@ -232,8 +237,9 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
                 {...register('monthlyBudget', { valueAsNumber: true })}
                 placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
                 className="flex-1"
+                data-testid="category-budget-input"
               />
-              <div className="flex items-center px-3 bg-muted rounded-md text-sm text-muted-foreground">
+              <div className="flex items-center px-3 bg-muted rounded-md text-sm text-muted-foreground" data-testid="category-budget-currency">
                 {mode === 'edit' && category?.budgetCurrency ? category.budgetCurrency : preferredCurrency}
               </div>
             </div>
@@ -250,6 +256,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
                 onClick={handleDelete}
                 disabled={deleteCategory.isPending || isSubmitting}
                 className="sm:mr-auto"
+                data-testid="category-delete-button"
               >
                 {deleteCategory.isPending ? t('common.deleting') : t('common.delete')}
               </Button>
@@ -259,12 +266,14 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting || createCategory.isPending || updateCategory.isPending}
+              data-testid="category-cancel-button"
             >
               {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || createCategory.isPending || updateCategory.isPending}
+              data-testid="category-submit-button"
             >
               {isSubmitting || createCategory.isPending || updateCategory.isPending
                 ? mode === 'create'

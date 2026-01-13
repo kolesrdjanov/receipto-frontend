@@ -246,10 +246,10 @@ export default function Receipts() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('receipts.title')}</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2" data-testid="receipts-title">{t('receipts.title')}</h2>
+          <p className="text-sm text-muted-foreground sm:text-base" data-testid="receipts-subtitle">
             {t('receipts.subtitle')}{' '}
-            <Link to="/templates" className="text-primary hover:underline">
+            <Link to="/templates" className="text-primary hover:underline" data-testid="receipts-manage-templates-link">
               {t('receipts.manageTemplates')}
             </Link>
           </p>
@@ -259,6 +259,7 @@ export default function Receipts() {
             variant={showFilters ? 'secondary' : 'outline'}
             onClick={() => setShowFilters(!showFilters)}
             className="order-2 lg:order-1 flex-1 sm:flex-none"
+            data-testid="receipts-filter-button"
           >
             <Filter className="h-4 w-4" />
             {t('receipts.filtersButton')}
@@ -269,35 +270,39 @@ export default function Receipts() {
                 variant="outline"
                 onClick={() => setShowAddDropdown(!showAddDropdown)}
                 className="w-full sm:w-auto"
+                data-testid="receipts-add-dropdown-button"
               >
                 <Plus className="h-4 w-4" />
                 <span>{t('receipts.addManually')}</span>
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
               {showAddDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-card border rounded-md shadow-lg z-50">
+                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-card border rounded-md shadow-lg z-50" data-testid="receipts-add-dropdown">
                   <button
                     onClick={handleAddManually}
                     className="w-full px-4 py-2 text-left hover:bg-accent rounded-t-md transition-colors"
+                    data-testid="receipts-add-blank-button"
                   >
                     {t('receipts.addBlank')}
                   </button>
                   <button
                     onClick={handleAddFromTemplate}
                     className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
+                    data-testid="receipts-add-from-template-button"
                   >
                     {t('receipts.addFromTemplate')}
                   </button>
                   <button
                     onClick={handlePfrEntry}
                     className="w-full px-4 py-2 text-left hover:bg-accent rounded-b-md transition-colors"
+                    data-testid="receipts-add-pfr-button"
                   >
                     {t('receipts.addViaPfr')}
                   </button>
                 </div>
               )}
             </div>
-            <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none">
+            <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
               {createReceipt.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -314,11 +319,11 @@ export default function Receipts() {
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12" data-testid="receipts-loading">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : receipts.length === 0 ? (
-        <Card>
+        <Card data-testid="receipts-empty">
           <CardHeader>
             <CardTitle className="text-center text-muted-foreground">{t('receipts.noReceipts')}</CardTitle>
           </CardHeader>
@@ -433,8 +438,8 @@ export default function Receipts() {
           </div>
 
           {/* Desktop Table View */}
-          <Card className="hidden md:block">
-            <Table className="table-fixed w-full">
+          <Card className="hidden md:block" data-testid="receipts-table-card">
+            <Table className="table-fixed w-full" data-testid="receipts-table">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('receipts.table.store')}</TableHead>
@@ -465,8 +470,8 @@ export default function Receipts() {
               </TableHeader>
               <TableBody>
                 {receipts.map((receipt) => (
-                  <TableRow key={receipt.id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={receipt.id} data-testid={`receipt-row-${receipt.id}`}>
+                    <TableCell className="font-medium" data-testid={`receipt-store-${receipt.id}`}>
                       {receipt.storeName || t('receipts.unknownStore')}
                     </TableCell>
                     <TableCell>{formatAmount(receipt)}</TableCell>
@@ -508,6 +513,7 @@ export default function Receipts() {
                             size="icon"
                             onClick={() => handleViewReceipt(receipt)}
                             title={t('receipts.viewer.viewReceipt')}
+                            data-testid={`receipt-view-${receipt.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -516,6 +522,7 @@ export default function Receipts() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditReceipt(receipt)}
+                          data-testid={`receipt-edit-${receipt.id}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -524,6 +531,7 @@ export default function Receipts() {
                           size="icon"
                           onClick={() => handleDeleteReceipt(receipt)}
                           disabled={deleteReceipt.isPending}
+                          data-testid={`receipt-delete-${receipt.id}`}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>

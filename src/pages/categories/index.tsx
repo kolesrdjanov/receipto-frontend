@@ -42,10 +42,10 @@ export default function Categories() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('categories.title')}</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">{t('categories.subtitle')}</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2" data-testid="categories-title">{t('categories.title')}</h2>
+          <p className="text-sm text-muted-foreground sm:text-base" data-testid="categories-subtitle">{t('categories.subtitle')}</p>
         </div>
-        <Button onClick={handleAddCategory} className="w-full sm:w-auto">
+        <Button onClick={handleAddCategory} className="w-full sm:w-auto" data-testid="categories-add-button">
           <Plus className="h-4 w-4" />
           {t('categories.addCategory')}
         </Button>

@@ -14,17 +14,17 @@ export default function SignIn() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
+      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl" data-testid="signin-card">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.signIn.title')}</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold" data-testid="signin-title">{t('auth.signIn.title')}</CardTitle>
+          <CardDescription data-testid="signin-subtitle">
             {t('auth.signIn.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="signin-form" noValidate>
             {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm" data-testid="signin-error">
                 {error}
               </div>
             )}
@@ -42,6 +42,7 @@ export default function SignIn() {
                 disabled={isLoading}
                 required
                 className="bg-background/50"
+                data-testid="signin-email-input"
               />
             </div>
 
@@ -57,6 +58,7 @@ export default function SignIn() {
                 disabled={isLoading}
                 required
                 className="bg-background/50"
+                data-testid="signin-password-input"
               />
             </div>
 
@@ -68,24 +70,25 @@ export default function SignIn() {
                   type="checkbox"
                   className="h-4 w-4 rounded border-input"
                   disabled={isLoading}
+                  data-testid="signin-remember-checkbox"
                 />
                 <Label htmlFor="remember-me" className="font-normal cursor-pointer text-sm">
                   {t('auth.signIn.rememberMe')}
                 </Label>
               </div>
 
-              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline" data-testid="signin-forgot-password-link">
                 {t('auth.signIn.forgotPassword')}
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading} data-testid="signin-submit-button">
               {isLoading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signIn.noAccount')}{' '}
-              <Link to="/sign-up" state={location.state} className="font-medium text-primary hover:underline">
+              <Link to="/sign-up" state={location.state} className="font-medium text-primary hover:underline" data-testid="signin-signup-link">
                 {t('auth.signIn.signUp')}
               </Link>
             </p>
