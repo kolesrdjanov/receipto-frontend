@@ -22,7 +22,8 @@
     "view": "Prikaži",
     "noData": "Nema podataka",
     "allRightsReserved": "Sva prava zadržana.",
-    "unknown": "Nepoznato"
+    "unknown": "Nepoznato",
+    "pickDate": "Izaberite datum"
   },
   "nav": {
     "dashboard": "Kontrolna tabla",

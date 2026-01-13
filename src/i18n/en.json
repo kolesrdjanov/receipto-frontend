@@ -22,7 +22,8 @@
     "view": "View",
     "noData": "No data",
     "allRightsReserved": "All rights reserved.",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "pickDate": "Pick a date"
   },
   "nav": {
     "dashboard": "Dashboard",

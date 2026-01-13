@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import {
   useCreateWarranty,
@@ -52,6 +53,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     register,
     handleSubmit,
     reset,
+    control,
     formState: { isSubmitting },
   } = useForm<CreateWarrantyData>({
     defaultValues: {
@@ -338,10 +340,17 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="purchaseDate">{t('warranties.modal.purchaseDate')}</Label>
-                    <Input
-                      id="purchaseDate"
-                      type="date"
-                      {...register('purchaseDate', { required: true })}
+                    <Controller
+                      name="purchaseDate"
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <DatePicker
+                          id="purchaseDate"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
                     />
                   </div>
 

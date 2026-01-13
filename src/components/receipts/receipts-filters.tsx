@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -45,17 +46,17 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
     })
   }
 
-  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStartDateChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      startDate: e.target.value || undefined,
+      startDate: value || undefined,
     })
   }
 
-  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEndDateChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      endDate: e.target.value || undefined,
+      endDate: value || undefined,
     })
   }
 
@@ -113,9 +114,8 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
 
         <div className="space-y-1.5">
           <Label htmlFor="startDate">{t('receipts.filters.fromDate')}</Label>
-          <Input
+          <DatePicker
             id="startDate"
-            type="date"
             value={filters.startDate ?? ''}
             onChange={handleStartDateChange}
           />
@@ -123,9 +123,8 @@ export function ReceiptsFiltersBar({ filters, onFiltersChange }: ReceiptsFilters
 
         <div className="space-y-1.5">
           <Label htmlFor="endDate">{t('receipts.filters.toDate')}</Label>
-          <Input
+          <DatePicker
             id="endDate"
-            type="date"
             value={filters.endDate ?? ''}
             onChange={handleEndDateChange}
           />

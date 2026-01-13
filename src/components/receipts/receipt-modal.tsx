@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -75,6 +76,12 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
     },
   })
 
+  // Track original date to preserve time component when user doesn't change the date
+  const originalDateRef = useRef<{ full: string | null; dateOnly: string }>({
+    full: null,
+    dateOnly: '',
+  })
+
   const { data: categories = [] } = useCategories()
   const { data: currencies = [] } = useCurrencies()
   const { data: groups = [] } = useGroups()
@@ -100,19 +107,30 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
 
   useEffect(() => {
     if (open && receipt && mode === 'edit') {
+      const dateOnly = receipt.receiptDate
+        ? new Date(receipt.receiptDate).toISOString().split('T')[0]
+        : ''
+
+      // Store the original full date and date-only portion for comparison
+      originalDateRef.current = {
+        full: receipt.receiptDate || null,
+        dateOnly,
+      }
+
       reset({
         storeName: receipt.storeName || '',
         totalAmount: receipt.totalAmount?.toString() || '',
         currency: receipt.currency || 'RSD',
-        receiptDate: receipt.receiptDate
-          ? new Date(receipt.receiptDate).toISOString().split('T')[0]
-          : '',
+        receiptDate: dateOnly,
         receiptNumber: receipt.receiptNumber || '',
         categoryId: receipt.categoryId || '',
         groupId: receipt.groupId || '',
         paidById: receipt.paidById || '',
       })
     } else if (open && mode === 'create') {
+      // Reset original date tracking for new receipts
+      originalDateRef.current = { full: null, dateOnly: '' }
+
       reset({
         storeName: prefillData?.storeName || '',
         totalAmount: '',
@@ -128,11 +146,25 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
 
   const onSubmit = async (data: ReceiptFormData) => {
     try {
+      // Determine the receiptDate to send:
+      // - If editing and the date hasn't changed, preserve the original (with time)
+      // - If the date changed or creating new, use the form value (date only)
+      let receiptDateToSend: string | undefined = data.receiptDate || undefined
+
+      if (mode === 'edit' && originalDateRef.current.full) {
+        // Check if user changed the date portion
+        const dateUnchanged = data.receiptDate === originalDateRef.current.dateOnly
+        if (dateUnchanged) {
+          // Preserve the original full datetime (with time component)
+          receiptDateToSend = originalDateRef.current.full
+        }
+      }
+
       const payload = {
         storeName: data.storeName || undefined,
         totalAmount: data.totalAmount ? parseFloat(data.totalAmount) : undefined,
         currency: data.currency || undefined,
-        receiptDate: data.receiptDate || undefined,
+        receiptDate: receiptDateToSend,
         receiptNumber: data.receiptNumber || undefined,
         categoryId: data.categoryId || null,
         groupId: data.groupId || null,
@@ -250,10 +282,16 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
 
             <div className="space-y-2">
               <Label htmlFor="receiptDate">{t('receipts.modal.date')}</Label>
-              <Input
-                id="receiptDate"
-                type="date"
-                {...register('receiptDate')}
+              <Controller
+                name="receiptDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    id="receiptDate"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </div>
           </div>
