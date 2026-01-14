@@ -103,7 +103,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-dvh bg-background">
       {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 pt-[env(safe-area-inset-top)] md:hidden">
         <Link to={'/dashboard'}>
           <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
         </Link>
@@ -135,7 +135,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
+          <div className="flex items-center justify-between border-b px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] md:pt-4">
             <Link to={'/dashboard'}>
               <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
             </Link>
@@ -259,7 +259,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="pt-14 md:pl-64 md:pt-0">
+      <div className="pt-[calc(3.5rem+env(safe-area-inset-top))] md:pl-64 md:pt-0">
         <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
 
