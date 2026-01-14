@@ -35,7 +35,8 @@
     "logout": "Logout",
     "admin": "Admin",
     "users": "Users",
-    "version": "Version"
+    "version": "Version",
+    "supportUs": "Support us"
   },
   "auth": {
     "signIn": {

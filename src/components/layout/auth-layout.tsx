@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Heart } from 'lucide-react'
 import { Logo } from '@/components/ui/logo'
 
 interface AuthLayoutProps {
@@ -41,6 +42,15 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         {/* Footer */}
         <footer className="p-6 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} {t('common.appName')}. {t('common.allRightsReserved')}</p>
+          <a
+            href="https://paypal.me/receipto"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
+          >
+            <Heart className="h-3 w-3" />
+            {t('nav.supportUs')}
+          </a>
         </footer>
       </div>
     </div>

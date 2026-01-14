@@ -7,7 +7,7 @@ import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
@@ -245,6 +245,15 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="mt-3 text-center text-xs text-muted-foreground">
               {t('nav.version')} {__APP_VERSION__}
             </div>
+            <a
+              href="https://paypal.me/receipto"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Heart className="h-3 w-3" />
+              {t('nav.supportUs')}
+            </a>
           </div>
         </div>
       </aside>
