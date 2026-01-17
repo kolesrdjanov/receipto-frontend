@@ -9,6 +9,9 @@ interface ApiRequestOptions extends AxiosRequestConfig {
   requiresAuth?: boolean
 }
 
+// Track ongoing refresh requests to prevent concurrent calls
+let refreshPromise: Promise<boolean> | null = null
+
 // Create axios instance
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -49,6 +52,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true
 
       const refreshed = await refreshAccessToken()
+
       if (refreshed) {
         const newAccessToken = useAuthStore.getState().accessToken
         if (newAccessToken) {
@@ -58,7 +62,6 @@ axiosInstance.interceptors.response.use(
       } else {
         // Refresh failed, logout user
         useAuthStore.getState().logout()
-        window.location.href = '/sign-in'
         return Promise.reject(new Error('Session expired. Please sign in again.'))
       }
     }
@@ -91,33 +94,50 @@ export async function apiRequest<T>(
 }
 
 async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const refreshToken = useAuthStore.getState().refreshToken
-    if (!refreshToken) {
-      return false
-    }
-
-    const response = await axios.post(
-      `${API_BASE_URL}/auth/refresh`,
-      { refreshToken },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-
-    const { accessToken, refreshToken: newRefreshToken } = response.data
-    const authStore = useAuthStore.getState()
-    authStore.setAccessToken(accessToken)
-    // Also update refresh token if rotated
-    if (newRefreshToken) {
-      authStore.setRefreshToken(newRefreshToken)
-    }
-    return true
-  } catch {
-    return false
+  // If a refresh is already in progress, wait for it instead of starting a new one
+  if (refreshPromise) {
+    return refreshPromise
   }
+
+  // Create a new refresh promise
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = useAuthStore.getState().refreshToken
+
+      if (!refreshToken) {
+        return false
+      }
+
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/refresh`,
+        { refreshToken },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      const { accessToken, refreshToken: newRefreshToken } = response.data
+      const authStore = useAuthStore.getState()
+
+      authStore.setAccessToken(accessToken)
+
+      // Also update refresh token if rotated
+      if (newRefreshToken) {
+        authStore.setRefreshToken(newRefreshToken)
+      }
+
+      return true
+    } catch {
+      return false
+    } finally {
+      // Clear the promise after completion (success or failure)
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
 }
 
 // Convenience methods

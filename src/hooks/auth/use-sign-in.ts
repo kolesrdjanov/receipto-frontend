@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/auth'
 
 interface LoginResponse {
   accessToken: string
+  refreshToken: string
   user: {
     id: string
     email: string
@@ -39,7 +40,7 @@ export function useSignIn() {
         { requiresAuth: false }
       )
 
-      login(response.user, response.accessToken)
+      login(response.user, response.accessToken, response.refreshToken)
 
       // Redirect to the page they were trying to access, or dashboard
       const from = (location.state as { from?: string })?.from || '/dashboard'
