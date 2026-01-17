@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,6 +20,11 @@ import {
   Minus,
   Database,
   ArrowRight,
+  QrCode,
+  BarChart3,
+  PiggyBank,
+  HelpCircle,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
@@ -29,6 +35,14 @@ export default function ItemsPage() {
   const { data: stats, isLoading: statsLoading } = useItemStats()
   const migrateReceipts = useMigrateReceipts()
   const { currency } = useSettingsStore()
+  const [showGuide, setShowGuide] = useState(() => {
+    return localStorage.getItem('items-guide-dismissed') !== 'true'
+  })
+
+  const dismissGuide = () => {
+    setShowGuide(false)
+    localStorage.setItem('items-guide-dismissed', 'true')
+  }
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('sr-RS', {
@@ -105,6 +119,68 @@ export default function ItemsPage() {
         </div>
       ) : (
         <>
+          {/* How It Works Guide */}
+          {showGuide && (
+            <Card className="mb-6 border-primary/20 bg-primary/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                    {t('items.guide.title')}
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={dismissGuide}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <QrCode className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{t('items.guide.step1Title')}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('items.guide.step1Description')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{t('items.guide.step2Title')}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('items.guide.step2Description')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <PiggyBank className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{t('items.guide.step3Title')}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t('items.guide.step3Description')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-4 pt-3 border-t">
+                  {t('items.guide.tip')}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Stats Cards */}
           <div className="grid gap-4 sm:grid-cols-3 mb-6">
             <Card>
