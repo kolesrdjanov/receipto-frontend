@@ -10,9 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -247,6 +248,33 @@ export default function Settings() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notifications */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              {t('settings.notifications.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('settings.notifications.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>{t('settings.notifications.warrantyReminders')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('settings.notifications.warrantyRemindersHelp')}
+                </p>
+              </div>
+              <Switch
+                checked={effectiveUser?.warrantyReminderEnabled ?? true}
+                onCheckedChange={(checked) => updateMe.mutate({ warrantyReminderEnabled: checked })}
+              />
             </div>
           </CardContent>
         </Card>

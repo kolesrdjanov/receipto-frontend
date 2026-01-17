@@ -485,6 +485,12 @@
       "en": "English",
       "sr": "Serbian"
     },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage your email notification preferences",
+      "warrantyReminders": "Warranty expiry reminders",
+      "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire"
+    },
     "profile": {
       "title": "Profile",
       "description": "Update your personal information",

@@ -473,6 +473,12 @@
       "en": "Engleski",
       "sr": "Srpski"
     },
+    "notifications": {
+      "title": "Obaveštenja",
+      "description": "Upravljajte podešavanjima email obaveštenja",
+      "warrantyReminders": "Podsetnici o isteku garancije",
+      "warrantyRemindersHelp": "Primajte email podsetike 30 i 7 dana pre isteka vaših garancija"
+    },
     "profile": {
       "title": "Profil",
       "description": "Ažurirajte svoje lične podatke",

@@ -9,12 +9,14 @@ export interface Me {
   firstName: string
   lastName: string
   profileImageUrl?: string | null
+  warrantyReminderEnabled?: boolean
 }
 
 export interface UpdateMeData {
   firstName?: string
   lastName?: string
   removeProfileImage?: boolean
+  warrantyReminderEnabled?: boolean
 }
 
 const fetchMe = async (): Promise<Me> => {

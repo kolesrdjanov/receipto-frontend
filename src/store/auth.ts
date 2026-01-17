@@ -8,6 +8,7 @@ interface User {
   lastName: string
   profileImageUrl?: string | null
   role: 'user' | 'admin'
+  warrantyReminderEnabled?: boolean
 }
 
 interface AuthState {
