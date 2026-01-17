@@ -107,8 +107,13 @@ async function refreshAccessToken(): Promise<boolean> {
       }
     )
 
-    const { accessToken } = response.data
-    useAuthStore.getState().setAccessToken(accessToken)
+    const { accessToken, refreshToken: newRefreshToken } = response.data
+    const authStore = useAuthStore.getState()
+    authStore.setAccessToken(accessToken)
+    // Also update refresh token if rotated
+    if (newRefreshToken) {
+      authStore.setRefreshToken(newRefreshToken)
+    }
     return true
   } catch {
     return false
