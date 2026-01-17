@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, useIsAdmin } from '@/store/auth'
@@ -11,6 +11,7 @@ import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings,
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
+import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
@@ -44,7 +45,15 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
   const createReceipt = useCreateReceipt()
+
+  // Show onboarding on first login
+  useEffect(() => {
+    if (user && localStorage.getItem('receipto-onboarding-completed') !== 'true') {
+      setIsOnboardingOpen(true)
+    }
+  }, [user])
 
   const closeSidebar = () => setSidebarOpen(false)
 
@@ -286,6 +295,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       <ContactSupportModal
         open={isSupportModalOpen}
         onOpenChange={setIsSupportModalOpen}
+      />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        open={isOnboardingOpen}
+        onOpenChange={setIsOnboardingOpen}
       />
     </div>
   )

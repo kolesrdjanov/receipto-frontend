@@ -23,7 +23,38 @@
     "noData": "Nema podataka",
     "allRightsReserved": "Sva prava zadržana.",
     "unknown": "Nepoznato",
-    "pickDate": "Izaberite datum"
+    "pickDate": "Izaberite datum",
+    "next": "Sledeće",
+    "back": "Nazad"
+  },
+  "onboarding": {
+    "skip": "Preskoči",
+    "getStarted": "Započni",
+    "step1": {
+      "title": "Pratite svoje troškove",
+      "description": "Skenirajte QR kodove sa fiskalnih računa za automatsko preuzimanje podataka. Možete dodavati troškove i ručno.",
+      "tip": "Skeniranje QR kodova daje najbolje rezultate - svi artikli, cene i podaci o prodavnici se automatski preuzimaju."
+    },
+    "step2": {
+      "title": "Organizujte po kategorijama",
+      "description": "Kreirajte kategorije kao što su Namirnice, Prevoz ili Zabava. Postavite mesečne budžete da kontrolišete potrošnju.",
+      "tip": ""
+    },
+    "step3": {
+      "title": "Ne propustite garanciju",
+      "description": "Dodajte garancije proizvoda sa datumima kupovine. Pomoći ćemo vam da pratite datume isteka.",
+      "tip": ""
+    },
+    "step4": {
+      "title": "Delite troškove",
+      "description": "Kreirajte grupe za porodicu, cimere ili putovanja. Pratite zajedničke troškove i vidite ko kome duguje.",
+      "tip": ""
+    },
+    "step5": {
+      "title": "Pratite cene",
+      "description": "Pogledajte istoriju cena proizvoda u različitim prodavnicama. Saznajte gde možete uštedeti na redovnim kupovinama.",
+      "tip": "Što više računa skenirate, bolji uvid u cene ćete imati!"
+    }
   },
   "nav": {
     "dashboard": "Kontrolna tabla",
