@@ -637,5 +637,55 @@
     "sending": "Šaljem...",
     "success": "Vaša poruka je uspešno poslata. Javićemo vam se uskoro!",
     "error": "Neuspelo slanje poruke. Pokušajte ponovo."
+  },
+  "items": {
+    "title": "Praćenje cena",
+    "subtitle": "Pratite cene i pronađite uštede u prodavnicama",
+    "frequentlyBought": "Često kupljeno",
+    "savingsOpportunities": "Prilike za uštedu",
+    "noItemsYet": "Nema praćenih artikala",
+    "scanReceiptsToTrack": "Skenirajte račune da počnete praćenje cena",
+    "noSavingsYet": "Nema pronađenih prilika za uštedu",
+    "shopMultipleStoresToCompare": "Kupujte u više prodavnica da vidite poređenje cena",
+    "boughtTimes": "Kupljeno {{count}} puta",
+    "stores": "prodavnica",
+    "viewAll": "Pogledaj sve",
+    "stable": "Stabilno",
+    "potential": "potencijalno",
+    "saveAmount": "Uštedite {{amount}}",
+    "priceHistory": "Istorija cena",
+    "storeComparison": "Poređenje prodavnica",
+    "avgPrice": "Prosečna cena",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "lastPrice": "Poslednja cena",
+    "purchases": "Kupovine",
+    "lastPurchase": "Poslednja kupovina",
+    "allStores": "Sve prodavnice",
+    "noHistory": "Nema istorije cena",
+    "stats": {
+      "title": "Statistika",
+      "totalProducts": "Praćeni proizvodi",
+      "priceRecords": "Zapisi o cenama",
+      "uniqueStores": "Različite prodavnice"
+    },
+    "migrate": {
+      "title": "Uvezi postojeće račune",
+      "description": "Izvuci podatke o artiklima iz postojećih računa",
+      "button": "Uvezi artikle",
+      "processing": "Obrada...",
+      "success": "Uvezeno {{items}} artikala iz {{receipts}} računa",
+      "error": "Greška pri uvozu artikala"
+    },
+    "matching": {
+      "title": "Spajanje proizvoda",
+      "description": "Pomozite nam da spojimo slične proizvode za bolje praćenje cena",
+      "searchPlaceholder": "Pretraži proizvode...",
+      "noMatches": "Nema pronađenih proizvoda",
+      "mergeWith": "Spoji sa",
+      "createNew": "Kreiraj kao novi proizvod",
+      "success": "Proizvodi uspešno spojeni",
+      "error": "Greška pri spajanju proizvoda"
+    }
   }
 }

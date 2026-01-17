@@ -81,4 +81,18 @@ export const queryKeys = {
     details: () => [...queryKeys.templates.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.templates.details(), id] as const,
   },
+
+  // Items (Price Intelligence)
+  items: {
+    all: ['items'] as const,
+    frequent: (limit?: number) => [...queryKeys.items.all, 'frequent', limit] as const,
+    stats: () => [...queryKeys.items.all, 'stats'] as const,
+    products: () => [...queryKeys.items.all, 'products'] as const,
+    savings: (limit?: number) => [...queryKeys.items.all, 'savings', limit] as const,
+    details: () => [...queryKeys.items.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.items.details(), id] as const,
+    history: (id: string, store?: string) => [...queryKeys.items.detail(id), 'history', store] as const,
+    stores: (id: string) => [...queryKeys.items.detail(id), 'stores'] as const,
+    search: (query: string) => [...queryKeys.items.all, 'search', query] as const,
+  },
 } as const

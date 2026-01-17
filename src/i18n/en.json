@@ -650,5 +650,55 @@
     "sending": "Sending...",
     "success": "Your message has been sent successfully. We'll get back to you soon!",
     "error": "Failed to send message. Please try again."
+  },
+  "items": {
+    "title": "Price Tracker",
+    "subtitle": "Track prices and find savings across stores",
+    "frequentlyBought": "Frequently Bought",
+    "savingsOpportunities": "Savings Opportunities",
+    "noItemsYet": "No items tracked yet",
+    "scanReceiptsToTrack": "Scan receipts to start tracking prices",
+    "noSavingsYet": "No savings opportunities found",
+    "shopMultipleStoresToCompare": "Shop at multiple stores to see price comparisons",
+    "boughtTimes": "Bought {{count}} times",
+    "stores": "stores",
+    "viewAll": "View all",
+    "stable": "Stable",
+    "potential": "potential",
+    "saveAmount": "Save {{amount}}",
+    "priceHistory": "Price History",
+    "storeComparison": "Store Comparison",
+    "avgPrice": "Avg Price",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "lastPrice": "Last Price",
+    "purchases": "Purchases",
+    "lastPurchase": "Last Purchase",
+    "allStores": "All Stores",
+    "noHistory": "No price history yet",
+    "stats": {
+      "title": "Statistics",
+      "totalProducts": "Products Tracked",
+      "priceRecords": "Price Records",
+      "uniqueStores": "Unique Stores"
+    },
+    "migrate": {
+      "title": "Import Existing Receipts",
+      "description": "Extract item data from your existing receipts",
+      "button": "Import Items",
+      "processing": "Processing...",
+      "success": "Imported {{items}} items from {{receipts}} receipts",
+      "error": "Failed to import items"
+    },
+    "matching": {
+      "title": "Match Products",
+      "description": "Help us match similar products for better price tracking",
+      "searchPlaceholder": "Search products...",
+      "noMatches": "No matching products found",
+      "mergeWith": "Merge with",
+      "createNew": "Create as new product",
+      "success": "Products merged successfully",
+      "error": "Failed to merge products"
+    }
   }
 }

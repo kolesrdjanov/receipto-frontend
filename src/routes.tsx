@@ -12,6 +12,8 @@ const Dashboard = lazy(() => import('./pages/dashboard'))
 const Categories = lazy(() => import('./pages/categories'))
 const Receipts = lazy(() => import('./pages/receipts'))
 const Templates = lazy(() => import('./pages/templates'))
+const Items = lazy(() => import('./pages/items'))
+const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const Groups = lazy(() => import('./pages/groups'))
 const Warranties = lazy(() => import('./pages/warranties'))
 const Settings = lazy(() => import('./pages/settings'))
@@ -67,6 +69,22 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <Templates />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/items',
+    element: (
+      <ProtectedRoute>
+        <Items />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/items/:id',
+    element: (
+      <ProtectedRoute>
+        <ItemDetail />
       </ProtectedRoute>
     ),
   },
