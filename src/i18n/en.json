@@ -701,6 +701,12 @@
       "success": "Imported {{items}} items from {{receipts}} receipts",
       "error": "Failed to import items"
     },
+    "autoMigrate": {
+      "title": "Setting up Price Tracker",
+      "description": "We're analyzing your receipts to extract product and price information. This only happens once.",
+      "processing": "Analyzing your receipts...",
+      "success": "Found {{items}} products from {{receipts}} receipts!"
+    },
     "matching": {
       "title": "Match Products",
       "description": "Help us match similar products for better price tracking",

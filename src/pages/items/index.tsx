@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,19 +25,71 @@ import {
   PiggyBank,
   HelpCircle,
   X,
+  Sparkles,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 
 export default function ItemsPage() {
   const { t } = useTranslation()
-  const { data: items, isLoading: itemsLoading } = useFrequentItems(50)
-  const { data: stats, isLoading: statsLoading } = useItemStats()
+  const { data: items, isLoading: itemsLoading, refetch: refetchItems } = useFrequentItems(50)
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useItemStats()
   const migrateReceipts = useMigrateReceipts()
   const { currency } = useSettingsStore()
   const [showGuide, setShowGuide] = useState(() => {
     return localStorage.getItem('items-guide-dismissed') !== 'true'
   })
+  const [isAutoMigrating, setIsAutoMigrating] = useState(false)
+  const autoMigrateAttempted = useRef(false)
+
+  // Auto-migrate existing receipts on first visit if user has no items
+  useEffect(() => {
+    const shouldAutoMigrate = async () => {
+      // Only run once per session
+      if (autoMigrateAttempted.current) return
+
+      // Wait for stats to load
+      if (statsLoading) return
+
+      // Check if already migrated before (has items) or already attempted this session
+      const migrationKey = 'items-auto-migration-done'
+      if (localStorage.getItem(migrationKey) === 'true') return
+
+      // If user has no products, try to migrate
+      if (stats?.totalProducts === 0) {
+        autoMigrateAttempted.current = true
+        setIsAutoMigrating(true)
+
+        try {
+          const result = await migrateReceipts.mutateAsync()
+
+          // Mark migration as done
+          localStorage.setItem(migrationKey, 'true')
+
+          // Refetch data after migration
+          await Promise.all([refetchItems(), refetchStats()])
+
+          // Only show toast if items were actually created
+          if (result.itemsCreated > 0) {
+            toast.success(t('items.autoMigrate.success', {
+              items: result.itemsCreated,
+              receipts: result.processed,
+            }))
+          }
+        } catch {
+          // Silent fail for auto-migration - user can still manually migrate
+          console.error('Auto-migration failed')
+        } finally {
+          setIsAutoMigrating(false)
+        }
+      } else {
+        // User already has items, mark as done
+        localStorage.setItem(migrationKey, 'true')
+      }
+    }
+
+    shouldAutoMigrate()
+  }, [statsLoading, stats?.totalProducts, migrateReceipts, refetchItems, refetchStats, t])
 
   const dismissGuide = () => {
     setShowGuide(false)
@@ -79,7 +131,28 @@ export default function ItemsPage() {
     }
   }
 
-  const isLoading = itemsLoading || statsLoading
+  const isLoading = itemsLoading || statsLoading || isAutoMigrating
+
+  // Show special loading state during auto-migration
+  if (isAutoMigrating) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="relative">
+            <Sparkles className="h-12 w-12 text-primary animate-pulse" />
+          </div>
+          <h3 className="mt-6 text-xl font-semibold">{t('items.autoMigrate.title')}</h3>
+          <p className="mt-2 text-muted-foreground text-center max-w-md">
+            {t('items.autoMigrate.description')}
+          </p>
+          <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t('items.autoMigrate.processing')}
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout>

@@ -688,6 +688,12 @@
       "success": "Uvezeno {{items}} artikala iz {{receipts}} računa",
       "error": "Greška pri uvozu artikala"
     },
+    "autoMigrate": {
+      "title": "Podešavanje praćenja cena",
+      "description": "Analiziramo vaše račune kako bismo izvukli informacije o proizvodima i cenama. Ovo se dešava samo jednom.",
+      "processing": "Analiziramo vaše račune...",
+      "success": "Pronađeno {{items}} proizvoda iz {{receipts}} računa!"
+    },
     "matching": {
       "title": "Spajanje proizvoda",
       "description": "Pomozite nam da spojimo slične proizvode za bolje praćenje cena",
