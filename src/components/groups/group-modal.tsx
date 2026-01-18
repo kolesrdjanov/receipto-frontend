@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +39,7 @@ import {
 } from '@/hooks/groups/use-groups'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { toast } from 'sonner'
+import { Loader2, Trash2 } from 'lucide-react'
 
 interface GroupModalProps {
   open: boolean
@@ -46,6 +57,8 @@ type GroupFormData = {
 
 export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps) {
   const { t } = useTranslation()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -116,19 +129,18 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
   const handleDelete = async () => {
     if (!group) return
 
-    if (window.confirm(t('groups.modal.deleteConfirm'))) {
-      try {
-        await deleteGroup.mutateAsync(group.id)
-        toast.success(t('groups.modal.deleteSuccess'))
-        onOpenChange(false)
-        reset()
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'An error occurred'
-        toast.error(t('groups.modal.deleteError'), {
-          description: errorMessage,
-        })
-      }
+    try {
+      await deleteGroup.mutateAsync(group.id)
+      toast.success(t('groups.modal.deleteSuccess'))
+      setShowDeleteDialog(false)
+      onOpenChange(false)
+      reset()
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('groups.modal.deleteError'), {
+        description: errorMessage,
+      })
     }
   }
 
@@ -221,11 +233,12 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={deleteGroup.isPending || isSubmitting}
                 className="sm:mr-auto"
               >
-                {deleteGroup.isPending ? t('common.deleting') : t('common.delete')}
+                <Trash2 className="h-4 w-4" />
+                {t('common.delete')}
               </Button>
             )}
             <Button
@@ -251,6 +264,33 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('groups.modal.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('groups.modal.deleteConfirmDescription', { name: group?.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleteGroup.isPending}
+            >
+              {deleteGroup.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

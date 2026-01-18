@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -32,6 +42,7 @@ import { useGroups, useGroup } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
 import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
+import { Loader2, Trash2 } from 'lucide-react'
 
 interface ReceiptModalProps {
   open: boolean
@@ -55,6 +66,8 @@ type ReceiptFormData = {
 
 export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }: ReceiptModalProps) {
   const { t } = useTranslation()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -192,19 +205,18 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   const handleDelete = async () => {
     if (!receipt) return
 
-    if (window.confirm(t('receipts.modal.deleteConfirm'))) {
-      try {
-        await deleteReceipt.mutateAsync(receipt.id)
-        toast.success(t('receipts.modal.deleteSuccess'))
-        onOpenChange(false)
-        reset()
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'An error occurred'
-        toast.error(t('receipts.modal.deleteError'), {
-          description: errorMessage,
-        })
-      }
+    try {
+      await deleteReceipt.mutateAsync(receipt.id)
+      toast.success(t('receipts.modal.deleteSuccess'))
+      setShowDeleteDialog(false)
+      onOpenChange(false)
+      reset()
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.modal.deleteError'), {
+        description: errorMessage,
+      })
     }
   }
 
@@ -430,12 +442,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={deleteReceipt.isPending || isSubmitting}
                 className="sm:mr-auto"
                 data-testid="receipt-delete-button"
               >
-                {deleteReceipt.isPending ? t('common.deleting') : t('common.delete')}
+                <Trash2 className="h-4 w-4" />
+                {t('common.delete')}
               </Button>
             )}
             <Button
@@ -463,6 +476,33 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('receipts.modal.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('receipts.modal.deleteConfirm', { store: receipt?.storeName || t('common.unknown') })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleteReceipt.isPending}
+            >
+              {deleteReceipt.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

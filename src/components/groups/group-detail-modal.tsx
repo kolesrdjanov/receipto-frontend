@@ -35,6 +35,8 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
   const { t } = useTranslation()
   const [inviteEmail, setInviteEmail] = useState('')
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const { user } = useAuthStore()
 
   const { data: stats, isLoading: statsLoading } = useGroupStats(group?.id || '')
@@ -63,12 +65,19 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
     }
   }
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (!window.confirm(t('groups.detail.removeMemberConfirm'))) return
+  const handleRemoveMemberClick = (memberId: string) => {
+    setMemberToRemove(memberId)
+    setShowRemoveMemberConfirm(true)
+  }
+
+  const handleRemoveMemberConfirm = async () => {
+    if (!memberToRemove) return
 
     try {
-      await removeMember.mutateAsync({ groupId: group.id, memberId })
+      await removeMember.mutateAsync({ groupId: group.id, memberId: memberToRemove })
       toast.success(t('groups.detail.memberRemoved'))
+      setShowRemoveMemberConfirm(false)
+      setMemberToRemove(null)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('groups.detail.removeMemberError')
       toast.error(errorMessage)
@@ -206,7 +215,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveMember(member.userId)}
+                      onClick={() => handleRemoveMemberClick(member.userId)}
                       disabled={removeMember.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -236,7 +245,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleRemoveMember(member.userId || member.id)}
+                        onClick={() => handleRemoveMemberClick(member.userId || member.id)}
                         disabled={removeMember.isPending}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -295,6 +304,17 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           confirmText={t('groups.detail.leaveGroup')}
           variant="destructive"
           isLoading={leaveGroup.isPending}
+        />
+
+        <ConfirmDialog
+          open={showRemoveMemberConfirm}
+          onOpenChange={setShowRemoveMemberConfirm}
+          title={t('groups.detail.removeMemberTitle')}
+          description={t('groups.detail.removeMemberConfirm')}
+          onConfirm={handleRemoveMemberConfirm}
+          confirmText={t('common.delete')}
+          variant="destructive"
+          isLoading={removeMember.isPending}
         />
       </DialogContent>
     </Dialog>
