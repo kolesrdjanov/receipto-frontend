@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, type ComponentType } from 'react'
+import { useEffect, useState, useRef, useCallback, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -25,6 +25,15 @@ type ScannerProps = {
   constraints?: unknown
   styles?: unknown
   components?: unknown
+}
+
+// Extended MediaTrackCapabilities with torch
+interface TorchCapabilities extends MediaTrackCapabilities {
+  torch?: boolean
+}
+
+// Extended MediaTrackConstraintSet with torch
+interface TorchConstraints extends MediaTrackConstraintSet {
   torch?: boolean
 }
 
@@ -32,12 +41,64 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [torchEnabled, setTorchEnabled] = useState(false)
+  const [torchSupported, setTorchSupported] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
 
   const qrTimeoutRef = useRef<number | null>(null)
   const lastScannedRef = useRef<string | null>(null)
   const scanningRef = useRef(false)
+  const videoTrackRef = useRef<MediaStreamTrack | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Toggle torch using the MediaStream API
+  const toggleTorch = useCallback(async (enable: boolean) => {
+    const track = videoTrackRef.current
+    if (!track) return
+
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: enable } as TorchConstraints],
+      })
+      setTorchEnabled(enable)
+    } catch (err) {
+      console.error('Failed to toggle torch:', err)
+    }
+  }, [])
+
+  // Check for torch support and get video track reference
+  useEffect(() => {
+    if (!open || !ScannerComponent) return
+
+    // Wait a bit for the video element to be created
+    const checkTorchSupport = setTimeout(() => {
+      const container = containerRef.current
+      if (!container) return
+
+      const video = container.querySelector('video')
+      if (!video || !video.srcObject) return
+
+      const stream = video.srcObject as MediaStream
+      const track = stream.getVideoTracks()[0]
+      if (!track) return
+
+      videoTrackRef.current = track
+
+      // Check if torch is supported
+      try {
+        const capabilities = track.getCapabilities() as TorchCapabilities
+        if (capabilities.torch) {
+          setTorchSupported(true)
+        }
+      } catch {
+        // getCapabilities not supported
+        setTorchSupported(false)
+      }
+    }, 500)
+
+    return () => {
+      clearTimeout(checkTorchSupport)
+    }
+  }, [open, ScannerComponent])
 
   // Load QR scanner component
   useEffect(() => {
@@ -49,6 +110,8 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       scanningRef.current = false
       setError(null)
       setTorchEnabled(false)
+      setTorchSupported(false)
+      videoTrackRef.current = null
       return
     }
 
@@ -134,7 +197,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
+        <div ref={containerRef} className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
             {error ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
                 <X className="h-12 w-12 text-destructive mb-2" />
@@ -155,7 +218,6 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
                     onScan={handleScan}
                     onError={handleError}
                     scanDelay={1000}
-                    torch={torchEnabled}
                     constraints={{
                       facingMode: 'environment',
                       width: { min: 1280, ideal: 1920, max: 2560 },
@@ -176,19 +238,21 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
                       finder: false,
                     }}
                   />
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-                    onClick={() => setTorchEnabled(!torchEnabled)}
-                    title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
-                  >
-                    {torchEnabled ? (
-                      <FlashlightOff className="h-5 w-5" />
-                    ) : (
-                      <Flashlight className="h-5 w-5" />
-                    )}
-                  </Button>
+                  {torchSupported && (
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                      onClick={() => toggleTorch(!torchEnabled)}
+                      title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
+                    >
+                      {torchEnabled ? (
+                        <FlashlightOff className="h-5 w-5" />
+                      ) : (
+                        <Flashlight className="h-5 w-5" />
+                      )}
+                    </Button>
+                  )}
                 </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
