@@ -318,44 +318,69 @@ export default function ItemsPage() {
                       <Link
                         key={item.id}
                         to={`/items/${item.id}`}
-                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                        className="block p-3 sm:p-4 rounded-lg border hover:bg-accent transition-colors"
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{item.displayName}</p>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                            <span>
-                              {t('items.boughtTimes', { count: item.purchaseCount })}
+                        {/* Mobile layout */}
+                        <div className="sm:hidden">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium leading-tight">{item.displayName}</p>
+                            {trend && TrendIcon && (
+                              <span className={`flex items-center gap-1 text-xs shrink-0 ${trend.color}`}>
+                                <TrendIcon className="h-3 w-3" />
+                                {trend.label}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-xs text-muted-foreground">
+                              {t('items.boughtTimes', { count: item.purchaseCount })} · {item.stores.length} {t('items.stores')}
                             </span>
-                            <span>
-                              {item.stores.length} {t('items.stores')}
-                            </span>
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className="text-muted-foreground">{formatPrice(item.avgPrice)}</span>
+                              <span className="font-medium">{formatPrice(item.lastPrice)}</span>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-6 ml-4">
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground">
-                              {t('items.avgPrice')}
-                            </p>
-                            <p className="font-medium">{formatPrice(item.avgPrice)}</p>
-                          </div>
-
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground">
-                              {t('items.lastPrice')}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">{formatPrice(item.lastPrice)}</p>
-                              {trend && TrendIcon && (
-                                <span className={`flex items-center gap-1 text-xs ${trend.color}`}>
-                                  <TrendIcon className="h-3 w-3" />
-                                  {trend.label}
-                                </span>
-                              )}
+                        {/* Desktop layout */}
+                        <div className="hidden sm:flex sm:items-center sm:justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{item.displayName}</p>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span>
+                                {t('items.boughtTimes', { count: item.purchaseCount })}
+                              </span>
+                              <span>
+                                {item.stores.length} {t('items.stores')}
+                              </span>
                             </div>
                           </div>
 
-                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-6 ml-4">
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                {t('items.avgPrice')}
+                              </p>
+                              <p className="font-medium">{formatPrice(item.avgPrice)}</p>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                {t('items.lastPrice')}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{formatPrice(item.lastPrice)}</p>
+                                {trend && TrendIcon && (
+                                  <span className={`flex items-center gap-1 text-xs ${trend.color}`}>
+                                    <TrendIcon className="h-3 w-3" />
+                                    {trend.label}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
                         </div>
                       </Link>
                     )

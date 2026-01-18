@@ -67,13 +67,13 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
           <Store className="h-4 w-4" />
           {t('items.storeComparison')}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {stores.map((store, index) => {
             const isCheapest = store.storeName === cheapestStore.storeName
             const priceDiff = ((store.avgPrice - cheapestStore.avgPrice) / cheapestStore.avgPrice) * 100
@@ -81,31 +81,57 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
             return (
               <div
                 key={store.storeName}
-                className={`p-3 rounded-lg border ${
+                className={`p-2.5 sm:p-3 rounded-lg border ${
                   isCheapest ? 'border-green-500/50 bg-green-500/5' : ''
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground w-4">
+                <div className="flex items-start sm:items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-bold text-muted-foreground shrink-0">
                       {index + 1}.
                     </span>
-                    <span className="font-medium">{store.storeName}</span>
+                    <span className="font-medium text-sm sm:text-base truncate">{store.storeName}</span>
                     {isCheapest && (
-                      <span className="px-2 py-0.5 bg-green-500/10 text-green-500 text-xs font-medium rounded-full">
+                      <span className="hidden sm:inline px-2 py-0.5 bg-green-500/10 text-green-500 text-xs font-medium rounded-full shrink-0">
                         {t('items.minPrice')}
                       </span>
                     )}
                   </div>
-                  {!isCheapest && priceDiff > 0 && (
-                    <span className="flex items-center gap-1 text-xs text-destructive">
-                      <TrendingUp className="h-3 w-3" />
-                      +{priceDiff.toFixed(0)}%
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isCheapest && (
+                      <span className="sm:hidden px-1.5 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-medium rounded-full">
+                        Best
+                      </span>
+                    )}
+                    {!isCheapest && priceDiff > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-destructive">
+                        <TrendingUp className="h-3 w-3" />
+                        +{priceDiff.toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                {/* Mobile: 2-column grid */}
+                <div className="grid grid-cols-2 gap-2 text-sm sm:hidden">
+                  <div>
+                    <p className="text-muted-foreground text-[10px]">{t('items.avgPrice')}</p>
+                    <p className="font-medium text-sm">{formatPrice(store.avgPrice)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-[10px]">{t('items.purchases')}</p>
+                    <p className="font-medium text-sm">{store.purchaseCount}x</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground text-[10px]">{t('items.priceRange')}</p>
+                    <p className="font-medium text-sm">
+                      {formatPrice(store.minPrice)} – {formatPrice(store.maxPrice)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Desktop: 3-column grid */}
+                <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">{t('items.avgPrice')}</p>
                     <p className="font-medium">{formatPrice(store.avgPrice)}</p>
@@ -113,7 +139,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                   <div>
                     <p className="text-muted-foreground text-xs">{t('items.minPrice')}/{t('items.maxPrice')}</p>
                     <p className="font-medium">
-                      {formatPrice(store.minPrice)} - {formatPrice(store.maxPrice)}
+                      {formatPrice(store.minPrice)} – {formatPrice(store.maxPrice)}
                     </p>
                   </div>
                   <div>
@@ -122,8 +148,8 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                   </div>
                 </div>
 
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('items.lastPurchase')}: {format(new Date(store.lastDate), 'MMM d, yyyy')} - {formatPrice(store.lastPrice)}
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+                  {t('items.lastPurchase')}: {format(new Date(store.lastDate), 'MMM d')} · {formatPrice(store.lastPrice)}
                 </p>
               </div>
             )

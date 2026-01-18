@@ -15,10 +15,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { UserDetailsDrawer } from '@/components/admin/user-details-drawer'
-import { useAdminUsers, useDeleteUser } from '@/hooks/admin/use-admin-users'
+import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X, Eye } from 'lucide-react'
+import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
@@ -28,13 +28,46 @@ interface UsersTableProps {
 export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState<SortField>('createdAt')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('DESC')
   const debouncedSearch = useDebouncedValue(search, 500)
 
   const { data: response, isLoading, error } = useAdminUsers({
     page,
     limit: 20,
-    search: debouncedSearch || undefined
+    search: debouncedSearch || undefined,
+    sortBy,
+    sortOrder,
   })
+
+  const handleSort = (field: SortField) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')
+    } else {
+      setSortBy(field)
+      setSortOrder('DESC')
+    }
+    onPageChange(1)
+  }
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortBy !== field) {
+      return <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground/50" />
+    }
+    return sortOrder === 'ASC'
+      ? <ArrowUp className="ml-1 h-3 w-3" />
+      : <ArrowDown className="ml-1 h-3 w-3" />
+  }
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <button
+      onClick={() => handleSort(field)}
+      className="flex items-center hover:text-foreground transition-colors"
+    >
+      {children}
+      <SortIcon field={field} />
+    </button>
+  )
   const deleteUser = useDeleteUser()
   const users = response?.data ?? []
   const meta = response?.meta
@@ -235,12 +268,32 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('admin.users.table.firstName')}</TableHead>
-                <TableHead>{t('admin.users.table.lastName')}</TableHead>
-                <TableHead>{t('admin.users.table.email')}</TableHead>
+                <TableHead>
+                  <SortableHeader field="firstName">
+                    {t('admin.users.table.firstName')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="lastName">
+                    {t('admin.users.table.lastName')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="email">
+                    {t('admin.users.table.email')}
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>{t('admin.users.table.role')}</TableHead>
-                <TableHead>{t('admin.users.table.receipts')}</TableHead>
-                <TableHead>{t('admin.users.table.joined')}</TableHead>
+                <TableHead>
+                  <SortableHeader field="receiptCount">
+                    {t('admin.users.table.receipts')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="createdAt">
+                    {t('admin.users.table.joined')}
+                  </SortableHeader>
+                </TableHead>
                 <TableHead className="text-right">{t('common.actions')}</TableHead>
               </TableRow>
             </TableHeader>

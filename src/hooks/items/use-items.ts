@@ -192,3 +192,19 @@ export function useMigrateReceipts() {
     },
   })
 }
+
+// Delete product API function
+const deleteProduct = async (id: string): Promise<{ deleted: boolean; pricesDeleted: number; aliasesDeleted: number }> => {
+  return api.delete(`/items/${id}`)
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
+    },
+  })
+}

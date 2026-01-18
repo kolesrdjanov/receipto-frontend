@@ -52,8 +52,26 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
 
   // Toggle torch using the MediaStream API
   const toggleTorch = useCallback(async (enable: boolean) => {
-    const track = videoTrackRef.current
-    if (!track) return
+    let track = videoTrackRef.current
+
+    // If no track, try to get it again from the video element
+    if (!track || track.readyState !== 'live') {
+      const container = containerRef.current
+      const video = container?.querySelector('video')
+      if (video?.srcObject) {
+        const stream = video.srcObject as MediaStream
+        const tracks = stream.getVideoTracks()
+        if (tracks.length > 0) {
+          track = tracks[0]
+          videoTrackRef.current = track
+        }
+      }
+    }
+
+    if (!track || track.readyState !== 'live') {
+      console.warn('No active video track for torch control')
+      return
+    }
 
     try {
       await track.applyConstraints({
@@ -62,6 +80,15 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       setTorchEnabled(enable)
     } catch (err) {
       console.error('Failed to toggle torch:', err)
+      // Re-check torch support - it might have changed
+      try {
+        const capabilities = track.getCapabilities() as TorchCapabilities
+        if (!capabilities.torch) {
+          setTorchSupported(false)
+        }
+      } catch {
+        setTorchSupported(false)
+      }
     }
   }, [])
 
@@ -69,18 +96,38 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   useEffect(() => {
     if (!open || !ScannerComponent) return
 
-    // Wait a bit for the video element to be created
-    const checkTorchSupport = setTimeout(() => {
+    let attempts = 0
+    const maxAttempts = 10
+    let intervalId: number | null = null
+
+    const checkTorchSupport = () => {
+      attempts++
       const container = containerRef.current
-      if (!container) return
+      if (!container) {
+        if (attempts >= maxAttempts && intervalId) {
+          clearInterval(intervalId)
+        }
+        return
+      }
 
       const video = container.querySelector('video')
-      if (!video || !video.srcObject) return
+      if (!video || !video.srcObject) {
+        if (attempts >= maxAttempts && intervalId) {
+          clearInterval(intervalId)
+        }
+        return
+      }
 
       const stream = video.srcObject as MediaStream
-      const track = stream.getVideoTracks()[0]
-      if (!track) return
+      const tracks = stream.getVideoTracks()
+      if (!tracks || tracks.length === 0) {
+        if (attempts >= maxAttempts && intervalId) {
+          clearInterval(intervalId)
+        }
+        return
+      }
 
+      const track = tracks[0]
       videoTrackRef.current = track
 
       // Check if torch is supported
@@ -93,10 +140,20 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         // getCapabilities not supported
         setTorchSupported(false)
       }
-    }, 500)
+
+      // Stop checking once we have the track
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+
+    // Check every 300ms until we find the video track or max attempts
+    intervalId = window.setInterval(checkTorchSupport, 300)
 
     return () => {
-      clearTimeout(checkTorchSupport)
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
     }
   }, [open, ScannerComponent])
 

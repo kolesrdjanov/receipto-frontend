@@ -145,30 +145,32 @@ export function PriceHistoryChart({ productId, productName }: PriceHistoryChartP
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <TrendingUp className="h-4 w-4" />
-          {t('items.priceHistory')}: {productName}
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+          <TrendingUp className="h-4 w-4 shrink-0" />
+          <span className="truncate">{t('items.priceHistory')}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
+      <CardContent className="pl-0 pr-2 sm:pl-6 sm:pr-6">
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={chartData} margin={{ left: 0, right: 8 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
               tick={{ fontSize: 10 }}
               tickLine={false}
               axisLine={false}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              tick={{ fontSize: 9 }}
+              tickLine={false}
+              axisLine={false}
               tickFormatter={(v) => `${v}`}
+              width={45}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend wrapperStyle={{ fontSize: '12px' }} />
             {stores.map((store, index) => (
               <Line
                 key={store}
@@ -177,7 +179,7 @@ export function PriceHistoryChart({ productId, productName }: PriceHistoryChartP
                 name={store}
                 stroke={STORE_COLORS[index % STORE_COLORS.length]}
                 strokeWidth={2}
-                dot={{ r: 4 }}
+                dot={{ r: 3 }}
                 connectNulls
               />
             ))}

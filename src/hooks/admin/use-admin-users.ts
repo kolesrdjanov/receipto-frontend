@@ -12,10 +12,15 @@ export interface AdminUser {
   receiptCount: number
 }
 
+export type SortField = 'createdAt' | 'receiptCount' | 'email' | 'firstName' | 'lastName'
+export type SortOrder = 'ASC' | 'DESC'
+
 export interface AdminUsersFilters {
   page?: number
   limit?: number
   search?: string
+  sortBy?: SortField
+  sortOrder?: SortOrder
 }
 
 export interface PaginationMeta {
@@ -37,6 +42,8 @@ const fetchAdminUsers = async (
   if (filters?.page !== undefined) params.append('page', filters.page.toString())
   if (filters?.limit !== undefined) params.append('limit', filters.limit.toString())
   if (filters?.search?.length) params.append('search', filters.search)
+  if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+  if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
 
   const queryString = params.toString()
   const endpoint = `/users${queryString ? `?${queryString}` : ''}`
