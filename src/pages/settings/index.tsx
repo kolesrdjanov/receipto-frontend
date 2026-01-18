@@ -427,7 +427,7 @@ export default function Settings() {
                         onClick={handleFileSelect}
                         disabled={uploadProfileImage.isPending}
                       >
-                        <ImageIcon className="h-4 w-4 mr-2" />
+                        <ImageIcon className="h-4 w-4" />
                         {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
                       </Button>
 
@@ -438,7 +438,7 @@ export default function Settings() {
                         onClick={handleRemoveProfileImage}
                         disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4" />
                         {t('settings.profile.remove')}
                       </Button>
                     </div>
@@ -480,7 +480,7 @@ export default function Settings() {
                     onClick={handleSaveProfile}
                     disabled={!isDirty || updateMe.isPending}
                   >
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4" />
                     {updateMe.isPending ? t('common.saving') : t('common.save')}
                   </Button>
                 </div>
@@ -542,7 +542,7 @@ export default function Settings() {
                 onClick={handleChangePassword}
                 disabled={changePassword.isPending || !passwordForm.currentPassword || !passwordForm.newPassword}
               >
-                <KeyRound className="h-4 w-4 mr-2" />
+                <KeyRound className="h-4 w-4" />
                 {changePassword.isPending ? t('common.saving') : t('settings.security.changePassword')}
               </Button>
             </div>
@@ -579,7 +579,7 @@ export default function Settings() {
                 variant="destructive"
                 onClick={() => setShowDeleteConfirm(true)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4" />
                 {t('settings.dangerZone.deleteAccount')}
               </Button>
             ) : (
@@ -611,7 +611,7 @@ export default function Settings() {
                     onClick={handleDeleteAccount}
                     disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4" />
                     {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
                   </Button>
                 </div>
