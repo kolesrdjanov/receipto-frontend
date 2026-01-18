@@ -10,6 +10,7 @@ export interface Me {
   lastName: string
   profileImageUrl?: string | null
   warrantyReminderEnabled?: boolean
+  budgetAlertEnabled?: boolean
 }
 
 export interface UpdateMeData {
@@ -17,6 +18,7 @@ export interface UpdateMeData {
   lastName?: string
   removeProfileImage?: boolean
   warrantyReminderEnabled?: boolean
+  budgetAlertEnabled?: boolean
 }
 
 export interface ChangePasswordData {

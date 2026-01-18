@@ -325,7 +325,7 @@ export default function Settings() {
               {t('settings.notifications.description')}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>{t('settings.notifications.warrantyReminders')}</Label>
@@ -337,6 +337,21 @@ export default function Settings() {
                 checked={effectiveUser?.warrantyReminderEnabled ?? true}
                 onCheckedChange={(checked) => updateMe.mutate({ warrantyReminderEnabled: checked })}
               />
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t('settings.notifications.budgetAlerts')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.notifications.budgetAlertsHelp')}
+                  </p>
+                </div>
+                <Switch
+                  checked={effectiveUser?.budgetAlertEnabled ?? true}
+                  onCheckedChange={(checked) => updateMe.mutate({ budgetAlertEnabled: checked })}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

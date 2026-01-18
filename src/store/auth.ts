@@ -9,6 +9,7 @@ interface User {
   profileImageUrl?: string | null
   role: 'user' | 'admin'
   warrantyReminderEnabled?: boolean
+  budgetAlertEnabled?: boolean
 }
 
 interface AuthState {

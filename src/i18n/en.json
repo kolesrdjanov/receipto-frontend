@@ -526,7 +526,9 @@
       "title": "Notifications",
       "description": "Manage your email notification preferences",
       "warrantyReminders": "Warranty expiry reminders",
-      "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire"
+      "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire",
+      "budgetAlerts": "Budget alerts",
+      "budgetAlertsHelp": "Receive email alerts when you reach 80% or exceed your category budgets"
     },
     "profile": {
       "title": "Profile",

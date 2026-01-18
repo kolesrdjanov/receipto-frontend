@@ -514,7 +514,9 @@
       "title": "Obaveštenja",
       "description": "Upravljajte podešavanjima email obaveštenja",
       "warrantyReminders": "Podsetnici o isteku garancije",
-      "warrantyRemindersHelp": "Primajte email podsetike 30 i 7 dana pre isteka vaših garancija"
+      "warrantyRemindersHelp": "Primajte email podsetike 30 i 7 dana pre isteka vaših garancija",
+      "budgetAlerts": "Upozorenja o budžetu",
+      "budgetAlertsHelp": "Primajte email upozorenja kada dostignete 80% ili premašite budžete kategorija"
     },
     "profile": {
       "title": "Profil",
