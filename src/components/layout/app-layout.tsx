@@ -113,7 +113,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-dvh bg-background">
       {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-card px-4 pt-[env(safe-area-inset-top)] md:hidden">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b bg-card px-4 pt-[env(safe-area-inset-top)] md:hidden">
         <Link to={'/dashboard'}>
           <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
         </Link>
