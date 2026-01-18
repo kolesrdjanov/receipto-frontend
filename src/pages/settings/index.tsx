@@ -13,12 +13,12 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
-import { useMe, useUpdateMe, useUploadProfileImage } from '@/hooks/users/use-me'
+import { useMe, useUpdateMe, useUploadProfileImage, useChangePassword, useDeleteMyAccount } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
 import { useMemo, useState, useRef } from 'react'
 
@@ -52,7 +52,21 @@ export default function Settings() {
   const { data: me } = useMe(true)
   const updateMe = useUpdateMe()
   const uploadProfileImage = useUploadProfileImage()
+  const changePassword = useChangePassword()
+  const deleteMyAccount = useDeleteMyAccount()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Password change state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  // Delete account state
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const effectiveUser = me ?? authUser
 
@@ -135,6 +149,54 @@ export default function Settings() {
       }
     } catch (err) {
       toast.error(t('settings.profile.uploadError'), {
+        description: err instanceof Error ? err.message : 'An error occurred',
+      })
+    }
+  }
+
+  const handleChangePassword = async () => {
+    setPasswordError(null)
+
+    // Validate
+    if (!passwordForm.currentPassword) {
+      setPasswordError(t('settings.security.currentPasswordRequired'))
+      return
+    }
+    if (!passwordForm.newPassword) {
+      setPasswordError(t('settings.security.newPasswordRequired'))
+      return
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError(t('settings.security.passwordTooShort'))
+      return
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError(t('settings.security.passwordsDoNotMatch'))
+      return
+    }
+
+    try {
+      await changePassword.mutateAsync({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      })
+      toast.success(t('settings.security.passwordChanged'))
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('settings.security.changePasswordError')
+      setPasswordError(message)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return
+
+    try {
+      await deleteMyAccount.mutateAsync()
+      toast.success(t('settings.dangerZone.accountDeleted'))
+      // User will be logged out automatically by the hook
+    } catch (err) {
+      toast.error(t('settings.dangerZone.deleteError'), {
         description: err instanceof Error ? err.message : 'An error occurred',
       })
     }
@@ -423,6 +485,137 @@ export default function Settings() {
                   </Button>
                 </div>
               </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Security - Password Change */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5" />
+              {t('settings.security.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('settings.security.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">{t('settings.security.currentPassword')}</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
+                autoComplete="current-password"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">{t('settings.security.newPassword')}</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">{t('settings.security.confirmPassword')}</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            {passwordError && (
+              <p className="text-sm text-destructive">{passwordError}</p>
+            )}
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={changePassword.isPending || !passwordForm.currentPassword || !passwordForm.newPassword}
+              >
+                <KeyRound className="h-4 w-4 mr-2" />
+                {changePassword.isPending ? t('common.saving') : t('settings.security.changePassword')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Danger Zone - Delete Account */}
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              {t('settings.dangerZone.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('settings.dangerZone.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg bg-destructive/10 p-4 space-y-3">
+              <p className="text-sm font-medium text-destructive">
+                {t('settings.dangerZone.deleteAccountWarning')}
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>{t('settings.dangerZone.deleteItem1')}</li>
+                <li>{t('settings.dangerZone.deleteItem2')}</li>
+                <li>{t('settings.dangerZone.deleteItem3')}</li>
+                <li>{t('settings.dangerZone.deleteItem4')}</li>
+              </ul>
+            </div>
+
+            {!showDeleteConfirm ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('settings.dangerZone.deleteAccount')}
+              </Button>
+            ) : (
+              <div className="space-y-3 p-4 border border-destructive rounded-lg">
+                <p className="text-sm font-medium">
+                  {t('settings.dangerZone.confirmPrompt')}
+                </p>
+                <Input
+                  type="text"
+                  placeholder="DELETE"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="font-mono"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowDeleteConfirm(false)
+                      setDeleteConfirmText('')
+                    }}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

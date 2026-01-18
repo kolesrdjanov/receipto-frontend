@@ -19,6 +19,11 @@ export interface UpdateMeData {
   warrantyReminderEnabled?: boolean
 }
 
+export interface ChangePasswordData {
+  currentPassword: string
+  newPassword: string
+}
+
 const fetchMe = async (): Promise<Me> => {
   return api.get<Me>('/users/me')
 }
@@ -76,6 +81,32 @@ export function useUploadProfileImage() {
         lastName: me.lastName,
         profileImageUrl: me.profileImageUrl ?? null,
       })
+    },
+  })
+}
+
+const changePassword = async (data: ChangePasswordData): Promise<{ message: string }> => {
+  return api.patch<{ message: string }>('/users/me/password', data)
+}
+
+const deleteMyAccount = async (): Promise<{ message: string }> => {
+  return api.delete<{ message: string }>('/users/me')
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: changePassword,
+  })
+}
+
+export function useDeleteMyAccount() {
+  const logout = useAuthStore((s) => s.logout)
+
+  return useMutation({
+    mutationFn: deleteMyAccount,
+    onSuccess: () => {
+      // Log out the user after account deletion
+      logout()
     },
   })
 }

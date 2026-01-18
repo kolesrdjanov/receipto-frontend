@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, X, Info } from 'lucide-react'
+import { Camera, X, Info, Flashlight, FlashlightOff } from 'lucide-react'
 
 interface QrScannerProps {
   open: boolean
@@ -25,11 +25,13 @@ type ScannerProps = {
   constraints?: unknown
   styles?: unknown
   components?: unknown
+  torch?: boolean
 }
 
 export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
+  const [torchEnabled, setTorchEnabled] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
 
   const qrTimeoutRef = useRef<number | null>(null)
@@ -46,6 +48,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       lastScannedRef.current = null
       scanningRef.current = false
       setError(null)
+      setTorchEnabled(false)
       return
     }
 
@@ -147,30 +150,46 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
               </div>
             ) : open ? (
               ScannerComponent ? (
-                <ScannerComponent
-                  onScan={handleScan}
-                  onError={handleError}
-                  scanDelay={1000}
-                  constraints={{
-                    facingMode: 'environment',
-                    width: { min: 1280, ideal: 1920, max: 2560 },
-                    height: { min: 720, ideal: 1080, max: 1440 },
-                  }}
-                  styles={{
-                    container: {
-                      width: '100%',
-                      height: '350px',
-                    },
-                    video: {
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    },
-                  }}
-                  components={{
-                    finder: false,
-                  }}
-                />
+                <>
+                  <ScannerComponent
+                    onScan={handleScan}
+                    onError={handleError}
+                    scanDelay={1000}
+                    torch={torchEnabled}
+                    constraints={{
+                      facingMode: 'environment',
+                      width: { min: 1280, ideal: 1920, max: 2560 },
+                      height: { min: 720, ideal: 1080, max: 1440 },
+                    }}
+                    styles={{
+                      container: {
+                        width: '100%',
+                        height: '350px',
+                      },
+                      video: {
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      },
+                    }}
+                    components={{
+                      finder: false,
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                    onClick={() => setTorchEnabled(!torchEnabled)}
+                    title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
+                  >
+                    {torchEnabled ? (
+                      <FlashlightOff className="h-5 w-5" />
+                    ) : (
+                      <Flashlight className="h-5 w-5" />
+                    )}
+                  </Button>
+                </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
                   <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>

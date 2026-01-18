@@ -258,7 +258,9 @@
       "tryAgain": "Try Again",
       "scanSuccess": "Receipt scanned successfully",
       "scanSuccessDescription": "The receipt data will be extracted shortly.",
-      "scanError": "Failed to create receipt from QR code"
+      "scanError": "Failed to create receipt from QR code",
+      "torchOn": "Turn on flashlight",
+      "torchOff": "Turn off flashlight"
     },
     "pfrEntry": {
       "title": "Manual Entry via PFR Number",
@@ -540,6 +542,34 @@
       "uploadError": "Failed to upload profile picture",
       "invalidFileType": "Invalid file type. Please upload JPEG, PNG, WebP, or HEIC image.",
       "fileTooLarge": "File is too large. Maximum size is 5MB."
+    },
+    "security": {
+      "title": "Security",
+      "description": "Update your password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "changePassword": "Change Password",
+      "passwordChanged": "Password changed successfully",
+      "changePasswordError": "Failed to change password",
+      "currentPasswordRequired": "Current password is required",
+      "newPasswordRequired": "New password is required",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "passwordsDoNotMatch": "New passwords do not match"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Irreversible and destructive actions",
+      "deleteAccount": "Delete Account",
+      "deleteAccountWarning": "Deleting your account is permanent and cannot be undone. This will:",
+      "deleteItem1": "Delete all your receipts and expense data",
+      "deleteItem2": "Delete all your warranties and their images",
+      "deleteItem3": "Delete all groups you own (including all receipts in those groups)",
+      "deleteItem4": "Remove you from any groups you're a member of",
+      "confirmPrompt": "Type DELETE to confirm account deletion:",
+      "confirmDelete": "Delete My Account",
+      "accountDeleted": "Your account has been deleted",
+      "deleteError": "Failed to delete account"
     }
   },
   "warranties": {

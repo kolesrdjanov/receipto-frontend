@@ -258,7 +258,9 @@
       "tryAgain": "Pokušaj ponovo",
       "scanSuccess": "Račun uspešno skeniran",
       "scanSuccessDescription": "Podaci sa računa će uskoro biti izdvojeni.",
-      "scanError": "Greška pri kreiranju računa iz QR koda"
+      "scanError": "Greška pri kreiranju računa iz QR koda",
+      "torchOn": "Uključi blic",
+      "torchOff": "Isključi blic"
     },
     "pfrEntry": {
       "title": "Ručni unos preko PFR broja",
@@ -528,6 +530,34 @@
       "uploadError": "Greška pri dodavanju profilne slike",
       "invalidFileType": "Nevažeći tip fajla. Molimo dodajte JPEG, PNG, WebP ili HEIC sliku.",
       "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB."
+    },
+    "security": {
+      "title": "Bezbednost",
+      "description": "Promenite svoju lozinku",
+      "currentPassword": "Trenutna lozinka",
+      "newPassword": "Nova lozinka",
+      "confirmPassword": "Potvrdite novu lozinku",
+      "changePassword": "Promeni lozinku",
+      "passwordChanged": "Lozinka je uspešno promenjena",
+      "changePasswordError": "Greška pri promeni lozinke",
+      "currentPasswordRequired": "Trenutna lozinka je obavezna",
+      "newPasswordRequired": "Nova lozinka je obavezna",
+      "passwordTooShort": "Lozinka mora imati najmanje 6 karaktera",
+      "passwordsDoNotMatch": "Nove lozinke se ne poklapaju"
+    },
+    "dangerZone": {
+      "title": "Opasna zona",
+      "description": "Nepovratne i destruktivne akcije",
+      "deleteAccount": "Obriši nalog",
+      "deleteAccountWarning": "Brisanje naloga je trajno i ne može se poništiti. Ovo će:",
+      "deleteItem1": "Obrisati sve vaše račune i podatke o troškovima",
+      "deleteItem2": "Obrisati sve vaše garancije i njihove slike",
+      "deleteItem3": "Obrisati sve grupe čiji ste vlasnik (uključujući sve račune u tim grupama)",
+      "deleteItem4": "Ukloniti vas iz svih grupa čiji ste član",
+      "confirmPrompt": "Ukucajte DELETE da potvrdite brisanje naloga:",
+      "confirmDelete": "Obriši moj nalog",
+      "accountDeleted": "Vaš nalog je obrisan",
+      "deleteError": "Greška pri brisanju naloga"
     }
   },
   "warranties": {
