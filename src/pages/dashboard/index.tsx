@@ -686,7 +686,7 @@ export default function Dashboard() {
                     <Link
                       key={receipt.id}
                       to="/receipts"
-                      className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border"
+                      className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border truncate"
                     >
                       <span className="font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</span>
                       <span className="text-lg font-bold">
