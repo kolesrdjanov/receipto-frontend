@@ -18,7 +18,6 @@ import { format } from 'date-fns'
 
 interface PriceHistoryChartProps {
   productId: string
-  productName: string
 }
 
 const STORE_COLORS = [
@@ -32,7 +31,7 @@ const STORE_COLORS = [
   '#84cc16',
 ]
 
-export function PriceHistoryChart({ productId, productName }: PriceHistoryChartProps) {
+export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
   const { t } = useTranslation()
   const { data: history, isLoading } = usePriceHistory(productId, { limit: 50 })
   const { currency } = useSettingsStore()

@@ -173,12 +173,12 @@ export default function ItemsPage() {
           >
             {migrateReceipts.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 {t('items.migrate.processing')}
               </>
             ) : (
               <>
-                <Database className="h-4 w-4 mr-2" />
+                <Database className="h-4 w-4" />
                 {t('items.migrate.button')}
               </>
             )}

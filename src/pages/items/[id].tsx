@@ -74,7 +74,7 @@ export default function ItemDetailPage() {
           <p className="text-lg text-muted-foreground">Product not found</p>
           <Link to="/items">
             <Button variant="outline" className="mt-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4" />
               {t('items.viewAll')}
             </Button>
           </Link>
@@ -89,7 +89,7 @@ export default function ItemDetailPage() {
         <div className="flex items-center justify-between mb-4">
           <Link to="/items">
             <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4" />
               {t('items.title')}
             </Button>
           </Link>
@@ -99,7 +99,7 @@ export default function ItemDetailPage() {
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={() => setShowDeleteDialog(true)}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4" />
             {t('common.delete')}
           </Button>
         </div>
@@ -177,7 +177,7 @@ export default function ItemDetailPage() {
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2 mb-6">
-        <PriceHistoryChart productId={id!} productName={product.displayName} />
+        <PriceHistoryChart productId={id!} />
         <StoreComparison productId={id!} />
       </div>
 
@@ -218,13 +218,13 @@ export default function ItemDetailPage() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
               disabled={deleteProduct.isPending}
             >
               {deleteProduct.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4" />
               )}
               {t('common.delete')}
             </AlertDialogAction>

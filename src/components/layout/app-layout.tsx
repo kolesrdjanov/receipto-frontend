@@ -249,7 +249,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               className="w-full mt-2"
               onClick={() => setIsSupportModalOpen(true)}
             >
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <MessageCircle className="h-4 w-4" />
               {t('support.contactSupport')}
             </Button>
             <div className="mt-3 text-center text-xs text-muted-foreground">

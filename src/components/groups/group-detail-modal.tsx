@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   useGroupStats,
   useInviteMember,
@@ -33,6 +34,7 @@ interface GroupDetailModalProps {
 export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDetailModalProps) {
   const { t } = useTranslation()
   const [inviteEmail, setInviteEmail] = useState('')
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const { user } = useAuthStore()
 
   const { data: stats, isLoading: statsLoading } = useGroupStats(group?.id || '')
@@ -73,12 +75,11 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
     }
   }
 
-  const handleLeave = async () => {
-    if (!window.confirm(t('groups.detail.leaveConfirm'))) return
-
+  const handleLeaveConfirm = async () => {
     try {
       await leaveGroup.mutateAsync(group.id)
       toast.success(t('groups.detail.leftGroup'))
+      setShowLeaveConfirm(false)
       onOpenChange(false)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('groups.detail.leaveError')
@@ -276,15 +277,25 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
             <Button
               variant="outline"
               className="w-full"
-              onClick={handleLeave}
-              disabled={leaveGroup.isPending}
+              onClick={() => setShowLeaveConfirm(true)}
             >
               <LogOut className="h-4 w-4" />
-              {leaveGroup.isPending ? t('groups.detail.leaving') : t('groups.detail.leaveGroup')}
+              {t('groups.detail.leaveGroup')}
             </Button>
           )}
           </TabsContent>
         </Tabs>
+
+        <ConfirmDialog
+          open={showLeaveConfirm}
+          onOpenChange={setShowLeaveConfirm}
+          title={t('groups.detail.leaveGroupTitle')}
+          description={t('groups.detail.leaveConfirm')}
+          onConfirm={handleLeaveConfirm}
+          confirmText={t('groups.detail.leaveGroup')}
+          variant="destructive"
+          isLoading={leaveGroup.isPending}
+        />
       </DialogContent>
     </Dialog>
   )

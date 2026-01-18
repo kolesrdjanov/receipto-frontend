@@ -263,7 +263,7 @@ export function CategoryDeleteModal({
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 {receipts && receipts.length > 0 ? t('categories.modal.reassigning') : t('common.deleting')}
               </>
             ) : (

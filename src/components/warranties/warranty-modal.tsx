@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,7 +32,7 @@ import {
   type CreateWarrantyData,
 } from '@/hooks/warranties/use-warranties'
 import { toast } from 'sonner'
-import { Info, X, FileText } from 'lucide-react'
+import { Info, X, FileText, Loader2, Trash2 } from 'lucide-react'
 
 interface WarrantyModalProps {
   open: boolean
@@ -48,6 +58,9 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   // New local images to upload
   const [localImages, setLocalImages] = useState<File[]>([])
   const [localPreviews, setLocalPreviews] = useState<string[]>([])
+
+  // Delete confirmation dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const {
     register,
@@ -278,16 +291,15 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   const handleDelete = async () => {
     if (!warranty) return
 
-    if (window.confirm(t('warranties.modal.deleteConfirm'))) {
-      try {
-        await deleteWarranty.mutateAsync(warranty.id)
-        toast.success(t('warranties.modal.deleteSuccess'))
-        onOpenChange(false)
-        reset()
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred'
-        toast.error(t('warranties.modal.deleteError'), { description: errorMessage })
-      }
+    try {
+      await deleteWarranty.mutateAsync(warranty.id)
+      toast.success(t('warranties.modal.deleteSuccess'))
+      setShowDeleteDialog(false)
+      onOpenChange(false)
+      reset()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('warranties.modal.deleteError'), { description: errorMessage })
     }
   }
 
@@ -482,11 +494,12 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                   <Button
                     type="button"
                     variant="destructive"
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteDialog(true)}
                     disabled={deleteWarranty.isPending || isSubmitting}
                     className="sm:mr-auto"
                   >
-                    {deleteWarranty.isPending ? t('common.deleting') : t('common.delete')}
+                    <Trash2 className="h-4 w-4" />
+                    {t('common.delete')}
                   </Button>
                 )}
                 <Button
@@ -514,6 +527,33 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
           </form>
         </div>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('warranties.modal.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('warranties.modal.deleteConfirmDescription', { name: warranty?.productName })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleteWarranty.isPending}
+            >
+              {deleteWarranty.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

@@ -224,7 +224,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                     className="flex-1"
                     onClick={() => handleViewDetails(user.id)}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="h-4 w-4" />
                     {t('common.view')}
                   </Button>
                   <Button
@@ -233,7 +233,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                     className="flex-1"
                     onClick={() => handleDeleteClick({ id: user.id, email: user.email })}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4" />
                     {t('admin.users.table.delete')}
                   </Button>
                 </div>
