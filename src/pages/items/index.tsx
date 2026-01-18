@@ -26,14 +26,20 @@ import {
   HelpCircle,
   X,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 
 export default function ItemsPage() {
   const { t } = useTranslation()
-  const { data: items, isLoading: itemsLoading, refetch: refetchItems } = useFrequentItems(50)
+  const [page, setPage] = useState(1)
+  const limit = 15
+  const { data: itemsResponse, isLoading: itemsLoading, refetch: refetchItems } = useFrequentItems({ page, limit })
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useItemStats()
+  const items = itemsResponse?.data
+  const pagination = itemsResponse?.pagination
   const migrateReceipts = useMigrateReceipts()
   const { currency } = useSettingsStore()
   const [showGuide, setShowGuide] = useState(() => {
@@ -309,83 +315,121 @@ export default function ItemsPage() {
                   <p className="text-sm mt-1">{t('items.scanReceiptsToTrack')}</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {items.map((item) => {
-                    const trend = getPriceTrend(item)
-                    const TrendIcon = trend?.icon
+                <>
+                  <div className="space-y-2">
+                    {items.map((item) => {
+                      const trend = getPriceTrend(item)
+                      const TrendIcon = trend?.icon
 
-                    return (
-                      <Link
-                        key={item.id}
-                        to={`/items/${item.id}`}
-                        className="block p-3 sm:p-4 rounded-lg border hover:bg-accent transition-colors"
-                      >
-                        {/* Mobile layout */}
-                        <div className="sm:hidden">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="font-medium leading-tight">{item.displayName}</p>
-                            {trend && TrendIcon && (
-                              <span className={`flex items-center gap-1 text-xs shrink-0 ${trend.color}`}>
-                                <TrendIcon className="h-3 w-3" />
-                                {trend.label}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-muted-foreground">
-                              {t('items.boughtTimes', { count: item.purchaseCount })} · {item.stores.length} {t('items.stores')}
-                            </span>
-                            <div className="flex items-center gap-3 text-sm">
-                              <span className="text-muted-foreground">{formatPrice(item.avgPrice)}</span>
-                              <span className="font-medium">{formatPrice(item.lastPrice)}</span>
+                      return (
+                        <Link
+                          key={item.id}
+                          to={`/items/${item.id}`}
+                          className="block p-3 sm:p-4 rounded-lg border hover:bg-accent transition-colors"
+                        >
+                          {/* Mobile layout */}
+                          <div className="sm:hidden">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-medium leading-tight">{item.displayName}</p>
+                              {trend && TrendIcon && (
+                                <span className={`flex items-center gap-1 text-xs shrink-0 ${trend.color}`}>
+                                  <TrendIcon className="h-3 w-3" />
+                                  {trend.label}
+                                </span>
+                              )}
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Desktop layout */}
-                        <div className="hidden sm:flex sm:items-center sm:justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{item.displayName}</p>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                              <span>
-                                {t('items.boughtTimes', { count: item.purchaseCount })}
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-muted-foreground">
+                                {t('items.boughtTimes', { count: item.purchaseCount })} · {item.stores.length} {t('items.stores')}
                               </span>
-                              <span>
-                                {item.stores.length} {t('items.stores')}
-                              </span>
+                              <div className="flex items-center gap-3 text-sm">
+                                <span className="text-muted-foreground">{formatPrice(item.avgPrice)}</span>
+                                <span className="font-medium">{formatPrice(item.lastPrice)}</span>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-6 ml-4">
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground">
-                                {t('items.avgPrice')}
-                              </p>
-                              <p className="font-medium">{formatPrice(item.avgPrice)}</p>
-                            </div>
-
-                            <div className="text-right">
-                              <p className="text-sm text-muted-foreground">
-                                {t('items.lastPrice')}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium">{formatPrice(item.lastPrice)}</p>
-                                {trend && TrendIcon && (
-                                  <span className={`flex items-center gap-1 text-xs ${trend.color}`}>
-                                    <TrendIcon className="h-3 w-3" />
-                                    {trend.label}
-                                  </span>
-                                )}
+                          {/* Desktop layout */}
+                          <div className="hidden sm:flex sm:items-center sm:justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{item.displayName}</p>
+                              <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                                <span>
+                                  {t('items.boughtTimes', { count: item.purchaseCount })}
+                                </span>
+                                <span>
+                                  {item.stores.length} {t('items.stores')}
+                                </span>
                               </div>
                             </div>
 
-                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex items-center gap-6 ml-4">
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">
+                                  {t('items.avgPrice')}
+                                </p>
+                                <p className="font-medium">{formatPrice(item.avgPrice)}</p>
+                              </div>
+
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">
+                                  {t('items.lastPrice')}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium">{formatPrice(item.lastPrice)}</p>
+                                  {trend && TrendIcon && (
+                                    <span className={`flex items-center gap-1 text-xs ${trend.color}`}>
+                                      <TrendIcon className="h-3 w-3" />
+                                      {trend.label}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                            </div>
                           </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+
+                  {/* Pagination */}
+                  {pagination && pagination.totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        {t('common.pagination.showing', {
+                          from: (pagination.page - 1) * pagination.limit + 1,
+                          to: Math.min(pagination.page * pagination.limit, pagination.total),
+                          total: pagination.total,
+                        })}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          {t('common.pagination.previous')}
+                        </Button>
+                        <span className="text-sm text-muted-foreground px-2">
+                          {pagination.page} / {pagination.totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPage((p) => p + 1)}
+                          disabled={!pagination.hasMore}
+                        >
+                          {t('common.pagination.next')}
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

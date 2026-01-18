@@ -85,7 +85,7 @@ export const queryKeys = {
   // Items (Price Intelligence)
   items: {
     all: ['items'] as const,
-    frequent: (limit?: number) => [...queryKeys.items.all, 'frequent', limit] as const,
+    frequent: (page?: number, limit?: number) => [...queryKeys.items.all, 'frequent', { page, limit }] as const,
     stats: () => [...queryKeys.items.all, 'stats'] as const,
     products: () => [...queryKeys.items.all, 'products'] as const,
     savings: (limit?: number) => [...queryKeys.items.all, 'savings', limit] as const,

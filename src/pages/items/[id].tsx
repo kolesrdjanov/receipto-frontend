@@ -27,7 +27,8 @@ export default function ItemDetailPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: product, isLoading: productLoading } = useProduct(id || '')
-  const { data: frequentItems } = useFrequentItems(50)
+  const { data: frequentItemsResponse } = useFrequentItems({ limit: 100 })
+  const frequentItems = frequentItemsResponse?.data
   const { currency } = useSettingsStore()
   const deleteProduct = useDeleteProduct()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)

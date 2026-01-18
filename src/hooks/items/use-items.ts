@@ -76,9 +76,28 @@ export interface MigrateResult {
   pricesRecorded: number
 }
 
+export interface Pagination {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+  hasMore: boolean
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  pagination: Pagination
+}
+
 // API functions
-const fetchFrequentItems = async (limit: number = 10): Promise<FrequentItem[]> => {
-  return api.get<FrequentItem[]>(`/items/frequent?limit=${limit}`)
+const fetchFrequentItems = async (
+  options: { page?: number; limit?: number } = {}
+): Promise<PaginatedResponse<FrequentItem>> => {
+  const params = new URLSearchParams()
+  if (options.page) params.append('page', options.page.toString())
+  if (options.limit) params.append('limit', options.limit.toString())
+  const queryString = params.toString()
+  return api.get<PaginatedResponse<FrequentItem>>(`/items/frequent${queryString ? `?${queryString}` : ''}`)
 }
 
 const fetchItemStats = async (): Promise<ItemStats> => {
@@ -122,10 +141,11 @@ const migrateExistingReceipts = async (): Promise<MigrateResult> => {
 }
 
 // Hooks
-export function useFrequentItems(limit: number = 10) {
+export function useFrequentItems(options: { page?: number; limit?: number } = {}) {
+  const { page = 1, limit = 10 } = options
   return useQuery({
-    queryKey: queryKeys.items.frequent(limit),
-    queryFn: () => fetchFrequentItems(limit),
+    queryKey: queryKeys.items.frequent(page, limit),
+    queryFn: () => fetchFrequentItems({ page, limit }),
   })
 }
 

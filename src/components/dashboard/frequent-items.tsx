@@ -7,7 +7,8 @@ import { useSettingsStore } from '@/store/settings'
 
 export function FrequentItems() {
   const { t } = useTranslation()
-  const { data: items, isLoading } = useFrequentItems(5)
+  const { data: itemsResponse, isLoading } = useFrequentItems({ limit: 5 })
+  const items = itemsResponse?.data
   const { currency } = useSettingsStore()
 
   const formatPrice = (amount: number) => {

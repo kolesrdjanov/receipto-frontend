@@ -25,7 +25,12 @@
     "unknown": "Nepoznato",
     "pickDate": "Izaberite datum",
     "next": "Sledeće",
-    "back": "Nazad"
+    "back": "Nazad",
+    "pagination": {
+      "showing": "Prikazano {{from}}-{{to}} od {{total}}",
+      "previous": "Prethodna",
+      "next": "Sledeća"
+    }
   },
   "onboarding": {
     "skip": "Preskoči",
