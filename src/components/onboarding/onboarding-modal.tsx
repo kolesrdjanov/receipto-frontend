@@ -10,7 +10,6 @@ import {
   FolderOpen,
   Shield,
   Users,
-  TrendingUp,
   ChevronRight,
   ChevronLeft,
   Sparkles,
