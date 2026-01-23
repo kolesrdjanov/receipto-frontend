@@ -438,7 +438,8 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                   {previewItems.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-2">
                       {previewItems.map((item, idx) => {
-                        const isPdf = item.src === 'pdf-placeholder' || item.src.toLowerCase().endsWith('.pdf')
+                        const lowerSrc = item.src.toLowerCase()
+                        const isPdf = item.src === 'pdf-placeholder' || lowerSrc.endsWith('.pdf') || lowerSrc.includes('/raw/upload/')
                         return (
                           <div key={`${item.type}-${idx}`} className="relative overflow-hidden rounded-lg border">
                             {item.src === 'heic-placeholder' ? (

@@ -51,8 +51,8 @@
       "tip": ""
     },
     "step4": {
-      "title": "Delite troškove",
-      "description": "Kreirajte grupe za porodicu, cimere ili putovanja. Pratite zajedničke troškove i vidite ko kome duguje.",
+      "title": "Podelite troškove zajedno",
+      "description": "Kreirajte grupe za porodicu, cimere ili putovanja. Pratite ko je platio, vidite stanje i lako poravnajte dugove - kao popularne aplikacije za deljenje troškova.",
       "tip": ""
     },
     "step5": {
@@ -65,7 +65,7 @@
     "dashboard": "Kontrolna tabla",
     "receipts": "Troškovi",
     "categories": "Kategorije",
-    "groups": "Grupe",
+    "groups": "Grupni troškovi",
     "warranties": "Garancije",
     "priceTracker": "Praćenje cena",
     "settings": "Podešavanja",
@@ -400,11 +400,21 @@
     }
   },
   "groups": {
-    "title": "Grupe",
-    "subtitle": "Kreirajte i upravljajte grupama za troškove",
+    "title": "Grupni troškovi",
+    "subtitle": "Podelite troškove sa porodicom, cimerima ili prijateljima",
     "newGroup": "Nova grupa",
     "noGroups": "Nema grupa",
     "noGroupsText": "Kreirajte grupu da biste delili troškove sa drugima",
+    "guide": {
+      "title": "Kako funkcionišu Grupni troškovi",
+      "step1Title": "Kreirajte grupu",
+      "step1Description": "Napravite grupu za domaćinstvo, putovanje ili bilo koji scenario deljenja troškova. Pozovite članove putem email-a.",
+      "step2Title": "Dodajte zajedničke troškove",
+      "step2Description": "Prilikom dodavanja računa, dodelite ga grupi. Pratite ko je platio i aplikacija će izračunati ko kome duguje.",
+      "step3Title": "Lako poravnajte dugove",
+      "step3Description": "Pregledajte stanje na prvi pogled. Dobijte optimizovane predloge plaćanja za izmirenje svih dugova sa minimalnim brojem transakcija.",
+      "tip": "Savet: Idealno za cimere koji dele račune, parove koji prate troškove domaćinstva ili prijatelje na putovanju. Svaka grupa ima svoju valutu, tako da možete upravljati različitim scenarijima odvojeno."
+    },
     "pendingInvites": "Pozivnice na čekanju",
     "membersCount": "{{count}} članova",
     "invitedBy": "Pozvao/la {{name}}",

@@ -175,7 +175,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
 
           {/* Balances Tab */}
           <TabsContent value="balances" className="mt-4">
-            <GroupBalancesTab groupId={group.id} />
+            <GroupBalancesTab groupId={group.id} currency={group.currency} />
           </TabsContent>
 
           {/* Members Tab */}

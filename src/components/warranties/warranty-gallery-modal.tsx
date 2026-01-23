@@ -51,7 +51,13 @@ export function WarrantyGalleryModal({
   }, [open, initialIndex, clampIndex])
 
   const current = safeImages[index]
-  const isPdf = useMemo(() => current?.toLowerCase().endsWith('.pdf') ?? false, [current])
+  // Detect PDFs by checking URL extension OR Cloudinary raw resource type path
+  const isPdf = useMemo(() => {
+    if (!current) return false
+    const lowerUrl = current.toLowerCase()
+    // Check for .pdf extension or Cloudinary raw resource path
+    return lowerUrl.endsWith('.pdf') || lowerUrl.includes('/raw/upload/')
+  }, [current])
 
   const currentDeliverUrl = useMemo(() => {
     if (!current) return ''
@@ -61,6 +67,12 @@ export function WarrantyGalleryModal({
     if (current.startsWith('blob:') || current.startsWith('data:')) return current
     return `${current}${current.includes('?') ? '&' : '?'}f_auto,q_auto`
   }, [current, isPdf])
+
+  // For PDF preview, use Google Docs Viewer to avoid auto-download from Cloudinary
+  const pdfViewerUrl = useMemo(() => {
+    if (!isPdf || !current) return ''
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(current)}&embedded=true`
+  }, [isPdf, current])
 
   const goPrev = useCallback(
     () => setIndex((i) => (safeImages.length ? (i - 1 + safeImages.length) % safeImages.length : 0)),
@@ -141,7 +153,7 @@ export function WarrantyGalleryModal({
             {current ? (
               isPdf ? (
                 <iframe
-                  src={currentDeliverUrl}
+                  src={pdfViewerUrl}
                   title={`${title} ${index + 1}`}
                   className="w-full h-full border-0"
                 />

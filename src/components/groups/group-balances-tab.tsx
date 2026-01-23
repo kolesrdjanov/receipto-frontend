@@ -5,9 +5,10 @@ import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight } from 'lucide-rea
 
 interface GroupBalancesTabProps {
   groupId: string
+  currency: string
 }
 
-export function GroupBalancesTab({ groupId }: GroupBalancesTabProps) {
+export function GroupBalancesTab({ groupId, currency }: GroupBalancesTabProps) {
   const { t } = useTranslation()
   const { data: balances = [], isLoading: balancesLoading } = useGroupBalances(groupId)
   const { data: settlements = [], isLoading: settlementsLoading } = useGroupSettlements(groupId)
@@ -18,7 +19,9 @@ export function GroupBalancesTab({ groupId }: GroupBalancesTabProps) {
   const totalSpent = balances.reduce((sum, balance) => sum + balance.totalPaid, 0)
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('sr-RS', {
+      style: 'currency',
+      currency: currency || 'RSD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount)
@@ -48,7 +51,7 @@ export function GroupBalancesTab({ groupId }: GroupBalancesTabProps) {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-primary">
-            {formatCurrency(totalSpent)} RSD
+            {formatCurrency(totalSpent)}
           </div>
         </CardContent>
       </Card>
@@ -159,7 +162,7 @@ export function GroupBalancesTab({ groupId }: GroupBalancesTabProps) {
                     </span>
                   </div>
                   <span className="font-semibold text-primary whitespace-nowrap">
-                    {formatCurrency(settlement.amount)} RSD
+                    {formatCurrency(settlement.amount)}
                   </span>
                 </div>
               ))}

@@ -12,7 +12,7 @@ import {
 } from '@/hooks/groups/use-groups'
 import { GroupModal } from '@/components/groups/group-modal'
 import { GroupDetailModal } from '@/components/groups/group-detail-modal'
-import { Plus, Users, Loader2, Mail, Check, X } from 'lucide-react'
+import { Plus, Users, Loader2, Mail, Check, X, HelpCircle, UserPlus, Receipt, Calculator } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Groups() {
@@ -21,6 +21,14 @@ export default function Groups() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [showGuide, setShowGuide] = useState(() => {
+    return localStorage.getItem('groups-guide-dismissed') !== 'true'
+  })
+
+  const dismissGuide = () => {
+    setShowGuide(false)
+    localStorage.setItem('groups-guide-dismissed', 'true')
+  }
 
   const { data: groups = [], isLoading } = useGroups()
   const { data: pendingInvites = [] } = usePendingInvites()
@@ -80,6 +88,68 @@ export default function Groups() {
           {t('groups.newGroup')}
         </Button>
       </div>
+
+      {/* How It Works Guide */}
+      {showGuide && (
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HelpCircle className="h-5 w-5 text-primary" />
+                {t('groups.guide.title')}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={dismissGuide}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <UserPlus className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('groups.guide.step1Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('groups.guide.step1Description')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Receipt className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('groups.guide.step2Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('groups.guide.step2Description')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Calculator className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('groups.guide.step3Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('groups.guide.step3Description')}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4 pt-3 border-t">
+              {t('groups.guide.tip')}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pending Invites */}
       {pendingInvites.length > 0 && (

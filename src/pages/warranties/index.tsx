@@ -23,6 +23,7 @@ import {
   Calendar,
   Store,
   Clock,
+  FileText,
 } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -239,23 +240,34 @@ export default function WarrantiesPage() {
                         <div className="grid grid-cols-2 gap-2">
                           {[warranty.fileUrl, warranty.fileUrl2]
                             .filter(Boolean)
-                            .map((img, i) => (
-                              <button
-                                key={img as string}
-                                type="button"
-                                className="relative h-32 rounded-md overflow-hidden bg-muted border hover:border-primary transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  openGallery(warranty, i)
-                                }}
-                              >
-                                <img
-                                  src={`${img as string}${(img as string).includes('?') ? '&' : '?'}f_auto,q_auto`}
-                                  alt={warranty.productName}
-                                  className="w-full h-full object-contain"
-                                />
-                              </button>
-                            ))}
+                            .map((fileUrl, i) => {
+                              const url = fileUrl as string
+                              const isPdf = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/raw/upload/')
+                              return (
+                                <button
+                                  key={url}
+                                  type="button"
+                                  className="relative h-32 rounded-md overflow-hidden bg-muted border hover:border-primary transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    openGallery(warranty, i)
+                                  }}
+                                >
+                                  {isPdf ? (
+                                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                      <FileText className="h-10 w-10" />
+                                      <span className="text-xs font-medium">PDF</span>
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={`${url}${url.includes('?') ? '&' : '?'}f_auto,q_auto`}
+                                      alt={warranty.productName}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  )}
+                                </button>
+                              )
+                            })}
                         </div>
                       )}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">

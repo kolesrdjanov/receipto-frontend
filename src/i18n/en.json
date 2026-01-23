@@ -51,8 +51,8 @@
       "tip": ""
     },
     "step4": {
-      "title": "Share Expenses",
-      "description": "Create groups for family, roommates, or trips. Track shared expenses and see who owes what.",
+      "title": "Split Expenses Together",
+      "description": "Create groups for family, roommates, or trips. Track who paid, see balances, and settle up easily - like popular expense sharing apps.",
       "tip": ""
     },
     "step5": {
@@ -65,7 +65,7 @@
     "dashboard": "Dashboard",
     "receipts": "Expenses",
     "categories": "Categories",
-    "groups": "Groups",
+    "groups": "Group Spending",
     "warranties": "Warranties",
     "priceTracker": "Price Tracker",
     "settings": "Settings",
@@ -412,11 +412,21 @@
     }
   },
   "groups": {
-    "title": "Groups",
-    "subtitle": "Create and manage expense groups",
+    "title": "Group Spending",
+    "subtitle": "Split expenses with family, roommates, or friends",
     "newGroup": "New Group",
     "noGroups": "No groups yet",
     "noGroupsText": "Create a group to share expenses with others",
+    "guide": {
+      "title": "How Group Spending Works",
+      "step1Title": "Create a Group",
+      "step1Description": "Set up a group for your household, trip, or any shared expense scenario. Invite members by email.",
+      "step2Title": "Add Shared Expenses",
+      "step2Description": "When adding a receipt, assign it to a group. Track who paid and let the app calculate who owes what.",
+      "step3Title": "Settle Up Easily",
+      "step3Description": "View balances at a glance. Get optimized payment suggestions to settle all debts with minimal transactions.",
+      "tip": "Tip: Perfect for roommates splitting bills, couples tracking household expenses, or friends on a trip. Each group has its own currency, so you can manage different scenarios separately."
+    },
     "pendingInvites": "Pending Invites",
     "membersCount": "{{count}} members",
     "invitedBy": "Invited by {{name}}",
