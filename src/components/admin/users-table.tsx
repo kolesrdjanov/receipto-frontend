@@ -183,6 +183,12 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
       {/* Mobile Card View */}
       {!isLoading && !error && users && users.length > 0 && (
       <div className="md:hidden space-y-4">
+        {/* Total users count for mobile */}
+        {meta && (
+          <div className="text-sm font-medium text-muted-foreground">
+            {t('admin.users.totalUsers', { count: meta.total })}
+          </div>
+        )}
         {users.map((user) => (
           <Card key={user.id}>
             <CardContent className="p-4">
@@ -207,6 +213,13 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                       {t('admin.users.table.receipts')}
                     </span>
                     <span className="font-medium">{user.receiptCount}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t('admin.users.table.warranties')}
+                    </span>
+                    <span className="font-medium">{user.warrantyCount}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -290,6 +303,11 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
+                  <SortableHeader field="warrantyCount">
+                    {t('admin.users.table.warranties')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
                   <SortableHeader field="createdAt">
                     {t('admin.users.table.joined')}
                   </SortableHeader>
@@ -309,6 +327,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{user.receiptCount}</TableCell>
+                  <TableCell>{user.warrantyCount}</TableCell>
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

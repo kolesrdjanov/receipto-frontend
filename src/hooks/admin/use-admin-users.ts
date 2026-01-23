@@ -10,9 +10,10 @@ export interface AdminUser {
   role: 'user' | 'admin'
   createdAt: string
   receiptCount: number
+  warrantyCount: number
 }
 
-export type SortField = 'createdAt' | 'receiptCount' | 'email' | 'firstName' | 'lastName'
+export type SortField = 'createdAt' | 'receiptCount' | 'warrantyCount' | 'email' | 'firstName' | 'lastName'
 export type SortOrder = 'ASC' | 'DESC'
 
 export interface AdminUsersFilters {

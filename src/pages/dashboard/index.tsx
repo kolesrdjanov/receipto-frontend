@@ -16,8 +16,6 @@ import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { CategoryInsights } from '@/components/dashboard/category-insights'
-import { FrequentItems } from '@/components/dashboard/frequent-items'
-import { SavingsOpportunities } from '@/components/dashboard/savings-opportunities'
 import {
   useDashboardStats,
   useCategoryStats,
@@ -663,12 +661,6 @@ export default function Dashboard() {
           {/* AI Categorization Insights */}
           <div className="mb-6">
             <CategoryInsights />
-          </div>
-
-          {/* Price Intelligence: Frequent Items & Savings */}
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
-            <FrequentItems />
-            <SavingsOpportunities />
           </div>
 
           {/* Recent Activity */}

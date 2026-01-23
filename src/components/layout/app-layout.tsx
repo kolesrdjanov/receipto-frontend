@@ -7,7 +7,7 @@ import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, TrendingUp } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
@@ -23,7 +23,6 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
-  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
   { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
@@ -111,7 +110,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-screen bg-background">
       {/* Mobile header */}
       <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b bg-card px-4 pt-[env(safe-area-inset-top)] md:hidden">
         <Link to={'/dashboard'}>

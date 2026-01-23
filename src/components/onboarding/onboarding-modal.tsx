@@ -22,7 +22,7 @@ interface OnboardingModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 4
 
 export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const { t } = useTranslation()
@@ -73,11 +73,11 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
     },
-    {
-      icon: TrendingUp,
-      color: 'text-rose-500',
-      bgColor: 'bg-rose-500/10',
-    },
+    // {
+    //   icon: TrendingUp,
+    //   color: 'text-rose-500',
+    //   bgColor: 'bg-rose-500/10',
+    // },
   ]
 
   const currentStep = steps[step - 1]

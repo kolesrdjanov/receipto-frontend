@@ -668,6 +668,7 @@
         "email": "Email",
         "role": "Role",
         "receipts": "Expenses",
+        "warranties": "Warranties",
         "joined": "Joined",
         "delete": "Delete"
       },
