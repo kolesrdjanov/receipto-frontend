@@ -1,4 +1,4 @@
-import {useState, useMemo, lazy, Suspense} from 'react'
+import {useState, useMemo, lazy, Suspense, useEffect} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
@@ -71,6 +71,39 @@ const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', 
 
 const ALL_CONVERTED = 'ALL'
 
+// Hook to get the computed primary color for charts
+function usePrimaryColor() {
+  const [primaryColor, setPrimaryColor] = useState('#3b82f6')
+  const { accentColor } = useSettingsStore()
+
+  useEffect(() => {
+    // Get computed color from CSS
+    const root = document.documentElement
+    const computedStyle = getComputedStyle(root)
+    const primary = computedStyle.getPropertyValue('--primary').trim()
+
+    if (primary) {
+      // Create a temporary element to convert oklch to rgb
+      const temp = document.createElement('div')
+      temp.style.color = primary
+      document.body.appendChild(temp)
+      const rgb = getComputedStyle(temp).color
+      document.body.removeChild(temp)
+
+      // Convert rgb(r, g, b) to hex
+      const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+      if (match) {
+        const hex = '#' + [match[1], match[2], match[3]]
+          .map(x => parseInt(x).toString(16).padStart(2, '0'))
+          .join('')
+        setPrimaryColor(hex)
+      }
+    }
+  }, [accentColor])
+
+  return primaryColor
+}
+
 export default function Dashboard() {
   const { t } = useTranslation()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -80,6 +113,7 @@ export default function Dashboard() {
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const createReceipt = useCreateReceipt()
   const navigate = useNavigate()
+  const primaryColor = usePrimaryColor()
 
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: currencies = [] } = useCurrencies()
@@ -276,11 +310,11 @@ export default function Dashboard() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-popover border rounded-lg shadow-lg p-3">
-          <p className="font-medium">{label}</p>
+        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+          <p className="font-semibold text-sm mb-1">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {formatAmount(entry.value)}
+            <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
+              {formatAmount(entry.value)}
             </p>
           ))}
         </div>
@@ -344,10 +378,11 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      <div>
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className={'flex items-start gap-4'}>
           <div className={'flex gap-0 flex-col'}>
-            <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">{t('dashboard.title')}</h2>
+            <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text">{t('dashboard.title')}</h2>
             <p className="text-sm text-muted-foreground md:text-base">
               {t('dashboard.subtitle')}
             </p>
@@ -355,11 +390,11 @@ export default function Dashboard() {
           <ButtonTooltip>
             <TooltipTrigger asChild>
               <Button
-                  variant="ghost"
+                  variant="glossy"
                   size="icon"
                   onClick={handleScanQr}
                   aria-label="Scan QR Code"
-                  className="[&_svg]:!size-7 ml-auto md:ml-0"
+                  className="[&_svg]:!size-5 ml-auto md:ml-0 h-10 w-10 rounded-xl"
               >
                 <QrCode />
               </Button>
@@ -370,10 +405,10 @@ export default function Dashboard() {
           </ButtonTooltip>
 
         </div>
-        <div className="flex items-center gap-2">
-          <Coins className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
+          <Coins className="h-4 w-4 text-muted-foreground ml-2" />
           <Select value={currencyMode} onValueChange={setCurrencyMode}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
               <SelectValue placeholder={t('dashboard.currency')} />
             </SelectTrigger>
             <SelectContent>
@@ -398,8 +433,8 @@ export default function Dashboard() {
       </div>
 
       {isConvertedMode && (
-        <div className="mb-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
+        <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-xl text-sm text-muted-foreground flex items-center gap-2">
+          <RefreshCw className="h-4 w-4 text-primary" />
           {t('dashboard.convertedAmounts', { currency: preferredCurrency })}
         </div>
       )}
@@ -413,13 +448,15 @@ export default function Dashboard() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             <Link to="/receipts">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Card className="stat-card-gradient cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                   <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
-                  <Receipt className="h-4 w-4 text-muted-foreground" />
+                  <div className="stat-icon-container">
+                    <Receipt className="h-4 w-4" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">{totalReceipts}</p>
+                <CardContent className="relative z-10">
+                  <p className="text-3xl font-bold">{totalReceipts}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {isConvertedMode ? t('dashboard.inCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
                   </p>
@@ -427,38 +464,44 @@ export default function Dashboard() {
               </Card>
             </Link>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <Card className="stat-card-gradient">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                 <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <div className="stat-icon-container">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(totalAmount)}</p>
+              <CardContent className="relative z-10">
+                <p className="text-3xl font-bold">{formatAmount(totalAmount)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {isConvertedMode ? t('dashboard.approxInCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <Card className="stat-card-gradient">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                 <CardTitle className="text-sm font-medium">{t('dashboard.thisMonth')}</CardTitle>
-                <PieChartIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="stat-icon-container">
+                  <PieChartIcon className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(totalMonthAmount)}</p>
+              <CardContent className="relative z-10">
+                <p className="text-3xl font-bold">{formatAmount(totalMonthAmount)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{monthName}</p>
               </CardContent>
             </Card>
 
             <Link to="/categories">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Card className="stat-card-gradient cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                   <CardTitle className="text-sm font-medium">{t('dashboard.categories')}</CardTitle>
-                  <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                  <div className="stat-icon-container">
+                    <FolderOpen className="h-4 w-4" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">{totalCategories}</p>
+                <CardContent className="relative z-10">
+                  <p className="text-3xl font-bold">{totalCategories}</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('dashboard.available')}</p>
                 </CardContent>
               </Card>
@@ -467,13 +510,13 @@ export default function Dashboard() {
 
           {/* Month Selector */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{t('dashboard.spendingAnalysis')}</h3>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{t('dashboard.spendingAnalysis')}</h3>
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
+              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8 hover:bg-background">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium min-w-[120px] text-center">{monthName}</span>
-              <Button variant="outline" size="icon" onClick={handleNextMonth}>
+              <span className="text-sm font-medium min-w-[120px] text-center px-2">{monthName}</span>
+              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8 hover:bg-background">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -481,10 +524,10 @@ export default function Dashboard() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
             {/* Category Pie Chart */}
-            <Card>
+            <Card className="card-interactive chart-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <PieChartIcon className="h-4 w-4" />
+                  <PieChartIcon className="h-4 w-4 text-primary" />
                   {t('dashboard.spendingByCategory')}
                 </CardTitle>
               </CardHeader>
@@ -537,10 +580,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Daily Bar Chart */}
-            <Card>
+            <Card className="card-interactive chart-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <BarChart3 className="h-4 w-4" />
+                  <BarChart3 className="h-4 w-4 text-primary" />
                   {t('dashboard.dailySpending')}
                 </CardTitle>
               </CardHeader>
@@ -566,7 +609,7 @@ export default function Dashboard() {
                         tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                       />
                       <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="totalAmount" name="Amount" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="totalAmount" name="Amount" fill={primaryColor} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -583,10 +626,10 @@ export default function Dashboard() {
 
           <div className="grid gap-4 lg:grid-cols-3 mb-6">
             {/* Monthly Trend */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 card-interactive chart-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <TrendingUp className="h-4 w-4" />
+                  <TrendingUp className="h-4 w-4 text-primary" />
                   {t('dashboard.monthlyTrend', { year: selectedYear })}
                 </CardTitle>
               </CardHeader>
@@ -611,9 +654,9 @@ export default function Dashboard() {
                         type="monotone"
                         dataKey="totalAmount"
                         name="Amount"
-                        stroke="hsl(var(--primary))"
+                        stroke={primaryColor}
                         strokeWidth={2}
-                        dot={{ fill: 'hsl(var(--primary))' }}
+                        dot={{ fill: primaryColor }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -622,10 +665,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Top Stores */}
-            <Card>
+            <Card className="card-interactive">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Store className="h-4 w-4" />
+                  <Store className="h-4 w-4 text-primary" />
                   {t('dashboard.topStores')}
                 </CardTitle>
               </CardHeader>
@@ -664,24 +707,24 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Activity */}
-          <Card>
+          <Card className="card-interactive card-gradient-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4" />
+                <Clock className="h-4 w-4 text-primary" />
                 {t('dashboard.recentActivity')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {recentReceipts && recentReceipts.length > 0 ? (
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   {recentReceipts.slice(0, 5).map((receipt) => (
                     <Link
                       key={receipt.id}
                       to="/receipts"
-                      className="flex flex-col p-3 hover:bg-accent rounded-lg transition-colors border truncate"
+                      className="flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
                     >
-                      <span className="font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</span>
-                      <span className="text-lg font-bold">
+                      <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
+                      <span className="text-xl font-bold mt-1">
                         {new Intl.NumberFormat('sr-RS', {
                           style: 'currency',
                           currency: receipt.currency || 'RSD',
@@ -689,7 +732,7 @@ export default function Dashboard() {
                           maximumFractionDigits: 0,
                         }).format(Number(receipt.totalAmount) || 0)}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground mt-1">
                         {formatDate(receipt.receiptDate || receipt.createdAt)}
                       </span>
                     </Link>
@@ -718,6 +761,7 @@ export default function Dashboard() {
           </Suspense>
         </>
       )}
+      </div>
     </AppLayout>
   )
 }

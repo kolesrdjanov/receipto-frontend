@@ -2,7 +2,7 @@ import { useState, lazy, Suspense, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -277,24 +277,24 @@ export default function Receipts() {
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
               {showAddDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-card border rounded-md shadow-lg z-50" data-testid="receipts-add-dropdown">
+                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95" data-testid="receipts-add-dropdown">
                   <button
                     onClick={handleAddManually}
-                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-t-md transition-colors"
+                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-blank-button"
                   >
                     {t('receipts.addBlank')}
                   </button>
                   <button
                     onClick={handleAddFromTemplate}
-                    className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
+                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-from-template-button"
                   >
                     {t('receipts.addFromTemplate')}
                   </button>
                   <button
                     onClick={handlePfrEntry}
-                    className="w-full px-4 py-2 text-left hover:bg-accent rounded-b-md transition-colors"
+                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-pfr-button"
                   >
                     {t('receipts.addViaPfr')}
@@ -302,7 +302,7 @@ export default function Receipts() {
                 </div>
               )}
             </div>
-            <Button onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
+            <Button variant="glossy" onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
               {createReceipt.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -323,22 +323,23 @@ export default function Receipts() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : receipts.length === 0 ? (
-        <Card data-testid="receipts-empty">
-          <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">{t('receipts.noReceipts')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-center text-muted-foreground">
-              {t('receipts.noReceiptsText')}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="empty-state" data-testid="receipts-empty">
+          <Camera className="empty-state-icon" />
+          <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+            {t('receipts.noReceiptsText')}
+          </p>
+          <Button variant="glossy" onClick={handleScanQr}>
+            <Camera className="h-4 w-4" />
+            {t('receipts.scanQr')}
+          </Button>
+        </div>
       ) : (
         <>
           {/* Mobile Card View */}
-          <div className="md:hidden space-y-4">
+          <div className="md:hidden space-y-3">
             {receipts.map((receipt) => (
-              <Card key={receipt.id} className="overflow-hidden">
+              <Card key={receipt.id} className="overflow-hidden card-interactive">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">

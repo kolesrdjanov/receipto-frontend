@@ -112,9 +112,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b bg-card px-4 pt-[env(safe-area-inset-top)] md:hidden">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] md:hidden sidebar-glass">
         <Link to={'/dashboard'}>
-          <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+          <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
         </Link>
         <Button
           variant="ghost"
@@ -138,15 +138,15 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-64 border-r bg-card transition-transform duration-200 ease-in-out md:translate-x-0',
+          'fixed left-0 top-0 z-50 h-full w-64 sidebar-glass transition-transform duration-200 ease-in-out md:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
-          <div className="flex items-center justify-between border-b px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] md:pt-4">
+          <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] md:pt-4">
             <Link to={'/dashboard'}>
-              <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+              <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
             </Link>
             {!sidebarOpen && (
               <Button
@@ -182,13 +182,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Link key={item.path} to={item.path} onClick={closeSidebar}>
                   <div
                     className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
                       isActive
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'nav-item-glow text-white'
                         : 'hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className={cn("h-4 w-4", isActive && "icon-glow")} />
                     {t(item.labelKey)}
                   </div>
                 </Link>
@@ -198,8 +198,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Admin Navigation Section */}
             {isAdmin && (
               <>
-                <div className="pt-4 pb-2">
-                  <div className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="pt-4 pb-2 mt-2 border-t border-border/50">
+                  <div className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-1 w-1 rounded-full bg-orange-500"></div>
                     {t('nav.admin')}
                   </div>
                 </div>
@@ -207,13 +208,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <Link key={item.path} to={item.path} onClick={closeSidebar}>
                     <div
                       className={cn(
-                        'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
                         location.pathname === item.path
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'nav-item-glow text-white'
                           : 'hover:bg-accent hover:text-accent-foreground'
                       )}
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className={cn("h-4 w-4", location.pathname === item.path && "icon-glow")} />
                       {t(item.labelKey)}
                     </div>
                   </Link>
@@ -223,8 +224,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           </nav>
 
           {/* User section */}
-          <div className="border-t p-4">
-            <div className="mb-3 flex items-center gap-3 px-3">
+          <div className="border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent">
+            <div className="mb-3 flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/30">
               <Avatar
                 firstName={user?.firstName}
                 lastName={user?.lastName}
@@ -240,7 +241,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={logout}>
+            <Button variant="outline" className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-300" onClick={logout}>
               {t('nav.logout')}
             </Button>
             <Button
@@ -268,7 +269,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="pt-[calc(3.5rem+env(safe-area-inset-top))] md:pl-64 md:pt-0">
+      <div className="pt-[calc(3.5rem+env(safe-area-inset-top))] md:pl-64 md:pt-0 page-bg-gradient min-h-screen">
         <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
 
