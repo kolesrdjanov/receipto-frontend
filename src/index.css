@@ -400,26 +400,26 @@ body {
   background: var(--card);
 }
 
-.card-gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1.5px;
-  border-radius: inherit;
-  background: linear-gradient(135deg,
-    var(--primary) 0%,
-    color-mix(in oklch, var(--primary) 50%, oklch(0.7 0.15 320)) 50%,
-    var(--primary) 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  pointer-events: none;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-}
+/*.card-gradient-border::before {*/
+/*  content: '';*/
+/*  position: absolute;*/
+/*  inset: 0;*/
+/*  padding: 1.5px;*/
+/*  border-radius: inherit;*/
+/*  background: linear-gradient(135deg,*/
+/*    var(--primary) 0%,*/
+/*    color-mix(in oklch, var(--primary) 50%, oklch(0.7 0.15 320)) 50%,*/
+/*    var(--primary) 100%*/
+/*  );*/
+/*  -webkit-mask:*/
+/*    linear-gradient(#fff 0 0) content-box,*/
+/*    linear-gradient(#fff 0 0);*/
+/*  mask-composite: exclude;*/
+/*  -webkit-mask-composite: xor;*/
+/*  pointer-events: none;*/
+/*  opacity: 0.4;*/
+/*  transition: opacity 0.3s ease;*/
+/*}*/
 
 .card-gradient-border:hover::before {
   opacity: 1;
@@ -436,25 +436,25 @@ body {
   overflow: hidden;
 }
 
-.chart-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    var(--primary) 0%,
-    color-mix(in oklch, var(--primary) 70%, oklch(0.7 0.2 320)) 50%,
-    var(--primary) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+/*.chart-card::after {*/
+/*  content: '';*/
+/*  position: absolute;*/
+/*  top: 0;*/
+/*  left: 0;*/
+/*  right: 0;*/
+/*  height: 3px;*/
+/*  background: linear-gradient(90deg,*/
+/*    var(--primary) 0%,*/
+/*    color-mix(in oklch, var(--primary) 70%, oklch(0.7 0.2 320)) 50%,*/
+/*    var(--primary) 100%*/
+/*  );*/
+/*  opacity: 0;*/
+/*  transition: opacity 0.3s ease;*/
+/*}*/
 
-.chart-card:hover::after {
-  opacity: 1;
-}
+/*.chart-card:hover::after {*/
+/*  opacity: 1;*/
+/*}*/
 
 /* ============================================
    TABLE ENHANCEMENTS
@@ -651,4 +651,45 @@ body {
 .focus-ring-primary:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+}
+
+/* ============================================
+   COACH CARD
+   ============================================ */
+
+/*.coach-card {*/
+/*  position: relative;*/
+/*  overflow: hidden;*/
+/*  border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));*/
+/*  background: linear-gradient(135deg,*/
+/*    color-mix(in oklch, var(--primary) 3%, var(--card)) 0%,*/
+/*    var(--card) 50%,*/
+/*    color-mix(in oklch, var(--primary) 2%, var(--card)) 100%*/
+/*  );*/
+/*}*/
+
+/*.coach-card::before {*/
+/*  content: '';*/
+/*  position: absolute;*/
+/*  top: 0;*/
+/*  left: 0;*/
+/*  right: 0;*/
+/*  height: 3px;*/
+/*  background: linear-gradient(90deg,*/
+/*    var(--primary) 0%,*/
+/*    color-mix(in oklch, var(--primary) 70%, oklch(0.7 0.2 320)) 50%,*/
+/*    var(--primary) 100%*/
+/*  );*/
+/*}*/
+
+.coach-header {
+  position: relative;
+}
+
+.dark .coach-card {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--primary) 6%, var(--card)) 0%,
+    var(--card) 50%,
+    color-mix(in oklch, var(--primary) 4%, var(--card)) 100%
+  );
 }

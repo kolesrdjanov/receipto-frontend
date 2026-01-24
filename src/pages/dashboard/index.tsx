@@ -16,6 +16,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { CategoryInsights } from '@/components/dashboard/category-insights'
+import { CoachCard } from '@/components/coach/coach-card'
 import {
   useDashboardStats,
   useCategoryStats,
@@ -701,8 +702,9 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* AI Categorization Insights */}
-          <div className="mb-6">
+          {/* Coach Card + AI Categorization Insights */}
+          <div className="grid gap-4 lg:grid-cols-2 mb-6">
+            <CoachCard />
             <CategoryInsights />
           </div>
 

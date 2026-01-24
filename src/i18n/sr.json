@@ -722,6 +722,14 @@
     "success": "Vaša poruka je uspešno poslata. Javićemo vam se uskoro!",
     "error": "Neuspelo slanje poruke. Pokušajte ponovo."
   },
+  "coach": {
+    "title": "Finansijski savetnik",
+    "thisWeek": "Potrošeno ove nedelje",
+    "vsLastWeek": "vs prošla nedelja",
+    "topCategory": "Najveća kategorija",
+    "topSpending": "Najviše potrošeno na",
+    "noInsights": "Nema novih uvida. Nastavi sa praćenjem troškova!"
+  },
   "items": {
     "title": "Praćenje cena",
     "subtitle": "Pratite cene i pronađite uštede u prodavnicama",
