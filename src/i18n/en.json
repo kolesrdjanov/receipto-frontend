@@ -265,7 +265,8 @@
       "scanSuccessDescription": "The receipt data will be extracted shortly.",
       "scanError": "Failed to create receipt from QR code",
       "torchOn": "Turn on flashlight",
-      "torchOff": "Turn off flashlight"
+      "torchOff": "Turn off flashlight",
+      "permissionHint": "Tip: To avoid being asked for camera permission every time, select \"Allow\" and check \"Remember this decision\" in your browser's permission dialog."
     },
     "pfrEntry": {
       "title": "Manual Entry via PFR Number",

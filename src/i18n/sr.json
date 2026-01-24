@@ -265,7 +265,8 @@
       "scanSuccessDescription": "Podaci sa računa će uskoro biti izdvojeni.",
       "scanError": "Greška pri kreiranju računa iz QR koda",
       "torchOn": "Uključi blic",
-      "torchOff": "Isključi blic"
+      "torchOff": "Isključi blic",
+      "permissionHint": "Savet: Da ne biste svaki put dozvoljavali pristup kameri, izaberite \"Dozvoli\" i čekirajte \"Zapamti ovu odluku\" u browser-ovom dijalogu za dozvole."
     },
     "pfrEntry": {
       "title": "Ručni unos preko PFR broja",

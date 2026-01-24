@@ -43,6 +43,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   const [torchEnabled, setTorchEnabled] = useState(false)
   const [torchSupported, setTorchSupported] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
+  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown')
 
   const qrTimeoutRef = useRef<number | null>(null)
   const lastScannedRef = useRef<string | null>(null)
@@ -157,6 +158,31 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     }
   }, [open, ScannerComponent])
 
+  // Check camera permission status
+  useEffect(() => {
+    if (!open) return
+
+    const checkPermission = async () => {
+      try {
+        // Check if Permissions API is supported
+        if ('permissions' in navigator) {
+          const result = await navigator.permissions.query({ name: 'camera' as PermissionName })
+          setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
+
+          // Listen for permission changes
+          result.addEventListener('change', () => {
+            setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
+          })
+        }
+      } catch {
+        // Permissions API not supported or camera permission not queryable
+        setPermissionStatus('unknown')
+      }
+    }
+
+    checkPermission()
+  }, [open])
+
   // Load QR scanner component
   useEffect(() => {
     let cancelled = false
@@ -168,6 +194,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       setError(null)
       setTorchEnabled(false)
       setTorchSupported(false)
+      setPermissionStatus('unknown')
       videoTrackRef.current = null
       return
     }
@@ -318,6 +345,13 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
               )
             ) : null}
           </div>
+
+        {permissionStatus === 'prompt' && (
+          <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <p>{t('receipts.qrScanner.permissionHint')}</p>
+          </div>
+        )}
 
         <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
           <Info className="h-4 w-4 mt-0.5 shrink-0" />
