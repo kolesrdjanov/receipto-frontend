@@ -60,8 +60,8 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
 
   return (
     <Table data-testid="categories-table">
-        <TableHeader>
-          <TableRow>
+      <TableHeader>
+        <TableRow>
             <TableHead>{t('categories.table.name')}</TableHead>
             <TableHead>{t('categories.table.color')}</TableHead>
             <TableHead>{t('categories.table.icon')}</TableHead>
@@ -134,7 +134,7 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
               </TableCell>
             </TableRow>
           ))}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
   )
 }

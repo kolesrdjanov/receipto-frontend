@@ -8,12 +8,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, X, Info, Flashlight, FlashlightOff } from 'lucide-react'
+import { Camera, X, Info, Flashlight, FlashlightOff, Loader2 } from 'lucide-react'
 
 interface QrScannerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onScan: (url: string) => void
+  onScan: (url: string) => Promise<void>
 }
 
 type ScannerResult = { rawValue: string }
@@ -43,9 +43,9 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   const [torchEnabled, setTorchEnabled] = useState(false)
   const [torchSupported, setTorchSupported] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
-  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const qrTimeoutRef = useRef<number | null>(null)
   const lastScannedRef = useRef<string | null>(null)
   const scanningRef = useRef(false)
   const videoTrackRef = useRef<MediaStreamTrack | null>(null)
@@ -81,7 +81,6 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       setTorchEnabled(enable)
     } catch (err) {
       console.error('Failed to toggle torch:', err)
-      // Re-check torch support - it might have changed
       try {
         const capabilities = track.getCapabilities() as TorchCapabilities
         if (!capabilities.torch) {
@@ -131,6 +130,9 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       const track = tracks[0]
       videoTrackRef.current = track
 
+      // Camera is now ready - hide loading
+      setIsLoading(false)
+
       // Check if torch is supported
       try {
         const capabilities = track.getCapabilities() as TorchCapabilities
@@ -138,7 +140,6 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
           setTorchSupported(true)
         }
       } catch {
-        // getCapabilities not supported
         setTorchSupported(false)
       }
 
@@ -148,8 +149,8 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       }
     }
 
-    // Check every 300ms until we find the video track or max attempts
-    intervalId = window.setInterval(checkTorchSupport, 300)
+    // Check every 200ms until we find the video track or max attempts
+    intervalId = window.setInterval(checkTorchSupport, 200)
 
     return () => {
       if (intervalId) {
@@ -157,31 +158,6 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       }
     }
   }, [open, ScannerComponent])
-
-  // Check camera permission status
-  useEffect(() => {
-    if (!open) return
-
-    const checkPermission = async () => {
-      try {
-        // Check if Permissions API is supported
-        if ('permissions' in navigator) {
-          const result = await navigator.permissions.query({ name: 'camera' as PermissionName })
-          setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
-
-          // Listen for permission changes
-          result.addEventListener('change', () => {
-            setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
-          })
-        }
-      } catch {
-        // Permissions API not supported or camera permission not queryable
-        setPermissionStatus('unknown')
-      }
-    }
-
-    checkPermission()
-  }, [open])
 
   // Load QR scanner component
   useEffect(() => {
@@ -194,7 +170,8 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       setError(null)
       setTorchEnabled(false)
       setTorchSupported(false)
-      setPermissionStatus('unknown')
+      setIsProcessing(false)
+      setIsLoading(true)
       videoTrackRef.current = null
       return
     }
@@ -211,6 +188,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       } catch {
         if (cancelled) return
         setError(t('receipts.qrScanner.cameraError'))
+        setIsLoading(false)
       }
     })()
 
@@ -219,13 +197,12 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     }
   }, [open, t])
 
-
-  const handleScan = (result: ScannerResult[]) => {
+  const handleScan = async (result: ScannerResult[]) => {
     if (result && result.length > 0) {
       const scannedText = result[0].rawValue
 
-      // Prevent duplicate scans
-      if (!scannedText || scanningRef.current || lastScannedRef.current === scannedText) {
+      // Prevent duplicate scans or scanning while processing
+      if (!scannedText || scanningRef.current || lastScannedRef.current === scannedText || isProcessing) {
         return
       }
 
@@ -233,14 +210,24 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       scanningRef.current = true
       lastScannedRef.current = scannedText
 
-      // Clear all timers immediately
-      if (qrTimeoutRef.current) {
-        clearTimeout(qrTimeoutRef.current)
-        qrTimeoutRef.current = null
-      }
+      // Set processing state
+      setIsProcessing(true)
+      setError(null)
 
-      onScan(scannedText)
-      onOpenChange(false)
+      try {
+        await onScan(scannedText)
+        // Only close modal on success
+        onOpenChange(false)
+      } catch (err) {
+        // Show error in modal
+        const errorMessage = err instanceof Error ? err.message : t('receipts.qrScanner.scanError')
+        setError(errorMessage)
+        // Reset scanning refs so user can try again
+        scanningRef.current = false
+        lastScannedRef.current = null
+      } finally {
+        setIsProcessing(false)
+      }
     }
   }
 
@@ -251,22 +238,30 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     } else {
       setError(t('receipts.qrScanner.cameraError'))
     }
+    setIsLoading(false)
   }
 
   const handleClose = () => {
-    setError(null)
-
-    // Clear all refs
-    if (qrTimeoutRef.current) {
-      clearTimeout(qrTimeoutRef.current)
-      qrTimeoutRef.current = null
-    }
-    lastScannedRef.current = null
-    scanningRef.current = false
-
+    if (isProcessing) return
     onOpenChange(false)
   }
 
+  const handleTryAgain = () => {
+    setError(null)
+    scanningRef.current = false
+    lastScannedRef.current = null
+    setIsLoading(true)
+    // Re-trigger scanner component load
+    setScannerComponent(null)
+    setTimeout(() => {
+      import('@yudiel/react-qr-scanner').then(mod => {
+        setScannerComponent(() => mod.Scanner as ComponentType<ScannerProps>)
+      }).catch(() => {
+        setError(t('receipts.qrScanner.cameraError'))
+        setIsLoading(false)
+      })
+    }, 100)
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -282,76 +277,78 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         </DialogHeader>
 
         <div ref={containerRef} className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
-            {error ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
-                <X className="h-12 w-12 text-destructive mb-2" />
-                <p className="text-sm text-center text-destructive">{error}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setError(null)}
-                  className="mt-4"
-                >
-                  {t('receipts.qrScanner.tryAgain')}
-                </Button>
-              </div>
-            ) : open ? (
-              ScannerComponent ? (
-                <>
-                  <ScannerComponent
-                    onScan={handleScan}
-                    onError={handleError}
-                    scanDelay={1000}
-                    constraints={{
-                      facingMode: 'environment',
-                      width: { min: 1280, ideal: 1920, max: 2560 },
-                      height: { min: 720, ideal: 1080, max: 1440 },
-                    }}
-                    styles={{
-                      container: {
-                        width: '100%',
-                        height: '350px',
-                      },
-                      video: {
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      },
-                    }}
-                    components={{
-                      finder: false,
-                    }}
-                  />
-                  {torchSupported && (
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-                      onClick={() => toggleTorch(!torchEnabled)}
-                      title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
-                    >
-                      {torchEnabled ? (
-                        <FlashlightOff className="h-5 w-5" />
-                      ) : (
-                        <Flashlight className="h-5 w-5" />
-                      )}
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4">
-                  <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
-                </div>
-              )
-            ) : null}
-          </div>
+          {isProcessing ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
+              <Loader2 className="h-12 w-12 text-primary mb-4 animate-spin" />
+              <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.processing')}</p>
+              <p className="text-sm text-center text-muted-foreground">{t('receipts.qrScanner.processingDescription')}</p>
+            </div>
+          ) : error ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
+              <X className="h-12 w-12 text-destructive mb-2" />
+              <p className="text-sm text-center text-destructive mb-4">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTryAgain}
+              >
+                {t('receipts.qrScanner.tryAgain')}
+              </Button>
+            </div>
+          ) : isLoading ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
+              <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
+              <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
+            </div>
+          ) : null}
 
-        {permissionStatus === 'prompt' && (
-          <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
-            <Info className="h-4 w-4 mt-0.5 shrink-0" />
-            <p>{t('receipts.qrScanner.permissionHint')}</p>
-          </div>
-        )}
+          {/* Scanner component */}
+          {open && ScannerComponent && !error && (
+            <>
+              <ScannerComponent
+                onScan={handleScan}
+                onError={handleError}
+                scanDelay={100}
+                constraints={{
+                  facingMode: 'environment',
+                  width: { min: 640, ideal: 1280, max: 1920 },
+                  height: { min: 480, ideal: 720, max: 1080 },
+                }}
+                styles={{
+                  container: {
+                    width: '100%',
+                    height: '350px',
+                  },
+                  video: {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  },
+                }}
+                components={{
+                  finder: false,
+                }}
+              />
+
+              {/* Torch button */}
+              {torchSupported && !isProcessing && !isLoading && (
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
+                  onClick={() => toggleTorch(!torchEnabled)}
+                  title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
+                >
+                  {torchEnabled ? (
+                    <FlashlightOff className="h-5 w-5" />
+                  ) : (
+                    <Flashlight className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
+            </>
+          )}
+        </div>
 
         <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
           <Info className="h-4 w-4 mt-0.5 shrink-0" />
@@ -359,7 +356,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         </div>
 
         <div className="flex justify-end">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
             {t('common.cancel')}
           </Button>
         </div>

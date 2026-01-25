@@ -124,18 +124,11 @@ export default function Receipts() {
   }
 
   const handleQrScan = async (url: string) => {
-    try {
-      await createReceipt.mutateAsync({ qrCodeUrl: url })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
+    await createReceipt.mutateAsync({ qrCodeUrl: url })
+    toast.success(t('receipts.qrScanner.scanSuccess'), {
+      description: t('receipts.qrScanner.scanSuccessDescription'),
+    })
+    // Errors are handled by the QR scanner modal now
   }
 
   const handleOcrScan = async (pfrData: PfrData) => {
@@ -439,121 +432,119 @@ export default function Receipts() {
           </div>
 
           {/* Desktop Table View */}
-          <Card className="hidden md:block" data-testid="receipts-table-card">
-            <Table className="table-fixed w-full" data-testid="receipts-table">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('receipts.table.store')}</TableHead>
-                  <TableHead>{t('receipts.table.amount')}</TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort('receiptDate')}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      {t('receipts.table.date')}
-                      {getSortIcon('receiptDate')}
-                    </button>
-                  </TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort('createdAt')}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      {t('receipts.table.createdAt')}
-                      {getSortIcon('createdAt')}
-                    </button>
-                  </TableHead>
-                  <TableHead>{t('receipts.table.category')}</TableHead>
-                  {/*<TableHead>{t('receipts.table.paidBy')}</TableHead>*/}
-                  <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
-                  <TableHead style={{ width: '120px' }}></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {receipts.map((receipt) => (
-                  <TableRow key={receipt.id} data-testid={`receipt-row-${receipt.id}`}>
-                    <TableCell className="font-medium" data-testid={`receipt-store-${receipt.id}`}>
-                      {receipt.storeName || t('receipts.unknownStore')}
-                    </TableCell>
-                    <TableCell>{formatAmount(receipt)}</TableCell>
-                    <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
-                    <TableCell>{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</TableCell>
-                    <TableCell>
-                      {receipt.category ? (
-                        <span className="inline-flex items-center gap-1">
-                          {receipt.category.icon && (
-                            <span>{receipt.category.icon}</span>
-                          )}
-                          <span
-                            style={{
-                              color: receipt.category.color || 'inherit',
-                            }}
-                          >
-                            {receipt.category.name}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    {/*<TableCell>*/}
-                    {/*  {receipt.group ? (*/}
-                    {/*    receipt.paidBy*/}
-                    {/*      ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
-                    {/*      : t('receipts.table.creator')*/}
-                    {/*  ) : (*/}
-                    {/*    <span className="text-muted-foreground">-</span>*/}
-                    {/*  )}*/}
-                    {/*</TableCell>*/}
-                    <TableCell>{getStatusBadge(receipt.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        {receipt.scrapedData?.journal && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewReceipt(receipt)}
-                            title={t('receipts.viewer.viewReceipt')}
-                            data-testid={`receipt-view-${receipt.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+          <Table className="table-fixed w-full" data-testid="receipts-table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('receipts.table.store')}</TableHead>
+                <TableHead>{t('receipts.table.amount')}</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('receiptDate')}
+                    className="flex items-center hover:text-foreground transition-colors"
+                  >
+                    {t('receipts.table.date')}
+                    {getSortIcon('receiptDate')}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort('createdAt')}
+                    className="flex items-center hover:text-foreground transition-colors"
+                  >
+                    {t('receipts.table.createdAt')}
+                    {getSortIcon('createdAt')}
+                  </button>
+                </TableHead>
+                <TableHead>{t('receipts.table.category')}</TableHead>
+                {/*<TableHead>{t('receipts.table.paidBy')}</TableHead>*/}
+                <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
+                <TableHead style={{ width: '120px' }}></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {receipts.map((receipt) => (
+                <TableRow key={receipt.id} data-testid={`receipt-row-${receipt.id}`}>
+                  <TableCell className="font-medium" data-testid={`receipt-store-${receipt.id}`}>
+                    {receipt.storeName || t('receipts.unknownStore')}
+                  </TableCell>
+                  <TableCell>{formatAmount(receipt)}</TableCell>
+                  <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
+                  <TableCell>{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</TableCell>
+                  <TableCell>
+                    {receipt.category ? (
+                      <span className="inline-flex items-center gap-1">
+                        {receipt.category.icon && (
+                          <span>{receipt.category.icon}</span>
                         )}
+                        <span
+                          style={{
+                            color: receipt.category.color || 'inherit',
+                          }}
+                        >
+                          {receipt.category.name}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  {/*<TableCell>*/}
+                  {/*  {receipt.group ? (*/}
+                  {/*    receipt.paidBy*/}
+                  {/*      ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
+                  {/*      : t('receipts.table.creator')*/}
+                  {/*  ) : (*/}
+                  {/*    <span className="text-muted-foreground">-</span>*/}
+                  {/*  )}*/}
+                  {/*</TableCell>*/}
+                  <TableCell>{getStatusBadge(receipt.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {receipt.scrapedData?.journal && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEditReceipt(receipt)}
-                          data-testid={`receipt-edit-${receipt.id}`}
+                          onClick={() => handleViewReceipt(receipt)}
+                          title={t('receipts.viewer.viewReceipt')}
+                          data-testid={`receipt-view-${receipt.id}`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteReceipt(receipt)}
-                          disabled={deleteReceipt.isPending}
-                          data-testid={`receipt-delete-${receipt.id}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {meta && meta.totalPages > 1 && (
-              <div className="px-4">
-                <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
-                  total={meta.total}
-                  limit={meta.limit}
-                  onPageChange={setPage}
-                />
-              </div>
-            )}
-          </Card>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditReceipt(receipt)}
+                        data-testid={`receipt-edit-${receipt.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteReceipt(receipt)}
+                        disabled={deleteReceipt.isPending}
+                        data-testid={`receipt-delete-${receipt.id}`}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {meta && meta.totalPages > 1 && (
+            <div className="px-4">
+              <Pagination
+                page={meta.page}
+                totalPages={meta.totalPages}
+                total={meta.total}
+                limit={meta.limit}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </>
       )}
 
