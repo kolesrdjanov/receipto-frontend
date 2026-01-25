@@ -17,6 +17,70 @@ interface CategoriesTableProps {
   onDelete?: (category: Category) => void
 }
 
+function CategoryCard({ category, onEdit, onDelete }: { category: Category; onEdit?: (category: Category) => void; onDelete?: (category: Category) => void }) {
+  const { t } = useTranslation()
+
+  return (
+    <Card data-testid={`category-card-${category.id}`}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {category.color && (
+              <div
+                className="w-10 h-10 rounded-full border flex-shrink-0 flex items-center justify-center text-lg"
+                style={{ backgroundColor: category.color }}
+              >
+                {category.icon || ''}
+              </div>
+            )}
+            {!category.color && category.icon && (
+              <div className="w-10 h-10 rounded-full border bg-muted flex-shrink-0 flex items-center justify-center text-lg">
+                {category.icon}
+              </div>
+            )}
+            {!category.color && !category.icon && (
+              <div className="w-10 h-10 rounded-full border bg-muted flex-shrink-0" />
+            )}
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium truncate">{category.name}</h3>
+              {category.description && (
+                <p className="text-sm text-muted-foreground truncate">{category.description}</p>
+              )}
+              {category.monthlyBudget && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('categories.table.monthlyBudget')}: {category.monthlyBudget} {category.budgetCurrency || ''}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-1 flex-shrink-0">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(category)}
+                data-testid={`category-edit-${category.id}`}
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(category)}
+                data-testid={`category-delete-${category.id}`}
+              >
+                <Trash2 className="w-4 h-4 text-destructive" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
   const { t } = useTranslation()
   const { data: categories, isLoading, error } = useCategories()
@@ -59,9 +123,23 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
   }
 
   return (
-    <Table data-testid="categories-table">
-      <TableHeader>
-        <TableRow>
+    <>
+      {/* Mobile view - Card list */}
+      <div className="flex flex-col gap-3 md:hidden" data-testid="categories-mobile-list">
+        {categories.map((category) => (
+          <CategoryCard
+            key={category.id}
+            category={category}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+
+      {/* Desktop view - Table */}
+      <Table className="hidden md:table" data-testid="categories-table">
+        <TableHeader>
+          <TableRow>
             <TableHead>{t('categories.table.name')}</TableHead>
             <TableHead>{t('categories.table.color')}</TableHead>
             <TableHead>{t('categories.table.icon')}</TableHead>
@@ -101,13 +179,13 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-                <TableCell>
-                    {category.monthlyBudget ? (
-                        <span className="text-sm">{category.monthlyBudget}</span>
-                    ) : (
-                        <span className="text-muted-foreground">-</span>
-                    )}
-                </TableCell>
+              <TableCell>
+                {category.monthlyBudget ? (
+                  <span className="text-sm">{category.monthlyBudget}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
                   {onEdit && (
@@ -134,7 +212,8 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
               </TableCell>
             </TableRow>
           ))}
-          </TableBody>
-        </Table>
+        </TableBody>
+      </Table>
+    </>
   )
 }
