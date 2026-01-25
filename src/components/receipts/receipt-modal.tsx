@@ -358,7 +358,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                 },
               ]}
               currentCategoryId={watch('categoryId')}
-              onAccept={(categoryId) => setValue('categoryId', categoryId)}
+              onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
               disabled={isSubmitting}
             />
           )}
