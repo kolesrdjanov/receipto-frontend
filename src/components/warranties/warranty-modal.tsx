@@ -304,7 +304,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0">
         <div className="flex h-full flex-col">
-          <div className="">
+          <div className="px-4 pt-4 sm:px-6 sm:pt-6">
             <DialogHeader>
               <DialogTitle>
                 {mode === 'create'
@@ -320,7 +320,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="productName">{t('warranties.modal.productName')}</Label>
@@ -463,7 +463,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
               </div>
             </div>
 
-            <div className="shrink-0 bg-background mt-4">
+            <div className="shrink-0 bg-background mt-4 px-4 pb-4 sm:px-6 sm:pb-6">
               <DialogFooter className="gap-2 sm:gap-0">
                 {mode === 'edit' && (
                   <Button
