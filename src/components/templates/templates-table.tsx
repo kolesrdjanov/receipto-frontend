@@ -60,12 +60,7 @@ export function TemplatesTable({ onEdit, onDelete }: TemplatesTableProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('templates.templatesCount', { count: templates.length })}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
+    <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t('templates.table.name')}</TableHead>
@@ -78,56 +73,54 @@ export function TemplatesTable({ onEdit, onDelete }: TemplatesTableProps) {
           </TableHeader>
           <TableBody>
             {templates.map((template) => (
-              <TableRow key={template.id}>
-                <TableCell className="font-medium">{template.name}</TableCell>
-                <TableCell>{template.storeName}</TableCell>
-                <TableCell>
-                  {template.currency || '-'}
-                </TableCell>
-                <TableCell>
-                  {template.category ? (
-                    <div className="flex items-center gap-2">
-                      {template.category.icon && (
-                        <span className="text-lg">{template.category.icon}</span>
-                      )}
-                      <span>{template.category.name}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
+                <TableRow key={template.id}>
+                  <TableCell className="font-medium">{template.name}</TableCell>
+                  <TableCell>{template.storeName}</TableCell>
+                  <TableCell>
+                    {template.currency || '-'}
+                  </TableCell>
+                  <TableCell>
+                    {template.category ? (
+                        <div className="flex items-center gap-2">
+                          {template.category.icon && (
+                              <span className="text-lg">{template.category.icon}</span>
+                          )}
+                          <span>{template.category.name}</span>
+                        </div>
+                    ) : (
+                        <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                   <span className="text-sm text-muted-foreground">
                     {formatDate(template.createdAt)}
                   </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    {onEdit && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(template)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(template)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      {onEdit && (
+                          <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onEdit(template)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                      )}
+                      {onDelete && (
+                          <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onDelete(template)}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
   )
 }

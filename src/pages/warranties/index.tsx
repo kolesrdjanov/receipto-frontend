@@ -1,12 +1,21 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
   useWarranties,
   useWarrantyStats,
+  useExportWarranties,
+  useImportWarranties,
   getWarrantyStatus,
   getRemainingDays,
   type Warranty,
@@ -24,9 +33,18 @@ import {
   Store,
   Clock,
   FileText,
+  Download,
+  Upload,
 } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 import { AppLayout } from '@/components/layout/app-layout'
+import { toast } from 'sonner'
+
+const CSV_TEMPLATE = `productName,storeName,purchaseDate,warrantyExpires,warrantyDuration,notes,fileUrls
+"Samsung TV 55""","Gigatron",2024-01-15,2026-01-15,24,"Living room TV",""
+"iPhone 15 Pro","iStyle",2024-03-20,,24,"Personal phone","https://example.com/warranty1.jpg"
+"Bosch Washing Machine","Tehnomanija",2024-02-10,2027-02-10,36,"","https://example.com/doc1.pdf;https://example.com/doc2.jpg"
+`
 
 export default function WarrantiesPage() {
   const { t } = useTranslation()
@@ -38,12 +56,17 @@ export default function WarrantiesPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([])
   const [galleryTitle, setGalleryTitle] = useState('')
   const [galleryIndex, setGalleryIndex] = useState(0)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const { data: allWarranties = [], isLoading } = useWarranties()
   const { data: activeWarranties = [] } = useWarranties('active')
   const { data: expiredWarranties = [] } = useWarranties('expired')
   const { data: expiringWarranties = [] } = useWarranties('expiring')
   const { data: stats } = useWarrantyStats()
+
+  const exportWarranties = useExportWarranties()
+  const importWarranties = useImportWarranties()
 
   const handleAddWarranty = () => {
     setSelectedWarranty(null)
@@ -58,13 +81,77 @@ export default function WarrantiesPage() {
   }
 
   const openGallery = (warranty: Warranty, index: number) => {
-    const imgs = [warranty.fileUrl, warranty.fileUrl2].filter(Boolean) as string[]
+    const imgs = (warranty.files || []).map(f => f.url)
     if (imgs.length === 0) return
 
     setGalleryImages(imgs)
     setGalleryTitle(warranty.productName)
     setGalleryIndex(Math.min(Math.max(index, 0), imgs.length - 1))
     setGalleryOpen(true)
+  }
+
+  const handleExport = async () => {
+    try {
+      await exportWarranties.mutateAsync()
+      toast.success(t('warranties.export.success'))
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('warranties.export.error'), { description: errorMessage })
+    }
+  }
+
+  const handleImportClick = () => {
+    setImportDialogOpen(true)
+  }
+
+  const handleDownloadTemplate = () => {
+    const blob = new Blob([CSV_TEMPLATE], { type: 'text/csv;charset=utf-8;' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'warranties-template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
+  const handleSelectFile = () => {
+    importInputRef.current?.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      const result = await importWarranties.mutateAsync(file)
+
+      if (result.errors.length === 0) {
+        toast.success(t('warranties.import.success', { count: result.imported }))
+      } else if (result.imported > 0) {
+        toast.warning(t('warranties.import.partialSuccess', {
+          imported: result.imported,
+          total: result.total,
+        }), {
+          description: `${result.errors.length} ${t('warranties.import.errorsOccurred')}`,
+        })
+      } else {
+        toast.error(t('warranties.import.error'), {
+          description: result.errors[0]?.message || 'Unknown error',
+        })
+      }
+
+      setImportDialogOpen(false)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('warranties.import.error'), { description: errorMessage })
+    }
+
+    // Reset input
+    if (importInputRef.current) {
+      importInputRef.current.value = ''
+    }
   }
 
   const getWarrantiesForTab = () => {
@@ -118,10 +205,20 @@ export default function WarrantiesPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('warranties.title')}</h1>
             <p className="text-muted-foreground">{t('warranties.subtitle')}</p>
           </div>
-          <Button onClick={handleAddWarranty}>
-            <Plus className="h-4 w-4" />
-            {t('warranties.addWarranty')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={handleExport} disabled={exportWarranties.isPending}>
+              <Download className="h-4 w-4" />
+              {t('warranties.export.button')}
+            </Button>
+            <Button variant="outline" onClick={handleImportClick} disabled={importWarranties.isPending}>
+              <Upload className="h-4 w-4" />
+              {t('warranties.import.button')}
+            </Button>
+            <Button onClick={handleAddWarranty}>
+              <Plus className="h-4 w-4" />
+              {t('warranties.addWarranty')}
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -236,38 +333,36 @@ export default function WarrantiesPage() {
                       )}
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      {(warranty.fileUrl || warranty.fileUrl2) && (
+                      {warranty.files && warranty.files.length > 0 && (
                         <div className="grid grid-cols-2 gap-2">
-                          {[warranty.fileUrl, warranty.fileUrl2]
-                            .filter(Boolean)
-                            .map((fileUrl, i) => {
-                              const url = fileUrl as string
-                              const isPdf = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/raw/upload/')
-                              return (
-                                <button
-                                  key={url}
-                                  type="button"
-                                  className="relative h-32 rounded-md overflow-hidden bg-muted border hover:border-primary transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    openGallery(warranty, i)
-                                  }}
-                                >
-                                  {isPdf ? (
-                                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                      <FileText className="h-10 w-10" />
-                                      <span className="text-xs font-medium">PDF</span>
-                                    </div>
-                                  ) : (
-                                    <img
-                                      src={`${url}${url.includes('?') ? '&' : '?'}f_auto,q_auto`}
-                                      alt={warranty.productName}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  )}
-                                </button>
-                              )
-                            })}
+                          {warranty.files.map((file, i) => {
+                            const url = file.url
+                            const isPdf = file.type === 'pdf' || url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/raw/upload/')
+                            return (
+                              <button
+                                key={url}
+                                type="button"
+                                className="relative h-32 rounded-md overflow-hidden bg-muted border hover:border-primary transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openGallery(warranty, i)
+                                }}
+                              >
+                                {isPdf ? (
+                                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                    <FileText className="h-10 w-10" />
+                                    <span className="text-xs font-medium">PDF</span>
+                                  </div>
+                                ) : (
+                                  <img
+                                    src={`${url}${url.includes('?') ? '&' : '?'}f_auto,q_auto`}
+                                    alt={warranty.productName}
+                                    className="w-full h-full object-contain"
+                                  />
+                                )}
+                              </button>
+                            )
+                          })}
                         </div>
                       )}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -292,6 +387,67 @@ export default function WarrantiesPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Import Dialog */}
+        <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{t('warranties.import.guide.title')}</DialogTitle>
+              <DialogDescription>
+                {t('warranties.import.guide.description')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">{t('warranties.import.guide.columns')}</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnProductName')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnStoreName')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnPurchaseDate')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnWarrantyExpires')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnWarrantyDuration')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnNotes')}
+                  </li>
+                  <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                    {t('warranties.import.guide.columnFileUrls')}
+                  </li>
+                </ul>
+              </div>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>{t('warranties.import.guide.dateFormats')}</p>
+                <p>{t('warranties.import.guide.defaultDuration')}</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <Button variant="outline" onClick={handleDownloadTemplate} className="flex-1">
+                  <Download className="h-4 w-4" />
+                  {t('warranties.import.guide.downloadTemplate')}
+                </Button>
+                <Button onClick={handleSelectFile} disabled={importWarranties.isPending} className="flex-1">
+                  <Upload className="h-4 w-4" />
+                  {t('warranties.import.guide.selectFile')}
+                </Button>
+              </div>
+            </div>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+          </DialogContent>
+        </Dialog>
 
         <Suspense fallback={null}>
           {galleryOpen && (

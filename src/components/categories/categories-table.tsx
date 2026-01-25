@@ -59,89 +59,82 @@ export function CategoriesTable({ onEdit, onDelete }: CategoriesTableProps) {
   }
 
   return (
-    <Card data-testid="categories-table-card">
-      <CardHeader>
-        <CardTitle data-testid="categories-count">{t('categories.categoriesCount', { count: categories.length })}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table data-testid="categories-table">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('categories.table.name')}</TableHead>
-              <TableHead>{t('categories.table.color')}</TableHead>
-              <TableHead>{t('categories.table.icon')}</TableHead>
-              <TableHead>{t('categories.table.description')}</TableHead>
-              <TableHead>{t('categories.table.monthlyBudget')}</TableHead>
-              <TableHead className="text-right">{t('categories.table.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id} data-testid={`category-row-${category.id}`}>
-                <TableCell className="font-medium">{category.name}</TableCell>
-                <TableCell>
-                  {category.color ? (
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-6 h-6 rounded-full border"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <span className="text-sm text-muted-foreground">{category.color}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {category.icon ? (
-                    <span className="text-lg">{category.icon}</span>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {category.description ? (
-                    <span className="text-sm">{category.description}</span>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                  <TableCell>
-                      {category.monthlyBudget ? (
-                          <span className="text-sm">{category.monthlyBudget}</span>
-                      ) : (
-                          <span className="text-muted-foreground">-</span>
-                      )}
-                  </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    {onEdit && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(category)}
-                        data-testid={`category-edit-${category.id}`}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(category)}
-                        data-testid={`category-delete-${category.id}`}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    )}
+    <Table data-testid="categories-table">
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('categories.table.name')}</TableHead>
+            <TableHead>{t('categories.table.color')}</TableHead>
+            <TableHead>{t('categories.table.icon')}</TableHead>
+            <TableHead>{t('categories.table.description')}</TableHead>
+            <TableHead>{t('categories.table.monthlyBudget')}</TableHead>
+            <TableHead className="text-right">{t('categories.table.actions')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {categories.map((category) => (
+            <TableRow key={category.id} data-testid={`category-row-${category.id}`}>
+              <TableCell className="font-medium">{category.name}</TableCell>
+              <TableCell>
+                {category.color ? (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-6 h-6 rounded-full border"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span className="text-sm text-muted-foreground">{category.color}</span>
                   </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {category.icon ? (
+                  <span className="text-lg">{category.icon}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {category.description ? (
+                  <span className="text-sm">{category.description}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+                <TableCell>
+                    {category.monthlyBudget ? (
+                        <span className="text-sm">{category.monthlyBudget}</span>
+                    ) : (
+                        <span className="text-muted-foreground">-</span>
+                    )}
                 </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-1">
+                  {onEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(category)}
+                      data-testid={`category-edit-${category.id}`}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(category)}
+                      data-testid={`category-delete-${category.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
   )
 }

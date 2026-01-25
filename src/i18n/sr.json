@@ -620,8 +620,8 @@
       "expiresDate": "Datum isteka",
       "notes": "Beleške",
       "notesPlaceholder": "Dodatne beleške o proizvodu ili garanciji",
-      "image": "Slika garancije",
-      "uploadImage": "Dodaj sliku",
+      "files": "Datoteke",
+      "addFile": "Dodaj",
       "deleteConfirmTitle": "Obriši garanciju",
       "deleteConfirmDescription": "Da li ste sigurni da želite da obrišete garanciju za \"{{name}}\"? Ova akcija se ne može poništiti.",
       "createSuccess": "Garancija uspešno dodata",
@@ -631,8 +631,36 @@
       "updateError": "Greška pri ažuriranju garancije",
       "deleteError": "Greška pri brisanju garancije",
       "captureImage": "Slikaj kamerom",
-      "imageSlots": "Dodajte do 2 slike (galerija ili kamera)",
+      "imageSlots": "Dodajte do 3 fajla (slike ili PDF)",
       "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada."
+    },
+    "export": {
+      "button": "Izvezi",
+      "success": "Garancije uspešno izvezene",
+      "error": "Greška pri izvozu garancija"
+    },
+    "import": {
+      "button": "Uvezi",
+      "success": "Uspešno uvezeno {{count}} garancija",
+      "partialSuccess": "Uvezeno {{imported}} od {{total}} garancija",
+      "error": "Greška pri uvozu garancija",
+      "errorsOccurred": "grešaka se desilo",
+      "guide": {
+        "title": "Vodič za CSV uvoz",
+        "description": "Uvezite garancije iz CSV fajla. Fajl mora sadržati određene kolone.",
+        "columns": "Potrebne kolone",
+        "columnProductName": "productName - Naziv proizvoda (obavezno)",
+        "columnStoreName": "storeName - Naziv prodavnice (opciono)",
+        "columnPurchaseDate": "purchaseDate - Datum kupovine u formatu YYYY-MM-DD (obavezno)",
+        "columnWarrantyExpires": "warrantyExpires - Datum isteka u formatu YYYY-MM-DD (opciono)",
+        "columnWarrantyDuration": "warrantyDuration - Trajanje u mesecima (opciono, koristi se ako warrantyExpires nije unet)",
+        "columnNotes": "notes - Dodatne beleške (opciono)",
+        "columnFileUrls": "fileUrls - URL-ovi fajlova razdvojeni tačka-zarezom (opciono)",
+        "dateFormats": "Podržani formati datuma: YYYY-MM-DD, DD/MM/YYYY, DD.MM.YYYY",
+        "defaultDuration": "Ako nisu uneti warrantyExpires ni warrantyDuration, podrazumevano trajanje je 24 meseca.",
+        "downloadTemplate": "Preuzmi šablon",
+        "selectFile": "Izaberi CSV fajl"
+      }
     }
   },
   "admin": {

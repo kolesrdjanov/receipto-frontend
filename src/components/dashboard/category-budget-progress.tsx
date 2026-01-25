@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Progress } from '@/components/ui/progress'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { Target, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -175,10 +174,9 @@ export function CategoryBudgetProgress({
                   </span>
                 </div>
 
-                <div className="relative">
-                  <Progress value={Math.min(percentage, 100)} className="h-3" />
+                <div className="relative h-3 w-full overflow-hidden rounded-full bg-secondary">
                   <div
-                    className={cn('absolute inset-0 h-3 rounded-full', getProgressColor())}
+                    className={cn('h-full rounded-full transition-all', getProgressColor())}
                     style={{ width: `${Math.min(percentage, 100)}%` }}
                   />
                 </div>

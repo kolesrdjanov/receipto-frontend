@@ -30,6 +30,7 @@ import {
   useDeleteWarranty,
   type Warranty,
   type CreateWarrantyData,
+  MAX_WARRANTY_FILES,
 } from '@/hooks/warranties/use-warranties'
 import { toast } from 'sonner'
 import { Info, X, FileText, Loader2, Trash2 } from 'lucide-react'
@@ -43,17 +44,17 @@ interface WarrantyModalProps {
 
 // Helper type for preview items
 type PreviewItem = {
-  type: 'remote1' | 'remote2' | 'local'
+  type: 'remote' | 'local'
   src: string
-  localIndex?: number
+  remoteIndex?: number // Index in the warranty.files array
+  localIndex?: number  // Index in the localImages array
 }
 
 export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyModalProps) {
   const { t } = useTranslation()
 
-  // Track which original remote images should be removed
-  const [removeImage1, setRemoveImage1] = useState(false)
-  const [removeImage2, setRemoveImage2] = useState(false)
+  // Track which original remote files should be removed (by index)
+  const [removeFileIndices, setRemoveFileIndices] = useState<number[]>([])
 
   // New local images to upload
   const [localImages, setLocalImages] = useState<File[]>([])
@@ -82,18 +83,17 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   const updateWarranty = useUpdateWarranty()
   const deleteWarranty = useDeleteWarranty()
 
-  // Build combined preview list: remaining remote images + new local images
+  // Build combined preview list: remaining remote files + new local images
   const buildPreviewItems = (): PreviewItem[] => {
     const items: PreviewItem[] = []
 
-    // Add remote image 1 if exists and not removed
-    if (mode === 'edit' && warranty?.fileUrl && !removeImage1) {
-      items.push({ type: 'remote1', src: warranty.fileUrl })
-    }
-
-    // Add remote image 2 if exists and not removed
-    if (mode === 'edit' && warranty?.fileUrl2 && !removeImage2) {
-      items.push({ type: 'remote2', src: warranty.fileUrl2 })
+    // Add remote files that haven't been marked for removal
+    if (mode === 'edit' && warranty?.files && Array.isArray(warranty.files)) {
+      warranty.files.forEach((file, index) => {
+        if (!removeFileIndices.includes(index)) {
+          items.push({ type: 'remote', src: file.url, remoteIndex: index })
+        }
+      })
     }
 
     // Add local images
@@ -105,8 +105,8 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   }
 
   const previewItems = buildPreviewItems()
-  const totalImageCount = previewItems.length
-  const remainingSlots = Math.max(0, 2 - totalImageCount)
+  const totalFileCount = previewItems.length
+  const remainingSlots = Math.max(0, MAX_WARRANTY_FILES - totalFileCount)
   const canAddMore = remainingSlots > 0
 
   const revokePreviews = (previews: string[]) => {
@@ -116,15 +116,12 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
   }
 
   const resetFileInputs = () => {
-    const lib = document.getElementById('warranty-images') as HTMLInputElement | null
-    const cam = document.getElementById('warranty-camera') as HTMLInputElement | null
-    if (lib) lib.value = ''
-    if (cam) cam.value = ''
+    const fileInput = document.getElementById('warranty-files') as HTMLInputElement | null
+    if (fileInput) fileInput.value = ''
   }
 
   const clearAll = () => {
-    setRemoveImage1(false)
-    setRemoveImage2(false)
+    setRemoveFileIndices([])
     setLocalImages([])
     setLocalPreviews((prev) => {
       revokePreviews(prev)
@@ -231,19 +228,14 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     }
   }
 
-  const handleLibrarySelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    await addFiles(e.target.files)
-  }
-
-  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     await addFiles(e.target.files)
   }
 
   const removePreviewItem = (item: PreviewItem) => {
-    if (item.type === 'remote1') {
-      setRemoveImage1(true)
-    } else if (item.type === 'remote2') {
-      setRemoveImage2(true)
+    if (item.type === 'remote' && item.remoteIndex !== undefined) {
+      // Mark remote file for removal
+      setRemoveFileIndices((prev) => [...prev, item.remoteIndex!])
     } else if (item.type === 'local' && item.localIndex !== undefined) {
       const idx = item.localIndex
       setLocalImages((prev) => prev.filter((_, i) => i !== idx))
@@ -269,8 +261,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
           id: warranty.id,
           data,
           images: localImages.length ? localImages : undefined,
-          removeImage1: removeImage1 || undefined,
-          removeImage2: removeImage2 || undefined,
+          removeFileIndices: removeFileIndices.length > 0 ? removeFileIndices : undefined,
         })
         toast.success(t('warranties.modal.updateSuccess'))
       }
@@ -391,46 +382,29 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                   />
                 </div>
 
-                {/* Image Upload */}
+                {/* File Upload */}
                 <div className="space-y-2">
-                  <Label>{t('warranties.modal.image')}</Label>
+                  <Label>{t('warranties.modal.files')}</Label>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {canAddMore && (
-                      <>
-                        <Button type="button" variant="outline" asChild className="shrink-0">
-                          <Label htmlFor="warranty-images" className="cursor-pointer">
-                            {t('warranties.modal.uploadImage')}
-                          </Label>
-                        </Button>
-                        <Button type="button" variant="outline" asChild className="shrink-0">
-                          <Label htmlFor="warranty-camera" className="cursor-pointer">
-                            {t('warranties.modal.captureImage')}
-                          </Label>
-                        </Button>
-                      </>
+                      <Button type="button" variant="outline" asChild className="shrink-0">
+                        <Label htmlFor="warranty-files" className="cursor-pointer">
+                          {t('warranties.modal.addFile')}
+                        </Label>
+                      </Button>
                     )}
                     <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
-                      {totalImageCount}/2
+                      {totalFileCount}/{MAX_WARRANTY_FILES}
                     </p>
                   </div>
 
                   <input
-                    id="warranty-images"
+                    id="warranty-files"
                     type="file"
                     accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
                     multiple
-                    onChange={handleLibrarySelect}
-                    className="hidden"
-                    disabled={!canAddMore}
-                  />
-
-                  <input
-                    id="warranty-camera"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleCameraCapture}
+                    onChange={handleFileSelect}
                     className="hidden"
                     disabled={!canAddMore}
                   />
@@ -441,7 +415,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                         const lowerSrc = item.src.toLowerCase()
                         const isPdf = item.src === 'pdf-placeholder' || lowerSrc.endsWith('.pdf') || lowerSrc.includes('/raw/upload/')
                         return (
-                          <div key={`${item.type}-${idx}`} className="relative overflow-hidden rounded-lg border">
+                          <div key={`${item.type}-${item.remoteIndex ?? item.localIndex}-${idx}`} className="relative overflow-hidden rounded-lg border">
                             {item.src === 'heic-placeholder' ? (
                               <div className="w-full h-48 bg-muted flex items-center justify-center">
                                 <span className="text-sm text-muted-foreground">HEIC Image</span>

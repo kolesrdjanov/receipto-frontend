@@ -632,8 +632,8 @@
       "expiresDate": "Expires On",
       "notes": "Notes",
       "notesPlaceholder": "Additional notes about the product or warranty",
-      "image": "Warranty Image",
-      "uploadImage": "Upload Image",
+      "files": "Files",
+      "addFile": "Add File",
       "deleteConfirmTitle": "Delete Warranty",
       "deleteConfirmDescription": "Are you sure you want to delete the warranty for \"{{name}}\"? This action cannot be undone.",
       "createSuccess": "Warranty added successfully",
@@ -643,8 +643,36 @@
       "updateError": "Failed to update warranty",
       "deleteError": "Failed to delete warranty",
       "captureImage": "Take Photo",
-      "imageSlots": "Add up to 2 images (library or camera)",
+      "imageSlots": "Add up to 3 files (images or PDFs)",
       "heicNotice": "HEIC images cannot be previewed but will be converted after upload."
+    },
+    "export": {
+      "button": "Export",
+      "success": "Warranties exported successfully",
+      "error": "Failed to export warranties"
+    },
+    "import": {
+      "button": "Import",
+      "success": "Successfully imported {{count}} warranties",
+      "partialSuccess": "Imported {{imported}} of {{total}} warranties",
+      "error": "Failed to import warranties",
+      "errorsOccurred": "errors occurred",
+      "guide": {
+        "title": "CSV Import Guide",
+        "description": "Import warranties from a CSV file. The file must contain specific columns.",
+        "columns": "Required columns",
+        "columnProductName": "productName - Product name (required)",
+        "columnStoreName": "storeName - Store name (optional)",
+        "columnPurchaseDate": "purchaseDate - Purchase date in YYYY-MM-DD format (required)",
+        "columnWarrantyExpires": "warrantyExpires - Expiration date in YYYY-MM-DD format (optional)",
+        "columnWarrantyDuration": "warrantyDuration - Duration in months (optional, used if warrantyExpires is empty)",
+        "columnNotes": "notes - Additional notes (optional)",
+        "columnFileUrls": "fileUrls - File URLs separated by semicolon (optional)",
+        "dateFormats": "Supported date formats: YYYY-MM-DD, DD/MM/YYYY, DD.MM.YYYY",
+        "defaultDuration": "If neither warrantyExpires nor warrantyDuration is provided, default is 24 months.",
+        "downloadTemplate": "Download Template",
+        "selectFile": "Select CSV File"
+      }
     }
   },
   "admin": {

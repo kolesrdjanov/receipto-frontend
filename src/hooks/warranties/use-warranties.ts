@@ -4,6 +4,14 @@ import { queryKeys } from '@/lib/query-keys'
 import { useAuthStore } from '@/store/auth'
 import axios from 'axios'
 
+export interface WarrantyFile {
+  url: string
+  publicId: string
+  type: 'image' | 'pdf'
+}
+
+export const MAX_WARRANTY_FILES = 3
+
 export interface Warranty {
   id: string
   productName: string
@@ -11,10 +19,7 @@ export interface Warranty {
   purchaseDate: string
   warrantyExpires: string
   warrantyDuration?: number
-  fileUrl?: string
-  filePublicId?: string
-  fileUrl2?: string
-  filePublicId2?: string
+  files: WarrantyFile[]
   notes?: string
   userId: string
   receiptId?: string
@@ -36,6 +41,12 @@ export interface CreateWarrantyData {
   warrantyDuration?: number
   notes?: string
   receiptId?: string
+}
+
+export interface ImportResult {
+  total: number
+  imported: number
+  errors: { row: number; message: string }[]
 }
 
 // Fetch all warranties
@@ -127,7 +138,7 @@ async function apiRequestWithFormData<T>(
   }
 }
 
-// Create warranty with optional images (max 2)
+// Create warranty with optional images (max 3)
 const createWarranty = async (data: CreateWarrantyData, images?: File[]): Promise<Warranty> => {
   const formData = new FormData()
 
@@ -137,20 +148,19 @@ const createWarranty = async (data: CreateWarrantyData, images?: File[]): Promis
     }
   })
 
-  ;(images ?? []).slice(0, 2).forEach((img) => {
+  ;(images ?? []).slice(0, MAX_WARRANTY_FILES).forEach((img) => {
     formData.append('images', img)
   })
 
   return apiRequestWithFormData<Warranty>('/warranties', formData, 'POST')
 }
 
-// Update warranty
+// Update warranty with removeFileIndices instead of removeImage1/removeImage2
 const updateWarranty = async (
   id: string,
   data: Partial<CreateWarrantyData>,
   images?: File[],
-  removeImage1?: boolean,
-  removeImage2?: boolean
+  removeFileIndices?: number[]
 ): Promise<Warranty> => {
   const formData = new FormData()
 
@@ -160,14 +170,11 @@ const updateWarranty = async (
     }
   })
 
-  if (removeImage1) {
-    formData.append('removeImage1', 'true')
-  }
-  if (removeImage2) {
-    formData.append('removeImage2', 'true')
+  if (removeFileIndices && removeFileIndices.length > 0) {
+    formData.append('removeFileIndices', removeFileIndices.join(','))
   }
 
-  ;(images ?? []).slice(0, 2).forEach((img) => {
+  ;(images ?? []).slice(0, MAX_WARRANTY_FILES).forEach((img) => {
     formData.append('images', img)
   })
 
@@ -182,13 +189,32 @@ const deleteWarranty = async (id: string): Promise<void> => {
 // Upload images to existing warranty
 const uploadWarrantyImages = async (id: string, images: File[]): Promise<Warranty> => {
   const formData = new FormData()
-  images.slice(0, 2).forEach((img) => formData.append('images', img))
+  images.slice(0, MAX_WARRANTY_FILES).forEach((img) => formData.append('images', img))
   return apiRequestWithFormData<Warranty>(`/warranties/${id}/image`, formData, 'POST')
 }
 
 // Remove image from warranty
 const removeWarrantyImage = async (id: string): Promise<Warranty> => {
   return api.delete<Warranty>(`/warranties/${id}/image`)
+}
+
+// Export warranties to CSV
+const exportWarranties = async (): Promise<Blob> => {
+  const accessToken = useAuthStore.getState().accessToken
+  const response = await axios.get(`${API_BASE_URL}/warranties/export`, {
+    headers: {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    responseType: 'blob',
+  })
+  return response.data
+}
+
+// Import warranties from CSV
+const importWarranties = async (file: File): Promise<ImportResult> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return apiRequestWithFormData<ImportResult>('/warranties/import', formData, 'POST')
 }
 
 // Hooks
@@ -233,15 +259,13 @@ export function useUpdateWarranty() {
       id,
       data,
       images,
-      removeImage1,
-      removeImage2,
+      removeFileIndices,
     }: {
       id: string
       data: Partial<CreateWarrantyData>
       images?: File[]
-      removeImage1?: boolean
-      removeImage2?: boolean
-    }) => updateWarranty(id, data, images, removeImage1, removeImage2),
+      removeFileIndices?: number[]
+    }) => updateWarranty(id, data, images, removeFileIndices),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.warranties.all })
     },
@@ -276,6 +300,34 @@ export function useRemoveWarrantyImage() {
 
   return useMutation({
     mutationFn: removeWarrantyImage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.warranties.all })
+    },
+  })
+}
+
+export function useExportWarranties() {
+  return useMutation({
+    mutationFn: async () => {
+      const blob = await exportWarranties()
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'warranties.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    },
+  })
+}
+
+export function useImportWarranties() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: importWarranties,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.warranties.all })
     },
