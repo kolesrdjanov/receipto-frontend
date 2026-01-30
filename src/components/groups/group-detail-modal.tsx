@@ -7,6 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
@@ -19,10 +26,13 @@ import {
   useLeaveGroup,
   type Group,
 } from '@/hooks/groups/use-groups'
+import { useCurrencies, getCurrencyFlag } from '@/hooks/currencies/use-currencies'
+import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
+import { useSettingsStore } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
 import { GroupBalancesTab } from './group-balances-tab'
 import { toast } from 'sonner'
-import { Users, UserPlus, Trash2, LogOut, Crown, Loader2, Pencil } from 'lucide-react'
+import { Users, UserPlus, Trash2, LogOut, Crown, Loader2, Pencil, Wallet } from 'lucide-react'
 
 interface GroupDetailModalProps {
   open: boolean
@@ -38,6 +48,10 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
   const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const { user } = useAuthStore()
+  const { currency: preferredCurrency } = useSettingsStore()
+  const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
+  const { data: currencies = [] } = useCurrencies()
+  const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
   const { data: stats, isLoading: statsLoading } = useGroupStats(group?.id || '')
   const inviteMember = useInviteMember()
@@ -101,12 +115,39 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
     onEdit(group)
   }
 
-  const formatAmount = (amount: number) => {
+  const formatAmount = (amount: number, currency?: string) => {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: group.currency || 'RSD',
+      currency: currency || displayCurrency || 'RSD',
       minimumFractionDigits: 0,
     }).format(amount)
+  }
+
+  // Convert amount from one currency to the display currency
+  const convertAmount = (amount: number, fromCurrency: string): number => {
+    if (fromCurrency === displayCurrency || !exchangeRates) {
+      return amount
+    }
+    const rate = exchangeRates[fromCurrency]
+    if (!rate || rate === 0) {
+      return amount
+    }
+    return amount / rate
+  }
+
+  // Calculate total amount from all currencies
+  const getTotalAmount = (): number => {
+    if (!stats?.byCurrency) return 0
+    return stats.byCurrency.reduce((sum, curr) => {
+      return sum + convertAmount(curr.totalAmount, curr.currency)
+    }, 0)
+  }
+
+  // Calculate user's total spent from all currencies
+  const getUserTotalSpent = (userByCurrency: { currency: string; totalSpent: number }[]): number => {
+    return userByCurrency.reduce((sum, curr) => {
+      return sum + convertAmount(curr.totalSpent, curr.currency)
+    }, 0)
   }
 
   return (
@@ -128,8 +169,21 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
             <DialogDescription>{group.description}</DialogDescription>
           )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
-            <span>{t('groups.detail.currency')}</span>
-            <span className="font-medium text-foreground">{group.currency}</span>
+            <Wallet className="h-4 w-4" />
+            <span>{t('groups.detail.displayCurrency')}</span>
+            <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
+              <SelectTrigger className="h-7 w-auto min-w-20 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {currencies.map((c) => (
+                  <SelectItem key={c.id} value={c.code}>
+                    {getCurrencyFlag(c.code)} {c.code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {ratesLoading && <Loader2 className="h-3 w-3 animate-spin" />}
           </div>
         </DialogHeader>
 
@@ -153,9 +207,24 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                   <span className="text-muted-foreground">{t('groups.detail.totalReceipts')}</span>
                   <span className="font-medium">{stats.totalReceipts}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-start">
                   <span className="text-muted-foreground">{t('groups.detail.totalAmount')}</span>
-                  <span className="font-medium">{formatAmount(stats.totalAmount)}</span>
+                  <div className="text-right">
+                    <span className="font-medium">{formatAmount(getTotalAmount())}</span>
+                    {/* Show breakdown by currency if multiple */}
+                    {stats.byCurrency.length > 1 && (
+                      <div className="flex flex-wrap gap-1 mt-1 justify-end">
+                        {stats.byCurrency.map((curr, idx) => (
+                          <span
+                            key={idx}
+                            className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                          >
+                            {formatAmount(curr.totalAmount, curr.currency)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {stats.perUser.length > 0 && (
                   <div className="pt-2 border-t">
@@ -163,7 +232,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                     {stats.perUser.map((u) => (
                       <div key={u.userId} className="flex justify-between text-sm">
                         <span>{u.firstName} {u.lastName}</span>
-                        <span>{formatAmount(u.totalSpent)} ({u.receiptsCount})</span>
+                        <span>{formatAmount(getUserTotalSpent(u.byCurrency))} ({u.receiptsCount})</span>
                       </div>
                     ))}
                   </div>
@@ -175,7 +244,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
 
           {/* Balances Tab */}
           <TabsContent value="balances" className="mt-4">
-            <GroupBalancesTab groupId={group.id} currency={group.currency} />
+            <GroupBalancesTab groupId={group.id} displayCurrency={displayCurrency} exchangeRates={exchangeRates} />
           </TabsContent>
 
           {/* Members Tab */}

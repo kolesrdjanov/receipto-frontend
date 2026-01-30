@@ -223,6 +223,7 @@
       "category": "Kategorija",
       "selectCategory": "Izaberite kategoriju",
       "group": "Grupa (opciono)",
+      "groupLocked": "Dodavanje računa u ovu grupu",
       "noGroup": "Bez grupe",
       "paidBy": "Platio",
       "selectPaidBy": "Izaberite ko je platio",
@@ -434,8 +435,8 @@
       "nameRequired": "Naziv je obavezan",
       "description": "Opis",
       "descriptionPlaceholder": "Opcioni opis",
-      "currency": "Valuta",
-      "currencyLocked": "Valuta se ne može promeniti nakon kreiranja grupe",
+      "defaultCurrency": "Podrazumevana valuta",
+      "defaultCurrencyHelp": "Ova valuta će biti unapred izabrana pri dodavanju računa u ovu grupu",
       "icon": "Ikona (emoji)",
       "iconPlaceholder": "npr. house, plane, shopping-cart",
       "deleteTitle": "Obriši grupu",
@@ -448,7 +449,7 @@
       "deleteError": "Greška pri brisanju grupe"
     },
     "detail": {
-      "currency": "Valuta:",
+      "displayCurrency": "Valuta prikaza:",
       "statistics": "Statistika",
       "totalReceipts": "Ukupno računa",
       "totalAmount": "Ukupan iznos",
@@ -489,6 +490,60 @@
       "settled": "Poravnato",
       "suggestedSettlements": "Predložena poravnanja",
       "settlementsHelp": "Ovo su optimizovani predlozi plaćanja za poravnanje svih dugova sa minimalnim brojem transakcija."
+    },
+    "settlements": {
+      "title": "Poravnaj dugove",
+      "recordPayment": "Zabeleži uplatu",
+      "history": "Istorija poravnanja",
+      "noHistory": "Nema zabeleženih poravnanja",
+      "from": "Od",
+      "to": "Za",
+      "amount": "Iznos",
+      "note": "Napomena (opciono)",
+      "notePlaceholder": "npr. Bankovni transfer, Gotovina",
+      "date": "Datum",
+      "settledAt": "Poravnato",
+      "recordedBy": "Zabeležio",
+      "confirmTitle": "Zabeleži poravnanje",
+      "confirmDescription": "Zabeležiti uplatu od {{amount}} od {{from}} za {{to}}?",
+      "success": "Poravnanje uspešno zabeleženo",
+      "error": "Greška pri beleženju poravnanja",
+      "pays": "plaća",
+      "selectPayer": "Izaberite ko plaća",
+      "selectReceiver": "Izaberite ko prima uplatu"
+    },
+    "archive": {
+      "button": "Arhiviraj grupu",
+      "unarchiveButton": "Vrati iz arhive",
+      "confirmTitle": "Arhiviraj grupu",
+      "confirmDescription": "Da li ste sigurni da želite da arhivirate \"{{name}}\"? Arhivirane grupe se neće prikazivati u glavnoj listi ali se mogu vratiti kasnije.",
+      "unarchiveTitle": "Vrati grupu iz arhive",
+      "unarchiveDescription": "Da li ste sigurni da želite da vratite \"{{name}}\" iz arhive? Grupa će se ponovo prikazivati u glavnoj listi.",
+      "success": "Grupa uspešno arhivirana",
+      "unarchiveSuccess": "Grupa uspešno vraćena iz arhive",
+      "error": "Greška pri arhiviranju grupe",
+      "unarchiveError": "Greška pri vraćanju grupe iz arhive",
+      "showArchived": "Prikaži arhivirane",
+      "archivedBadge": "Arhivirana"
+    },
+    "activities": {
+      "title": "Aktivnost",
+      "noActivities": "Nema aktivnosti",
+      "loadMore": "Učitaj više",
+      "types": {
+        "group_created": "je kreirao/la grupu",
+        "group_updated": "je ažurirao/la podešavanja grupe",
+        "group_archived": "je arhivirao/la grupu",
+        "group_unarchived": "je vratio/la grupu iz arhive",
+        "member_invited": "je pozvao/la {{email}}",
+        "member_joined": "se pridružio/la grupi",
+        "member_left": "je napustio/la grupu",
+        "member_removed": "je uklonjen/a iz grupe",
+        "receipt_added": "je dodao/la račun",
+        "receipt_updated": "je ažurirao/la račun",
+        "receipt_deleted": "je obrisao/la račun",
+        "settlement_created": "je zabeležio/la poravnanje"
+      }
     }
   },
   "settings": {

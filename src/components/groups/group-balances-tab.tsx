@@ -1,29 +1,119 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useGroupBalances, useGroupSettlements } from '@/hooks/groups/use-groups'
-import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight } from 'lucide-react'
+import { useGroupBalances, type MemberBalance } from '@/hooks/groups/use-groups'
+import { Loader2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+
+interface ExchangeRates {
+  [currency: string]: number
+}
 
 interface GroupBalancesTabProps {
   groupId: string
-  currency: string
+  displayCurrency: string
+  exchangeRates?: ExchangeRates
 }
 
-export function GroupBalancesTab({ groupId, currency }: GroupBalancesTabProps) {
+interface ConvertedBalance {
+  userId: string
+  user: MemberBalance['user']
+  totalPaid: number
+  totalOwed: number
+  balance: number
+  originalAmounts: { currency: string; paid: number; owed: number }[]
+  settlementsReceived: number
+  settlementsPaid: number
+}
+
+export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: GroupBalancesTabProps) {
   const { t } = useTranslation()
   const { data: balances = [], isLoading: balancesLoading } = useGroupBalances(groupId)
-  const { data: settlements = [], isLoading: settlementsLoading } = useGroupSettlements(groupId)
 
-  const isLoading = balancesLoading || settlementsLoading
+  const isLoading = balancesLoading
 
-  // Calculate total spent across all members
-  const totalSpent = balances.reduce((sum, balance) => sum + balance.totalPaid, 0)
+  // Convert amount from one currency to the display currency
+  const convertAmount = (amount: number, fromCurrency: string): number => {
+    if (fromCurrency === displayCurrency || !exchangeRates) {
+      return amount
+    }
+    const rate = exchangeRates[fromCurrency]
+    if (!rate || rate === 0) {
+      return amount
+    }
+    return amount / rate
+  }
 
-  const formatCurrency = (amount: number) => {
+  // Calculate converted balances
+  const convertedBalances: ConvertedBalance[] = useMemo(() => {
+    return balances.map((balance) => {
+      let totalPaid = 0
+      let totalOwed = 0
+      const originalAmounts: { currency: string; paid: number; owed: number }[] = []
+
+      // Check if we have the new byCurrency format
+      if (balance.byCurrency && balance.byCurrency.length > 0) {
+        // New format: multi-currency support
+        for (const curr of balance.byCurrency) {
+          const convertedPaid = convertAmount(curr.totalPaid, curr.currency)
+          const convertedOwed = convertAmount(curr.totalOwed, curr.currency)
+          totalPaid += convertedPaid
+          totalOwed += convertedOwed
+
+          originalAmounts.push({
+            currency: curr.currency,
+            paid: curr.totalPaid,
+            owed: curr.totalOwed,
+          })
+        }
+      } else if (balance.totalPaid !== undefined || balance.totalOwed !== undefined) {
+        // Legacy format: single currency (backwards compatibility)
+        totalPaid = balance.totalPaid || 0
+        totalOwed = balance.totalOwed || 0
+        originalAmounts.push({
+          currency: displayCurrency,
+          paid: totalPaid,
+          owed: totalOwed,
+        })
+      }
+
+      // Apply settlements - convert each settlement from its original currency
+      let settlementsReceived = 0
+      let settlementsPaid = 0
+
+      if (balance.settlementsByCurrency && balance.settlementsByCurrency.length > 0) {
+        // New format: settlements by currency
+        for (const settlement of balance.settlementsByCurrency) {
+          settlementsReceived += convertAmount(settlement.received, settlement.currency)
+          settlementsPaid += convertAmount(settlement.paid, settlement.currency)
+        }
+      } else {
+        // Legacy format: flat settlements (assume already in display currency)
+        settlementsReceived = balance.settlementsReceived || 0
+        settlementsPaid = balance.settlementsPaid || 0
+      }
+
+      // Balance = Paid - Owed + SettlementsPaid - SettlementsReceived
+      const finalBalance = totalPaid - totalOwed + settlementsPaid - settlementsReceived
+
+      return {
+        userId: balance.userId,
+        user: balance.user,
+        totalPaid,
+        totalOwed,
+        balance: finalBalance,
+        originalAmounts,
+        settlementsReceived,
+        settlementsPaid,
+      }
+    })
+  }, [balances, displayCurrency, exchangeRates])
+
+  const formatCurrency = (amount: number, currency?: string) => {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      currency: currency || displayCurrency || 'RSD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount)
   }
 
@@ -44,34 +134,24 @@ export function GroupBalancesTab({ groupId, currency }: GroupBalancesTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Total Spent Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{t('groups.balances.totalSpent')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-primary">
-            {formatCurrency(totalSpent)}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Member Balances */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">{t('groups.balances.memberBalances')}</CardTitle>
         </CardHeader>
         <CardContent>
-          {balances.length === 0 ? (
+          {convertedBalances.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               {t('groups.balances.noExpenses')}
             </p>
           ) : (
             <div className="space-y-4">
-              {balances.map((balance) => {
-                const isOwed = balance.balance > 0.01
-                const owes = balance.balance < -0.01
-                const isSettled = Math.abs(balance.balance) < 0.01
+              {convertedBalances.map((balance) => {
+                // Use same threshold as suggested settlements to be consistent
+                const DISPLAY_THRESHOLD = 1.0
+                const isOwed = balance.balance > DISPLAY_THRESHOLD
+                const owes = balance.balance < -DISPLAY_THRESHOLD
+                const isSettled = Math.abs(balance.balance) <= DISPLAY_THRESHOLD
 
                 return (
                   <div
@@ -102,6 +182,19 @@ export function GroupBalancesTab({ groupId, currency }: GroupBalancesTabProps) {
                             {t('groups.balances.owed')}: {formatCurrency(balance.totalOwed)}
                           </span>
                         </div>
+                        {/* Show original amounts if multiple currencies */}
+                        {balance.originalAmounts.length > 1 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {balance.originalAmounts.map((orig, idx) => (
+                              <span
+                                key={idx}
+                                className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
+                              >
+                                {formatCurrency(orig.paid, orig.currency)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -139,40 +232,8 @@ export function GroupBalancesTab({ groupId, currency }: GroupBalancesTabProps) {
         </CardContent>
       </Card>
 
-      {/* Suggested Settlements */}
-      {settlements.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t('groups.balances.suggestedSettlements')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {settlements.map((settlement, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg bg-muted/50 gap-2"
-                >
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium">
-                      {settlement.from.firstName} {settlement.from.lastName}
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">
-                      {settlement.to.firstName} {settlement.to.lastName}
-                    </span>
-                  </div>
-                  <span className="font-semibold text-primary whitespace-nowrap">
-                    {formatCurrency(settlement.amount)}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              {t('groups.balances.settlementsHelp')}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* TODO: Suggested Settlements - hidden for now */}
+      {/* TODO: Settlement History - hidden for now */}
     </div>
   )
 }

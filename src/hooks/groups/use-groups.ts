@@ -31,6 +31,8 @@ export interface Group {
   currency: string
   color?: string
   icon?: string
+  isArchived?: boolean
+  archivedAt?: string
   createdById: string
   createdBy?: {
     id: string
@@ -49,7 +51,7 @@ export interface GroupInvite extends GroupMember {
 export interface CreateGroupInput {
   name: string
   description?: string
-  currency: string
+  currency?: string // Default currency for receipts in this group
   color?: string
   icon?: string
 }
@@ -57,20 +59,46 @@ export interface CreateGroupInput {
 export interface UpdateGroupInput {
   name?: string
   description?: string
+  currency?: string // Default currency for receipts in this group
   color?: string
   icon?: string
 }
 
+export interface CurrencyAmount {
+  currency: string
+  totalAmount: number
+  receiptCount: number
+}
+
+export interface UserCurrencyAmount {
+  currency: string
+  totalSpent: number
+  receiptsCount: number
+}
+
 export interface GroupStats {
   totalReceipts: number
-  totalAmount: number
+  byCurrency: CurrencyAmount[]
   perUser: {
     userId: string
     firstName: string
     lastName: string
     receiptsCount: number
-    totalSpent: number
+    byCurrency: UserCurrencyAmount[]
   }[]
+}
+
+export interface MemberBalanceCurrency {
+  currency: string
+  totalPaid: number
+  totalOwed: number
+  balance: number
+}
+
+export interface SettlementByCurrency {
+  currency: string
+  received: number
+  paid: number
 }
 
 export interface MemberBalance {
@@ -82,12 +110,17 @@ export interface MemberBalance {
     email: string
     profileImageUrl?: string
   }
-  totalPaid: number
-  totalOwed: number
-  balance: number
+  byCurrency?: MemberBalanceCurrency[]
+  settlementsByCurrency?: SettlementByCurrency[]
+  // Legacy fields for backwards compatibility (old API format)
+  totalPaid?: number
+  totalOwed?: number
+  balance?: number
+  settlementsReceived?: number
+  settlementsPaid?: number
 }
 
-export interface Settlement {
+export interface SuggestedSettlement {
   from: {
     id: string
     firstName: string
@@ -101,9 +134,67 @@ export interface Settlement {
   amount: number
 }
 
+export interface SettlementRecord {
+  id: string
+  groupId: string
+  fromUserId: string
+  fromUser: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+  }
+  toUserId: string
+  toUser: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+  }
+  amount: number
+  currency: string
+  note?: string
+  settledAt: string
+  createdById: string
+  createdBy?: {
+    id: string
+    firstName?: string
+    lastName?: string
+  }
+  createdAt: string
+}
+
+export interface CreateSettlementInput {
+  fromUserId: string
+  toUserId: string
+  amount: number
+  currency: string
+  note?: string
+  settledAt?: string
+}
+
+export interface GroupActivity {
+  id: string
+  groupId: string
+  userId?: string
+  user?: {
+    id: string
+    firstName?: string
+    lastName?: string
+    email: string
+  }
+  type: string
+  metadata?: Record<string, any>
+  createdAt: string
+}
+
+// Legacy alias for backwards compatibility
+export type Settlement = SuggestedSettlement
+
 // API functions
-const fetchGroups = async (): Promise<Group[]> => {
-  return api.get<Group[]>('/groups')
+const fetchGroups = async (includeArchived = false): Promise<Group[]> => {
+  const params = includeArchived ? '?includeArchived=true' : ''
+  return api.get<Group[]>(`/groups${params}`)
 }
 
 const fetchGroup = async (id: string): Promise<Group> => {
@@ -118,8 +209,16 @@ const fetchGroupBalances = async (id: string): Promise<MemberBalance[]> => {
   return api.get<MemberBalance[]>(`/groups/${id}/balances`)
 }
 
-const fetchGroupSettlements = async (id: string): Promise<Settlement[]> => {
-  return api.get<Settlement[]>(`/groups/${id}/settlements`)
+const fetchSuggestedSettlements = async (id: string): Promise<SuggestedSettlement[]> => {
+  return api.get<SuggestedSettlement[]>(`/groups/${id}/suggested-settlements`)
+}
+
+const fetchSettlementHistory = async (id: string): Promise<SettlementRecord[]> => {
+  return api.get<SettlementRecord[]>(`/groups/${id}/settlement-history`)
+}
+
+const fetchActivities = async (id: string, limit = 50, offset = 0): Promise<{ data: GroupActivity[]; total: number }> => {
+  return api.get<{ data: GroupActivity[]; total: number }>(`/groups/${id}/activities?limit=${limit}&offset=${offset}`)
 }
 
 const fetchPendingInvites = async (): Promise<GroupInvite[]> => {
@@ -136,6 +235,18 @@ const updateGroup = async (id: string, data: UpdateGroupInput): Promise<Group> =
 
 const deleteGroup = async (id: string): Promise<void> => {
   return api.delete<void>(`/groups/${id}`)
+}
+
+const archiveGroup = async (id: string): Promise<Group> => {
+  return api.post<Group>(`/groups/${id}/archive`, {})
+}
+
+const unarchiveGroup = async (id: string): Promise<Group> => {
+  return api.post<Group>(`/groups/${id}/unarchive`, {})
+}
+
+const createSettlement = async (groupId: string, data: CreateSettlementInput): Promise<SettlementRecord> => {
+  return api.post<SettlementRecord>(`/groups/${groupId}/settlements`, data)
 }
 
 const inviteMember = async (groupId: string, email: string): Promise<GroupMember> => {
@@ -159,10 +270,10 @@ const leaveGroup = async (groupId: string): Promise<void> => {
 }
 
 // Hooks
-export function useGroups() {
+export function useGroups(includeArchived = false) {
   return useQuery({
-    queryKey: queryKeys.groups.list(),
-    queryFn: fetchGroups,
+    queryKey: [...queryKeys.groups.list(), { includeArchived }],
+    queryFn: () => fetchGroups(includeArchived),
   })
 }
 
@@ -190,10 +301,26 @@ export function useGroupBalances(id: string) {
   })
 }
 
-export function useGroupSettlements(id: string) {
+export function useSuggestedSettlements(id: string) {
   return useQuery({
-    queryKey: [...queryKeys.groups.detail(id), 'settlements'],
-    queryFn: () => fetchGroupSettlements(id),
+    queryKey: [...queryKeys.groups.detail(id), 'suggested-settlements'],
+    queryFn: () => fetchSuggestedSettlements(id),
+    enabled: !!id,
+  })
+}
+
+export function useSettlementHistory(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.groups.detail(id), 'settlement-history'],
+    queryFn: () => fetchSettlementHistory(id),
+    enabled: !!id,
+  })
+}
+
+export function useGroupActivities(id: string, limit = 50, offset = 0) {
+  return useQuery({
+    queryKey: [...queryKeys.groups.detail(id), 'activities', { limit, offset }],
+    queryFn: () => fetchActivities(id, limit, offset),
     enabled: !!id,
   })
 }
@@ -204,6 +331,9 @@ export function usePendingInvites() {
     queryFn: fetchPendingInvites,
   })
 }
+
+// Legacy alias for backwards compatibility
+export const useGroupSettlements = useSuggestedSettlements
 
 export function useCreateGroup() {
   const queryClient = useQueryClient()
@@ -222,8 +352,10 @@ export function useUpdateGroup() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateGroupInput }) =>
       updateGroup(id, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      // Invalidate both the list and the specific group detail
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(variables.id) })
     },
   })
 }
@@ -245,8 +377,10 @@ export function useInviteMember() {
   return useMutation({
     mutationFn: ({ groupId, email }: { groupId: string; email: string }) =>
       inviteMember(groupId, email),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      // Invalidate both the list and the specific group detail
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(variables.groupId) })
     },
   })
 }
@@ -280,8 +414,10 @@ export function useRemoveMember() {
   return useMutation({
     mutationFn: ({ groupId, memberId }: { groupId: string; memberId: string }) =>
       removeMember(groupId, memberId),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      // Invalidate both the list and the specific group detail
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(variables.groupId) })
     },
   })
 }
@@ -293,6 +429,47 @@ export function useLeaveGroup() {
     mutationFn: leaveGroup,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+    },
+  })
+}
+
+export function useArchiveGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: archiveGroup,
+    onSuccess: (_data, groupId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(groupId) })
+    },
+  })
+}
+
+export function useUnarchiveGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: unarchiveGroup,
+    onSuccess: (_data, groupId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(groupId) })
+    },
+  })
+}
+
+export function useCreateSettlement() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ groupId, data }: { groupId: string; data: CreateSettlementInput }) =>
+      createSettlement(groupId, data),
+    onSuccess: (_data, variables) => {
+      // Invalidate all group-related queries (balances, settlements, activities)
+      // Using exact: false to match all nested query keys
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.groups.detail(variables.groupId),
+        exact: false
+      })
     },
   })
 }

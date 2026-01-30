@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
@@ -11,26 +12,27 @@ import {
   type Group,
 } from '@/hooks/groups/use-groups'
 import { GroupModal } from '@/components/groups/group-modal'
-import { GroupDetailModal } from '@/components/groups/group-detail-modal'
-import { Plus, Users, Loader2, Mail, Check, X, HelpCircle, UserPlus, Receipt, Calculator } from 'lucide-react'
+import { Plus, Users, Loader2, Mail, Check, X, HelpCircle, UserPlus, Receipt, Calculator, Archive } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 
 export default function Groups() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [showGuide, setShowGuide] = useState(() => {
     return localStorage.getItem('groups-guide-dismissed') !== 'true'
   })
+  const [showArchived, setShowArchived] = useState(false)
 
   const dismissGuide = () => {
     setShowGuide(false)
     localStorage.setItem('groups-guide-dismissed', 'true')
   }
 
-  const { data: groups = [], isLoading } = useGroups()
+  const { data: groups = [], isLoading } = useGroups(showArchived)
   const { data: pendingInvites = [] } = usePendingInvites()
   const acceptInvite = useAcceptInvite()
   const declineInvite = useDeclineInvite()
@@ -41,15 +43,8 @@ export default function Groups() {
     setIsModalOpen(true)
   }
 
-  const handleEditGroup = (group: Group) => {
-    setSelectedGroup(group)
-    setModalMode('edit')
-    setIsModalOpen(true)
-  }
-
   const handleViewGroup = (group: Group) => {
-    setSelectedGroup(group)
-    setIsDetailModalOpen(true)
+    navigate(`/groups/${group.id}`)
   }
 
   const handleAcceptInvite = async (groupId: string) => {
@@ -83,10 +78,20 @@ export default function Groups() {
             {t('groups.subtitle')}
           </p>
         </div>
-        <Button onClick={handleCreateGroup}>
-          <Plus className="h-4 w-4" />
-          {t('groups.newGroup')}
-        </Button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Switch
+              checked={showArchived}
+              onCheckedChange={setShowArchived}
+            />
+            <Archive className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">{t('groups.archive.showArchived')}</span>
+          </label>
+          <Button onClick={handleCreateGroup}>
+            <Plus className="h-4 w-4" />
+            {t('groups.newGroup')}
+          </Button>
+        </div>
       </div>
 
       {/* How It Works Guide */}
@@ -225,6 +230,11 @@ export default function Groups() {
                   <div className="flex items-center gap-2">
                     {group.icon && <span className="text-2xl">{group.icon}</span>}
                     <CardTitle className="text-lg">{group.name}</CardTitle>
+                    {group.isArchived && (
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
+                        {t('groups.archive.archivedBadge')}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {group.description && (
@@ -249,13 +259,6 @@ export default function Groups() {
         onOpenChange={setIsModalOpen}
         group={selectedGroup}
         mode={modalMode}
-      />
-
-      <GroupDetailModal
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-        group={selectedGroup}
-        onEdit={handleEditGroup}
       />
     </AppLayout>
   )

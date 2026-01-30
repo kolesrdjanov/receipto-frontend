@@ -174,9 +174,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 space-y-2 p-4">
             {mainNavItems.map((item) => {
-              // Highlight receipts when on templates page
+              // Highlight navigation items when on sub-pages
               const isActive = location.pathname === item.path ||
-                (item.path === '/receipts' && location.pathname === '/templates')
+                (item.path === '/receipts' && location.pathname === '/templates') ||
+                (item.path === '/groups' && location.pathname.startsWith('/groups/'))
 
               return (
                 <Link key={item.path} to={item.path} onClick={closeSidebar}>

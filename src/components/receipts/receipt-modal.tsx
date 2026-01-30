@@ -103,20 +103,12 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
 
-  // Watch groupId to auto-set currency and fetch group details
+  // Watch groupId to fetch group details for member selection
   const selectedGroupId = watch('groupId')
   const { data: selectedGroupDetails } = useGroup(selectedGroupId || '')
-  const selectedGroup = groups.find((g) => g.id === selectedGroupId)
 
   // Get accepted group members
   const groupMembers = selectedGroupDetails?.members?.filter((m) => m.status === 'accepted') || []
-
-  // Kada se promeni grupa, postavi currency iz grupe
-  useEffect(() => {
-    if (selectedGroup) {
-      setValue('currency', selectedGroup.currency)
-    }
-  }, [selectedGroupId, selectedGroup, setValue])
 
   useEffect(() => {
     if (open && receipt && mode === 'edit') {
@@ -151,8 +143,8 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         receiptDate: new Date().toISOString().split('T')[0],
         receiptNumber: '',
         categoryId: prefillData?.categoryId || '',
-        groupId: '',
-        paidById: '',
+        groupId: prefillData?.groupId || '',
+        paidById: prefillData?.groupId && user ? user.id : '',
       })
     }
   }, [open, receipt, mode, reset, prefillData])
@@ -272,7 +264,6 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
-                    disabled={!!selectedGroup}
                   >
                     <SelectTrigger id="currency" data-testid="receipt-currency-select">
                       <SelectValue placeholder={t('receipts.modal.currency')} />
@@ -287,11 +278,6 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                   </Select>
                 )}
               />
-              {selectedGroup && (
-                <p className="text-xs text-muted-foreground">
-                  {t('receipts.modal.currencySetByGroup')}
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -382,6 +368,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                       }
                     }}
                     value={field.value || '__none__'}
+                    disabled={mode === 'create' && !!prefillData?.groupId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('receipts.modal.group')} />
@@ -398,6 +385,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                   </Select>
                 )}
               />
+              {mode === 'create' && prefillData?.groupId && (
+                <p className="text-xs text-muted-foreground">
+                  {t('receipts.modal.groupLocked')}
+                </p>
+              )}
             </div>
           )}
 

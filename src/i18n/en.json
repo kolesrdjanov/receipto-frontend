@@ -223,6 +223,7 @@
       "category": "Category",
       "selectCategory": "Select category",
       "group": "Group (optional)",
+      "groupLocked": "Adding receipt to this group",
       "noGroup": "No group",
       "paidBy": "Paid By",
       "selectPaidBy": "Select who paid",
@@ -446,8 +447,8 @@
       "nameRequired": "Name is required",
       "description": "Description",
       "descriptionPlaceholder": "Optional description",
-      "currency": "Currency",
-      "currencyLocked": "Currency cannot be changed after group creation",
+      "defaultCurrency": "Default Currency",
+      "defaultCurrencyHelp": "This currency will be pre-selected when adding receipts to this group",
       "icon": "Icon (emoji)",
       "iconPlaceholder": "e.g., house, plane, shopping-cart",
       "deleteTitle": "Delete Group",
@@ -460,7 +461,7 @@
       "deleteError": "Failed to delete group"
     },
     "detail": {
-      "currency": "Currency:",
+      "displayCurrency": "Display currency:",
       "statistics": "Statistics",
       "totalReceipts": "Total Receipts",
       "totalAmount": "Total Amount",
@@ -501,6 +502,60 @@
       "settled": "Settled",
       "suggestedSettlements": "Suggested Settlements",
       "settlementsHelp": "These are optimized payment suggestions to settle all balances with minimum transactions."
+    },
+    "settlements": {
+      "title": "Settle Debts",
+      "recordPayment": "Record Payment",
+      "history": "Settlement History",
+      "noHistory": "No settlements recorded yet",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g., Bank transfer, Cash payment",
+      "date": "Date",
+      "settledAt": "Settled",
+      "recordedBy": "Recorded by",
+      "confirmTitle": "Record Settlement",
+      "confirmDescription": "Record a payment of {{amount}} from {{from}} to {{to}}?",
+      "success": "Settlement recorded successfully",
+      "error": "Failed to record settlement",
+      "pays": "pays",
+      "selectPayer": "Select who is paying",
+      "selectReceiver": "Select who receives payment"
+    },
+    "archive": {
+      "button": "Archive Group",
+      "unarchiveButton": "Unarchive Group",
+      "confirmTitle": "Archive Group",
+      "confirmDescription": "Are you sure you want to archive \"{{name}}\"? Archived groups won't appear in your main list but can be restored later.",
+      "unarchiveTitle": "Unarchive Group",
+      "unarchiveDescription": "Are you sure you want to unarchive \"{{name}}\"? The group will appear in your main list again.",
+      "success": "Group archived successfully",
+      "unarchiveSuccess": "Group unarchived successfully",
+      "error": "Failed to archive group",
+      "unarchiveError": "Failed to unarchive group",
+      "showArchived": "Show Archived",
+      "archivedBadge": "Archived"
+    },
+    "activities": {
+      "title": "Activity",
+      "noActivities": "No activity yet",
+      "loadMore": "Load more",
+      "types": {
+        "group_created": "created the group",
+        "group_updated": "updated group settings",
+        "group_archived": "archived the group",
+        "group_unarchived": "unarchived the group",
+        "member_invited": "invited {{email}}",
+        "member_joined": "joined the group",
+        "member_left": "left the group",
+        "member_removed": "was removed from the group",
+        "receipt_added": "added a receipt",
+        "receipt_updated": "updated a receipt",
+        "receipt_deleted": "deleted a receipt",
+        "settlement_created": "recorded a settlement"
+      }
     }
   },
   "settings": {
