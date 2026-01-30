@@ -625,9 +625,10 @@ export default function Dashboard() {
                         fill={primaryColor}
                         radius={[4, 4, 0, 0]}
                         cursor="pointer"
-                        onClick={(data) => {
-                          if (data?.date) {
-                            navigate(`/receipts?startDate=${data.date}&endDate=${data.date}`)
+                        onClick={(data: any) => {
+                          const date = data?.payload?.date || data?.date
+                          if (date) {
+                            navigate(`/receipts?startDate=${date}&endDate=${date}`)
                           }
                         }}
                       />
