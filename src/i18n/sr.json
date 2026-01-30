@@ -164,6 +164,7 @@
     "receiptsCount": "{{count}} računa",
     "unknownStore": "Nepoznat objekat",
     "scan_now": "Skeniraj QR kod odmah",
+    "clickToViewReceipts": "Klikni za pregled računa",
     "budgetProgress": {
       "title": "Praćenje budžeta",
       "selectCategory": "Izaberite kategoriju",

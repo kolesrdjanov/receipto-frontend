@@ -164,6 +164,7 @@
     "receiptsCount": "{{count}} receipts",
     "unknownStore": "Unknown Store",
     "scan_now": "Scan QR Code now",
+    "clickToViewReceipts": "Click to view receipts",
     "budgetProgress": {
       "title": "Budget Tracker",
       "selectCategory": "Select a category",

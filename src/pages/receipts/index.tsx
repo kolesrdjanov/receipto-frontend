@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -35,6 +35,7 @@ import { toast } from 'sonner'
 
 export default function Receipts() {
   const { t } = useTranslation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
@@ -61,6 +62,23 @@ export default function Receipts() {
   const createReceipt = useCreateReceipt()
   const deleteReceipt = useDeleteReceipt()
 
+  // Sync filters with URL params when navigating to this page
+  useEffect(() => {
+    const startDate = searchParams.get('startDate') || undefined
+    const endDate = searchParams.get('endDate') || undefined
+    const categoryId = searchParams.get('categoryId') || undefined
+    const minAmount = searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined
+    const maxAmount = searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined
+
+    const hasParams = !!(startDate || endDate || categoryId || minAmount || maxAmount)
+
+    setFilters({ startDate, endDate, categoryId, minAmount, maxAmount })
+    if (hasParams) {
+      setShowFilters(true)
+    }
+    setPage(1)
+  }, [searchParams])
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -81,6 +99,15 @@ export default function Receipts() {
   const handleFiltersChange = (newFilters: ReceiptsFilters) => {
     setFilters(newFilters)
     setPage(1) // Reset to first page when filters change
+
+    // Update URL params to keep in sync
+    const params = new URLSearchParams()
+    if (newFilters.startDate) params.set('startDate', newFilters.startDate)
+    if (newFilters.endDate) params.set('endDate', newFilters.endDate)
+    if (newFilters.categoryId) params.set('categoryId', newFilters.categoryId)
+    if (newFilters.minAmount !== undefined) params.set('minAmount', String(newFilters.minAmount))
+    if (newFilters.maxAmount !== undefined) params.set('maxAmount', String(newFilters.maxAmount))
+    setSearchParams(params, { replace: true })
   }
 
   const handleAddManually = () => {

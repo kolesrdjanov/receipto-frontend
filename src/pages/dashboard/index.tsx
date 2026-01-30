@@ -310,14 +310,23 @@ export default function Dashboard() {
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      // Check if this is daily chart data (has date property)
+      const data = payload[0]?.payload
+      const displayLabel = data?.date
+        ? format(new Date(data.date), 'd MMM yyyy')
+        : label
+
       return (
         <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
-          <p className="font-semibold text-sm mb-1">{label}</p>
+          <p className="font-semibold text-sm mb-1">{displayLabel}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
               {formatAmount(entry.value)}
             </p>
           ))}
+          {data?.date && (
+            <p className="text-xs text-muted-foreground mt-1">{t('dashboard.clickToViewReceipts')}</p>
+          )}
         </div>
       )
     }
@@ -610,7 +619,18 @@ export default function Dashboard() {
                         tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                       />
                       <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="totalAmount" name="Amount" fill={primaryColor} radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="totalAmount"
+                        name="Amount"
+                        fill={primaryColor}
+                        radius={[4, 4, 0, 0]}
+                        cursor="pointer"
+                        onClick={(data) => {
+                          if (data?.date) {
+                            navigate(`/receipts?startDate=${data.date}&endDate=${data.date}`)
+                          }
+                        }}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
