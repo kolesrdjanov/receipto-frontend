@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useGroupBalances, type MemberBalance } from '@/hooks/groups/use-groups'
-import { Loader2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight, Handshake } from 'lucide-react'
 
 interface ExchangeRates {
   [currency: string]: number
@@ -23,6 +23,12 @@ interface ConvertedBalance {
   originalAmounts: { currency: string; paid: number; owed: number }[]
   settlementsReceived: number
   settlementsPaid: number
+}
+
+interface SuggestedSettlement {
+  from: { id: string; firstName: string; lastName: string }
+  to: { id: string; firstName: string; lastName: string }
+  amount: number
 }
 
 export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: GroupBalancesTabProps) {
@@ -108,6 +114,68 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
     })
   }, [balances, displayCurrency, exchangeRates])
 
+  // Calculate suggested settlements from converted balances (with proper currency conversion)
+  const suggestedSettlements: SuggestedSettlement[] = useMemo(() => {
+    const THRESHOLD = 1.0 // Ignore amounts less than 1 unit
+
+    // Separate creditors (positive balance = paid more than fair share)
+    // and debtors (negative balance = paid less than fair share)
+    const creditors = convertedBalances
+      .filter((b) => b.balance > THRESHOLD)
+      .map((b) => ({
+        userId: b.userId,
+        user: b.user,
+        balance: b.balance,
+      }))
+      .sort((a, b) => b.balance - a.balance) // Largest first
+
+    const debtors = convertedBalances
+      .filter((b) => b.balance < -THRESHOLD)
+      .map((b) => ({
+        userId: b.userId,
+        user: b.user,
+        balance: Math.abs(b.balance), // Make positive for easier calculation
+      }))
+      .sort((a, b) => b.balance - a.balance) // Largest first
+
+    const settlements: SuggestedSettlement[] = []
+
+    // Greedy algorithm: match largest debtor with largest creditor
+    let i = 0 // creditor index
+    let j = 0 // debtor index
+
+    while (i < creditors.length && j < debtors.length) {
+      const creditor = creditors[i]
+      const debtor = debtors[j]
+
+      const amount = Math.min(creditor.balance, debtor.balance)
+
+      if (amount > THRESHOLD) {
+        settlements.push({
+          from: {
+            id: debtor.userId,
+            firstName: debtor.user.firstName || '',
+            lastName: debtor.user.lastName || '',
+          },
+          to: {
+            id: creditor.userId,
+            firstName: creditor.user.firstName || '',
+            lastName: creditor.user.lastName || '',
+          },
+          amount: Number(amount.toFixed(0)),
+        })
+      }
+
+      creditor.balance -= amount
+      debtor.balance -= amount
+
+      if (creditor.balance < THRESHOLD) i++
+      if (debtor.balance < THRESHOLD) j++
+    }
+
+    return settlements
+  }, [convertedBalances])
+
   const formatCurrency = (amount: number, currency?: string) => {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
@@ -122,6 +190,13 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
       return `${user.firstName} ${user.lastName}`
     }
     return user.firstName || user.lastName || user.email
+  }
+
+  const getSettlementMemberName = (user: { firstName: string; lastName: string }) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    return user.firstName || user.lastName
   }
 
   if (isLoading) {
@@ -232,8 +307,38 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
         </CardContent>
       </Card>
 
-      {/* TODO: Suggested Settlements - hidden for now */}
-      {/* TODO: Settlement History - hidden for now */}
+      {/* Suggested Settlements */}
+      {suggestedSettlements.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Handshake className="h-5 w-5" />
+              {t('groups.balances.suggestedSettlements')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {suggestedSettlements.map((settlement, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 flex-wrap p-3 rounded-lg border bg-card"
+                >
+                  <span className="font-medium">
+                    {getSettlementMemberName(settlement.from)}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">
+                    {getSettlementMemberName(settlement.to)}
+                  </span>
+                  <span className="font-semibold text-primary ml-2">
+                    {formatCurrency(settlement.amount)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
