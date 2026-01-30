@@ -33,16 +33,36 @@ import { formatDateTime } from '@/lib/date-utils'
 import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
 
+// Helper to parse filters from URL search params
+function getFiltersFromParams(params: URLSearchParams): ReceiptsFilters {
+  return {
+    startDate: params.get('startDate') || undefined,
+    endDate: params.get('endDate') || undefined,
+    categoryId: params.get('categoryId') || undefined,
+    minAmount: params.get('minAmount') ? Number(params.get('minAmount')) : undefined,
+    maxAmount: params.get('maxAmount') ? Number(params.get('maxAmount')) : undefined,
+  }
+}
+
+function hasActiveFilters(filters: ReceiptsFilters): boolean {
+  return !!(filters.startDate || filters.endDate || filters.categoryId || filters.minAmount !== undefined || filters.maxAmount !== undefined)
+}
+
 export default function Receipts() {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  // Initialize filters directly from URL params to avoid double load
+  const initialFilters = getFiltersFromParams(searchParams)
+  const isFirstMount = useRef(true)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [showFilters, setShowFilters] = useState(false)
-  const [filters, setFilters] = useState<ReceiptsFilters>({})
+  const [showFilters, setShowFilters] = useState(() => hasActiveFilters(initialFilters))
+  const [filters, setFilters] = useState<ReceiptsFilters>(initialFilters)
   const [page, setPage] = useState(1)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
@@ -62,18 +82,16 @@ export default function Receipts() {
   const createReceipt = useCreateReceipt()
   const deleteReceipt = useDeleteReceipt()
 
-  // Sync filters with URL params when navigating to this page
+  // Sync filters with URL params when URL changes (skip first mount - already initialized)
   useEffect(() => {
-    const startDate = searchParams.get('startDate') || undefined
-    const endDate = searchParams.get('endDate') || undefined
-    const categoryId = searchParams.get('categoryId') || undefined
-    const minAmount = searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined
-    const maxAmount = searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined
+    if (isFirstMount.current) {
+      isFirstMount.current = false
+      return
+    }
 
-    const hasParams = !!(startDate || endDate || categoryId || minAmount || maxAmount)
-
-    setFilters({ startDate, endDate, categoryId, minAmount, maxAmount })
-    if (hasParams) {
+    const newFilters = getFiltersFromParams(searchParams)
+    setFilters(newFilters)
+    if (hasActiveFilters(newFilters)) {
       setShowFilters(true)
     }
     setPage(1)
