@@ -3,10 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* PWA safe area support */
-html {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+/* PWA safe area support - handled by app-layout.tsx */
 
 body {
   /* Prevent overscroll/bounce on iOS */
