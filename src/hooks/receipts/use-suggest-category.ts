@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 
-export interface StoreStoreCategorySuggestion {
+export interface StoreCategorySuggestion {
   categoryId: string
   categoryName: string
   categoryIcon?: string
