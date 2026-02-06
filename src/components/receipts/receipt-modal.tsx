@@ -36,6 +36,7 @@ import {
   useDeleteReceipt,
   type Receipt,
 } from '@/hooks/receipts/use-receipts'
+import { useSuggestCategory } from '@/hooks/receipts/use-suggest-category'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { useGroups, useGroup } from '@/hooks/groups/use-groups'
@@ -68,6 +69,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   const { t } = useTranslation()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [splitAmong, setSplitAmong] = useState<string[]>([])
+  const [blurredStoreName, setBlurredStoreName] = useState('')
 
   const {
     register,
@@ -103,6 +105,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
   const deleteReceipt = useDeleteReceipt()
+
+  // Store name category suggestion (create mode only, no category selected yet)
+  const watchedCategoryId = watch('categoryId')
+  const { data: storeSuggestion } = useSuggestCategory(
+    blurredStoreName,
+    mode === 'create' && !watchedCategoryId,
+  )
 
   // Watch groupId to fetch group details for member selection
   const selectedGroupId = watch('groupId')
@@ -156,6 +165,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
       })
 
       setSplitAmong([]) // default: all members
+      setBlurredStoreName('') // reset suggestion state
     }
   }, [open, receipt, mode, reset, prefillData])
 
@@ -291,7 +301,14 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
             <Label htmlFor="storeName">{t('receipts.modal.storeName')}</Label>
             <Input
               id="storeName"
-              {...register('storeName')}
+              {...register('storeName', {
+                onBlur: (e) => {
+                  const value = e.target.value?.trim()
+                  if (value && value.length >= 2 && mode === 'create') {
+                    setBlurredStoreName(value)
+                  }
+                },
+              })}
               placeholder={t('receipts.modal.storeNamePlaceholder')}
               data-testid="receipt-store-input"
             />
@@ -395,10 +412,29 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                   categoryIcon: receipt.autoSuggestedCategory?.icon,
                   categoryColor: receipt.autoSuggestedCategory?.color,
                   confidence: receipt.suggestionConfidence || 0,
-                  reason: 'Based on merchant and item analysis',
+                  reason: t('categorization.basedOnPurchases'),
                 },
               ]}
-              currentCategoryId={watch('categoryId')}
+              currentCategoryId={watchedCategoryId}
+              onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
+              disabled={isSubmitting}
+            />
+          )}
+
+          {/* Show store-name-based category suggestion (create mode) */}
+          {storeSuggestion && mode === 'create' && (
+            <CategorySuggestionCard
+              suggestions={[
+                {
+                  categoryId: storeSuggestion.categoryId,
+                  categoryName: storeSuggestion.categoryName,
+                  categoryIcon: storeSuggestion.categoryIcon,
+                  categoryColor: storeSuggestion.categoryColor,
+                  confidence: storeSuggestion.confidence,
+                  reason: storeSuggestion.reason,
+                },
+              ]}
+              currentCategoryId={watchedCategoryId}
               onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
               disabled={isSubmitting}
             />

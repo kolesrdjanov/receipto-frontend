@@ -96,6 +96,11 @@ export const queryKeys = {
     search: (query: string) => [...queryKeys.items.all, 'search', query] as const,
   },
 
+  // Categorization
+  categorization: {
+    suggestByStore: (storeName: string) => ['categorization', 'suggest-by-store', storeName] as const,
+  },
+
   // Coach (Financial Insights)
   coach: () => ['coach'] as const,
 } as const
