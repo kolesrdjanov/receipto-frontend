@@ -831,7 +831,10 @@
     "vsLastWeek": "vs prošla nedelja",
     "topCategory": "Najveća kategorija",
     "topSpending": "Najviše potrošeno na",
-    "noInsights": "Nema novih uvida. Nastavi sa praćenjem troškova!"
+    "noInsights": "Nema novih uvida. Nastavi sa praćenjem troškova!",
+    "topCategoryMessage": "Potrošio/la si {{amount}} na {{category}} ove nedelje.",
+    "spendingUpMessage": "Tvoja potrošnja je porasla {{percent}}% u odnosu na prošlu nedelju.",
+    "spendingDownMessage": "Tvoja potrošnja je pala {{percent}}% u odnosu na prošlu nedelju."
   },
   "items": {
     "title": "Praćenje cena",

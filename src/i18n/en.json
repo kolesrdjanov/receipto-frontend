@@ -844,7 +844,10 @@
     "vsLastWeek": "vs last week",
     "topCategory": "Top Category",
     "topSpending": "Most spent on",
-    "noInsights": "No new insights right now. Keep tracking your expenses!"
+    "noInsights": "No new insights right now. Keep tracking your expenses!",
+    "topCategoryMessage": "You spent {{amount}} on {{category}} this week.",
+    "spendingUpMessage": "Your spending is up {{percent}}% compared to last week.",
+    "spendingDownMessage": "Your spending is down {{percent}}% compared to last week."
   },
   "items": {
     "title": "Price Tracker",

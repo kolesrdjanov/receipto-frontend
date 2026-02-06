@@ -115,31 +115,76 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
   }
 
   const { greeting, insights, summary, tip } = data
-  const baseCurrency = summary?.currency || 'RSD'
 
-  const convertToDisplay = (amount: number, fromCurrency: string) => {
-    if (fromCurrency === targetCurrency) {
-      return { amount, currency: targetCurrency }
+  const convertBreakdownToTotal = (breakdown: { currency: string; amount: number }[]) => {
+    let total = 0
+    for (const { currency, amount } of breakdown) {
+      if (currency === targetCurrency) {
+        total += amount
+      } else {
+        const rate = exchangeRates?.[currency]
+        if (rate && rate !== 0) {
+          total += amount / rate
+        } else {
+          total += amount
+        }
+      }
     }
-
-    const rate = exchangeRates?.[fromCurrency]
-    if (!rate || rate === 0) {
-      return { amount, currency: fromCurrency }
-    }
-
-    return { amount: amount / rate, currency: targetCurrency }
+    return total
   }
 
-  const convertedWeekTotal = summary
-    ? convertToDisplay(summary.totalSpentThisWeek, baseCurrency)
+  const thisWeekConverted = summary?.byCurrency
+    ? convertBreakdownToTotal(summary.byCurrency)
+    : summary?.totalSpentThisWeek || 0
+
+  const lastWeekConverted = summary?.lastWeekByCurrency
+    ? convertBreakdownToTotal(summary.lastWeekByCurrency)
+    : summary?.totalSpentLastWeek || 0
+
+  const convertedWeeklyChangePercent = lastWeekConverted > 0
+    ? Math.round(((thisWeekConverted - lastWeekConverted) / lastWeekConverted) * 1000) / 10
+    : 0
+
+  const topCategoryConverted = summary?.topCategory?.byCurrency
+    ? convertBreakdownToTotal(summary.topCategory.byCurrency)
     : null
 
-  const convertedTopCategory = summary?.topCategory
-    ? convertToDisplay(
-        summary.topCategory.amount,
-        summary.topCategory.currency || baseCurrency
-      )
-    : null
+  // Re-generate insight messages with converted currency amounts
+  const convertedInsights = insights.map((insight: Insight) => {
+    const details = insight.details
+    if (!details) return insight
+
+    if (insight.type === 'weekly_summary' && details.byCurrency) {
+      const converted = convertBreakdownToTotal(details.byCurrency)
+      return {
+        ...insight,
+        message: t('coach.topCategoryMessage', {
+          amount: formatAmount(converted, targetCurrency),
+          category: details.categoryName,
+        }),
+      }
+    }
+
+    if (insight.type === 'spending_increase' && details.currentByCurrency) {
+      return {
+        ...insight,
+        message: t('coach.spendingUpMessage', {
+          percent: Math.abs(details.percentage || 0),
+        }),
+      }
+    }
+
+    if (insight.type === 'spending_decrease' && details.currentByCurrency) {
+      return {
+        ...insight,
+        message: t('coach.spendingDownMessage', {
+          percent: Math.abs(details.percentage || 0),
+        }),
+      }
+    }
+
+    return insight
+  })
 
   return (
     <Card className="coach-card overflow-hidden h-full">
@@ -161,35 +206,34 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
           <div className="p-2.5 rounded-lg bg-muted/40 space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">{t('coach.thisWeek')}</span>
-              {summary.weeklyChangePercent !== 0 && (
+              {convertedWeeklyChangePercent !== 0 && (
                 <div
                   className={cn(
                     'flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded',
-                    summary.weeklyChangePercent > 0
+                    convertedWeeklyChangePercent > 0
                       ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10'
                       : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
                   )}
                 >
-                  {summary.weeklyChangePercent > 0 ? (
+                  {convertedWeeklyChangePercent > 0 ? (
                     <ArrowUpRight className="h-3 w-3" />
                   ) : (
                     <ArrowDownRight className="h-3 w-3" />
                   )}
-                  {Math.abs(summary.weeklyChangePercent)}% {t('coach.vsLastWeek')}
+                  {Math.abs(convertedWeeklyChangePercent)}% {t('coach.vsLastWeek')}
                 </div>
               )}
             </div>
             <p className="text-lg font-semibold">
-              {convertedWeekTotal
-                ? formatAmount(convertedWeekTotal.amount, convertedWeekTotal.currency)
-                : formatAmount(summary.totalSpentThisWeek, baseCurrency)}
+              {formatAmount(thisWeekConverted, targetCurrency)}
             </p>
             {summary.topCategory && (
               <p className="text-[11px] text-muted-foreground">
                 {t('coach.topSpending')}: {summary.topCategory.name} (
-                {convertedTopCategory
-                  ? formatAmount(convertedTopCategory.amount, convertedTopCategory.currency)
-                  : formatAmount(summary.topCategory.amount, summary.topCategory.currency || baseCurrency)}
+                {formatAmount(
+                  topCategoryConverted ?? summary.topCategory.amount,
+                  targetCurrency
+                )}
                 )
               </p>
             )}
@@ -197,16 +241,16 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
         )}
 
         {/* Insights with full messages */}
-        {insights.length > 0 && (
+        {convertedInsights.length > 0 && (
           <div className="space-y-1.5">
-            {insights.slice(0, 2).map((insight: Insight) => (
+            {convertedInsights.slice(0, 2).map((insight: Insight) => (
               <InsightItem key={insight.id} insight={insight} />
             ))}
           </div>
         )}
 
         {/* Tip */}
-        {tip && insights.length === 0 && (
+        {tip && convertedInsights.length === 0 && (
           <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/40 text-xs">
             <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
             <div>
@@ -216,7 +260,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
           </div>
         )}
 
-        {insights.length === 0 && !tip && (
+        {convertedInsights.length === 0 && !tip && (
           <p className="text-xs text-muted-foreground text-center py-2">
             {t('coach.noInsights')}
           </p>

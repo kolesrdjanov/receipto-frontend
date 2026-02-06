@@ -359,20 +359,6 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            <Link to="/receipts">
-              <Card className="stat-card-gradient cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
-                  <div className="stat-icon-container">
-                    <Receipt className="h-4 w-4" />
-                  </div>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <p className="text-3xl font-bold">{totalReceipts}</p>
-                </CardContent>
-              </Card>
-            </Link>
-
             <Card className="stat-card-gradient">
               <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                 <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
@@ -387,16 +373,29 @@ export default function Dashboard() {
 
             <Card className="stat-card-gradient">
               <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">{t('dashboard.thisMonth')}</CardTitle>
+                <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
                 <div className="stat-icon-container">
                   <PieChartIcon className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-3xl font-bold">{formatAmount(totalMonthAmount)}</p>
-                <p className="text-xs text-muted-foreground mt-1">{monthName}</p>
               </CardContent>
             </Card>
+
+            <Link to="/receipts">
+              <Card className="stat-card-gradient cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
+                  <div className="stat-icon-container">
+                    <Receipt className="h-4 w-4" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <p className="text-3xl font-bold">{totalReceipts}</p>
+                </CardContent>
+              </Card>
+            </Link>
 
             <Link to="/categories">
               <Card className="stat-card-gradient cursor-pointer">
@@ -408,7 +407,6 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="relative z-10">
                   <p className="text-3xl font-bold">{totalCategories}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.available')}</p>
                 </CardContent>
               </Card>
             </Link>

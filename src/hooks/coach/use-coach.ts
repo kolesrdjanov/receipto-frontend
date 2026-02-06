@@ -2,9 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 
+interface CurrencyAmountDetail {
+  currency: string
+  amount: number
+}
+
 export interface InsightDetails {
   amount?: number
   currency?: string
+  byCurrency?: CurrencyAmountDetail[]
   percentage?: number
   categoryName?: string
   categoryIcon?: string
@@ -13,6 +19,8 @@ export interface InsightDetails {
   comparisonPeriod?: string
   previousAmount?: number
   currentAmount?: number
+  previousByCurrency?: CurrencyAmountDetail[]
+  currentByCurrency?: CurrencyAmountDetail[]
   budgetAmount?: number
   budgetUsed?: number
   savings?: number
@@ -32,6 +40,11 @@ export interface Insight {
   createdAt: string
 }
 
+interface CurrencyAmount {
+  currency: string
+  amount: number
+}
+
 export interface CoachResponse {
   greeting: string
   insights: Insight[]
@@ -42,11 +55,14 @@ export interface CoachResponse {
     weeklyChangePercent: number
     currency?: string
     receiptsThisWeek: number
+    byCurrency?: CurrencyAmount[]
+    lastWeekByCurrency?: CurrencyAmount[]
     topCategory?: {
       name: string
       icon: string
       amount: number
       currency?: string
+      byCurrency?: CurrencyAmount[]
     }
   }
   tip?: {
