@@ -65,7 +65,7 @@ const fetchExpiringSoon = async (days: number = 30): Promise<Warranty[]> => {
   return api.get<Warranty[]>(`/warranties/expiring-soon?days=${days}`)
 }
 
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || '/api'
 
 async function apiRequestWithFormData<T>(
   endpoint: string,

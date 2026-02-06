@@ -35,6 +35,11 @@
   "onboarding": {
     "skip": "Preskoči",
     "getStarted": "Započni",
+    "installApp": {
+      "title": "Instaliraj na početni ekran",
+      "description": "Koristite Receipto kao aplikaciju: iPhone (Safari) pritisnite Share, pa Add to Home Screen. Android (Chrome) otvorite meni (tri tačke), pa Add to Home screen ili Install app.",
+      "tip": "Otvorite Receipto sa početnog ekrana za brži pristup i prikaz preko celog ekrana."
+    },
     "step1": {
       "title": "Pratite svoje troškove",
       "description": "Skenirajte QR kodove sa fiskalnih računa za automatsko preuzimanje podataka. Možete dodavati troškove i ručno.",
@@ -204,6 +209,7 @@
     },
     "status": {
       "completed": "Završeno",
+      "manual": "Ručno",
       "pending": "Na čekanju",
       "failed": "Neuspelo"
     },

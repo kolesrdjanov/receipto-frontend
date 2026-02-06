@@ -35,6 +35,11 @@
   "onboarding": {
     "skip": "Skip",
     "getStarted": "Get Started",
+    "installApp": {
+      "title": "Install on Home Screen",
+      "description": "Use Receipto like an app: iPhone (Safari) tap Share, then Add to Home Screen. Android (Chrome) tap menu (three dots), then Add to Home screen or Install app.",
+      "tip": "Open Receipto from your home screen for faster access and a full-screen experience."
+    },
     "step1": {
       "title": "Track Your Expenses",
       "description": "Scan QR codes from Serbian fiscal receipts for automatic data extraction. You can also add expenses manually.",
@@ -204,6 +209,7 @@
     },
     "status": {
       "completed": "Completed",
+      "manual": "Manual",
       "pending": "Pending",
       "failed": "Failed"
     },

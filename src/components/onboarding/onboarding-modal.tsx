@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import {
+  Smartphone,
   QrCode,
   FolderOpen,
   Shield,
@@ -21,14 +22,47 @@ interface OnboardingModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const TOTAL_STEPS = 4
-
 export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const { t } = useTranslation()
   const [step, setStep] = useState(1)
 
+  const steps = [
+    {
+      key: 'installApp',
+      icon: Smartphone,
+      color: 'text-indigo-500',
+      bgColor: 'bg-indigo-500/10',
+    },
+    {
+      key: 'step1',
+      icon: QrCode,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
+    },
+    {
+      key: 'step2',
+      icon: FolderOpen,
+      color: 'text-amber-500',
+      bgColor: 'bg-amber-500/10',
+    },
+    {
+      key: 'step3',
+      icon: Shield,
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10',
+    },
+    {
+      key: 'step4',
+      icon: Users,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+    },
+  ] as const
+
+  const totalSteps = steps.length
+
   const handleNext = () => {
-    if (step < TOTAL_STEPS) {
+    if (step < totalSteps) {
       setStep(step + 1)
     }
   }
@@ -50,34 +84,6 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     onOpenChange(false)
     setStep(1)
   }
-
-  const steps = [
-    {
-      icon: QrCode,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
-    },
-    {
-      icon: FolderOpen,
-      color: 'text-amber-500',
-      bgColor: 'bg-amber-500/10',
-    },
-    {
-      icon: Shield,
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10',
-    },
-    {
-      icon: Users,
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10',
-    },
-    // {
-    //   icon: TrendingUp,
-    //   color: 'text-rose-500',
-    //   bgColor: 'bg-rose-500/10',
-    // },
-  ]
 
   const currentStep = steps[step - 1]
   const Icon = currentStep.icon
@@ -115,20 +121,20 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
 
           {/* Title */}
           <h2 className="text-xl font-semibold mb-2">
-            {t(`onboarding.step${step}.title`)}
+            {t(`onboarding.${currentStep.key}.title`)}
           </h2>
 
           {/* Description */}
           <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-xs">
-            {t(`onboarding.step${step}.description`)}
+            {t(`onboarding.${currentStep.key}.description`)}
           </p>
 
           {/* Tip (if exists) */}
-          {t(`onboarding.step${step}.tip`, { defaultValue: '' }) && (
+          {t(`onboarding.${currentStep.key}.tip`, { defaultValue: '' }) && (
             <div className="flex items-start gap-2 bg-muted/50 rounded-lg p-3 mb-6 text-left w-full">
               <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-muted-foreground">
-                {t(`onboarding.step${step}.tip`)}
+                {t(`onboarding.${currentStep.key}.tip`)}
               </p>
             </div>
           )}
@@ -156,7 +162,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
               </Button>
             )}
 
-            {step < TOTAL_STEPS ? (
+            {step < totalSteps ? (
               <Button onClick={handleNext} className="gap-1">
                 {t('common.next')}
                 <ChevronRight className="w-4 h-4" />

@@ -65,12 +65,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       await createReceipt.mutateAsync({ qrCodeUrl: url })
       toast.success(t('receipts.qrScanner.scanSuccess'), {
         description: t('receipts.qrScanner.scanSuccessDescription'),
+        action: {
+          label: t('nav.receipts'),
+          onClick: () => navigate('/receipts'),
+        },
       })
       setIsScannerOpen(false)
-      // Navigate to receipts page if not already there
-      if (location.pathname !== '/receipts') {
-        navigate('/receipts')
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'
@@ -94,12 +94,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       })
       toast.success(t('receipts.qrScanner.scanSuccess'), {
         description: t('receipts.qrScanner.scanSuccessDescription'),
+        action: {
+          label: t('nav.receipts'),
+          onClick: () => navigate('/receipts'),
+        },
       })
       setIsPfrEntryOpen(false)
-      // Navigate to receipts page
-      if (location.pathname !== '/receipts') {
-        navigate('/receipts')
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'

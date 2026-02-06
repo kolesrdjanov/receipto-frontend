@@ -338,23 +338,15 @@ export default function Dashboard() {
   }
 
   const handleQrScan = async (url: string) => {
-    try {
-      await createReceipt.mutateAsync({ qrCodeUrl: url })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
-      setIsScannerOpen(false)
-      // Navigate to receipts page if not already there
-      if (location.pathname !== '/receipts') {
-        navigate('/receipts')
-      }
-    } catch (error) {
-      const errorMessage =
-          error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
+    await createReceipt.mutateAsync({ qrCodeUrl: url })
+    toast.success(t('receipts.qrScanner.scanSuccess'), {
+      description: t('receipts.qrScanner.scanSuccessDescription'),
+      action: {
+        label: t('nav.receipts'),
+        onClick: () => navigate('/receipts'),
+      },
+    })
+    // Errors are handled by the QR scanner modal
   }
 
   const handleOcrScan = async (pfrData: PfrData) => {
@@ -371,12 +363,12 @@ export default function Dashboard() {
       })
       toast.success(t('receipts.qrScanner.scanSuccess'), {
         description: t('receipts.qrScanner.scanSuccessDescription'),
+        action: {
+          label: t('nav.receipts'),
+          onClick: () => navigate('/receipts'),
+        },
       })
       setIsPfrEntryOpen(false)
-      // Navigate to receipts page
-      if (location.pathname !== '/receipts') {
-        navigate('/receipts')
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'An error occurred'

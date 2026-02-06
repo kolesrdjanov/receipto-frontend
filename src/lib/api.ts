@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/auth'
 import { useSettingsStore } from '@/store/settings'
 
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || '/api'
 
 interface ApiRequestOptions extends AxiosRequestConfig {
   requiresAuth?: boolean

@@ -258,9 +258,16 @@ export default function Receipts() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'scraped':
+      case 'completed': // Legacy status value
         return (
           <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
             {t('receipts.status.completed')}
+          </span>
+        )
+      case 'manual':
+        return (
+          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+            {t('receipts.status.manual')}
           </span>
         )
       case 'pending':

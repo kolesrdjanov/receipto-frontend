@@ -9,6 +9,18 @@ import packageJson from './package.json'
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  server: {
+    allowedHosts: ['.loca.lt', '.trycloudflare.com', '.ngrok-free.dev', '.ngrok.io'],
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
