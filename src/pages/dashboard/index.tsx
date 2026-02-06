@@ -18,11 +18,6 @@ import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-p
 import { CategoryInsights } from '@/components/dashboard/category-insights'
 import { CoachCard } from '@/components/coach/coach-card'
 import {
-  useDashboardStats,
-  useCategoryStats,
-  useDailyStats,
-  useMonthlyStats,
-  useTopStores,
   useAggregatedStats,
   useAggregatedCategoryStats,
   useAggregatedDailyStats,
@@ -45,7 +40,6 @@ import {
   PieChart as PieChartIcon,
   BarChart3,
   Coins,
-  RefreshCw,
   QrCode
 } from 'lucide-react'
 import {
@@ -69,8 +63,6 @@ const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m =
 const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
-
-const ALL_CONVERTED = 'ALL'
 
 // Hook to get the computed primary color for charts
 function usePrimaryColor() {
@@ -110,7 +102,7 @@ export default function Dashboard() {
   const { currency: preferredCurrency } = useSettingsStore()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [currencyMode, setCurrencyMode] = useState<string>(preferredCurrency || 'RSD')
+  const [displayCurrency, setDisplayCurrency] = useState<string>(preferredCurrency || 'RSD')
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const createReceipt = useCreateReceipt()
@@ -119,32 +111,7 @@ export default function Dashboard() {
 
   const { data: currencies = [] } = useCurrencies()
 
-  useEffect(() => {
-    setCurrencyMode((current) =>
-      current === ALL_CONVERTED ? ALL_CONVERTED : (preferredCurrency || 'RSD')
-    )
-  }, [preferredCurrency])
-
-  const isConvertedMode = currencyMode === ALL_CONVERTED
-  const displayCurrency = isConvertedMode ? preferredCurrency : currencyMode
-
-  const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(preferredCurrency)
-
-  const { data: stats, isLoading: statsLoading } = useDashboardStats(
-    isConvertedMode ? undefined : currencyMode
-  )
-  const { data: categoryStats, isLoading: categoryLoading } = useCategoryStats(
-    selectedYear, selectedMonth, isConvertedMode ? undefined : currencyMode
-  )
-  const { data: dailyStats, isLoading: dailyLoading } = useDailyStats(
-    selectedYear, selectedMonth, isConvertedMode ? undefined : currencyMode
-  )
-  const { data: monthlyStats, isLoading: monthlyLoading } = useMonthlyStats(
-    selectedYear, isConvertedMode ? undefined : currencyMode
-  )
-  const { data: topStores, isLoading: storesLoading } = useTopStores(
-    5, isConvertedMode ? undefined : currencyMode
-  )
+  const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
   const { data: aggStats, isLoading: aggStatsLoading } = useAggregatedStats()
   const { data: aggCategoryStats, isLoading: aggCategoryLoading } = useAggregatedCategoryStats(
@@ -159,7 +126,7 @@ export default function Dashboard() {
   const convertBreakdownToTotal = (breakdown: CurrencyBreakdown[] | undefined): number => {
     if (!breakdown || !exchangeRates) return 0
     return breakdown.reduce((sum, item) => {
-      if (item.currency === preferredCurrency) {
+      if (item.currency === displayCurrency) {
         return sum + item.totalAmount
       }
       const rate = exchangeRates[item.currency]
@@ -203,116 +170,66 @@ export default function Dashboard() {
     }
   }
 
-  const isLoading = isConvertedMode
-    ? (aggStatsLoading || ratesLoading)
-    : statsLoading
+  const isLoading = aggStatsLoading || ratesLoading
 
-  const totalReceipts = isConvertedMode
-    ? (aggStats?.totalReceipts ?? 0)
-    : (stats?.totalReceipts ?? 0)
-
-  const totalCategories = isConvertedMode
-    ? (aggStats?.totalCategories ?? 0)
-    : (stats?.totalCategories ?? 0)
-
-  const totalAmount = isConvertedMode
-    ? convertBreakdownToTotal(aggStats?.byCurrency)
-    : (stats?.totalAmount ?? 0)
-
-  const recentReceipts = isConvertedMode
-    ? (aggStats?.recentReceipts ?? [])
-    : (stats?.recentReceipts ?? [])
+  const totalReceipts = aggStats?.totalReceipts ?? 0
+  const totalCategories = aggStats?.totalCategories ?? 0
+  const totalAmount = convertBreakdownToTotal(aggStats?.byCurrency)
+  const recentReceipts = aggStats?.recentReceipts ?? []
 
   const dailyChartData = useMemo(() => {
     const daysInMonth = getDaysInMonth(new Date(selectedYear, selectedMonth - 1))
     const data = []
 
-    if (isConvertedMode && aggDailyStats) {
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-        const found = aggDailyStats.find((d) => d.date === dateStr)
-        data.push({
-          day,
-          date: dateStr,
-          totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
-          receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
-        })
-      }
-    } else {
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-        const found = dailyStats?.find((d) => d.date === dateStr)
-        data.push({
-          day,
-          date: dateStr,
-          totalAmount: found?.totalAmount || 0,
-          receiptCount: found?.receiptCount || 0,
-        })
-      }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      const found = aggDailyStats?.find((d) => d.date === dateStr)
+      data.push({
+        day,
+        date: dateStr,
+        totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
+        receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
+      })
     }
     return data
-  }, [dailyStats, aggDailyStats, selectedYear, selectedMonth, isConvertedMode, exchangeRates])
+  }, [aggDailyStats, selectedYear, selectedMonth, exchangeRates])
 
   const monthlyChartData = useMemo(() => {
     const months = []
 
-    if (isConvertedMode && aggMonthlyStats) {
-      for (let m = 1; m <= 12; m++) {
-        const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
-        const found = aggMonthlyStats.find((d) => d.month === monthStr)
-        months.push({
-          month: format(new Date(selectedYear, m - 1), 'MMM'),
-          totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
-          receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
-        })
-      }
-    } else {
-      for (let m = 1; m <= 12; m++) {
-        const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
-        const found = monthlyStats?.find((d) => d.month === monthStr)
-        months.push({
-          month: format(new Date(selectedYear, m - 1), 'MMM'),
-          totalAmount: found?.totalAmount || 0,
-          receiptCount: found?.receiptCount || 0,
-        })
-      }
+    for (let m = 1; m <= 12; m++) {
+      const monthStr = `${selectedYear}-${String(m).padStart(2, '0')}`
+      const found = aggMonthlyStats?.find((d) => d.month === monthStr)
+      months.push({
+        month: format(new Date(selectedYear, m - 1), 'MMM'),
+        totalAmount: found ? convertBreakdownToTotal(found.byCurrency) : 0,
+        receiptCount: found ? found.byCurrency.reduce((sum, c) => sum + c.receiptCount, 0) : 0,
+      })
     }
     return months
-  }, [monthlyStats, aggMonthlyStats, selectedYear, isConvertedMode, exchangeRates])
+  }, [aggMonthlyStats, selectedYear, exchangeRates])
 
   const categoryChartData = useMemo(() => {
-    if (isConvertedMode && aggCategoryStats) {
-      return aggCategoryStats.map((c, index) => ({
-        name: c.categoryName,
-        value: convertBreakdownToTotal(c.byCurrency),
-        icon: c.categoryIcon,
-        color: c.categoryColor || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-        count: c.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
-      }))
-    }
-
-    if (!categoryStats || categoryStats.length === 0) return []
-    return categoryStats.map((c, index) => ({
+    if (!aggCategoryStats || aggCategoryStats.length === 0) return []
+    return aggCategoryStats.map((c, index) => ({
       name: c.categoryName,
-      value: c.totalAmount,
+      value: convertBreakdownToTotal(c.byCurrency),
       icon: c.categoryIcon,
       color: c.categoryColor || FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-      count: c.receiptCount,
+      count: c.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
     }))
-  }, [categoryStats, aggCategoryStats, isConvertedMode, exchangeRates])
+  }, [aggCategoryStats, exchangeRates])
 
   const totalMonthAmount = categoryChartData.reduce((sum, c) => sum + c.value, 0)
 
   const topStoresData = useMemo(() => {
-    if (isConvertedMode && aggTopStores) {
-      return aggTopStores.map((s) => ({
-        storeName: s.storeName,
-        totalAmount: convertBreakdownToTotal(s.byCurrency),
-        receiptCount: s.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
-      })).sort((a, b) => b.totalAmount - a.totalAmount)
-    }
-    return topStores || []
-  }, [topStores, aggTopStores, isConvertedMode, exchangeRates])
+    if (!aggTopStores) return []
+    return aggTopStores.map((s) => ({
+      storeName: s.storeName,
+      totalAmount: convertBreakdownToTotal(s.byCurrency),
+      receiptCount: s.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
+    })).sort((a, b) => b.totalAmount - a.totalAmount)
+  }, [aggTopStores, exchangeRates])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -415,17 +332,11 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
           <Coins className="h-4 w-4 text-muted-foreground ml-2" />
-          <Select value={currencyMode} onValueChange={setCurrencyMode}>
-            <SelectTrigger className="w-[160px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
+          <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
+            <SelectTrigger className="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
               <SelectValue placeholder={t('dashboard.currency')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL_CONVERTED}>
-                <span className="flex items-center gap-2">
-                  <RefreshCw className="h-3 w-3" />
-                  {t('dashboard.allTo', { currency: preferredCurrency })}
-                </span>
-              </SelectItem>
               {currencies.map((c) => (
                 <SelectItem key={c.id} value={c.code}>
                   <div className="flex items-center gap-2">
@@ -439,13 +350,6 @@ export default function Dashboard() {
           </Select>
         </div>
       </div>
-
-      {isConvertedMode && (
-        <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-xl text-sm text-muted-foreground flex items-center gap-2">
-          <RefreshCw className="h-4 w-4 text-primary" />
-          {t('dashboard.convertedAmounts', { currency: preferredCurrency })}
-        </div>
-      )}
 
       {/* Stats Cards */}
       {isLoading ? (
@@ -465,9 +369,6 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="relative z-10">
                   <p className="text-3xl font-bold">{totalReceipts}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isConvertedMode ? t('dashboard.inCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
-                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -481,9 +382,6 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="relative z-10">
                 <p className="text-3xl font-bold">{formatAmount(totalAmount)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {isConvertedMode ? t('dashboard.approxInCurrency', { currency: preferredCurrency }) : t('dashboard.inCurrency', { currency: currencyMode })}
-                </p>
               </CardContent>
             </Card>
 
@@ -540,7 +438,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {(isConvertedMode ? aggCategoryLoading : categoryLoading) ? (
+                {aggCategoryLoading ? (
                   <div className="flex items-center justify-center h-[250px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -596,7 +494,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {(isConvertedMode ? aggDailyLoading : dailyLoading) ? (
+                {aggDailyLoading ? (
                   <div className="flex items-center justify-center h-[250px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -640,7 +538,7 @@ export default function Dashboard() {
             <CategoryBudgetProgress
               aggCategoryStats={aggCategoryStats}
               exchangeRates={exchangeRates}
-              preferredCurrency={preferredCurrency}
+              displayCurrency={displayCurrency}
             />
           </div>
 
@@ -654,7 +552,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {(isConvertedMode ? aggMonthlyLoading : monthlyLoading) ? (
+                {aggMonthlyLoading ? (
                   <div className="flex items-center justify-center h-[200px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
@@ -693,7 +591,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {(isConvertedMode ? aggStoresLoading : storesLoading) ? (
+                {aggStoresLoading ? (
                   <div className="flex items-center justify-center h-[200px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>

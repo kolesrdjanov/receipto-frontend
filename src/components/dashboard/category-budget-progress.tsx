@@ -16,13 +16,13 @@ import { type CategoryStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 interface CategoryBudgetProgressProps {
   aggCategoryStats: CategoryStatsByCurrency[] | undefined
   exchangeRates: Record<string, number> | undefined
-  preferredCurrency: string
+  displayCurrency: string
 }
 
 export function CategoryBudgetProgress({
   aggCategoryStats,
   exchangeRates,
-  preferredCurrency
+  displayCurrency
 }: CategoryBudgetProgressProps) {
   const { t } = useTranslation()
   const { data: categories = [] } = useCategories()
@@ -31,7 +31,7 @@ export function CategoryBudgetProgress({
   const categoriesWithBudget = categories.filter((c) => c.monthlyBudget && c.monthlyBudget > 0 && c.budgetCurrency)
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
-  const budgetCurrency = selectedCategory?.budgetCurrency || preferredCurrency
+  const budgetCurrency = selectedCategory?.budgetCurrency || displayCurrency
 
   // Convert spending TO the budget's currency
   const getConvertedSpending = (): number => {
@@ -50,20 +50,20 @@ export function CategoryBudgetProgress({
       if (!exchangeRates) return sum + item.totalAmount
 
       // Convert from item.currency to targetCurrency
-      // exchangeRates are based on preferredCurrency
-      // So we need: amount in item.currency -> preferredCurrency -> targetCurrency
+      // exchangeRates are based on displayCurrency (the dashboard's selected currency)
+      // Convert: item.currency -> displayCurrency -> targetCurrency (budget currency)
 
-      const itemRate = exchangeRates[item.currency] // item.currency to preferredCurrency
-      const targetRate = exchangeRates[targetCurrency] // targetCurrency to preferredCurrency
+      const itemRate = exchangeRates[item.currency] // item.currency to displayCurrency
+      const targetRate = exchangeRates[targetCurrency] // targetCurrency to displayCurrency
 
       if (!itemRate || itemRate === 0) return sum + item.totalAmount
 
-      // Convert to preferredCurrency first
-      const amountInPreferred = item.totalAmount / itemRate
+      // Convert to displayCurrency first (intermediate step)
+      const amountInDisplay = item.totalAmount / itemRate
 
-      // Then convert to target currency
-      if (!targetRate || targetRate === 0) return sum + amountInPreferred
-      const amountInTarget = amountInPreferred * targetRate
+      // Then convert to target currency (budget currency)
+      if (!targetRate || targetRate === 0) return sum + amountInDisplay
+      const amountInTarget = amountInDisplay * targetRate
 
       return sum + amountInTarget
     }, 0)
@@ -89,7 +89,7 @@ export function CategoryBudgetProgress({
   const formatBudgetInDropdown = (cat: typeof categories[0]) => {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: cat.budgetCurrency || preferredCurrency,
+      currency: cat.budgetCurrency || displayCurrency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(cat.monthlyBudget || 0)
