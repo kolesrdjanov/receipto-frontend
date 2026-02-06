@@ -235,6 +235,10 @@
       "paidBy": "Platio",
       "selectPaidBy": "Izaberite ko je platio",
       "paidByHelp": "Ko je zapravo platio ovaj trošak",
+      "splitAmong": "Podeli između",
+      "splitAmongAll": "Svi članovi",
+      "splitAmongHelp": "Odčekirajte članove koji nisu uključeni u ovaj trošak",
+      "splitAmongCount": "{{count}}/{{total}} članova",
       "deleteTitle": "Obriši račun",
       "deleteConfirm": "Da li ste sigurni da želite da obrišete račun iz {{store}}? Ova akcija se ne može poništiti.",
       "createSuccess": "Račun uspešno kreiran",
@@ -751,6 +755,17 @@
       "noName": "Bez imena",
       "emailLabel": "Email",
       "roleLabel": "Uloga",
+      "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
+      "backToUsers": "Nazad na korisnike",
+      "invalidUser": "Neispravan korisnik",
+      "analytics": {
+        "title": "Analitika potrošnje",
+        "description": "Gde ovaj korisnik najviše troši, grupisano po kategoriji",
+        "noData": "Još nema podataka o potrošnji",
+        "totalTrackedSpend": "Ukupno evidentirana potrošnja",
+        "topCategory": "Najveća kategorija",
+        "convertedTo": "Iznosi konvertovani u {{currency}}"
+      },
       "table": {
         "firstName": "Ime",
         "lastName": "Prezime",

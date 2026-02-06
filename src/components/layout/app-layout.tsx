@@ -205,21 +205,27 @@ export function AppLayout({ children }: AppLayoutProps) {
                     {t('nav.admin')}
                   </div>
                 </div>
-                {adminNavItems.map((item) => (
-                  <Link key={item.path} to={item.path} onClick={closeSidebar}>
-                    <div
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
-                        location.pathname === item.path
-                          ? 'nav-item-glow text-white'
-                          : 'hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      <item.icon className={cn("h-4 w-4", location.pathname === item.path && "icon-glow")} />
-                      {t(item.labelKey)}
-                    </div>
-                  </Link>
-                ))}
+                {adminNavItems.map((item) => {
+                  const isAdminItemActive = item.path === '/admin/users'
+                    ? location.pathname.startsWith('/admin/users')
+                    : location.pathname === item.path
+
+                  return (
+                    <Link key={item.path} to={item.path} onClick={closeSidebar}>
+                      <div
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
+                          isAdminItemActive
+                            ? 'nav-item-glow text-white'
+                            : 'hover:bg-accent hover:text-accent-foreground'
+                        )}
+                      >
+                        <item.icon className={cn("h-4 w-4", isAdminItemActive && "icon-glow")} />
+                        {t(item.labelKey)}
+                      </div>
+                    </Link>
+                  )
+                })}
               </>
             )}
           </nav>

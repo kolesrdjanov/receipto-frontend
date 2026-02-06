@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -42,7 +42,7 @@ import { useGroups, useGroup } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
 import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
-import { Loader2, Trash2 } from 'lucide-react'
+import { Loader2, Trash2, Check } from 'lucide-react'
 
 interface ReceiptModalProps {
   open: boolean
@@ -67,6 +67,7 @@ type ReceiptFormData = {
 export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }: ReceiptModalProps) {
   const { t } = useTranslation()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [splitAmong, setSplitAmong] = useState<string[]>([])
 
   const {
     register,
@@ -132,6 +133,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         groupId: receipt.groupId || '',
         paidById: receipt.paidById || '',
       })
+
+      // Initialize splitAmong from existing participants
+      if (receipt.participants && receipt.participants.length > 0) {
+        setSplitAmong(receipt.participants.map((p) => p.userId))
+      } else {
+        setSplitAmong([]) // empty = all members
+      }
     } else if (open && mode === 'create') {
       // Reset original date tracking for new receipts
       originalDateRef.current = { full: null, dateOnly: '' }
@@ -146,8 +154,45 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         groupId: prefillData?.groupId || '',
         paidById: prefillData?.groupId && user ? user.id : '',
       })
+
+      setSplitAmong([]) // default: all members
     }
   }, [open, receipt, mode, reset, prefillData])
+
+  // When group members load and splitAmong is empty (= all), keep it as empty
+  // When group changes, reset splitAmong to empty (= all members)
+  const prevGroupIdRef = useRef(selectedGroupId)
+  useEffect(() => {
+    if (prevGroupIdRef.current !== selectedGroupId) {
+      setSplitAmong([]) // reset to "all" when group changes
+      prevGroupIdRef.current = selectedGroupId
+    }
+  }, [selectedGroupId])
+
+  // Determine if all members are selected (splitAmong empty or matches all)
+  const allMemberIds = useMemo(() => groupMembers.map((m) => m.userId), [groupMembers])
+  const effectiveSplitAmong = splitAmong.length === 0 ? allMemberIds : splitAmong
+  const allSelected = splitAmong.length === 0 || (groupMembers.length > 0 && splitAmong.length === groupMembers.length)
+
+  const toggleMember = (userId: string) => {
+    if (splitAmong.length === 0) {
+      // Currently "all" → switching to explicit: remove this member
+      setSplitAmong(allMemberIds.filter((id) => id !== userId))
+    } else if (splitAmong.includes(userId)) {
+      // Don't allow deselecting the last member
+      if (splitAmong.length <= 1) return
+      const next = splitAmong.filter((id) => id !== userId)
+      // If we'd end up with all members, collapse back to empty
+      setSplitAmong(next.length === allMemberIds.length ? [] : next)
+    } else {
+      const next = [...splitAmong, userId]
+      setSplitAmong(next.length === allMemberIds.length ? [] : next)
+    }
+  }
+
+  const selectAllMembers = () => {
+    setSplitAmong([])
+  }
 
   const onSubmit = async (data: ReceiptFormData) => {
     try {
@@ -165,7 +210,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         }
       }
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         storeName: data.storeName || undefined,
         totalAmount: data.totalAmount ? parseFloat(data.totalAmount) : undefined,
         currency: data.currency || undefined,
@@ -176,11 +221,21 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
         paidById: data.paidById || null,
       }
 
+      // Only send splitAmong when a group is selected and not all members
+      if (data.groupId && !allSelected) {
+        payload.splitAmong = effectiveSplitAmong
+      } else if (data.groupId && allSelected) {
+        // Explicitly clear participants on update if switched back to all
+        if (mode === 'edit') {
+          payload.splitAmong = null
+        }
+      }
+
       if (mode === 'create') {
-        await createReceipt.mutateAsync(payload)
+        await createReceipt.mutateAsync(payload as any)
         toast.success(t('receipts.modal.createSuccess'))
       } else if (mode === 'edit' && receipt) {
-        await updateReceipt.mutateAsync({ id: receipt.id, data: payload })
+        await updateReceipt.mutateAsync({ id: receipt.id, data: payload as any })
         toast.success(t('receipts.modal.updateSuccess'))
       }
       onOpenChange(false)
@@ -425,6 +480,57 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
               />
               <p className="text-xs text-muted-foreground">
                 {t('receipts.modal.paidByHelp')}
+              </p>
+            </div>
+          )}
+
+          {selectedGroupId && groupMembers.length > 1 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>
+                  {t('receipts.modal.splitAmong')}{' '}
+                  <span className="text-muted-foreground font-normal">
+                    ({t('receipts.modal.splitAmongCount', {
+                      count: effectiveSplitAmong.length,
+                      total: groupMembers.length,
+                    })})
+                  </span>
+                </Label>
+                {!allSelected && (
+                  <button
+                    type="button"
+                    onClick={selectAllMembers}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {t('receipts.modal.splitAmongAll')}
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {groupMembers.map((member) => {
+                  const name = member.user?.firstName && member.user?.lastName
+                    ? `${member.user.firstName} ${member.user.lastName}`
+                    : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
+                  const isSelected = effectiveSplitAmong.includes(member.userId)
+                  return (
+                    <button
+                      key={member.userId}
+                      type="button"
+                      onClick={() => toggleMember(member.userId)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                        isSelected
+                          ? 'bg-primary/10 border-primary/30 text-primary'
+                          : 'bg-muted/30 border-border text-muted-foreground'
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                      {name}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('receipts.modal.splitAmongHelp')}
               </p>
             </div>
           )}

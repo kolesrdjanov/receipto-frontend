@@ -40,11 +40,13 @@ export interface CoachResponse {
     totalSpentLastWeek: number
     weeklyChange: number
     weeklyChangePercent: number
+    currency?: string
     receiptsThisWeek: number
     topCategory?: {
       name: string
       icon: string
       amount: number
+      currency?: string
     }
   }
   tip?: {

@@ -157,6 +157,7 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                               <TableHead className="w-12"></TableHead>
                               <TableHead>{t('categories.table.name')}</TableHead>
                               <TableHead>{t('categories.table.description')}</TableHead>
+                              <TableHead>{t('categories.table.monthlyBudget')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -173,6 +174,12 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                                 <TableCell className="font-medium">{category.name}</TableCell>
                                 <TableCell className="text-muted-foreground">
                                   {category.description || '-'}
+                                </TableCell>
+                                <TableCell>
+                                  {category.monthlyBudget !== null &&
+                                  category.monthlyBudget !== undefined
+                                    ? `${Number(category.monthlyBudget).toFixed(2)}${category.budgetCurrency ? ` ${category.budgetCurrency}` : ''}`
+                                    : '-'}
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -282,4 +289,3 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
     </Drawer>
   )
 }
-

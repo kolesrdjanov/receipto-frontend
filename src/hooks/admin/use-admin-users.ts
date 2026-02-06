@@ -138,6 +138,8 @@ export interface UserCategory {
   description: string
   icon: string
   color: string
+  monthlyBudget?: number | null
+  budgetCurrency?: string | null
   createdAt: string
 }
 
@@ -201,6 +203,32 @@ export function useUserReceipts(userId: string | null, page: number, limit: numb
   return useQuery({
     queryKey: [...queryKeys.users.detail(userId!), 'receipts', page, limit],
     queryFn: () => fetchUserReceipts(userId!, page, limit),
+    enabled: !!userId,
+  })
+}
+
+export interface CategorySpendingByCurrency {
+  currency: string
+  totalAmount: number
+  receiptCount: number
+}
+
+export interface UserCategorySpending {
+  categoryId: string
+  categoryName: string
+  categoryIcon: string
+  categoryColor: string | null
+  byCurrency: CategorySpendingByCurrency[]
+}
+
+const fetchUserSpendingByCategory = async (userId: string): Promise<UserCategorySpending[]> => {
+  return api.get<UserCategorySpending[]>(`/users/${userId}/analytics/spending-by-category`)
+}
+
+export function useUserSpendingByCategory(userId: string | null) {
+  return useQuery({
+    queryKey: [...queryKeys.users.detail(userId!), 'analytics', 'spending-by-category'],
+    queryFn: () => fetchUserSpendingByCategory(userId!),
     enabled: !!userId,
   })
 }

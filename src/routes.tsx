@@ -19,6 +19,7 @@ const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const Warranties = lazy(() => import('./pages/warranties'))
 const Settings = lazy(() => import('./pages/settings'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
+const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
 
 export const routes: RouteObject[] = [
   {
@@ -126,6 +127,14 @@ export const routes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminUsers />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/users/:id',
+    element: (
+      <AdminRoute>
+        <AdminUserDetails />
       </AdminRoute>
     ),
   },

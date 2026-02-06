@@ -107,17 +107,23 @@ function usePrimaryColor() {
 
 export default function Dashboard() {
   const { t } = useTranslation()
+  const { currency: preferredCurrency } = useSettingsStore()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [currencyMode, setCurrencyMode] = useState<string>('RSD')
+  const [currencyMode, setCurrencyMode] = useState<string>(preferredCurrency || 'RSD')
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const createReceipt = useCreateReceipt()
   const navigate = useNavigate()
   const primaryColor = usePrimaryColor()
 
-  const { currency: preferredCurrency } = useSettingsStore()
   const { data: currencies = [] } = useCurrencies()
+
+  useEffect(() => {
+    setCurrencyMode((current) =>
+      current === ALL_CONVERTED ? ALL_CONVERTED : (preferredCurrency || 'RSD')
+    )
+  }, [preferredCurrency])
 
   const isConvertedMode = currencyMode === ALL_CONVERTED
   const displayCurrency = isConvertedMode ? preferredCurrency : currencyMode
@@ -717,7 +723,7 @@ export default function Dashboard() {
 
           {/* Coach Card + AI Categorization Insights */}
           <div className="grid gap-4 lg:grid-cols-2 mb-6">
-            <CoachCard />
+            <CoachCard displayCurrency={displayCurrency} />
             <CategoryInsights />
           </div>
 

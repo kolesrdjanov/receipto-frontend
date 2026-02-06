@@ -235,6 +235,10 @@
       "paidBy": "Paid By",
       "selectPaidBy": "Select who paid",
       "paidByHelp": "Who actually paid for this expense",
+      "splitAmong": "Split among",
+      "splitAmongAll": "All members",
+      "splitAmongHelp": "Uncheck members not included in this expense",
+      "splitAmongCount": "{{count}}/{{total}} members",
       "deleteTitle": "Delete Receipt",
       "deleteConfirm": "Are you sure you want to delete the receipt from {{store}}? This action cannot be undone.",
       "createSuccess": "Receipt created successfully",
@@ -764,6 +768,17 @@
       "noName": "No name",
       "emailLabel": "Email",
       "roleLabel": "Role",
+      "detailsSubtitle": "Detailed user profile, expenses, and spending insights",
+      "backToUsers": "Back to users",
+      "invalidUser": "Invalid user",
+      "analytics": {
+        "title": "Spending Analytics",
+        "description": "Where this user spends the most, grouped by category",
+        "noData": "No spending data available yet",
+        "totalTrackedSpend": "Total tracked spend",
+        "topCategory": "Top category",
+        "convertedTo": "Amounts converted to {{currency}}"
+      },
       "table": {
         "firstName": "First Name",
         "lastName": "Last Name",

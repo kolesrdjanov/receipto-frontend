@@ -12,12 +12,23 @@ import {
   ArrowDownRight,
 } from 'lucide-react'
 import { useCoach, type Insight } from '@/hooks/coach/use-coach'
+import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
+import { useSettingsStore } from '@/store/settings'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-function formatAmount(amount: number): string {
-  return new Intl.NumberFormat('sr-RS').format(Math.round(amount))
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat('sr-RS', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(amount))
+}
+
+interface CoachCardProps {
+  displayCurrency?: string
 }
 
 function InsightIcon({ insight }: { insight: Insight }) {
@@ -78,8 +89,11 @@ function InsightItem({ insight }: { insight: Insight }) {
   )
 }
 
-export function CoachCard() {
+export function CoachCard({ displayCurrency }: CoachCardProps) {
   const { t } = useTranslation()
+  const { currency: preferredCurrency } = useSettingsStore()
+  const targetCurrency = displayCurrency || preferredCurrency || 'RSD'
+  const { data: exchangeRates } = useExchangeRates(targetCurrency)
   const { data, isLoading, error } = useCoach()
 
   if (isLoading) {
@@ -101,6 +115,31 @@ export function CoachCard() {
   }
 
   const { greeting, insights, summary, tip } = data
+  const baseCurrency = summary?.currency || 'RSD'
+
+  const convertToDisplay = (amount: number, fromCurrency: string) => {
+    if (fromCurrency === targetCurrency) {
+      return { amount, currency: targetCurrency }
+    }
+
+    const rate = exchangeRates?.[fromCurrency]
+    if (!rate || rate === 0) {
+      return { amount, currency: fromCurrency }
+    }
+
+    return { amount: amount / rate, currency: targetCurrency }
+  }
+
+  const convertedWeekTotal = summary
+    ? convertToDisplay(summary.totalSpentThisWeek, baseCurrency)
+    : null
+
+  const convertedTopCategory = summary?.topCategory
+    ? convertToDisplay(
+        summary.topCategory.amount,
+        summary.topCategory.currency || baseCurrency
+      )
+    : null
 
   return (
     <Card className="coach-card overflow-hidden h-full">
@@ -141,11 +180,17 @@ export function CoachCard() {
               )}
             </div>
             <p className="text-lg font-semibold">
-              {formatAmount(summary.totalSpentThisWeek)} <span className="text-xs font-normal text-muted-foreground">RSD</span>
+              {convertedWeekTotal
+                ? formatAmount(convertedWeekTotal.amount, convertedWeekTotal.currency)
+                : formatAmount(summary.totalSpentThisWeek, baseCurrency)}
             </p>
             {summary.topCategory && (
               <p className="text-[11px] text-muted-foreground">
-                {t('coach.topSpending')}: {summary.topCategory.name} ({formatAmount(summary.topCategory.amount)} RSD)
+                {t('coach.topSpending')}: {summary.topCategory.name} (
+                {convertedTopCategory
+                  ? formatAmount(convertedTopCategory.amount, convertedTopCategory.currency)
+                  : formatAmount(summary.topCategory.amount, summary.topCategory.currency || baseCurrency)}
+                )
               </p>
             )}
           </div>

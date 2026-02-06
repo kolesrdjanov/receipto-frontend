@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -14,7 +15,6 @@ import { Pagination } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { UserDetailsDrawer } from '@/components/admin/user-details-drawer'
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
@@ -27,6 +27,7 @@ interface UsersTableProps {
 
 export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortField>('createdAt')
   const [sortOrder, setSortOrder] = useState<SortOrder>('DESC')
@@ -73,8 +74,6 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const meta = response?.meta
 
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null)
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
-  const [drawerOpen, setDrawerOpen] = useState(false)
 
 
   const handleDeleteClick = (user: { id: string; email: string }) => {
@@ -82,8 +81,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
   }
 
   const handleViewDetails = (userId: string) => {
-    setSelectedUserId(userId)
-    setDrawerOpen(true)
+    navigate(`/admin/users/${userId}`)
   }
 
   const handleDeleteConfirm = async () => {
@@ -375,12 +373,6 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
         confirmText={t('common.delete')}
         variant="destructive"
         isLoading={deleteUser.isPending}
-      />
-
-      <UserDetailsDrawer
-        userId={selectedUserId}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
       />
     </>
   )

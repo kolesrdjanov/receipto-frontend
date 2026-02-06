@@ -84,6 +84,7 @@ export interface Receipt {
   }
   suggestionConfidence?: number
   suggestionAccepted?: boolean
+  participants?: { userId: string }[]
   createdAt: string
   updatedAt: string
 }
@@ -105,6 +106,7 @@ export interface CreateReceiptInput {
   categoryId?: string | null
   groupId?: string | null
   paidById?: string | null
+  splitAmong?: string[]
 }
 
 export interface UpdateReceiptInput {
@@ -116,6 +118,7 @@ export interface UpdateReceiptInput {
   categoryId?: string | null
   groupId?: string | null
   paidById?: string | null
+  splitAmong?: string[] | null
 }
 
 export interface ReceiptsFilters {

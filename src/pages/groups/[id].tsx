@@ -356,39 +356,43 @@ export default function GroupDetail() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {/* Add Receipt Buttons */}
-            <div className="relative" ref={dropdownRef}>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddDropdown(!showAddDropdown)}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('receipts.addManually')}</span>
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </Button>
-              {showAddDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
-                  <button
-                    onClick={handleAddManually}
-                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+            {/* Add Receipt Buttons - hidden when archived */}
+            {!group.isArchived && (
+              <>
+                <div className="relative" ref={dropdownRef}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddDropdown(!showAddDropdown)}
                   >
-                    {t('receipts.addBlank')}
-                  </button>
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('receipts.addManually')}</span>
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                  {showAddDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                      <button
+                        onClick={handleAddManually}
+                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                      >
+                        {t('receipts.addBlank')}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Button
-              variant="glossy"
-              onClick={handleScanQr}
-              disabled={createReceipt.isPending}
-            >
-              {createReceipt.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">{t('receipts.scanQr')}</span>
-            </Button>
+                <Button
+                  variant="glossy"
+                  onClick={handleScanQr}
+                  disabled={createReceipt.isPending}
+                >
+                  {createReceipt.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">{t('receipts.scanQr')}</span>
+                </Button>
+              </>
+            )}
 
             {isOwner && (
               <Button
@@ -409,7 +413,7 @@ export default function GroupDetail() {
               </Button>
             )}
 
-            {!isOwner && (
+            {!isOwner && !group.isArchived && (
               <Button
                 variant="outline"
                 onClick={() => setShowLeaveConfirm(true)}
@@ -554,7 +558,7 @@ export default function GroupDetail() {
                         </span>
                       </div>
                     </div>
-                    {isAdmin && member.role !== 'owner' && member.userId !== user?.id && (
+                    {isAdmin && !group.isArchived && member.role !== 'owner' && member.userId !== user?.id && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -583,7 +587,7 @@ export default function GroupDetail() {
                         <span className="text-sm text-muted-foreground">
                           {member.invitedEmail || member.user?.email}
                         </span>
-                        {isAdmin && (
+                        {isAdmin && !group.isArchived && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -599,8 +603,8 @@ export default function GroupDetail() {
                 </div>
               )}
 
-              {/* Invite Member */}
-              {isAdmin && (
+              {/* Invite Member - hidden when archived */}
+              {isAdmin && !group.isArchived && (
                 <div className="pt-4 border-t">
                   <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                     <UserPlus className="h-4 w-4" />
