@@ -1,6 +1,7 @@
 import {useState, useMemo, lazy, Suspense, useEffect} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { CategoryInsights } from '@/components/dashboard/category-insights'
 import { CoachCard } from '@/components/coach/coach-card'
+import { useMe } from '@/hooks/users/use-me'
 import {
   useAggregatedStats,
   useAggregatedCategoryStats,
@@ -28,6 +30,7 @@ import {
 import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
+import { cn } from '@/lib/utils'
 import {
   Loader2,
   Receipt,
@@ -40,7 +43,10 @@ import {
   PieChart as PieChartIcon,
   BarChart3,
   Coins,
-  QrCode
+  QrCode,
+  Compass,
+  Sparkles,
+  Crown,
 } from 'lucide-react'
 import {
   PieChart,
@@ -59,6 +65,7 @@ import {
 import { format, getDaysInMonth } from 'date-fns'
 import {toast} from "sonner";
 import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
+import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 
@@ -110,6 +117,7 @@ export default function Dashboard() {
   const primaryColor = usePrimaryColor()
 
   const { data: currencies = [] } = useCurrencies()
+  const { data: me } = useMe(true)
 
   const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
@@ -176,6 +184,34 @@ export default function Dashboard() {
   const totalCategories = aggStats?.totalCategories ?? 0
   const totalAmount = convertBreakdownToTotal(aggStats?.byCurrency)
   const recentReceipts = aggStats?.recentReceipts ?? []
+  const rankReceiptCount = me?.receiptCount ?? totalReceipts
+  const rankCode = normalizeRank(me?.receiptRank as ReceiptRank | undefined, rankReceiptCount)
+  const nextRank = getNextRank(rankCode)
+  const rankProgress = getProgressToNextRank(rankCode, rankReceiptCount)
+
+  const rankName = rankCode === 'status_a'
+    ? t('settings.profile.rank.names.statusA')
+    : rankCode === 'status_b'
+      ? t('settings.profile.rank.names.statusB')
+      : rankCode === 'status_c'
+        ? t('settings.profile.rank.names.statusC')
+        : t('settings.profile.rank.names.noStatus')
+
+  const rankVisual = rankCode === 'status_a'
+    ? { icon: Crown, iconClassName: 'text-amber-400', cardClassName: 'border-amber-400/30 bg-amber-500/10' }
+    : rankCode === 'status_b'
+      ? { icon: Sparkles, iconClassName: 'text-blue-400', cardClassName: 'border-blue-400/30 bg-blue-500/10' }
+      : rankCode === 'status_c'
+        ? { icon: Compass, iconClassName: 'text-emerald-400', cardClassName: 'border-emerald-400/30 bg-emerald-500/10' }
+        : { icon: Compass, iconClassName: 'text-muted-foreground', cardClassName: 'border-border bg-muted/20' }
+
+  const rankDescription = rankCode === 'status_a'
+    ? t('dashboard.rank.details.statusA')
+    : rankCode === 'status_b'
+      ? t('dashboard.rank.details.statusB')
+      : rankCode === 'status_c'
+        ? t('dashboard.rank.details.statusC')
+        : t('dashboard.rank.details.noStatus')
 
   const dailyChartData = useMemo(() => {
     const daysInMonth = getDaysInMonth(new Date(selectedYear, selectedMonth - 1))
@@ -622,6 +658,39 @@ export default function Dashboard() {
             <CoachCard displayCurrency={displayCurrency} />
             <CategoryInsights />
           </div>
+
+          <Card className={cn('mb-6 card-interactive', rankVisual.cardClassName)}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center justify-between gap-3 text-base">
+                <span>{t('dashboard.rank.title')}</span>
+                <span className="inline-flex items-center gap-2">
+                  <rankVisual.icon className={cn('h-4 w-4', rankVisual.iconClassName)} />
+                  <span className="font-semibold">{rankName}</span>
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                {t('dashboard.rank.receiptsTracked', { count: rankReceiptCount })}
+              </p>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{t('dashboard.rank.progress')}</span>
+                  <span>{Math.round(rankProgress)}%</span>
+                </div>
+                <Progress value={rankProgress} className="h-2" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {nextRank
+                  ? t('dashboard.rank.nextTarget', {
+                      count: Math.max(nextRank.minReceipts - rankReceiptCount, 0),
+                      rank: t(nextRank.nameKey),
+                    })
+                  : t('dashboard.rank.topTier')}
+              </p>
+              <p className="text-sm">{rankDescription}</p>
+            </CardContent>
+          </Card>
 
           {/* Recent Activity */}
           <Card className="card-interactive card-gradient-border">

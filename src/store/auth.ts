@@ -10,6 +10,7 @@ interface User {
   role: 'user' | 'admin'
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
+  receiptMilestoneEmailsEnabled?: boolean
 }
 
 interface AuthState {

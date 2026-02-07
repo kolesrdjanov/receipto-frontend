@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 import { useAuthStore } from '@/store/auth'
+import type { ReceiptRank } from '@/lib/rank'
 
 export interface Me {
   id: string
@@ -11,6 +12,9 @@ export interface Me {
   profileImageUrl?: string | null
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
+  receiptMilestoneEmailsEnabled?: boolean
+  receiptRank?: ReceiptRank
+  receiptCount?: number
 }
 
 export interface UpdateMeData {
@@ -19,6 +23,7 @@ export interface UpdateMeData {
   removeProfileImage?: boolean
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
+  receiptMilestoneEmailsEnabled?: boolean
 }
 
 export interface ChangePasswordData {
@@ -65,6 +70,9 @@ export function useUpdateMe() {
         firstName: me.firstName,
         lastName: me.lastName,
         profileImageUrl: me.profileImageUrl ?? null,
+        warrantyReminderEnabled: me.warrantyReminderEnabled,
+        budgetAlertEnabled: me.budgetAlertEnabled,
+        receiptMilestoneEmailsEnabled: me.receiptMilestoneEmailsEnabled,
       })
     },
   })
@@ -82,6 +90,9 @@ export function useUploadProfileImage() {
         firstName: me.firstName,
         lastName: me.lastName,
         profileImageUrl: me.profileImageUrl ?? null,
+        warrantyReminderEnabled: me.warrantyReminderEnabled,
+        budgetAlertEnabled: me.budgetAlertEnabled,
+        receiptMilestoneEmailsEnabled: me.receiptMilestoneEmailsEnabled,
       })
     },
   })
@@ -112,4 +123,3 @@ export function useDeleteMyAccount() {
     },
   })
 }
-

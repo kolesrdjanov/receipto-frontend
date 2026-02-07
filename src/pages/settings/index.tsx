@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Progress } from '@/components/ui/progress'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage, useChangePassword, useDeleteMyAccount } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
 import { useMemo, useState, useRef } from 'react'
+import { normalizeRank, getNextRank, getProgressToNextRank, type ReceiptRank } from '@/lib/rank'
 
 const themes: { value: Theme; labelKey: string }[] = [
   { value: 'light', labelKey: 'settings.appearance.light' },
@@ -69,6 +71,62 @@ export default function Settings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const effectiveUser = me ?? authUser
+  const receiptCount = me?.receiptCount ?? 0
+  const receiptRank = normalizeRank(me?.receiptRank as ReceiptRank | undefined, receiptCount)
+  const receiptMilestoneEmailsEnabled = effectiveUser?.receiptMilestoneEmailsEnabled ?? true
+
+  const rankConfig = useMemo(() => {
+    const nextRank = getNextRank(receiptRank)
+    const progress = getProgressToNextRank(receiptRank, receiptCount)
+
+    const common = {
+      progress,
+      nextRankName: nextRank ? t(nextRank.nameKey) : t('settings.profile.rank.maxRank'),
+      receiptsToNextRank: nextRank ? Math.max(nextRank.minReceipts - receiptCount, 0) : 0,
+    }
+
+    if (receiptRank === 'status_a') {
+      return {
+        name: t('settings.profile.rank.names.statusA'),
+        description: t('settings.profile.rank.descriptions.statusA'),
+        icon: Crown,
+        iconClassName: 'text-amber-400',
+        cardClassName: 'border-amber-400/30 bg-amber-500/10',
+        ...common,
+      }
+    }
+
+    if (receiptRank === 'status_b') {
+      return {
+        name: t('settings.profile.rank.names.statusB'),
+        description: t('settings.profile.rank.descriptions.statusB', { remaining: common.receiptsToNextRank }),
+        icon: Sparkles,
+        iconClassName: 'text-blue-400',
+        cardClassName: 'border-blue-400/30 bg-blue-500/10',
+        ...common,
+      }
+    }
+
+    if (receiptRank === 'status_c') {
+      return {
+        name: t('settings.profile.rank.names.statusC'),
+        description: t('settings.profile.rank.descriptions.statusC', { remaining: common.receiptsToNextRank }),
+        icon: Compass,
+        iconClassName: 'text-emerald-400',
+        cardClassName: 'border-emerald-400/30 bg-emerald-500/10',
+        ...common,
+      }
+    }
+
+    return {
+      name: t('settings.profile.rank.names.noStatus'),
+      description: t('settings.profile.rank.descriptions.noStatus', { remaining: common.receiptsToNextRank }),
+      icon: Compass,
+      iconClassName: 'text-muted-foreground',
+      cardClassName: 'border-border bg-muted/20',
+      ...common,
+    }
+  }, [receiptCount, receiptRank, t])
 
   const initial = useMemo(
     () => ({
@@ -328,15 +386,30 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>{t('settings.notifications.warrantyReminders')}</Label>
+                <Label>{t('settings.notifications.rankMilestones')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  {t('settings.notifications.warrantyRemindersHelp')}
+                  {t('settings.notifications.rankMilestonesHelp')}
                 </p>
               </div>
               <Switch
-                checked={effectiveUser?.warrantyReminderEnabled ?? true}
-                onCheckedChange={(checked) => updateMe.mutate({ warrantyReminderEnabled: checked })}
+                checked={receiptMilestoneEmailsEnabled}
+                onCheckedChange={(checked) => updateMe.mutate({ receiptMilestoneEmailsEnabled: checked })}
               />
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t('settings.notifications.warrantyReminders')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.notifications.warrantyRemindersHelp')}
+                  </p>
+                </div>
+                <Switch
+                  checked={effectiveUser?.warrantyReminderEnabled ?? true}
+                  onCheckedChange={(checked) => updateMe.mutate({ warrantyReminderEnabled: checked })}
+                />
+              </div>
             </div>
 
             <div className="border-t pt-4">
@@ -487,6 +560,35 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label htmlFor="email">{t('settings.profile.email')}</Label>
                   <Input id="email" value={effectiveUser.email} disabled />
+                </div>
+
+                <div className={cn('rounded-lg border p-4 space-y-3', rankConfig.cardClassName)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <Label>{t('settings.profile.rank.title')}</Label>
+                      <p className="text-base font-semibold mt-1">{rankConfig.name}</p>
+                    </div>
+                    <rankConfig.icon className={cn('h-5 w-5 mt-0.5', rankConfig.iconClassName)} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.profile.rank.receiptsTracked', { count: receiptCount })}
+                  </p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{t('settings.profile.rank.progress')}</span>
+                      <span>{Math.round(rankConfig.progress)}%</span>
+                    </div>
+                    <Progress value={rankConfig.progress} className="h-2" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {rankConfig.receiptsToNextRank > 0
+                      ? t('settings.profile.rank.nextTarget', {
+                          count: rankConfig.receiptsToNextRank,
+                          rank: rankConfig.nextRankName,
+                        })
+                      : t('settings.profile.rank.topTier')}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{rankConfig.description}</p>
                 </div>
 
                 <div className="flex justify-end">

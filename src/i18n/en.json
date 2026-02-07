@@ -77,6 +77,7 @@
     "logout": "Logout",
     "admin": "Admin",
     "users": "Users",
+    "rank": "Rank",
     "version": "Version",
     "supportUs": "Support us"
   },
@@ -147,6 +148,19 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Overview of your expenses and spending patterns",
+    "rank": {
+      "title": "Your Rank",
+      "receiptsTracked": "Receipts tracked: {{count}}",
+      "progress": "Progress to next rank",
+      "nextTarget": "{{count}} more receipts to unlock {{rank}}",
+      "topTier": "Top tier reached. Keep the streak alive.",
+      "details": {
+        "noStatus": "You are in the warm-up phase. Keep scanning to unlock your first rank.",
+        "statusC": "You reached Receipt Ranger. Your tracking habit is now a real system.",
+        "statusB": "You reached Budget Pathfinder. You are tracking with high consistency.",
+        "statusA": "You reached Ledger Legend. This is elite-level tracking discipline."
+      }
+    },
     "currency": "Currency",
     "totalReceipts": "Total Receipts",
     "totalSpent": "Total Spent",
@@ -604,6 +618,8 @@
     "notifications": {
       "title": "Notifications",
       "description": "Manage your email notification preferences",
+      "rankMilestones": "Rank milestone emails",
+      "rankMilestonesHelp": "Receive email updates when you hit receipt count milestones and unlock new ranks",
       "warrantyReminders": "Warranty expiry reminders",
       "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire",
       "budgetAlerts": "Budget alerts",
@@ -625,7 +641,27 @@
       "pictureUploaded": "Profile picture uploaded successfully",
       "uploadError": "Failed to upload profile picture",
       "invalidFileType": "Invalid file type. Please upload JPEG, PNG, WebP, or HEIC image.",
-      "fileTooLarge": "File is too large. Maximum size is 5MB."
+      "fileTooLarge": "File is too large. Maximum size is 5MB.",
+      "rank": {
+        "title": "Receipt rank",
+        "receiptsTracked": "Receipts tracked: {{count}}",
+        "progress": "Progress to next rank",
+        "nextTarget": "{{count}} more receipts to unlock {{rank}}",
+        "topTier": "Top tier reached. Keep the streak alive.",
+        "maxRank": "Max Rank",
+        "names": {
+          "noStatus": "Receipt Rookie",
+          "statusC": "Receipt Ranger",
+          "statusB": "Budget Pathfinder",
+          "statusA": "Ledger Legend"
+        },
+        "descriptions": {
+          "noStatus": "Strong start. Scan {{remaining}} more receipts to enter the ranked tier.",
+          "statusC": "You earned this by scanning at least 50 receipts. Consistency is paying off.",
+          "statusB": "You earned this by scanning at least 75 receipts. Your tracking discipline is elite.",
+          "statusA": "You earned this for scanning 100+ receipts. This is the highest rank."
+        }
+      }
     },
     "security": {
       "title": "Security",

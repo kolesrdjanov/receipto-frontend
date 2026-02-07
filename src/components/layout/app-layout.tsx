@@ -4,14 +4,16 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore, useIsAdmin } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
 import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
+import { useMe } from '@/hooks/users/use-me'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
+import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
@@ -38,6 +40,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuthStore()
+  const { data: me } = useMe(!!user)
   const logout = useLogout()
   const isAdmin = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -46,6 +49,23 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
   const createReceipt = useCreateReceipt()
+
+  const receiptCount = me?.receiptCount ?? 0
+  const receiptRank = normalizeRank(me?.receiptRank as ReceiptRank | undefined, receiptCount)
+  const rankName = receiptRank === 'status_a'
+    ? t('settings.profile.rank.names.statusA')
+    : receiptRank === 'status_b'
+      ? t('settings.profile.rank.names.statusB')
+      : receiptRank === 'status_c'
+        ? t('settings.profile.rank.names.statusC')
+        : t('settings.profile.rank.names.noStatus')
+  const rankVisual = receiptRank === 'status_a'
+    ? { icon: Crown, className: 'text-amber-400 bg-amber-500/10 border-amber-400/25' }
+    : receiptRank === 'status_b'
+      ? { icon: Sparkles, className: 'text-blue-400 bg-blue-500/10 border-blue-400/25' }
+      : receiptRank === 'status_c'
+        ? { icon: Compass, className: 'text-emerald-400 bg-emerald-500/10 border-emerald-400/25' }
+        : { icon: Compass, className: 'text-muted-foreground bg-muted/40 border-border' }
 
   // Show onboarding on first login
   useEffect(() => {
@@ -247,6 +267,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
               </div>
+            </div>
+            <div className={cn('mb-3 rounded-lg border px-3 py-2 text-xs flex items-center justify-between', rankVisual.className)}>
+              <span className="font-medium">{t('nav.rank')}</span>
+              <span className="inline-flex items-center gap-1.5 font-semibold">
+                <rankVisual.icon className="h-3.5 w-3.5" />
+                {rankName}
+              </span>
             </div>
             <Button variant="outline" className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all duration-300" onClick={logout}>
               {t('nav.logout')}

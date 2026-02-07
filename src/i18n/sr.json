@@ -77,6 +77,7 @@
     "logout": "Odjava",
     "admin": "Admin",
     "users": "Korisnici",
+    "rank": "Rang",
     "version": "Verzija",
     "supportUs": "Podrži nas"
   },
@@ -147,6 +148,19 @@
   "dashboard": {
     "title": "Kontrolna tabla",
     "subtitle": "Pregled vaših troškova i obrazaca potrošnje",
+    "rank": {
+      "title": "Vaš rang",
+      "receiptsTracked": "Broj skeniranih računa: {{count}}",
+      "progress": "Napredak do sledećeg ranga",
+      "nextTarget": "Još {{count}} računa do ranga {{rank}}",
+      "topTier": "Dostigli ste najviši rang. Održite niz.",
+      "details": {
+        "noStatus": "Trenutno ste u početnoj fazi. Nastavite da skenirate račune za prvi rang.",
+        "statusC": "Dostigli ste Receipt Ranger. Navika praćenja je sada stabilna.",
+        "statusB": "Dostigli ste Budget Pathfinder. Vaša disciplina praćenja je na visokom nivou.",
+        "statusA": "Dostigli ste Ledger Legend. Ovo je elitni nivo discipline praćenja."
+      }
+    },
     "currency": "Valuta",
     "totalReceipts": "Ukupno računa",
     "totalSpent": "Ukupno potrošeno",
@@ -592,6 +606,8 @@
     "notifications": {
       "title": "Obaveštenja",
       "description": "Upravljajte podešavanjima email obaveštenja",
+      "rankMilestones": "Emailovi za milestone rangove",
+      "rankMilestonesHelp": "Primajte email obaveštenja kada dostignete milestone broja računa i otključate nove rangove",
       "warrantyReminders": "Podsetnici o isteku garancije",
       "warrantyRemindersHelp": "Primajte email podsetike 30 i 7 dana pre isteka vaših garancija",
       "budgetAlerts": "Upozorenja o budžetu",
@@ -613,7 +629,27 @@
       "pictureUploaded": "Profilna slika je uspešno dodata",
       "uploadError": "Greška pri dodavanju profilne slike",
       "invalidFileType": "Nevažeći tip fajla. Molimo dodajte JPEG, PNG, WebP ili HEIC sliku.",
-      "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB."
+      "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB.",
+      "rank": {
+        "title": "Status računa",
+        "receiptsTracked": "Broj skeniranih računa: {{count}}",
+        "progress": "Napredak do sledećeg ranga",
+        "nextTarget": "Još {{count}} računa do ranga {{rank}}",
+        "topTier": "Dostigli ste najviši rang. Održite niz.",
+        "maxRank": "Maksimalni rang",
+        "names": {
+          "noStatus": "Receipt Rookie",
+          "statusC": "Receipt Ranger",
+          "statusB": "Budget Pathfinder",
+          "statusA": "Ledger Legend"
+        },
+        "descriptions": {
+          "noStatus": "Odličan početak. Skenirajte još {{remaining}} računa da uđete u rangirani nivo.",
+          "statusC": "Ovaj rang ste dobili jer ste skenirali najmanje 50 računa. Kontinuitet se isplati.",
+          "statusB": "Ovaj rang ste dobili jer ste skenirali najmanje 75 računa. Vaša disciplina praćenja je vrhunska.",
+          "statusA": "Ovaj status ste dobili jer ste skenirali 100+ računa. Ovo je najviši status."
+        }
+      }
     },
     "security": {
       "title": "Bezbednost",
