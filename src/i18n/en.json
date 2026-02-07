@@ -215,8 +215,10 @@
       "category": "Category",
       "paidBy": "Paid By",
       "creator": "Creator",
-      "status": "Status"
+      "status": "Status",
+      "group": "Group"
     },
+    "archivedGroupLocked": "This receipt is in an archived group. Unarchive the group to edit or delete.",
     "status": {
       "completed": "Completed",
       "manual": "Manual",
@@ -487,6 +489,8 @@
       "totalReceipts": "Total Receipts",
       "totalAmount": "Total Amount",
       "perMember": "Per member:",
+      "receipts": "Expenses",
+      "noReceipts": "No expenses in this group yet",
       "members": "Members ({{count}})",
       "pendingInvites": "Pending Invites ({{count}})",
       "inviteMember": "Invite Member",

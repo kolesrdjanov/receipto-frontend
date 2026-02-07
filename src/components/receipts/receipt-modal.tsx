@@ -100,7 +100,8 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
 
   const { data: categories = [] } = useCategories()
   const { data: currencies = [] } = useCurrencies()
-  const { data: groups = [] } = useGroups()
+  const includeArchivedGroups = mode === 'edit'
+  const { data: groups = [] } = useGroups(includeArchivedGroups)
   const user = useAuthStore((state) => state.user)
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
@@ -467,9 +468,18 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                     <SelectContent>
                       <SelectItem value="__none__">{t('receipts.modal.noGroup')}</SelectItem>
                       {groups.map((group) => (
-                        <SelectItem key={group.id} value={group.id}>
+                        <SelectItem
+                          key={group.id}
+                          value={group.id}
+                          disabled={!!group.isArchived}
+                        >
                           {group.icon && <span className="mr-2">{group.icon}</span>}
                           {group.name}
+                          {group.isArchived && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({t('groups.archive.archivedBadge')})
+                            </span>
+                          )}
                         </SelectItem>
                       ))}
                     </SelectContent>

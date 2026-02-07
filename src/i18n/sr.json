@@ -215,8 +215,10 @@
       "category": "Kategorija",
       "paidBy": "Platio",
       "creator": "Kreator",
-      "status": "Status"
+      "status": "Status",
+      "group": "Grupa"
     },
+    "archivedGroupLocked": "Ovaj račun je u arhiviranoj grupi. Dearhivirajte grupu da biste mogli da menjate ili brišete.",
     "status": {
       "completed": "Završeno",
       "manual": "Ručno",
@@ -475,6 +477,8 @@
       "totalReceipts": "Ukupno računa",
       "totalAmount": "Ukupan iznos",
       "perMember": "Po članu:",
+      "receipts": "Troškovi",
+      "noReceipts": "Nema troškova u ovoj grupi",
       "members": "Članovi ({{count}})",
       "pendingInvites": "Pozivnice na čekanju ({{count}})",
       "inviteMember": "Pozovi člana",

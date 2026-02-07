@@ -30,7 +30,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users } from 'lucide-react'
 import { toast } from 'sonner'
 
 // Helper to parse filters from URL search params
@@ -410,6 +410,8 @@ export default function Receipts() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditReceipt(receipt)}
+                        disabled={!!receipt.group?.isArchived}
+                        title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -417,7 +419,8 @@ export default function Receipts() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteReceipt(receipt)}
-                        disabled={deleteReceipt.isPending}
+                        disabled={deleteReceipt.isPending || !!receipt.group?.isArchived}
+                        title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -455,16 +458,18 @@ export default function Receipts() {
                       )}
                     </div>
 
-                    {/*{receipt.group && (*/}
-                    {/*  <div className="flex items-center justify-between">*/}
-                    {/*    <span className="text-muted-foreground">{t('receipts.table.paidBy')}</span>*/}
-                    {/*    <span className="font-medium">*/}
-                    {/*      {receipt.paidBy*/}
-                    {/*        ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
-                    {/*        : t('receipts.table.creator')}*/}
-                    {/*    </span>*/}
-                    {/*  </div>*/}
-                    {/*)}*/}
+                    {receipt.group && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t('receipts.table.group')}</span>
+                        <span className={`inline-flex items-center gap-1 font-medium ${receipt.group.isArchived ? 'text-muted-foreground' : ''}`}>
+                          <Users className="h-3 w-3" />
+                          {receipt.group.name}
+                          {receipt.group.isArchived && (
+                            <Archive className="h-3 w-3 ml-0.5" />
+                          )}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -509,7 +514,7 @@ export default function Receipts() {
                     </button>
                   </TableHead>
                   <TableHead>{t('receipts.table.category')}</TableHead>
-                  {/*<TableHead>{t('receipts.table.paidBy')}</TableHead>*/}
+                  <TableHead>{t('receipts.table.group')}</TableHead>
                   <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
                   <TableHead style={{ width: '120px' }}></TableHead>
                 </TableRow>
@@ -541,15 +546,19 @@ export default function Receipts() {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    {/*<TableCell>*/}
-                    {/*  {receipt.group ? (*/}
-                    {/*    receipt.paidBy*/}
-                    {/*      ? `${receipt.paidBy.firstName || ''} ${receipt.paidBy.lastName || ''}`.trim() || receipt.paidBy.email*/}
-                    {/*      : t('receipts.table.creator')*/}
-                    {/*  ) : (*/}
-                    {/*    <span className="text-muted-foreground">-</span>*/}
-                    {/*  )}*/}
-                    {/*</TableCell>*/}
+                    <TableCell>
+                      {receipt.group ? (
+                        <span className={`inline-flex items-center gap-1 text-sm ${receipt.group.isArchived ? 'text-muted-foreground' : ''}`}>
+                          <Users className="h-3 w-3" />
+                          {receipt.group.name}
+                          {receipt.group.isArchived && (
+                            <Archive className="h-3 w-3 ml-0.5" />
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                     <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -568,6 +577,8 @@ export default function Receipts() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditReceipt(receipt)}
+                          disabled={!!receipt.group?.isArchived}
+                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
                           data-testid={`receipt-edit-${receipt.id}`}
                         >
                           <Pencil className="h-4 w-4" />
@@ -576,7 +587,8 @@ export default function Receipts() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteReceipt(receipt)}
-                          disabled={deleteReceipt.isPending}
+                          disabled={deleteReceipt.isPending || !!receipt.group?.isArchived}
+                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
                           data-testid={`receipt-delete-${receipt.id}`}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />

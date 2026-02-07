@@ -31,6 +31,7 @@ import { useCreateReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
 import { useAuthStore } from '@/store/auth'
 import { GroupModal } from '@/components/groups/group-modal'
 import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
+import { GroupReceiptsTable } from '@/components/groups/group-receipts-table'
 import { ActivityFeed } from '@/components/groups/activity-feed'
 import { toast } from 'sonner'
 import {
@@ -505,6 +506,15 @@ export default function GroupDetail() {
               )}
             </CardContent>
           </Card>
+
+          {/* Receipts Table */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <ReceiptIcon className="h-5 w-5" />
+              {t('groups.detail.receipts')}
+            </h3>
+            <GroupReceiptsTable groupId={group.id} isArchived={!!group.isArchived} />
+          </div>
 
           {/* Balances Section */}
           <div>

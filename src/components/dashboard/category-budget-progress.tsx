@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -32,6 +32,20 @@ export function CategoryBudgetProgress({
 
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
   const budgetCurrency = selectedCategory?.budgetCurrency || displayCurrency
+
+  useEffect(() => {
+    if (categoriesWithBudget.length === 0) {
+      if (selectedCategoryId !== '') {
+        setSelectedCategoryId('')
+      }
+      return
+    }
+
+    const hasValidSelection = categoriesWithBudget.some((category) => category.id === selectedCategoryId)
+    if (!hasValidSelection) {
+      setSelectedCategoryId(categoriesWithBudget[0].id)
+    }
+  }, [categoriesWithBudget, selectedCategoryId])
 
   // Convert spending TO the budget's currency
   const getConvertedSpending = (): number => {

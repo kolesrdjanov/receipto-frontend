@@ -61,6 +61,7 @@ export interface Receipt {
     name: string
     color?: string
     icon?: string
+    isArchived?: boolean
   }
   paidBy?: {
     id: string
@@ -122,6 +123,7 @@ export interface UpdateReceiptInput {
 }
 
 export interface ReceiptsFilters {
+  groupId?: string
   categoryId?: string
   minAmount?: number
   maxAmount?: number
@@ -148,6 +150,7 @@ export interface PaginatedReceipts {
 // API functions
 const fetchReceipts = async (filters?: ReceiptsFilters): Promise<PaginatedReceipts> => {
   const params = new URLSearchParams()
+  if (filters?.groupId) params.append('groupId', filters.groupId)
   if (filters?.categoryId) params.append('categoryId', filters.categoryId)
   if (filters?.minAmount !== undefined) params.append('minAmount', filters.minAmount.toString())
   if (filters?.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())
