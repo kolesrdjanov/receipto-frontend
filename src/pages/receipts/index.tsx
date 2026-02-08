@@ -23,6 +23,7 @@ import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
+  useReceipt,
   useCreateReceipt,
   useDeleteReceipt,
   type Receipt,
@@ -70,7 +71,7 @@ export default function Receipts() {
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [viewerReceipt, setViewerReceipt] = useState<Receipt | null>(null)
+  const [viewerReceiptId, setViewerReceiptId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'receiptDate' | 'createdAt'>('receiptDate')
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -81,6 +82,7 @@ export default function Receipts() {
   const meta = response?.meta
   const createReceipt = useCreateReceipt()
   const deleteReceipt = useDeleteReceipt()
+  const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
 
   // Sync filters with URL params when URL changes (skip first mount - already initialized)
   useEffect(() => {
@@ -223,7 +225,7 @@ export default function Receipts() {
   }
 
   const handleViewReceipt = (receipt: Receipt) => {
-    setViewerReceipt(receipt)
+    setViewerReceiptId(receipt.id)
     setViewerOpen(true)
   }
 
@@ -396,7 +398,7 @@ export default function Receipts() {
                       </p>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      {receipt.scrapedData?.journal && (
+                      {receipt.hasJournal && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -562,7 +564,7 @@ export default function Receipts() {
                     <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        {receipt.scrapedData?.journal && (
+                        {receipt.hasJournal && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -661,8 +663,8 @@ export default function Receipts() {
           <ReceiptViewerModal
             open={viewerOpen}
             onOpenChange={setViewerOpen}
-            journalText={viewerReceipt?.scrapedData?.journal ?? null}
-            receiptNumber={viewerReceipt?.receiptNumber}
+            journalText={viewerReceiptFull?.scrapedData?.journal ?? null}
+            receiptNumber={viewerReceiptFull?.receiptNumber}
           />
         )}
       </Suspense>

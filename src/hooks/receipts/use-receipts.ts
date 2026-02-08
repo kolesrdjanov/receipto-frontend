@@ -49,6 +49,7 @@ export interface Receipt {
   receiptDate?: string
   receiptNumber?: string
   scrapedData?: ScrapedData
+  hasJournal?: boolean
   status: 'pending' | 'scraped' | 'failed' | 'manual' | 'completed'
   category?: {
     id: string

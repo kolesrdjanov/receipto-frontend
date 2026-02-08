@@ -14,6 +14,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   useReceipts,
+  useReceipt,
   useDeleteReceipt,
   type Receipt,
 } from '@/hooks/receipts/use-receipts'
@@ -41,12 +42,13 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [viewerReceipt, setViewerReceipt] = useState<Receipt | null>(null)
+  const [viewerReceiptId, setViewerReceiptId] = useState<string | null>(null)
 
   const { data: response, isLoading } = useReceipts({ groupId, page, limit: 5, sortBy, sortOrder })
   const receipts = response?.data ?? []
   const meta = response?.meta
   const deleteReceipt = useDeleteReceipt()
+  const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
 
   const formatAmount = (receipt: Receipt) => {
     const currency: string = receipt.currency || 'RSD'
@@ -112,7 +114,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
   }
 
   const handleViewReceipt = (receipt: Receipt) => {
-    setViewerReceipt(receipt)
+    setViewerReceiptId(receipt.id)
     setViewerOpen(true)
   }
 
@@ -166,7 +168,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
                   </p>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  {receipt.scrapedData?.journal && (
+                  {receipt.hasJournal && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -277,7 +279,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
                 <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    {receipt.scrapedData?.journal && (
+                    {receipt.hasJournal && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -341,8 +343,8 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
           <ReceiptViewerModal
             open={viewerOpen}
             onOpenChange={setViewerOpen}
-            journalText={viewerReceipt?.scrapedData?.journal ?? null}
-            receiptNumber={viewerReceipt?.receiptNumber}
+            journalText={viewerReceiptFull?.scrapedData?.journal ?? null}
+            receiptNumber={viewerReceiptFull?.receiptNumber}
           />
         )}
       </Suspense>
