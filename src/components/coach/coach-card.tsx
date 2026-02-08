@@ -150,41 +150,48 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
     : null
 
   // Re-generate insight messages with converted currency amounts
-  const convertedInsights = insights.map((insight: Insight) => {
-    const details = insight.details
-    if (!details) return insight
+  // and filter out spending insights that contradict the actual converted percentage
+  const convertedInsights = insights
+    .filter((insight: Insight) => {
+      if (insight.type === 'spending_increase' && convertedWeeklyChangePercent <= 0) return false
+      if (insight.type === 'spending_decrease' && convertedWeeklyChangePercent >= 0) return false
+      return true
+    })
+    .map((insight: Insight) => {
+      const details = insight.details
+      if (!details) return insight
 
-    if (insight.type === 'weekly_summary' && details.byCurrency) {
-      const converted = convertBreakdownToTotal(details.byCurrency)
-      return {
-        ...insight,
-        message: t('coach.topCategoryMessage', {
-          amount: formatAmount(converted, targetCurrency),
-          category: details.categoryName,
-        }),
+      if (insight.type === 'weekly_summary' && details.byCurrency) {
+        const converted = convertBreakdownToTotal(details.byCurrency)
+        return {
+          ...insight,
+          message: t('coach.topCategoryMessage', {
+            amount: formatAmount(converted, targetCurrency),
+            category: details.categoryName,
+          }),
+        }
       }
-    }
 
-    if (insight.type === 'spending_increase' && details.currentByCurrency) {
-      return {
-        ...insight,
-        message: t('coach.spendingUpMessage', {
-          percent: Math.abs(convertedWeeklyChangePercent),
-        }),
+      if (insight.type === 'spending_increase' && details.currentByCurrency) {
+        return {
+          ...insight,
+          message: t('coach.spendingUpMessage', {
+            percent: Math.abs(convertedWeeklyChangePercent),
+          }),
+        }
       }
-    }
 
-    if (insight.type === 'spending_decrease' && details.currentByCurrency) {
-      return {
-        ...insight,
-        message: t('coach.spendingDownMessage', {
-          percent: Math.abs(convertedWeeklyChangePercent),
-        }),
+      if (insight.type === 'spending_decrease' && details.currentByCurrency) {
+        return {
+          ...insight,
+          message: t('coach.spendingDownMessage', {
+            percent: Math.abs(convertedWeeklyChangePercent),
+          }),
+        }
       }
-    }
 
-    return insight
-  })
+      return insight
+    })
 
   return (
     <Card className="coach-card overflow-hidden h-full">
