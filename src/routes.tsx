@@ -4,23 +4,36 @@ import type { RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from './components/protected-route'
 import { AdminRoute } from './components/admin-route'
 
+// Eagerly load core sidebar pages — they're small (~5-20KB each gzipped)
+// and lazy-loading them causes a jarring navigation delay (sidebar disappears).
+import Dashboard from './pages/dashboard'
+import Receipts from './pages/receipts'
+import Categories from './pages/categories'
+import Groups from './pages/groups'
+import Warranties from './pages/warranties'
+import Settings from './pages/settings'
+import Items from './pages/items'
+
+// Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
 const SignUp = lazy(() => import('./pages/auth/sign-up'))
 const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
 const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
-const Dashboard = lazy(() => import('./pages/dashboard'))
-const Categories = lazy(() => import('./pages/categories'))
-const Receipts = lazy(() => import('./pages/receipts'))
 const Templates = lazy(() => import('./pages/templates'))
-const Items = lazy(() => import('./pages/items'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
-const Groups = lazy(() => import('./pages/groups'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
-const Warranties = lazy(() => import('./pages/warranties'))
-const Settings = lazy(() => import('./pages/settings'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
 const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
 const AdminRatings = lazy(() => import('./pages/admin/ratings'))
+
+// Prefetch remaining lazy chunks after initial load so they're instant when needed
+export function prefetchLazyRoutes() {
+  requestIdleCallback(() => {
+    import('./pages/items/[id]')
+    import('./pages/groups/[id]')
+    import('./pages/templates')
+  })
+}
 
 export const routes: RouteObject[] = [
   {

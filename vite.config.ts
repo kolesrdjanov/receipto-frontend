@@ -26,5 +26,15 @@ export default defineConfig({
   build: {
     sourcemap: true,
     chunkSizeWarningLimit: 1500, // heic2any is ~1.3MB, recharts ~400kB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-recharts': ['recharts'],
+          'vendor-heic': ['heic2any'],
+        },
+      },
+    },
   },
 })

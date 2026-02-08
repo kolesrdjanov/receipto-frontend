@@ -3,7 +3,7 @@ import { BrowserRouter, useRoutes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { routes } from './routes'
+import { routes, prefetchLazyRoutes } from './routes'
 import { useSettingsStore } from './store/settings'
 
 const queryClient = new QueryClient({
@@ -42,6 +42,8 @@ function ThemeInitializer() {
 }
 
 function App() {
+  useEffect(() => { prefetchLazyRoutes() }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
