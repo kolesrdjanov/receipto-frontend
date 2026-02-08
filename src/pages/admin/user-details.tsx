@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, Loader2, Mail, PieChart as PieChartIcon, Receipt, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -213,6 +213,20 @@ export default function AdminUserDetailsPage() {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('admin.users.table.receipts')}</p>
                     <p className="text-sm font-medium">{userDetails.receiptCount}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.addressLabel')}</p>
+                    {userDetails.street || userDetails.city ? (
+                      <p className="text-sm font-medium">
+                        {[userDetails.street, [userDetails.zipCode, userDetails.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">{t('admin.users.noAddress')}</p>
+                    )}
                   </div>
                 </div>
               </div>

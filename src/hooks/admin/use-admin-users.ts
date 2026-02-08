@@ -117,6 +117,9 @@ export interface UserDetails {
   profileImageUrl: string | null
   createdAt: string
   receiptCount: number
+  street: string | null
+  zipCode: string | null
+  city: string | null
 }
 
 const fetchUserDetails = async (userId: string): Promise<UserDetails> => {

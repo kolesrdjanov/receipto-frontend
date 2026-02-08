@@ -15,6 +15,9 @@ export interface Me {
   receiptMilestoneEmailsEnabled?: boolean
   receiptRank?: ReceiptRank
   receiptCount?: number
+  street?: string | null
+  zipCode?: string | null
+  city?: string | null
 }
 
 export interface UpdateMeData {
@@ -24,6 +27,9 @@ export interface UpdateMeData {
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
   receiptMilestoneEmailsEnabled?: boolean
+  street?: string
+  zipCode?: string
+  city?: string
 }
 
 export interface ChangePasswordData {

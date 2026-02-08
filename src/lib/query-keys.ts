@@ -103,4 +103,13 @@ export const queryKeys = {
 
   // Coach (Financial Insights)
   coach: () => ['coach'] as const,
+
+  // Ratings
+  ratings: {
+    all: ['ratings'] as const,
+    myRating: () => [...queryKeys.ratings.all, 'my-rating'] as const,
+    adminLists: () => [...queryKeys.ratings.all, 'admin-list'] as const,
+    adminList: (filters?: { page?: number; limit?: number }) =>
+      [...queryKeys.ratings.adminLists(), filters] as const,
+  },
 } as const

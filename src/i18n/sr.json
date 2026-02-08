@@ -79,7 +79,8 @@
     "users": "Korisnici",
     "rank": "Rang",
     "version": "Verzija",
-    "supportUs": "Podrži nas"
+    "supportUs": "Podrži nas",
+    "ratings": "Ocene"
   },
   "auth": {
     "signIn": {
@@ -634,6 +635,13 @@
       "uploadError": "Greška pri dodavanju profilne slike",
       "invalidFileType": "Nevažeći tip fajla. Molimo dodajte JPEG, PNG, WebP ili HEIC sliku.",
       "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB.",
+      "address": {
+        "title": "Adresa",
+        "description": "Vaša adresa može biti korišćena kako bi vam Receipto poslao poklone i promotivne materijale poput stikera, šolja i majica.",
+        "street": "Ulica i broj",
+        "zipCode": "Poštanski broj",
+        "city": "Grad"
+      },
       "rank": {
         "title": "Status računa",
         "receiptsTracked": "Broj skeniranih računa: {{count}}",
@@ -791,6 +799,8 @@
       "noName": "Bez imena",
       "emailLabel": "Email",
       "roleLabel": "Uloga",
+      "addressLabel": "Adresa",
+      "noAddress": "Adresa nije uneta",
       "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
       "backToUsers": "Nazad na korisnike",
       "invalidUser": "Neispravan korisnik",
@@ -829,6 +839,27 @@
         "roleUser": "Korisnik",
         "roleAdmin": "Admin"
       }
+    },
+    "ratings": {
+      "title": "Ocene",
+      "subtitle": "Pregledajte i upravljajte ocenama aplikacije od korisnika",
+      "noRatings": "Još nema ocena",
+      "totalRatings": "Ukupno ocena: {{count}}",
+      "table": {
+        "user": "Korisnik",
+        "rating": "Ocena",
+        "description": "Opis",
+        "public": "Javno",
+        "private": "Privatno",
+        "approved": "Odobreno",
+        "pending": "Na čekanju",
+        "date": "Datum",
+        "comment": "Admin komentar",
+        "addComment": "Dodaj komentar",
+        "editComment": "Izmeni komentar",
+        "saveComment": "Sačuvaj",
+        "cancelComment": "Otkaži"
+      }
     }
   },
   "categorization": {
@@ -864,6 +895,21 @@
     "sending": "Šaljem...",
     "success": "Vaša poruka je uspešno poslata. Javićemo vam se uskoro!",
     "error": "Neuspelo slanje poruke. Pokušajte ponovo."
+  },
+  "rating": {
+    "rateApp": "Oceni aplikaciju",
+    "title": "Oceni Receipto",
+    "description": "Pomozi nam da poboljšamo aplikaciju deljenjem svog iskustva",
+    "ratingLabel": "Kako bi ocenio/la Receipto?",
+    "descriptionLabel": "Opis (opciono)",
+    "descriptionPlaceholder": "Reci nam šta ti se sviđa ili šta može da bude bolje...",
+    "allowPublic": "Dozvoli prikaz moje ocene na sajtu",
+    "submit": "Pošalji ocenu",
+    "update": "Ažuriraj ocenu",
+    "submitting": "Šaljem...",
+    "success": "Hvala na povratnoj informaciji!",
+    "updated": "Tvoja ocena je ažurirana!",
+    "error": "Neuspelo slanje ocene. Pokušaj ponovo."
   },
   "coach": {
     "title": "Finansijski savetnik",

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, useIsAdmin } from '@/store/auth'
@@ -8,11 +8,12 @@ import { useMe } from '@/hooks/users/use-me'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
+import { RateAppModal } from '@/components/rating/rate-app-modal'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
@@ -33,6 +34,7 @@ const mainNavItems = [
 
 const adminNavItems = [
   { path: '/admin/users', labelKey: 'nav.users', icon: UserCog },
+  { path: '/admin/ratings', labelKey: 'nav.ratings', icon: Star },
 ]
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -48,6 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
   const createReceipt = useCreateReceipt()
 
   const receiptCount = me?.receiptCount ?? 0
@@ -75,6 +78,36 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, [user])
 
   const closeSidebar = () => setSidebarOpen(false)
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [sidebarOpen])
+
+  // Swipe left to close sidebar on mobile
+  const touchStartX = useRef<number | null>(null)
+  const touchStartY = useRef<number | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current
+    if (deltaX < -50 && Math.abs(deltaY) < Math.abs(deltaX)) {
+      closeSidebar()
+    }
+    touchStartX.current = null
+    touchStartY.current = null
+  }
 
   const handleScanQr = () => {
     setIsScannerOpen(true)
@@ -152,6 +185,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={closeSidebar}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         />
       )}
 
@@ -161,6 +196,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           'fixed left-0 top-0 z-50 h-full w-64 sidebar-glass transition-transform duration-200 ease-in-out md:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
@@ -226,9 +263,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   </div>
                 </div>
                 {adminNavItems.map((item) => {
-                  const isAdminItemActive = item.path === '/admin/users'
-                    ? location.pathname.startsWith('/admin/users')
-                    : location.pathname === item.path
+                  const isAdminItemActive = location.pathname.startsWith(item.path)
 
                   return (
                     <Link key={item.path} to={item.path} onClick={closeSidebar}>
@@ -281,6 +316,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Button
               variant="ghost"
               className="w-full mt-2"
+              onClick={() => setIsRatingModalOpen(true)}
+            >
+              <Star className="h-4 w-4" />
+              {t('rating.rateApp')}
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full mt-2"
               onClick={() => setIsSupportModalOpen(true)}
             >
               <MessageCircle className="h-4 w-4" />
@@ -324,6 +367,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           onSubmit={handleOcrScan}
         />
       </Suspense>
+
+      {/* Rate App Modal */}
+      <RateAppModal
+        open={isRatingModalOpen}
+        onOpenChange={setIsRatingModalOpen}
+      />
 
       {/* Contact Support Modal */}
       <ContactSupportModal

@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -134,19 +134,25 @@ export default function Settings() {
       lastName: effectiveUser?.lastName ?? '',
       profileImageUrl: effectiveUser?.profileImageUrl ?? null,
       userId: effectiveUser?.id ?? null,
+      street: me?.street ?? '',
+      zipCode: me?.zipCode ?? '',
+      city: me?.city ?? '',
     }),
-    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.profileImageUrl, effectiveUser?.id]
+    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.profileImageUrl, effectiveUser?.id, me?.street, me?.zipCode, me?.city]
   )
 
   // Keep a per-user draft without using setState inside an effect (lint rule).
-  const [draft, setDraft] = useState<{ firstName: string; lastName: string }>(() => ({
+  const [draft, setDraft] = useState<{ firstName: string; lastName: string; street: string; zipCode: string; city: string }>(() => ({
     firstName: initial.firstName,
     lastName: initial.lastName,
+    street: initial.street,
+    zipCode: initial.zipCode,
+    city: initial.city,
   }))
 
   const profileKey = initial.userId ?? 'no-user'
 
-  const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName
+  const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName || draft.street !== initial.street || draft.zipCode !== initial.zipCode || draft.city !== initial.city
 
   const handleSaveProfile = async () => {
     if (!effectiveUser) return
@@ -155,6 +161,9 @@ export default function Settings() {
       await updateMe.mutateAsync({
         firstName: draft.firstName.trim(),
         lastName: draft.lastName.trim(),
+        street: draft.street.trim(),
+        zipCode: draft.zipCode.trim(),
+        city: draft.city.trim(),
       })
       toast.success(t('settings.profile.saved'))
     } catch (err) {
@@ -560,6 +569,46 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label htmlFor="email">{t('settings.profile.email')}</Label>
                   <Input id="email" value={effectiveUser.email} disabled />
+                </div>
+
+                {/* Address */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-base font-medium">{t('settings.profile.address.title')}</Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.profile.address.description')}
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="street">{t('settings.profile.address.street')}</Label>
+                    <Input
+                      id="street"
+                      value={draft.street}
+                      onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))}
+                      autoComplete="street-address"
+                    />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="zipCode">{t('settings.profile.address.zipCode')}</Label>
+                      <Input
+                        id="zipCode"
+                        value={draft.zipCode}
+                        onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))}
+                        autoComplete="postal-code"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">{t('settings.profile.address.city')}</Label>
+                      <Input
+                        id="city"
+                        value={draft.city}
+                        onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))}
+                        autoComplete="address-level2"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className={cn('rounded-lg border p-4 space-y-3', rankConfig.cardClassName)}>

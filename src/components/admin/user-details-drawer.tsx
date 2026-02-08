@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Calendar, Mail, ShieldCheck, Receipt } from 'lucide-react'
+import { Loader2, Calendar, Mail, MapPin, ShieldCheck, Receipt } from 'lucide-react'
 import { Drawer, DrawerHeader, DrawerTitle, DrawerContent } from '@/components/ui/drawer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -128,6 +128,20 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                         {t('admin.users.table.receipts')}
                       </p>
                       <p className="text-sm font-medium">{userDetails.receiptCount}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('admin.users.addressLabel')}</p>
+                      {userDetails.street || userDetails.city ? (
+                        <p className="text-sm font-medium">
+                          {[userDetails.street, [userDetails.zipCode, userDetails.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{t('admin.users.noAddress')}</p>
+                      )}
                     </div>
                   </div>
                 </div>

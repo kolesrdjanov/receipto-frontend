@@ -79,7 +79,8 @@
     "users": "Users",
     "rank": "Rank",
     "version": "Version",
-    "supportUs": "Support us"
+    "supportUs": "Support us",
+    "ratings": "Ratings"
   },
   "auth": {
     "signIn": {
@@ -646,6 +647,13 @@
       "uploadError": "Failed to upload profile picture",
       "invalidFileType": "Invalid file type. Please upload JPEG, PNG, WebP, or HEIC image.",
       "fileTooLarge": "File is too large. Maximum size is 5MB.",
+      "address": {
+        "title": "Address",
+        "description": "Your address may be used so that Receipto can send you goodies and promotional materials such as stickers, cups, and t-shirts.",
+        "street": "Street and number",
+        "zipCode": "ZIP code",
+        "city": "City"
+      },
       "rank": {
         "title": "Receipt rank",
         "receiptsTracked": "Receipts tracked: {{count}}",
@@ -804,6 +812,8 @@
       "noName": "No name",
       "emailLabel": "Email",
       "roleLabel": "Role",
+      "addressLabel": "Address",
+      "noAddress": "No address provided",
       "detailsSubtitle": "Detailed user profile, expenses, and spending insights",
       "backToUsers": "Back to users",
       "invalidUser": "Invalid user",
@@ -842,6 +852,27 @@
         "roleUser": "User",
         "roleAdmin": "Admin"
       }
+    },
+    "ratings": {
+      "title": "Ratings",
+      "subtitle": "View and manage app ratings from users",
+      "noRatings": "No ratings yet",
+      "totalRatings": "Total Ratings: {{count}}",
+      "table": {
+        "user": "User",
+        "rating": "Rating",
+        "description": "Description",
+        "public": "Public",
+        "private": "Private",
+        "approved": "Approved",
+        "pending": "Pending",
+        "date": "Date",
+        "comment": "Admin Comment",
+        "addComment": "Add comment",
+        "editComment": "Edit comment",
+        "saveComment": "Save",
+        "cancelComment": "Cancel"
+      }
     }
   },
   "categorization": {
@@ -877,6 +908,21 @@
     "sending": "Sending...",
     "success": "Your message has been sent successfully. We'll get back to you soon!",
     "error": "Failed to send message. Please try again."
+  },
+  "rating": {
+    "rateApp": "Rate App",
+    "title": "Rate Receipto",
+    "description": "Help us improve by sharing your experience",
+    "ratingLabel": "How would you rate Receipto?",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Tell us what you like or what could be better...",
+    "allowPublic": "Allow displaying my rating on the website",
+    "submit": "Submit Rating",
+    "update": "Update Rating",
+    "submitting": "Submitting...",
+    "success": "Thank you for your feedback!",
+    "updated": "Your rating has been updated!",
+    "error": "Failed to submit rating. Please try again."
   },
   "coach": {
     "title": "Financial Coach",
