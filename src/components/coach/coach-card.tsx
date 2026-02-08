@@ -169,7 +169,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
       return {
         ...insight,
         message: t('coach.spendingUpMessage', {
-          percent: Math.abs(details.percentage || 0),
+          percent: Math.abs(convertedWeeklyChangePercent),
         }),
       }
     }
@@ -178,7 +178,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
       return {
         ...insight,
         message: t('coach.spendingDownMessage', {
-          percent: Math.abs(details.percentage || 0),
+          percent: Math.abs(convertedWeeklyChangePercent),
         }),
       }
     }
