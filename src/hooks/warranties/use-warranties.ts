@@ -1,8 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, apiRequest } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
-import { useAuthStore } from '@/store/auth'
-import axios from 'axios'
 
 export interface WarrantyFile {
   url: string
@@ -65,79 +63,6 @@ const fetchExpiringSoon = async (days: number = 30): Promise<Warranty[]> => {
   return api.get<Warranty[]>(`/warranties/expiring-soon?days=${days}`)
 }
 
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || '/api'
-
-async function apiRequestWithFormData<T>(
-  endpoint: string,
-  formData: FormData,
-  method: 'POST' | 'PATCH'
-): Promise<T> {
-  // Use a plain axios call so we can control headers for FormData.
-  // Reuse the same refresh-token behavior as the main api client.
-  const accessToken = useAuthStore.getState().accessToken
-
-  try {
-    const response = await axios.request<T>({
-      url: `${API_BASE_URL}${endpoint}`,
-      method,
-      data: formData,
-      headers: {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      },
-      // Let axios set the multipart boundary automatically.
-    })
-    return response.data
-  } catch (err) {
-    // If unauthorized, rely on the same refresh endpoint used in lib/api.ts.
-    // Keep it local to avoid circular imports.
-    const refreshToken = useAuthStore.getState().refreshToken
-    if (
-      axios.isAxiosError(err) &&
-      err.response?.status === 401 &&
-      refreshToken
-    ) {
-      try {
-        const refreshResponse = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          { refreshToken },
-          { headers: { 'Content-Type': 'application/json' } }
-        )
-        const { accessToken: newAccessToken } = refreshResponse.data
-        if (newAccessToken) {
-          useAuthStore.getState().setAccessToken(newAccessToken)
-        }
-
-        const retryResponse = await axios.request<T>({
-          url: `${API_BASE_URL}${endpoint}`,
-          method,
-          data: formData,
-          headers: {
-            ...(newAccessToken ? { Authorization: `Bearer ${newAccessToken}` } : {}),
-          },
-        })
-
-        return retryResponse.data
-      } catch {
-        // If refresh fails, surface a clear error.
-        throw new Error('Session expired. Please sign in again.')
-      }
-    }
-
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data
-      const maybeMessage =
-        typeof data === 'object' && data !== null && 'message' in data
-          ? (data as { message?: unknown }).message
-          : undefined
-
-      const message = typeof maybeMessage === 'string' ? maybeMessage : err.message
-      throw new Error(message || 'Request failed')
-    }
-
-    throw err
-  }
-}
-
 // Create warranty with optional images (max 3)
 const createWarranty = async (data: CreateWarrantyData, images?: File[]): Promise<Warranty> => {
   const formData = new FormData()
@@ -152,7 +77,7 @@ const createWarranty = async (data: CreateWarrantyData, images?: File[]): Promis
     formData.append('images', img)
   })
 
-  return apiRequestWithFormData<Warranty>('/warranties', formData, 'POST')
+  return apiRequest<Warranty>('/warranties', { method: 'POST', data: formData })
 }
 
 // Update warranty with removeFileIndices instead of removeImage1/removeImage2
@@ -178,7 +103,7 @@ const updateWarranty = async (
     formData.append('images', img)
   })
 
-  return apiRequestWithFormData<Warranty>(`/warranties/${id}`, formData, 'PATCH')
+  return apiRequest<Warranty>(`/warranties/${id}`, { method: 'PATCH', data: formData })
 }
 
 // Delete warranty
@@ -190,7 +115,7 @@ const deleteWarranty = async (id: string): Promise<void> => {
 const uploadWarrantyImages = async (id: string, images: File[]): Promise<Warranty> => {
   const formData = new FormData()
   images.slice(0, MAX_WARRANTY_FILES).forEach((img) => formData.append('images', img))
-  return apiRequestWithFormData<Warranty>(`/warranties/${id}/image`, formData, 'POST')
+  return apiRequest<Warranty>(`/warranties/${id}/image`, { method: 'POST', data: formData })
 }
 
 // Remove image from warranty
@@ -200,21 +125,14 @@ const removeWarrantyImage = async (id: string): Promise<Warranty> => {
 
 // Export warranties to CSV
 const exportWarranties = async (): Promise<Blob> => {
-  const accessToken = useAuthStore.getState().accessToken
-  const response = await axios.get(`${API_BASE_URL}/warranties/export`, {
-    headers: {
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    responseType: 'blob',
-  })
-  return response.data
+  return apiRequest<Blob>('/warranties/export', { method: 'GET', responseType: 'blob' })
 }
 
 // Import warranties from CSV
 const importWarranties = async (file: File): Promise<ImportResult> => {
   const formData = new FormData()
   formData.append('file', file)
-  return apiRequestWithFormData<ImportResult>('/warranties/import', formData, 'POST')
+  return apiRequest<ImportResult>('/warranties/import', { method: 'POST', data: formData })
 }
 
 // Hooks

@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/auth'
 import { useSettingsStore } from '@/store/settings'
 
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || ''
 
 interface ApiRequestOptions extends AxiosRequestConfig {
   requiresAuth?: boolean
@@ -34,6 +34,11 @@ axiosInstance.interceptors.request.use(
 
     // Add Accept-Language header from settings store
     config.headers['Accept-Language'] = useSettingsStore.getState().language || 'en'
+
+    // Let axios auto-set Content-Type with boundary for FormData
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
 
     return config
   },
