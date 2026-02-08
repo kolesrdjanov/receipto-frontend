@@ -22,6 +22,7 @@ window.addEventListener('unhandledrejection', (e) => {
 
 Sentry.init({
     dsn: "https://d728defb2ee0b252d59657b958b6360a@o4510675980713984.ingest.de.sentry.io/4510675983990864",
+    enabled: import.meta.env.PROD,
     sendDefaultPii: true
 });
 
