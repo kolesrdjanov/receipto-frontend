@@ -28,7 +28,8 @@ const AdminRatings = lazy(() => import('./pages/admin/ratings'))
 
 // Prefetch remaining lazy chunks after initial load so they're instant when needed
 export function prefetchLazyRoutes() {
-  requestIdleCallback(() => {
+  const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1))
+  idle(() => {
     import('./pages/items/[id]')
     import('./pages/groups/[id]')
     import('./pages/templates')
