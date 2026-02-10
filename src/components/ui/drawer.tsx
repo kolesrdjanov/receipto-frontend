@@ -52,7 +52,7 @@ interface DrawerHeaderProps {
 
 export function DrawerHeader({ children, onClose }: DrawerHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-6 border-b">
+    <div className="flex items-center justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top))] border-b">
       <div className="flex-1">{children}</div>
       <Button variant="ghost" size="sm" onClick={onClose}>
         <X className="h-4 w-4" />
