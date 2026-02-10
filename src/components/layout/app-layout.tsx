@@ -8,10 +8,11 @@ import { useMe } from '@/hooks/users/use-me'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
+import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
 import { RateAppModal } from '@/components/rating/rate-app-modal'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
@@ -35,6 +36,7 @@ const mainNavItems = [
 const adminNavItems = [
   { path: '/admin/users', labelKey: 'nav.users', icon: UserCog },
   { path: '/admin/ratings', labelKey: 'nav.ratings', icon: Star },
+  { path: '/admin/announcements', labelKey: 'nav.announcements', icon: Megaphone },
 ]
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -51,6 +53,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
+  const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false)
+  const { hasAnnouncements } = useAnnouncementIndicator()
   const createReceipt = useCreateReceipt()
 
   const receiptCount = me?.receiptCount ?? 0
@@ -166,9 +170,21 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
       <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] md:hidden sidebar-glass">
-        <Link to={'/dashboard'}>
-          <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link to={'/dashboard'}>
+            <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
+          </Link>
+          <button
+            onClick={() => setIsAnnouncementsOpen(true)}
+            className="relative p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={t('announcements.title')}
+          >
+            <Megaphone className="h-4 w-4" />
+            {hasAnnouncements && (
+              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            )}
+          </button>
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -202,9 +218,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className="flex h-full flex-col">
           {/* Logo/Brand */}
           <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] md:pt-4">
-            <Link to={'/dashboard'}>
-              <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to={'/dashboard'}>
+                <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
+              </Link>
+              <button
+                onClick={() => setIsAnnouncementsOpen(true)}
+                className="relative p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={t('announcements.title')}
+              >
+                <Megaphone className="h-4 w-4" />
+                {hasAnnouncements && (
+                  <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                )}
+              </button>
+            </div>
             {!sidebarOpen && (
               <Button
                 variant="ghost"
@@ -384,6 +412,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       <OnboardingModal
         open={isOnboardingOpen}
         onOpenChange={setIsOnboardingOpen}
+      />
+
+      {/* Announcements Drawer */}
+      <AnnouncementDrawer
+        open={isAnnouncementsOpen}
+        onOpenChange={setIsAnnouncementsOpen}
       />
     </div>
   )

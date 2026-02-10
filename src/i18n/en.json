@@ -80,7 +80,8 @@
     "rank": "Rank",
     "version": "Version",
     "supportUs": "Support us",
-    "ratings": "Ratings"
+    "ratings": "Ratings",
+    "announcements": "Announcements"
   },
   "auth": {
     "signIn": {
@@ -873,6 +874,66 @@
         "saveComment": "Save",
         "cancelComment": "Cancel"
       }
+    },
+    "announcements": {
+      "title": "Announcements",
+      "subtitle": "Manage system announcements visible to all users",
+      "noAnnouncements": "No announcements yet",
+      "totalAnnouncements": "Total Announcements: {{count}}",
+      "createAnnouncement": "Create Announcement",
+      "editAnnouncement": "Edit Announcement",
+      "deleteAnnouncement": "Delete Announcement",
+      "deleteConfirm": "Are you sure you want to delete this announcement? This action cannot be undone.",
+      "createSuccess": "Announcement created successfully",
+      "updateSuccess": "Announcement updated successfully",
+      "deleteSuccess": "Announcement deleted successfully",
+      "createError": "Failed to create announcement",
+      "updateError": "Failed to update announcement",
+      "table": {
+        "type": "Type",
+        "title": "Title",
+        "message": "Message",
+        "displayMode": "Display",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "link": "Link",
+        "viewLink": "View",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "form": {
+        "title": "Title",
+        "titleEn": "Title (English)",
+        "titleSr": "Title (Serbian)",
+        "titlePlaceholder": "e.g. Scheduled Maintenance",
+        "titlePlaceholderSr": "npr. Planirano održavanje",
+        "titleRequired": "Title is required in both languages",
+        "message": "Message",
+        "messageEn": "Message (English)",
+        "messageSr": "Message (Serbian)",
+        "messagePlaceholder": "Describe the announcement...",
+        "messagePlaceholderSr": "Opišite obaveštenje...",
+        "messageRequired": "Message is required in both languages",
+        "type": "Type",
+        "typeAlert": "Alert",
+        "typeSuccess": "Success",
+        "typeInfo": "Info",
+        "displayMode": "Display Mode",
+        "displayBanner": "Banner",
+        "displayList": "List",
+        "displayBoth": "Both",
+        "linkUrl": "Link URL",
+        "linkUrlPlaceholder": "https://...",
+        "linkText": "Link Text",
+        "linkTextPlaceholder": "Learn more",
+        "isActive": "Active"
+      },
+      "types": {
+        "alert": "Alert",
+        "success": "Success",
+        "info": "Info"
+      }
     }
   },
   "categorization": {
@@ -1004,6 +1065,17 @@
       "createNew": "Create as new product",
       "success": "Products merged successfully",
       "error": "Failed to merge products"
+    }
+  },
+  "announcements": {
+    "title": "Service Status",
+    "dismiss": "Dismiss",
+    "learnMore": "Learn more",
+    "noAnnouncements": "No announcements right now",
+    "types": {
+      "alert": "Alert",
+      "success": "Resolved",
+      "info": "Info"
     }
   }
 }

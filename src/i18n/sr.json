@@ -80,7 +80,8 @@
     "rank": "Rang",
     "version": "Verzija",
     "supportUs": "Podrži nas",
-    "ratings": "Ocene"
+    "ratings": "Ocene",
+    "announcements": "Obaveštenja"
   },
   "auth": {
     "signIn": {
@@ -860,6 +861,66 @@
         "saveComment": "Sačuvaj",
         "cancelComment": "Otkaži"
       }
+    },
+    "announcements": {
+      "title": "Obaveštenja",
+      "subtitle": "Upravljajte sistemskim obaveštenjima vidljivim svim korisnicima",
+      "noAnnouncements": "Još nema obaveštenja",
+      "totalAnnouncements": "Ukupno obaveštenja: {{count}}",
+      "createAnnouncement": "Kreiraj obaveštenje",
+      "editAnnouncement": "Izmeni obaveštenje",
+      "deleteAnnouncement": "Obriši obaveštenje",
+      "deleteConfirm": "Da li ste sigurni da želite da obrišete ovo obaveštenje? Ova radnja se ne može poništiti.",
+      "createSuccess": "Obaveštenje je uspešno kreirano",
+      "updateSuccess": "Obaveštenje je uspešno ažurirano",
+      "deleteSuccess": "Obaveštenje je uspešno obrisano",
+      "createError": "Kreiranje obaveštenja nije uspelo",
+      "updateError": "Ažuriranje obaveštenja nije uspelo",
+      "table": {
+        "type": "Tip",
+        "title": "Naslov",
+        "message": "Poruka",
+        "displayMode": "Prikaz",
+        "status": "Status",
+        "active": "Aktivno",
+        "inactive": "Neaktivno",
+        "link": "Link",
+        "viewLink": "Pogledaj",
+        "date": "Datum",
+        "actions": "Akcije"
+      },
+      "form": {
+        "title": "Naslov",
+        "titleEn": "Naslov (Engleski)",
+        "titleSr": "Naslov (Srpski)",
+        "titlePlaceholder": "npr. Planirano održavanje",
+        "titlePlaceholderSr": "npr. Planirano održavanje",
+        "titleRequired": "Naslov je obavezan na oba jezika",
+        "message": "Poruka",
+        "messageEn": "Poruka (Engleski)",
+        "messageSr": "Poruka (Srpski)",
+        "messagePlaceholder": "Opišite obaveštenje...",
+        "messagePlaceholderSr": "Opišite obaveštenje...",
+        "messageRequired": "Poruka je obavezna na oba jezika",
+        "type": "Tip",
+        "typeAlert": "Upozorenje",
+        "typeSuccess": "Uspeh",
+        "typeInfo": "Info",
+        "displayMode": "Režim prikaza",
+        "displayBanner": "Baner",
+        "displayList": "Lista",
+        "displayBoth": "Oba",
+        "linkUrl": "URL linka",
+        "linkUrlPlaceholder": "https://...",
+        "linkText": "Tekst linka",
+        "linkTextPlaceholder": "Saznaj više",
+        "isActive": "Aktivno"
+      },
+      "types": {
+        "alert": "Upozorenje",
+        "success": "Uspeh",
+        "info": "Info"
+      }
     }
   },
   "categorization": {
@@ -991,6 +1052,17 @@
       "createNew": "Kreiraj kao novi proizvod",
       "success": "Proizvodi uspešno spojeni",
       "error": "Greška pri spajanju proizvoda"
+    }
+  },
+  "announcements": {
+    "title": "Status servisa",
+    "dismiss": "Odbaci",
+    "learnMore": "Saznaj više",
+    "noAnnouncements": "Trenutno nema obaveštenja",
+    "types": {
+      "alert": "Upozorenje",
+      "success": "Rešeno",
+      "info": "Info"
     }
   }
 }

@@ -104,6 +104,15 @@ export const queryKeys = {
   // Coach (Financial Insights)
   coach: () => ['coach'] as const,
 
+  // Announcements
+  announcements: {
+    all: ['announcements'] as const,
+    active: () => [...queryKeys.announcements.all, 'active'] as const,
+    adminLists: () => [...queryKeys.announcements.all, 'admin-list'] as const,
+    adminList: (filters?: { page?: number; limit?: number }) =>
+      [...queryKeys.announcements.adminLists(), filters] as const,
+  },
+
   // Ratings
   ratings: {
     all: ['ratings'] as const,

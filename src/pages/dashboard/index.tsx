@@ -18,6 +18,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { CategoryInsights } from '@/components/dashboard/category-insights'
 import { CoachCard } from '@/components/coach/coach-card'
+import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
 import { useMe } from '@/hooks/users/use-me'
 import {
   useAggregatedStats,
@@ -340,6 +341,7 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div>
+      <AnnouncementBanner />
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className={'flex items-start gap-4'}>
           <div className={'flex gap-0 flex-col'}>
@@ -658,6 +660,7 @@ export default function Dashboard() {
             <CoachCard displayCurrency={displayCurrency} />
             <CategoryInsights />
           </div>
+
 
           <Card className={cn('mb-6 card-interactive', rankVisual.cardClassName)}>
             <CardHeader className="pb-2">

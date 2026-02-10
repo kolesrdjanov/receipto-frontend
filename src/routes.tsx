@@ -25,6 +25,7 @@ const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
 const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
 const AdminRatings = lazy(() => import('./pages/admin/ratings'))
+const AdminAnnouncements = lazy(() => import('./pages/admin/announcements'))
 
 // Prefetch remaining lazy chunks after initial load so they're instant when needed
 export function prefetchLazyRoutes() {
@@ -158,6 +159,14 @@ export const routes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminRatings />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/announcements',
+    element: (
+      <AdminRoute>
+        <AdminAnnouncements />
       </AdminRoute>
     ),
   },
