@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage, useChangePassword, useDeleteMyAccount } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
-import { useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { normalizeRank, getNextRank, getProgressToNextRank, type ReceiptRank } from '@/lib/rank'
 
 const themes: { value: Theme; labelKey: string }[] = [
@@ -151,6 +151,18 @@ export default function Settings() {
   }))
 
   const profileKey = initial.userId ?? 'no-user'
+
+  // Sync draft with async me data (address fields load after mount)
+  useEffect(() => {
+    if (me) {
+      setDraft((prev) => ({
+        ...prev,
+        street: me.street ?? '',
+        zipCode: me.zipCode ?? '',
+        city: me.city ?? '',
+      }))
+    }
+  }, [me?.street, me?.zipCode, me?.city])
 
   const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName || draft.street !== initial.street || draft.zipCode !== initial.zipCode || draft.city !== initial.city
 
