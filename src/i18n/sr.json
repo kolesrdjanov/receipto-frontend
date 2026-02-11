@@ -644,7 +644,7 @@
         "city": "Grad"
       },
       "rank": {
-        "title": "Status računa",
+        "title": "Rang računa",
         "receiptsTracked": "Broj skeniranih računa: {{count}}",
         "progress": "Napredak do sledećeg ranga",
         "nextTarget": "Još {{count}} računa do ranga {{rank}}",
@@ -660,7 +660,7 @@
           "noStatus": "Odličan početak. Skenirajte još {{remaining}} računa da uđete u rangirani nivo.",
           "statusC": "Ovaj rang ste dobili jer ste skenirali najmanje 50 računa. Kontinuitet se isplati.",
           "statusB": "Ovaj rang ste dobili jer ste skenirali najmanje 75 računa. Vaša disciplina praćenja je vrhunska.",
-          "statusA": "Ovaj status ste dobili jer ste skenirali 100+ računa. Ovo je najviši status."
+          "statusA": "Ovaj rang ste dobili jer ste skenirali 100+ računa. Ovo je najviši rang."
         }
       }
     },
