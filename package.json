@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-icons": "node scripts/generate-icons.js",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
