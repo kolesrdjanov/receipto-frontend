@@ -1,0 +1,2 @@
+echo "🔨 Running frontend build check..."
+npm run build
