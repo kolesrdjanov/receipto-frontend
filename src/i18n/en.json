@@ -84,6 +84,10 @@
     "announcements": "Announcements"
   },
   "auth": {
+    "brandTagline": "Your smart receipt companion",
+    "brandFeature1": "Scan & track receipts instantly",
+    "brandFeature2": "Budget insights & spending analysis",
+    "brandFeature3": "Warranty tracking & reminders",
     "signIn": {
       "title": "Welcome back",
       "subtitle": "Sign in to your account to continue",

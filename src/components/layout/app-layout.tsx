@@ -1,24 +1,18 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, useIsAdmin } from '@/store/auth'
 import { useLogout } from '@/hooks/auth/use-logout'
-import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { useMe } from '@/hooks/users/use-me'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, QrCode, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone } from 'lucide-react'
-import { toast } from 'sonner'
-import type { PfrData } from '@/components/receipts/pfr-entry-modal'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone } from 'lucide-react'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
 import { RateAppModal } from '@/components/rating/rate-app-modal'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
-
-const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
-const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -42,20 +36,16 @@ const adminNavItems = [
 export function AppLayout({ children }: AppLayoutProps) {
   const { t } = useTranslation()
   const location = useLocation()
-  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { data: me } = useMe(!!user)
   const logout = useLogout()
   const isAdmin = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isScannerOpen, setIsScannerOpen] = useState(false)
-  const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false)
   const { hasAnnouncements } = useAnnouncementIndicator()
-  const createReceipt = useCreateReceipt()
 
   const receiptCount = me?.receiptCount ?? 0
   const receiptRank = normalizeRank(me?.receiptRank as ReceiptRank | undefined, receiptCount)
@@ -111,59 +101,6 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
     touchStartX.current = null
     touchStartY.current = null
-  }
-
-  const handleScanQr = () => {
-    setIsScannerOpen(true)
-  }
-
-  const handleQrScan = async (url: string) => {
-    try {
-      await createReceipt.mutateAsync({ qrCodeUrl: url })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-        action: {
-          label: t('nav.receipts'),
-          onClick: () => navigate('/receipts'),
-        },
-      })
-      setIsScannerOpen(false)
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
-  }
-
-  const handleOcrScan = async (pfrData: PfrData) => {
-    // Call API with PFR data to fetch full receipt from fiscal system
-    try {
-      await createReceipt.mutateAsync({
-        pfrData: {
-          InvoiceNumberSe: pfrData.InvoiceNumberSe,
-          InvoiceCounter: pfrData.InvoiceCounter,
-          InvoiceCounterExtension: pfrData.InvoiceCounterExtension,
-          TotalAmount: pfrData.TotalAmount,
-          SdcDateTime: pfrData.SdcDateTime,
-        },
-      })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-        action: {
-          label: t('nav.receipts'),
-          onClick: () => navigate('/receipts'),
-        },
-      })
-      setIsPfrEntryOpen(false)
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
   }
 
   return (
@@ -233,18 +170,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
               </button>
             </div>
-            {!sidebarOpen && (
-              <Button
-                variant="glossy"
-                size="icon"
-                onClick={handleScanQr}
-                aria-label="Scan QR Code"
-                className="[&_svg]:!size-5 h-9 w-9 rounded-xl"
-              >
-                <QrCode />
-              </Button>
-            )}
-
             <Button
               variant="ghost"
               size="icon"
@@ -377,24 +302,6 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="pt-[calc(3.5rem+env(safe-area-inset-top))] md:pl-64 md:pt-0 page-bg-gradient min-h-screen">
         <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
-
-      {/* QR Scanner */}
-      <Suspense fallback={null}>
-        <QrScanner
-          open={isScannerOpen}
-          onOpenChange={setIsScannerOpen}
-          onScan={handleQrScan}
-        />
-      </Suspense>
-
-      {/* PFR Entry Modal */}
-      <Suspense fallback={null}>
-        <PfrEntryModal
-          open={isPfrEntryOpen}
-          onOpenChange={setIsPfrEntryOpen}
-          onSubmit={handleOcrScan}
-        />
-      </Suspense>
 
       {/* Rate App Modal */}
       <RateAppModal

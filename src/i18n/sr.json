@@ -84,6 +84,10 @@
     "announcements": "Obaveštenja"
   },
   "auth": {
+    "brandTagline": "Vaš pametni pratilac za račune",
+    "brandFeature1": "Skenirajte i pratite račune odmah",
+    "brandFeature2": "Uvid u budžet i analiza potrošnje",
+    "brandFeature3": "Praćenje garancija i podsetnici",
     "signIn": {
       "title": "Dobrodošli nazad",
       "subtitle": "Prijavite se na svoj nalog da nastavite",

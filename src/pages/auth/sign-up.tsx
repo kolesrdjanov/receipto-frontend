@@ -14,7 +14,7 @@ export default function SignUp() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl" data-testid="signup-card">
+      <Card className="w-full max-w-md border-0 shadow-none" data-testid="signup-card">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold" data-testid="signup-title">{t('auth.signUp.title')}</CardTitle>
           <CardDescription data-testid="signup-subtitle">

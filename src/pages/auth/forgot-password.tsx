@@ -13,7 +13,7 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
+      <Card className="w-full max-w-md border-0 shadow-none">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">{t('auth.forgotPassword.title')}</CardTitle>
           <CardDescription>

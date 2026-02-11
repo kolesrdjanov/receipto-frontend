@@ -1,4 +1,4 @@
-import {useState, useMemo, useEffect, useCallback} from 'react'
+import {useState, useMemo, useEffect, useCallback, lazy, Suspense} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -16,7 +16,10 @@ import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-p
 import { CategoryInsights } from '@/components/dashboard/category-insights'
 import { CoachCard } from '@/components/coach/coach-card'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
+import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { useMe } from '@/hooks/users/use-me'
+import { toast } from 'sonner'
+import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import {
   useAggregatedStats,
   useAggregatedCategoryStats,
@@ -33,6 +36,7 @@ import { PageTransition, StaggerContainer, StaggerItem, AnimatedNumber } from '@
 import {
   Loader2,
   Receipt,
+  QrCode,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -61,6 +65,9 @@ import {
 } from 'recharts'
 import { format, getDaysInMonth } from 'date-fns'
 import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
+
+const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
+const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
@@ -105,6 +112,9 @@ export default function Dashboard() {
   const [displayCurrency, setDisplayCurrency] = useState<string>(preferredCurrency || 'RSD')
   const navigate = useNavigate()
   const primaryColor = usePrimaryColor()
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
+  const createReceipt = useCreateReceipt()
 
   const { data: currencies = [] } = useCurrencies()
   const { data: me } = useMe(true)
@@ -290,6 +300,31 @@ export default function Dashboard() {
     }).format(amount)
   }, [displayCurrency])
 
+  const handleQrScan = async (url: string) => {
+    try {
+      await createReceipt.mutateAsync({ qrCodeUrl: url })
+      toast.success(t('receipts.scanSuccess'))
+      navigate('/receipts')
+    } catch {
+      toast.error(t('receipts.scanError'))
+    }
+  }
+
+  const handleOcrScan = (data: PfrData) => {
+    createReceipt.mutate(
+      { pfrData: data },
+      {
+        onSuccess: () => {
+          toast.success(t('receipts.scanSuccess'))
+          navigate('/receipts')
+        },
+        onError: () => {
+          toast.error(t('receipts.scanError'))
+        },
+      }
+    )
+  }
+
   return (
     <AppLayout>
       <PageTransition>
@@ -302,7 +337,16 @@ export default function Dashboard() {
             {t('dashboard.subtitle')}
           </p>
         </div>
-        <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="glossy"
+            size="icon"
+            className="md:hidden rounded-full h-10 w-10"
+            onClick={() => setIsScannerOpen(true)}
+          >
+            <QrCode className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
           <Coins className="h-4 w-4 text-muted-foreground ml-2" />
           <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
             <SelectTrigger className="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
@@ -320,6 +364,7 @@ export default function Dashboard() {
               ))}
             </SelectContent>
           </Select>
+        </div>
         </div>
       </div>
 
@@ -669,6 +714,24 @@ export default function Dashboard() {
       )}
       </div>
       </PageTransition>
+
+      {/* QR Scanner (mobile) */}
+      <Suspense fallback={null}>
+        <QrScanner
+          open={isScannerOpen}
+          onOpenChange={setIsScannerOpen}
+          onScan={handleQrScan}
+        />
+      </Suspense>
+
+      {/* PFR Entry Modal (mobile) */}
+      <Suspense fallback={null}>
+        <PfrEntryModal
+          open={isPfrEntryOpen}
+          onOpenChange={setIsPfrEntryOpen}
+          onSubmit={handleOcrScan}
+        />
+      </Suspense>
     </AppLayout>
   )
 }
