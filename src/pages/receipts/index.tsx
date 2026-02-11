@@ -376,7 +376,6 @@ export default function Receipts() {
           (sum, { currency, total }) => sum + convert(total, currency),
           0,
         )
-        const hasMultipleCurrencies = totalAmounts.length > 1
         const allSameCurrency = totalAmounts.length === 1 && totalAmounts[0].currency === preferredCurrency
 
         return (
