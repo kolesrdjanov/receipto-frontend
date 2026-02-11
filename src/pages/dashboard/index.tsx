@@ -375,8 +375,8 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <StaggerContainer className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
-            <StaggerItem className="col-span-2">
+          <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+            <StaggerItem className="sm:col-span-2">
               <Card className="stat-card-gradient stat-card-hero">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                   <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
@@ -385,7 +385,7 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <p className="text-4xl lg:text-5xl font-bold font-display">
+                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display">
                     <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
                   </p>
                 </CardContent>
@@ -401,7 +401,7 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <p className="text-3xl font-bold font-display">
+                  <p className="text-2xl sm:text-3xl font-bold font-display">
                     <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
                   </p>
                 </CardContent>
@@ -418,7 +418,7 @@ export default function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="relative z-10">
-                    <p className="text-3xl font-bold font-display">
+                    <p className="text-2xl sm:text-3xl font-bold font-display">
                       <AnimatedNumber value={totalReceipts} />
                     </p>
                   </CardContent>
