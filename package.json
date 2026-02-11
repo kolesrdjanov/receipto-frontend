@@ -1,7 +1,7 @@
 {
   "name": "receipto-frontend",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.34.0",
+    "frimousse": "^0.3.0",
     "heic2any": "^0.0.4",
     "i18next": "^25.7.3",
     "lucide-react": "^0.562.0",

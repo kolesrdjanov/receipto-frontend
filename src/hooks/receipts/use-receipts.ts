@@ -143,9 +143,15 @@ export interface PaginationMeta {
   totalPages: number
 }
 
+export interface CurrencyTotal {
+  currency: string
+  total: number
+}
+
 export interface PaginatedReceipts {
   data: Receipt[]
   meta: PaginationMeta
+  totalAmounts: CurrencyTotal[]
 }
 
 // API functions

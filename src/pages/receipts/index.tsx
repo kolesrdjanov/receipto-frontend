@@ -32,8 +32,9 @@ import {
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info } from 'lucide-react'
 import { toast } from 'sonner'
+import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 
 // Helper to parse filters from URL search params
 function getFiltersFromParams(params: URLSearchParams): ReceiptsFilters {
@@ -81,6 +82,9 @@ export default function Receipts() {
   const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10, sortBy, sortOrder })
   const receipts = response?.data ?? []
   const meta = response?.meta
+  const totalAmounts = response?.totalAmounts ?? []
+  const filtersActive = hasActiveFilters(debouncedFilters)
+  const { convert, preferredCurrency } = useCurrencyConverter()
   const createReceipt = useCreateReceipt()
   const deleteReceipt = useDeleteReceipt()
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
@@ -366,6 +370,32 @@ export default function Receipts() {
       {showFilters && (
         <ReceiptsFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
       )}
+
+      {totalAmounts.length > 0 && !isLoading && receipts.length > 0 && (() => {
+        const convertedTotal = totalAmounts.reduce(
+          (sum, { currency, total }) => sum + convert(total, currency),
+          0,
+        )
+        const hasMultipleCurrencies = totalAmounts.length > 1
+        const allSameCurrency = totalAmounts.length === 1 && totalAmounts[0].currency === preferredCurrency
+
+        return (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 px-1 text-sm">
+            <span className="font-medium text-muted-foreground">
+              {filtersActive ? t('receipts.filteredTotal') : t('receipts.total')}:
+            </span>
+            <span className="font-semibold text-foreground">
+              {preferredCurrency} {convertedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            {!allSameCurrency && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title={t('receipts.convertedDisclaimer')}>
+                <Info className="h-3 w-3" />
+                {t('receipts.convertedNote')}
+              </span>
+            )}
+          </div>
+        )
+      })()}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12" data-testid="receipts-loading">

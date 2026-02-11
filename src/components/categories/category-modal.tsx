@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from '@/components/ui/emoji-picker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -59,6 +61,8 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
   const deleteCategory = useDeleteCategory()
   
   const colorValue = watch('color')
+  const iconValue = watch('icon')
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
 
   useEffect(() => {
     if (open && category && mode === 'edit') {
@@ -196,16 +200,50 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="icon">{t('categories.modal.icon')}</Label>
-            <Input
-              id="icon"
-              {...register('icon')}
-              placeholder={t('categories.modal.iconPlaceholder')}
-              data-testid="category-icon-input"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t('categories.modal.iconHelp')}
-            </p>
+            <Label>{t('categories.modal.icon')}</Label>
+            <div className="flex items-center gap-2">
+              <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-10 w-10 text-lg p-0"
+                    data-testid="category-icon-input"
+                  >
+                    {iconValue || '😀'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-fit p-0" align="start">
+                  <EmojiPicker
+                    className="h-[340px]"
+                    onEmojiSelect={(emoji) => {
+                      setValue('icon', emoji.emoji)
+                      setEmojiPickerOpen(false)
+                    }}
+                  >
+                    <EmojiPickerSearch placeholder={t('categories.modal.iconSearchPlaceholder')} />
+                    <EmojiPickerContent />
+                    <EmojiPickerFooter />
+                  </EmojiPicker>
+                </PopoverContent>
+              </Popover>
+              {iconValue && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground text-xs"
+                  onClick={() => setValue('icon', '')}
+                >
+                  {t('common.clear')}
+                </Button>
+              )}
+              {!iconValue && (
+                <span className="text-sm text-muted-foreground">
+                  {t('categories.modal.iconPlaceholder')}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">

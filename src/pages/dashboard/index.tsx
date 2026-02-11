@@ -346,7 +346,7 @@ export default function Dashboard() {
           >
             <QrCode className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
+          <div className="ml-auto md:ml-0 flex items-center gap-2 p-1 rounded-lg bg-muted/30">
           <Coins className="h-4 w-4 text-muted-foreground ml-2" />
           <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
             <SelectTrigger className="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
@@ -460,7 +460,7 @@ export default function Dashboard() {
                     {t('dashboard.noDataThisMonth')}
                   </div>
                 ) : (
-                  <div className="flex flex-col lg:flex-row items-center gap-4">
+                  <div className="flex flex-col items-center gap-4">
                     <ResponsiveContainer width="100%" height={200}>
                       <PieChart>
                         <Pie
@@ -479,7 +479,7 @@ export default function Dashboard() {
                         <Tooltip content={<CustomTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div className="flex flex-col gap-1 text-sm w-full lg:w-auto">
+                    <div className="flex flex-col gap-1 text-sm w-full">
                       {categoryChartData.slice(0, 5).map((c) => (
                         <div key={c.name} className="flex items-center gap-2">
                           <div
@@ -687,7 +687,7 @@ export default function Dashboard() {
                     <Link
                       key={receipt.id}
                       to="/receipts"
-                      className="flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                      className="truncate flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
                     >
                       <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
                       <span className="text-xl font-bold mt-1">

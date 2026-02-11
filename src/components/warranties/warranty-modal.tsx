@@ -302,7 +302,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0">
+      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0 sm:p-0">
         <div className="flex h-full flex-col">
           <div className="px-4 pt-4 sm:px-6 sm:pt-6">
             <DialogHeader>

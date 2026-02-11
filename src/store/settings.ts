@@ -14,10 +14,12 @@ interface SettingsState {
   theme: Theme
   accentColor: AccentColor
   language: Language
+  sidebarCollapsed: boolean
   setCurrency: (currency: Currency) => void
   setTheme: (theme: Theme) => void
   setAccentColor: (color: AccentColor) => void
   setLanguage: (language: Language) => void
+  setSidebarCollapsed: (collapsed: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -27,6 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
       theme: 'system',
       accentColor: 'zinc',
       language: 'en',
+      sidebarCollapsed: false,
       setCurrency: (currency) => set({ currency }),
       setTheme: (theme) => {
         set({ theme })
@@ -40,6 +43,7 @@ export const useSettingsStore = create<SettingsState>()(
         set({ language })
         i18n.changeLanguage(language)
       },
+      setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
     }),
     {
       name: 'receipto-settings',

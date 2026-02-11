@@ -3,6 +3,7 @@
     "appName": "Receipto",
     "loading": "Učitavanje...",
     "cancel": "Otkaži",
+    "clear": "Obriši",
     "close": "Zatvori",
     "delete": "Obriši",
     "deleting": "Brisanje...",
@@ -81,7 +82,9 @@
     "version": "Verzija",
     "supportUs": "Podrži nas",
     "ratings": "Ocene",
-    "announcements": "Obaveštenja"
+    "announcements": "Obaveštenja",
+    "collapseSidebar": "Skupi meni",
+    "expandSidebar": "Proširi meni"
   },
   "auth": {
     "brandTagline": "Vaš pametni pratilac za račune",
@@ -211,6 +214,10 @@
     "addFromTemplate": "Iz šablona",
     "addViaPfr": "Preko PFR broja",
     "scanQr": "Skeniraj",
+    "total": "Ukupno",
+    "filteredTotal": "Ukupno za filter",
+    "convertedNote": "Konvertovano u vašu valutu",
+    "convertedDisclaimer": "Iznosi u drugim valutama su konvertovani koristeći približne kurseve. Stvarni iznosi mogu varirati.",
     "noReceipts": "Nema računa",
     "noReceiptsText": "Skenirajte QR kod ili dodajte račun ručno da biste počeli",
     "table": {
@@ -415,8 +422,8 @@
       "color": "Boja",
       "colorPlaceholder": "#3b82f6",
       "icon": "Ikona",
-      "iconPlaceholder": "Koristite emoji za ikonu, npr. 🏠, ✈️, 🛒",
-      "iconHelp": "Unesite emoji ili naziv ikone",
+      "iconPlaceholder": "Izaberite emoji",
+      "iconSearchPlaceholder": "Pretraži emoji...",
       "description": "Opis",
       "descriptionPlaceholder": "Opcioni opis za ovu kategoriju",
       "deleteConfirm": "Da li ste sigurni da želite da obrišete ovu kategoriju?",
@@ -580,6 +587,11 @@
   "settings": {
     "title": "Podešavanja",
     "subtitle": "Upravljajte podešavanjima aplikacije",
+    "tabs": {
+      "application": "Aplikacija",
+      "profile": "Profil",
+      "account": "Nalog"
+    },
     "appearance": {
       "title": "Izgled",
       "description": "Prilagodite izgled aplikacije",

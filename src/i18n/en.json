@@ -3,6 +3,7 @@
     "appName": "Receipto",
     "loading": "Loading...",
     "cancel": "Cancel",
+    "clear": "Clear",
     "close": "Close",
     "delete": "Delete",
     "deleting": "Deleting...",
@@ -81,7 +82,9 @@
     "version": "Version",
     "supportUs": "Support us",
     "ratings": "Ratings",
-    "announcements": "Announcements"
+    "announcements": "Announcements",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "auth": {
     "brandTagline": "Your smart receipt companion",
@@ -211,6 +214,10 @@
     "addFromTemplate": "From Template",
     "addViaPfr": "Via PFR Number",
     "scanQr": "Scan",
+    "total": "Total",
+    "filteredTotal": "Filtered total",
+    "convertedNote": "Converted to your display currency",
+    "convertedDisclaimer": "Amounts in other currencies are converted using approximate exchange rates. Actual totals may vary.",
     "noReceipts": "No receipts yet",
     "noReceiptsText": "Scan a QR code or add a receipt manually to get started",
     "table": {
@@ -415,8 +422,8 @@
       "color": "Color",
       "colorPlaceholder": "#3b82f6",
       "icon": "Icon",
-      "iconPlaceholder": "Use an emoji for best visibility, e.g. 🛒, ✈️, 🍔",
-      "iconHelp": "Enter an emoji or icon name",
+      "iconPlaceholder": "Select an emoji",
+      "iconSearchPlaceholder": "Search emoji...",
       "description": "Description",
       "descriptionPlaceholder": "Optional description for this category",
       "deleteTitle": "Delete Category",
@@ -592,6 +599,11 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your application preferences",
+    "tabs": {
+      "application": "Application",
+      "profile": "Profile",
+      "account": "Account"
+    },
     "appearance": {
       "title": "Appearance",
       "description": "Customize how the application looks",
