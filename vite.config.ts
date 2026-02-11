@@ -33,6 +33,7 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query'],
           'vendor-recharts': ['recharts'],
           'vendor-heic': ['heic2any'],
+          'vendor-motion': ['framer-motion'],
         },
       },
     },

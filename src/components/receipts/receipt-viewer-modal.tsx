@@ -118,7 +118,7 @@ export function ReceiptViewerModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto border rounded-lg bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="flex-1 overflow-auto receipt-paper my-2">
           {journalText ? (
             <pre
               ref={receiptRef}

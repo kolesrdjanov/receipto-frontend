@@ -1,11 +1,8 @@
-import {useState, useMemo, lazy, Suspense, useEffect} from 'react'
+import {useState, useMemo, useEffect, useCallback} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import type { PfrData } from '@/components/receipts/pfr-entry-modal'
-
 import { Button } from '@/components/ui/button'
-import { Tooltip as ButtonTooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
@@ -32,10 +29,10 @@ import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { cn } from '@/lib/utils'
+import { PageTransition, StaggerContainer, StaggerItem, AnimatedNumber } from '@/components/ui/animated'
 import {
   Loader2,
   Receipt,
-  FolderOpen,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -44,7 +41,6 @@ import {
   PieChart as PieChartIcon,
   BarChart3,
   Coins,
-  QrCode,
   Compass,
   Sparkles,
   Crown,
@@ -64,11 +60,7 @@ import {
   Line,
 } from 'recharts'
 import { format, getDaysInMonth } from 'date-fns'
-import {toast} from "sonner";
-import { useCreateReceipt } from '@/hooks/receipts/use-receipts'
 import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
-const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
-const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
@@ -111,9 +103,6 @@ export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [displayCurrency, setDisplayCurrency] = useState<string>(preferredCurrency || 'RSD')
-  const [isScannerOpen, setIsScannerOpen] = useState(false)
-  const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
-  const createReceipt = useCreateReceipt()
   const navigate = useNavigate()
   const primaryColor = usePrimaryColor()
 
@@ -182,7 +171,6 @@ export default function Dashboard() {
   const isLoading = aggStatsLoading || ratesLoading
 
   const totalReceipts = aggStats?.totalReceipts ?? 0
-  const totalCategories = aggStats?.totalCategories ?? 0
   const totalAmount = convertBreakdownToTotal(aggStats?.byCurrency)
   const recentReceipts = aggStats?.recentReceipts ?? []
   const rankReceiptCount = me?.receiptCount ?? totalReceipts
@@ -293,80 +281,26 @@ export default function Dashboard() {
     return null
   }
 
-  const handleScanQr = () => {
-    setIsScannerOpen(true)
-  }
-
-  const handleQrScan = async (url: string) => {
-    await createReceipt.mutateAsync({ qrCodeUrl: url })
-    toast.success(t('receipts.qrScanner.scanSuccess'), {
-      description: t('receipts.qrScanner.scanSuccessDescription'),
-      action: {
-        label: t('nav.receipts'),
-        onClick: () => navigate('/receipts'),
-      },
-    })
-    // Errors are handled by the QR scanner modal
-  }
-
-  const handleOcrScan = async (pfrData: PfrData) => {
-    // Call API with PFR data to fetch full receipt from fiscal system
-    try {
-      await createReceipt.mutateAsync({
-        pfrData: {
-          InvoiceNumberSe: pfrData.InvoiceNumberSe,
-          InvoiceCounter: pfrData.InvoiceCounter,
-          InvoiceCounterExtension: pfrData.InvoiceCounterExtension,
-          TotalAmount: pfrData.TotalAmount,
-          SdcDateTime: pfrData.SdcDateTime,
-        },
-      })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-        action: {
-          label: t('nav.receipts'),
-          onClick: () => navigate('/receipts'),
-        },
-      })
-      setIsPfrEntryOpen(false)
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
-  }
+  const formatAmountRaw = useCallback((amount: number) => {
+    return new Intl.NumberFormat('sr-RS', {
+      style: 'currency',
+      currency: displayCurrency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }, [displayCurrency])
 
   return (
     <AppLayout>
+      <PageTransition>
       <div>
       <AnnouncementBanner />
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className={'flex items-start gap-4'}>
-          <div className={'flex gap-0 flex-col'}>
-            <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text">{t('dashboard.title')}</h2>
-            <p className="text-sm text-muted-foreground md:text-base">
-              {t('dashboard.subtitle')}
-            </p>
-          </div>
-          <ButtonTooltip>
-            <TooltipTrigger asChild>
-              <Button
-                  variant="glossy"
-                  size="icon"
-                  onClick={handleScanQr}
-                  aria-label="Scan QR Code"
-                  className="[&_svg]:!size-5 ml-auto md:ml-0 h-10 w-10 rounded-xl"
-              >
-                <QrCode />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{t('dashboard.scan_now')}</p>
-            </TooltipContent>
-          </ButtonTooltip>
-
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text font-display">{t('dashboard.title')}</h2>
+          <p className="text-sm text-muted-foreground md:text-base">
+            {t('dashboard.subtitle')}
+          </p>
         </div>
         <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/30">
           <Coins className="h-4 w-4 text-muted-foreground ml-2" />
@@ -396,59 +330,57 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            <Card className="stat-card-gradient">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
-                <div className="stat-icon-container">
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <p className="text-3xl font-bold">{formatAmount(totalAmount)}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="stat-card-gradient">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
-                <div className="stat-icon-container">
-                  <PieChartIcon className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <p className="text-3xl font-bold">{formatAmount(totalMonthAmount)}</p>
-              </CardContent>
-            </Card>
-
-            <Link to="/receipts">
-              <Card className="stat-card-gradient cursor-pointer">
+          <StaggerContainer className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6">
+            <StaggerItem className="col-span-2">
+              <Card className="stat-card-gradient stat-card-hero">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
                   <div className="stat-icon-container">
-                    <Receipt className="h-4 w-4" />
+                    <TrendingUp className="h-4 w-4" />
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <p className="text-3xl font-bold">{totalReceipts}</p>
+                  <p className="text-4xl lg:text-5xl font-bold font-display">
+                    <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
+                  </p>
                 </CardContent>
               </Card>
-            </Link>
+            </StaggerItem>
 
-            <Link to="/categories">
-              <Card className="stat-card-gradient cursor-pointer">
+            <StaggerItem>
+              <Card className="stat-card-gradient h-full">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">{t('dashboard.categories')}</CardTitle>
+                  <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
                   <div className="stat-icon-container">
-                    <FolderOpen className="h-4 w-4" />
+                    <PieChartIcon className="h-4 w-4" />
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  <p className="text-3xl font-bold">{totalCategories}</p>
+                  <p className="text-3xl font-bold font-display">
+                    <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
+                  </p>
                 </CardContent>
               </Card>
-            </Link>
-          </div>
+            </StaggerItem>
+
+            <StaggerItem>
+              <Link to="/receipts" className="block h-full">
+                <Card className="stat-card-gradient cursor-pointer h-full">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                    <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
+                    <div className="stat-icon-container">
+                      <Receipt className="h-4 w-4" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    <p className="text-3xl font-bold font-display">
+                      <AnimatedNumber value={totalReceipts} />
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </StaggerItem>
+          </StaggerContainer>
 
           {/* Month Selector */}
           <div className="flex items-center justify-between mb-4">
@@ -733,24 +665,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Suspense fallback={null}>
-            <QrScanner
-                open={isScannerOpen}
-                onOpenChange={setIsScannerOpen}
-                onScan={handleQrScan}
-            />
-          </Suspense>
-
-          <Suspense fallback={null}>
-            <PfrEntryModal
-                open={isPfrEntryOpen}
-                onOpenChange={setIsPfrEntryOpen}
-                onSubmit={handleOcrScan}
-            />
-          </Suspense>
         </>
       )}
       </div>
+      </PageTransition>
     </AppLayout>
   )
 }

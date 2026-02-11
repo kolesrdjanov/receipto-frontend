@@ -11,6 +11,7 @@ body {
 }
 
 @theme inline {
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -196,6 +197,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-display);
   }
 
   /* Table header styling */
@@ -203,6 +205,10 @@ body {
   th button {
     text-transform: uppercase;
   }
+}
+
+.font-display {
+  font-family: var(--font-display);
 }
 
 /* ============================================
@@ -689,4 +695,98 @@ body {
     var(--card) 50%,
     color-mix(in oklch, var(--primary) 4%, var(--card)) 100%
   );
+}
+
+/* ============================================
+   ANIMATED EMPTY STATES
+   ============================================ */
+
+@keyframes empty-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.empty-state .empty-state-icon {
+  animation: empty-float 3s ease-in-out infinite;
+}
+
+/* ============================================
+   RECEIPT PAPER VIEWER
+   ============================================ */
+
+.receipt-paper {
+  position: relative;
+  background: #fefdf8;
+  font-family: 'Courier New', 'Courier', monospace;
+  border: none;
+  box-shadow: 0 2px 16px oklch(0 0 0 / 8%);
+  border-radius: 4px;
+  padding: 1.5rem 1rem;
+}
+
+.receipt-paper::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(135deg, #fefdf8 33.33%, transparent 33.33%),
+              linear-gradient(225deg, #fefdf8 33.33%, transparent 33.33%);
+  background-size: 12px 8px;
+}
+
+.receipt-paper::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(45deg, #fefdf8 33.33%, transparent 33.33%),
+              linear-gradient(315deg, #fefdf8 33.33%, transparent 33.33%);
+  background-size: 12px 8px;
+}
+
+.dark .receipt-paper {
+  background: #1c1c1e;
+}
+
+.dark .receipt-paper::before {
+  background: linear-gradient(135deg, #1c1c1e 33.33%, transparent 33.33%),
+              linear-gradient(225deg, #1c1c1e 33.33%, transparent 33.33%);
+  background-size: 12px 8px;
+}
+
+.dark .receipt-paper::after {
+  background: linear-gradient(45deg, #1c1c1e 33.33%, transparent 33.33%),
+              linear-gradient(315deg, #1c1c1e 33.33%, transparent 33.33%);
+  background-size: 12px 8px;
+}
+
+.receipt-paper .receipt-separator {
+  border-top: 1px dashed oklch(0 0 0 / 20%);
+  margin: 0.75rem 0;
+}
+
+.dark .receipt-paper .receipt-separator {
+  border-top-color: oklch(1 1 1 / 15%);
+}
+
+/* ============================================
+   STAT CARD HERO (Bento Grid)
+   ============================================ */
+
+.stat-card-hero::before {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--primary) 12%, transparent) 0%,
+    color-mix(in oklch, var(--primary) 5%, transparent) 100%
+  ) !important;
+}
+
+.dark .stat-card-hero::before {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--primary) 20%, transparent) 0%,
+    color-mix(in oklch, var(--primary) 8%, transparent) 100%
+  ) !important;
 }

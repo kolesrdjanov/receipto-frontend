@@ -31,6 +31,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
+import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
 import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -291,6 +292,7 @@ export default function Receipts() {
 
   return (
     <AppLayout>
+      <PageTransition>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
           <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2" data-testid="receipts-title">{t('receipts.title')}</h2>
@@ -371,7 +373,10 @@ export default function Receipts() {
         </div>
       ) : receipts.length === 0 ? (
         <div className="empty-state" data-testid="receipts-empty">
-          <Camera className="empty-state-icon" />
+          <div className="relative mb-2">
+            <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
+            <Camera className="empty-state-icon !mb-0 relative" />
+          </div>
           <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-sm">
             {t('receipts.noReceiptsText')}
@@ -384,9 +389,10 @@ export default function Receipts() {
       ) : (
         <>
           {/* Mobile Card View */}
-          <div className="md:hidden space-y-3">
+          <StaggerContainer className="md:hidden space-y-3">
             {receipts.map((receipt) => (
-              <Card key={receipt.id} className="overflow-hidden card-interactive">
+              <StaggerItem key={receipt.id}>
+              <Card className="overflow-hidden card-interactive">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -475,8 +481,9 @@ export default function Receipts() {
                   </div>
                 </CardContent>
               </Card>
+              </StaggerItem>
             ))}
-            
+
             {meta && meta.totalPages > 1 && (
               <div className="pt-2">
                 <Pagination
@@ -488,7 +495,7 @@ export default function Receipts() {
                 />
               </div>
             )}
-          </div>
+          </StaggerContainer>
 
           {/* Desktop Table View */}
           <div className="hidden md:block">
@@ -682,6 +689,7 @@ export default function Receipts() {
         variant="destructive"
         isLoading={deleteReceipt.isPending}
       />
+      </PageTransition>
     </AppLayout>
   )
 }

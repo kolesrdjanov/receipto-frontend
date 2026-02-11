@@ -172,7 +172,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] md:hidden sidebar-glass">
         <div className="flex items-center gap-2">
           <Link to={'/dashboard'}>
-            <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
+            <h1 className="text-2xl font-bold text-primary font-display">{t('common.appName')}</h1>
           </Link>
           <button
             onClick={() => setIsAnnouncementsOpen(true)}
@@ -220,7 +220,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] md:pt-4">
             <div className="flex items-center gap-2">
               <Link to={'/dashboard'}>
-                <h1 className="text-2xl font-bold text-primary">{t('common.appName')}</h1>
+                <h1 className="text-2xl font-bold text-primary font-display">{t('common.appName')}</h1>
               </Link>
               <button
                 onClick={() => setIsAnnouncementsOpen(true)}
@@ -235,11 +235,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             {!sidebarOpen && (
               <Button
-                variant="ghost"
+                variant="glossy"
                 size="icon"
                 onClick={handleScanQr}
                 aria-label="Scan QR Code"
-                className="[&_svg]:!size-7"
+                className="[&_svg]:!size-5 h-9 w-9 rounded-xl"
               >
                 <QrCode />
               </Button>
