@@ -78,6 +78,7 @@ export function useActiveAnnouncements() {
     queryKey: queryKeys.announcements.active(),
     queryFn: fetchActiveAnnouncements,
     staleTime: 60_000,
+    refetchInterval: 5 * 60 * 1000,
   })
 }
 

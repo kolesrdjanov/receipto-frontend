@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useGroupActivities, type GroupActivity } from '@/hooks/groups/use-groups'
-import { Loader2, Activity, UserPlus, UserMinus, Receipt, Settings, CreditCard, Users } from 'lucide-react'
+import { Loader2, Activity, UserPlus, UserMinus, Receipt, Settings, CreditCard, Users, ChevronDown } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, sr } from 'date-fns/locale'
 import i18n from 'i18next'
@@ -29,7 +31,9 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
   const { t } = useTranslation()
   const { data, isLoading } = useGroupActivities(groupId, 20)
 
-  const activities = data?.data || []
+  const [expanded, setExpanded] = useState(false)
+  const allActivities = data?.data || []
+  const activities = expanded ? allActivities : allActivities.slice(0, 5)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -148,6 +152,17 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
                 </div>
               )
             })}
+            {!expanded && allActivities.length > 5 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => setExpanded(true)}
+              >
+                <ChevronDown className="h-4 w-4 mr-1" />
+                {t('groups.activities.loadMore')}
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

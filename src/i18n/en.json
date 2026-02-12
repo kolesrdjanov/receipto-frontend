@@ -524,7 +524,8 @@
       "inviteError": "Failed to send invite",
       "cancelInvite": "Cancel invite",
       "inviteCanceled": "Invite canceled",
-      "cancelInviteError": "Failed to cancel invite"
+      "cancelInviteError": "Failed to cancel invite",
+      "refresh": "Refresh"
     },
     "tabs": {
       "summary": "Summary",

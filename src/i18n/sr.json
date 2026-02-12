@@ -512,7 +512,8 @@
       "inviteError": "Greška pri slanju pozivnice",
       "cancelInvite": "Otkaži pozivnicu",
       "inviteCanceled": "Pozivnica otkazana",
-      "cancelInviteError": "Greška pri otkazivanju pozivnice"
+      "cancelInviteError": "Greška pri otkazivanju pozivnice",
+      "refresh": "Osveži"
     },
     "tabs": {
       "summary": "Pregled",

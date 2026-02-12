@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,8 +28,10 @@ import {
   useUnarchiveGroup,
   type GroupMember,
 } from '@/hooks/groups/use-groups'
+import { useGroupPolling } from '@/hooks/groups/use-group-polling'
 import { useCreateReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
 import { useAuthStore } from '@/store/auth'
+import { queryKeys } from '@/lib/query-keys'
 import { GroupModal } from '@/components/groups/group-modal'
 import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
 import { GroupReceiptsTable } from '@/components/groups/group-receipts-table'
@@ -50,6 +53,7 @@ import {
   ChevronDown,
   Archive,
   ArchiveRestore,
+  RefreshCw,
 } from 'lucide-react'
 
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
@@ -78,8 +82,10 @@ export default function GroupDetail() {
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  const queryClient = useQueryClient()
   const { data: group, isLoading: groupLoading } = useGroup(id || '')
   const { data: stats, isLoading: statsLoading } = useGroupStats(id || '')
+  useGroupPolling(id || '')
   const inviteMember = useInviteMember()
   const removeMember = useRemoveMember()
   const leaveGroup = useLeaveGroup()
@@ -357,6 +363,14 @@ export default function GroupDetail() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(id!) })}
+              title={t('groups.detail.refresh')}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
             {/* Add Receipt Buttons - hidden when archived */}
             {!group.isArchived && (
               <>
