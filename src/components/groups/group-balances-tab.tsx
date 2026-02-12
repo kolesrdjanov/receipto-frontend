@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Avatar } from '@/components/ui/avatar'
 import { useGroupBalances, type MemberBalance } from '@/hooks/groups/use-groups'
-import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight, Handshake } from 'lucide-react'
+import { useAuthStore } from '@/store/auth'
+import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight, Handshake, CheckCircle } from 'lucide-react'
 
 interface ExchangeRates {
   [currency: string]: number
@@ -33,6 +35,7 @@ interface SuggestedSettlement {
 
 export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: GroupBalancesTabProps) {
   const { t } = useTranslation()
+  const { user } = useAuthStore()
   const { data: balances = [], isLoading: balancesLoading } = useGroupBalances(groupId)
 
   const isLoading = balancesLoading
@@ -199,6 +202,12 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
     return user.firstName || user.lastName
   }
 
+  // Calculate current user's balance summary (must be before early returns to respect Rules of Hooks)
+  const myBalance = useMemo(() => {
+    if (!user) return null
+    return convertedBalances.find((b) => b.userId === user.id)
+  }, [convertedBalances, user])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -209,6 +218,36 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
 
   return (
     <div className="space-y-6">
+      {/* Your Balance Summary */}
+      {myBalance && (
+        <Card>
+          <CardContent className="py-4">
+            {Math.abs(myBalance.balance) <= 1.0 ? (
+              <div className="flex items-center gap-3 text-center justify-center">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-600">
+                  {t('groups.balances.allSettled')}
+                </span>
+              </div>
+            ) : myBalance.balance < -1.0 ? (
+              <div className="flex items-center gap-3 text-center justify-center">
+                <TrendingDown className="h-5 w-5 text-red-600" />
+                <span className="font-semibold text-red-600">
+                  {t('groups.balances.youOwe', { amount: formatCurrency(Math.abs(myBalance.balance)) })}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 text-center justify-center">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <span className="font-semibold text-green-600">
+                  {t('groups.balances.youAreOwed', { amount: formatCurrency(myBalance.balance) })}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Member Balances */}
       <Card>
         <CardHeader>
@@ -318,23 +357,39 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {suggestedSettlements.map((settlement, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 flex-wrap p-3 rounded-lg border bg-card"
-                >
-                  <span className="font-medium">
-                    {getSettlementMemberName(settlement.from)}
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">
-                    {getSettlementMemberName(settlement.to)}
-                  </span>
-                  <span className="font-semibold text-primary ml-2">
-                    {formatCurrency(settlement.amount)}
-                  </span>
-                </div>
-              ))}
+              {suggestedSettlements.map((settlement, index) => {
+                const fromUser = convertedBalances.find((b) => b.userId === settlement.from.id)?.user
+                const toUser = convertedBalances.find((b) => b.userId === settlement.to.id)?.user
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 flex-wrap p-3 rounded-lg border bg-card"
+                  >
+                    <Avatar
+                      firstName={settlement.from.firstName}
+                      lastName={settlement.from.lastName}
+                      imageUrl={fromUser?.profileImageUrl}
+                      size="sm"
+                    />
+                    <span className="font-medium">
+                      {getSettlementMemberName(settlement.from)}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <Avatar
+                      firstName={settlement.to.firstName}
+                      lastName={settlement.to.lastName}
+                      imageUrl={toUser?.profileImageUrl}
+                      size="sm"
+                    />
+                    <span className="font-medium">
+                      {getSettlementMemberName(settlement.to)}
+                    </span>
+                    <span className="font-semibold text-primary ml-2">
+                      {formatCurrency(settlement.amount)}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>

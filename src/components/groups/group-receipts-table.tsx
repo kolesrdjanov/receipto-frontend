@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,7 +19,7 @@ import {
   type Receipt,
 } from '@/hooks/receipts/use-receipts'
 import { formatDateTime } from '@/lib/date-utils'
-import { Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
+import { Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Loader2, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
@@ -135,6 +135,26 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
     }
   }
 
+  // Group receipts by currency for totals (must be before early returns to respect Rules of Hooks)
+  const pageTotals = useMemo(() => {
+    const totals: Record<string, number> = {}
+    for (const receipt of receipts) {
+      const currency = receipt.currency || 'RSD'
+      const amount = typeof receipt.totalAmount === 'string' ? parseFloat(receipt.totalAmount) : (receipt.totalAmount || 0)
+      totals[currency] = (totals[currency] || 0) + amount
+    }
+    return totals
+  }, [receipts])
+
+  const formatTotal = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('sr-RS', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -145,9 +165,15 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
 
   if (receipts.length === 0) {
     return (
-      <p className="text-center text-muted-foreground py-8">
-        {t('groups.detail.noReceipts')}
-      </p>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <ReceiptIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
+        <p className="text-lg font-medium text-muted-foreground">
+          {t('groups.detail.noReceipts')}
+        </p>
+        <p className="text-sm text-muted-foreground/70 mt-1 max-w-sm">
+          {t('groups.detail.noReceiptsDescription')}
+        </p>
+      </div>
     )
   }
 
@@ -204,19 +230,6 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
                   <span className="text-muted-foreground">{t('receipts.table.date')}</span>
                   <span className="font-medium">{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">{t('receipts.table.category')}</span>
-                  {receipt.category ? (
-                    <span className="inline-flex items-center gap-1 font-medium">
-                      {receipt.category.icon && <span>{receipt.category.icon}</span>}
-                      <span style={{ color: receipt.category.color || 'inherit' }}>
-                        {receipt.category.name}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -251,8 +264,6 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
                   {getSortIcon('receiptDate')}
                 </button>
               </TableHead>
-              <TableHead>{t('receipts.table.category')}</TableHead>
-              <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
               <TableHead style={{ width: '120px' }}></TableHead>
             </TableRow>
           </TableHeader>
@@ -264,19 +275,6 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
                 </TableCell>
                 <TableCell>{formatAmount(receipt)}</TableCell>
                 <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
-                <TableCell>
-                  {receipt.category ? (
-                    <span className="inline-flex items-center gap-1">
-                      {receipt.category.icon && <span>{receipt.category.icon}</span>}
-                      <span style={{ color: receipt.category.color || 'inherit' }}>
-                        {receipt.category.name}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>{getStatusBadge(receipt.status)}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     {receipt.hasJournal && (
@@ -326,6 +324,19 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
           </div>
         )}
       </div>
+
+      {/* Page Total */}
+      {Object.keys(pageTotals).length > 0 && (
+        <div className="flex items-center justify-end gap-2 pt-3 border-t mt-3 text-sm">
+          <span className="text-muted-foreground font-medium">
+            {t('groups.detail.totalExpenses', {
+              amount: Object.entries(pageTotals)
+                .map(([currency, amount]) => formatTotal(amount, currency))
+                .join(' + '),
+            })}
+          </span>
+        </div>
+      )}
 
       <Suspense fallback={null}>
         {isModalOpen && (

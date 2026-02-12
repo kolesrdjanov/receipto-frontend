@@ -65,10 +65,16 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
     const metadata = activity.metadata
     if (!metadata) return null
 
-    // Show receipt details (store name + amount)
+    // Show receipt details (store name + amount + split info)
     if (activity.type === 'receipt_added' && metadata.amount && metadata.currency) {
       const storeName = metadata.storeName || t('common.unknown')
-      return `${storeName} - ${formatAmount(metadata.amount, metadata.currency)}`
+      let splitText = ''
+      if (metadata.splitType === 'all') {
+        splitText = ` · ${t('groups.activities.betweenAllMembers')}`
+      } else if (metadata.splitType === 'custom' && metadata.participantNames) {
+        splitText = ` · ${t('groups.activities.betweenMembers', { names: metadata.participantNames.join(', ') })}`
+      }
+      return `${storeName} - ${formatAmount(metadata.amount, metadata.currency)}${splitText}`
     }
 
     // Show settlement details (amount + participants)

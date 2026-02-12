@@ -21,6 +21,7 @@ export interface GroupMember {
     firstName: string
     lastName: string
   }
+  expiresAt?: string
   createdAt: string
 }
 
