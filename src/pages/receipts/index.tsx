@@ -15,20 +15,17 @@ import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
-const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
-const PfrEntryModal = lazy(() => import('@/components/receipts/pfr-entry-modal').then(m => ({ default: m.PfrEntryModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
 const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
-import type { PfrData } from '@/components/receipts/pfr-entry-modal'
 import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
 import {
   useReceipts,
   useReceipt,
-  useCreateReceipt,
   useDeleteReceipt,
   type Receipt,
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
+import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
@@ -60,8 +57,6 @@ export default function Receipts() {
   const isFirstMount = useRef(true)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isScannerOpen, setIsScannerOpen] = useState(false)
-  const [isPfrEntryOpen, setIsPfrEntryOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
   const [showFilters, setShowFilters] = useState(() => hasActiveFilters(initialFilters))
@@ -85,7 +80,7 @@ export default function Receipts() {
   const totalAmounts = response?.totalAmounts ?? []
   const filtersActive = hasActiveFilters(debouncedFilters)
   const { convert, preferredCurrency } = useCurrencyConverter()
-  const createReceipt = useCreateReceipt()
+  const { openQrScanner, openPfrEntry, scannerModals, isCreating } = useReceiptScanner()
   const deleteReceipt = useDeleteReceipt()
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
 
@@ -166,46 +161,9 @@ export default function Receipts() {
     setIsModalOpen(true)
   }
 
-  const handleScanQr = () => {
-    setIsScannerOpen(true)
-  }
-
   const handlePfrEntry = () => {
-    setIsPfrEntryOpen(true)
+    openPfrEntry()
     setShowAddDropdown(false)
-  }
-
-  const handleQrScan = async (url: string) => {
-    await createReceipt.mutateAsync({ qrCodeUrl: url })
-    toast.success(t('receipts.qrScanner.scanSuccess'), {
-      description: t('receipts.qrScanner.scanSuccessDescription'),
-    })
-    // Errors are handled by the QR scanner modal now
-  }
-
-  const handleOcrScan = async (pfrData: PfrData) => {
-    // Call API with PFR data to fetch full receipt from fiscal system
-    try {
-      await createReceipt.mutateAsync({
-        pfrData: {
-          InvoiceNumberSe: pfrData.InvoiceNumberSe,
-          InvoiceCounter: pfrData.InvoiceCounter,
-          InvoiceCounterExtension: pfrData.InvoiceCounterExtension,
-          TotalAmount: pfrData.TotalAmount,
-          SdcDateTime: pfrData.SdcDateTime,
-        },
-      })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
-      setIsPfrEntryOpen(false)
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.qrScanner.scanError'), {
-        description: errorMessage,
-      })
-    }
   }
 
   const handleDeleteReceipt = (receipt: Receipt) => {
@@ -355,8 +313,8 @@ export default function Receipts() {
                 </div>
               )}
             </div>
-            <Button variant="glossy" onClick={handleScanQr} disabled={createReceipt.isPending} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
-              {createReceipt.isPending ? (
+            <Button variant="glossy" onClick={openQrScanner} disabled={isCreating} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
+              {isCreating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Camera className="h-4 w-4" />
@@ -410,7 +368,7 @@ export default function Receipts() {
           <p className="text-sm text-muted-foreground mb-4 max-w-sm">
             {t('receipts.noReceiptsText')}
           </p>
-          <Button variant="glossy" onClick={handleScanQr}>
+          <Button variant="glossy" onClick={openQrScanner}>
             <Camera className="h-4 w-4" />
             {t('receipts.scanQr')}
           </Button>
@@ -418,7 +376,7 @@ export default function Receipts() {
       ) : (
         <>
           {/* Mobile Card View */}
-          <StaggerContainer className="md:hidden space-y-3">
+          <StaggerContainer key={receipts.map(r => r.id).join()} className="md:hidden space-y-3">
             {receipts.map((receipt) => (
               <StaggerItem key={receipt.id}>
               <Card className="overflow-hidden card-interactive">
@@ -664,25 +622,7 @@ export default function Receipts() {
         )}
       </Suspense>
 
-      <Suspense fallback={null}>
-        {isScannerOpen && (
-          <QrScanner
-            open={isScannerOpen}
-            onOpenChange={setIsScannerOpen}
-            onScan={handleQrScan}
-          />
-        )}
-      </Suspense>
-
-      <Suspense fallback={null}>
-        {isPfrEntryOpen && (
-          <PfrEntryModal
-            open={isPfrEntryOpen}
-            onOpenChange={setIsPfrEntryOpen}
-            onSubmit={handleOcrScan}
-          />
-        )}
-      </Suspense>
+      {scannerModals}
 
       <Suspense fallback={null}>
         {templateSelectorOpen && (

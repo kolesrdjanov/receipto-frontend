@@ -10,7 +10,7 @@ export default defineConfig({
   base: '/',
   plugins: [react()],
   server: {
-    allowedHosts: ['.loca.lt', '.trycloudflare.com', '.ngrok-free.dev', '.ngrok.io'],
+    allowedHosts: ['.loca.lt', '.trycloudflare.com', '.ngrok-free.dev', '.ngrok.io', '.tunnl.gg'],
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
