@@ -57,37 +57,6 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
     return `${currency} ${amount}`
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'scraped':
-      case 'completed':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            {t('receipts.status.completed')}
-          </span>
-        )
-      case 'manual':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-            {t('receipts.status.manual')}
-          </span>
-        )
-      case 'pending':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-            {t('receipts.status.pending')}
-          </span>
-        )
-      case 'failed':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-            {t('receipts.status.failed')}
-          </span>
-        )
-      default:
-        return null
-    }
-  }
 
   const handleSort = (column: 'receiptDate' | 'createdAt') => {
     if (sortBy === column) {
