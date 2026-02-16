@@ -13,6 +13,13 @@ import {
 } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
@@ -22,6 +29,8 @@ import {
   useReceipts,
   useReceipt,
   useDeleteReceipt,
+  useExportReceipts,
+  useImportReceipts,
   type Receipt,
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
@@ -29,9 +38,15 @@ import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
+
+const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
+"Maxi Supermarket",2450.00,RSD,2024-06-15,12345,Groceries
+"Shell Gas Station",5200.50,RSD,2024-06-14,,Transport
+"Restaurant Dva Jelena",3800.00,RSD,2024-06-13,67890,
+`
 
 // Helper to parse filters from URL search params
 function getFiltersFromParams(params: URLSearchParams): ReceiptsFilters {
@@ -82,6 +97,10 @@ export default function Receipts() {
   const { convert, preferredCurrency } = useCurrencyConverter()
   const { openQrScanner, openPfrEntry, scannerModals, isCreating } = useReceiptScanner()
   const deleteReceipt = useDeleteReceipt()
+  const exportReceipts = useExportReceipts()
+  const importReceipts = useImportReceipts()
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
 
   // Sync filters with URL params when URL changes (skip first mount - already initialized)
@@ -212,6 +231,65 @@ export default function Receipts() {
   }
 
 
+  const handleExport = async () => {
+    try {
+      await exportReceipts.mutateAsync()
+      toast.success(t('receipts.export.success'))
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.export.error'), { description: errorMessage })
+    }
+  }
+
+  const handleDownloadTemplate = () => {
+    const blob = new Blob([CSV_TEMPLATE], { type: 'text/csv;charset=utf-8;' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'receipts-template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
+  const handleSelectImportFile = () => {
+    importInputRef.current?.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      const result = await importReceipts.mutateAsync(file)
+
+      if (result.errors.length === 0) {
+        toast.success(t('receipts.import.success', { count: result.imported }))
+      } else if (result.imported > 0) {
+        toast.warning(t('receipts.import.partialSuccess', {
+          imported: result.imported,
+          total: result.total,
+        }), {
+          description: `${result.errors.length} ${t('receipts.import.errorsOccurred')}`,
+        })
+      } else {
+        toast.error(t('receipts.import.error'), {
+          description: result.errors[0]?.message || 'Unknown error',
+        })
+      }
+
+      setImportDialogOpen(false)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(t('receipts.import.error'), { description: errorMessage })
+    }
+
+    if (importInputRef.current) {
+      importInputRef.current.value = ''
+    }
+  }
+
   const formatAmount = (receipt: Receipt) => {
     const currency: string = receipt.currency || 'RSD'
     const amount = receipt.totalAmount
@@ -275,7 +353,24 @@ export default function Receipts() {
             <Filter className="h-4 w-4" />
             {t('receipts.filtersButton')}
           </Button>
-          <div className="order-1 lg:order-2 flex gap-4 lg:gap-2 w-full lg:w-auto">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={exportReceipts.isPending}
+            className="order-3 lg:order-2 flex-1 sm:flex-none"
+          >
+            {exportReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {t('receipts.export.button')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="order-4 lg:order-3 flex-1 sm:flex-none"
+          >
+            <Upload className="h-4 w-4" />
+            {t('receipts.import.button')}
+          </Button>
+          <div className="order-1 lg:order-4 flex gap-4 lg:gap-2 w-full lg:w-auto">
             <div className="relative flex-1 sm:flex-none" ref={dropdownRef}>
               <Button
                 variant="outline"
@@ -644,6 +739,62 @@ export default function Receipts() {
           />
         )}
       </Suspense>
+
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t('receipts.import.guide.title')}</DialogTitle>
+            <DialogDescription>
+              {t('receipts.import.guide.description')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">{t('receipts.import.guide.columns')}</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnStoreName')}
+                </li>
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnTotalAmount')}
+                </li>
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnCurrency')}
+                </li>
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnReceiptDate')}
+                </li>
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnReceiptNumber')}
+                </li>
+                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {t('receipts.import.guide.columnCategoryName')}
+                </li>
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t('receipts.import.guide.dateFormats')}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <Button variant="outline" onClick={handleDownloadTemplate}>
+                <Download className="h-4 w-4" />
+                {t('receipts.import.guide.downloadTemplate')}
+              </Button>
+              <Button onClick={handleSelectImportFile} disabled={importReceipts.isPending}>
+                {importReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {t('receipts.import.guide.selectFile')}
+              </Button>
+            </div>
+          </div>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={deleteConfirmOpen}

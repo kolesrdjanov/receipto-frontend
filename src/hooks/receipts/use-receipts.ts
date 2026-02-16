@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, apiRequest } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 
 // Types
@@ -190,6 +190,33 @@ const deleteReceipt = async (id: string): Promise<void> => {
   return api.delete<void>(`/receipts/${id}`)
 }
 
+export interface ExportReceipt {
+  id: string
+  storeName?: string
+  totalAmount?: number
+  currency?: string
+  receiptDate?: string
+  receiptNumber?: string
+  status: string
+  category?: { id: string; name: string }
+}
+
+export interface ImportResult {
+  total: number
+  imported: number
+  errors: { row: number; message: string }[]
+}
+
+const fetchExportReceipts = async (): Promise<ExportReceipt[]> => {
+  return api.get<ExportReceipt[]>('/receipts/export')
+}
+
+const importReceipts = async (file: File): Promise<ImportResult> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return apiRequest<ImportResult>('/receipts/import', { method: 'POST', data: formData })
+}
+
 // Hooks
 export function useReceipts(filters?: ReceiptsFilters) {
   return useQuery({
@@ -243,6 +270,65 @@ export function useDeleteReceipt() {
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+    },
+  })
+}
+
+function escapeCsvField(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
+function generateCsv(receipts: ExportReceipt[]): string {
+  const headers = ['storeName', 'totalAmount', 'currency', 'receiptDate', 'receiptNumber', 'categoryName', 'status']
+  const lines = [headers.join(',')]
+
+  for (const r of receipts) {
+    const date = r.receiptDate ? r.receiptDate.split('T')[0] : ''
+    const row = [
+      escapeCsvField(r.storeName || ''),
+      r.totalAmount != null ? String(r.totalAmount) : '',
+      r.currency || '',
+      date,
+      escapeCsvField(r.receiptNumber || ''),
+      escapeCsvField(r.category?.name || ''),
+      r.status || '',
+    ]
+    lines.push(row.join(','))
+  }
+
+  return lines.join('\n')
+}
+
+export function useExportReceipts() {
+  return useMutation({
+    mutationFn: async () => {
+      const receipts = await fetchExportReceipts()
+      const csv = generateCsv(receipts)
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const date = new Date().toISOString().split('T')[0]
+      a.download = `receipts-${date}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    },
+  })
+}
+
+export function useImportReceipts() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: importReceipts,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
     },
   })
 }

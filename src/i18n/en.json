@@ -336,6 +336,32 @@
       "loadError": "Error loading templates: {{message}}",
       "currency": "Currency"
     },
+    "export": {
+      "button": "Export",
+      "success": "Receipts exported successfully",
+      "error": "Failed to export receipts"
+    },
+    "import": {
+      "button": "Import",
+      "success": "Successfully imported {{count}} receipts",
+      "partialSuccess": "Imported {{imported}} of {{total}} receipts",
+      "error": "Failed to import receipts",
+      "errorsOccurred": "errors occurred",
+      "guide": {
+        "title": "CSV Import Guide",
+        "description": "Import receipts from a CSV file. The file must contain specific columns.",
+        "columns": "CSV columns",
+        "columnStoreName": "storeName - Store name (optional)",
+        "columnTotalAmount": "totalAmount - Total amount (required)",
+        "columnCurrency": "currency - Currency code, e.g. RSD, EUR (optional, defaults to RSD)",
+        "columnReceiptDate": "receiptDate - Date in YYYY-MM-DD format (required)",
+        "columnReceiptNumber": "receiptNumber - Receipt number (optional)",
+        "columnCategoryName": "categoryName - Category name, must match existing category (optional)",
+        "dateFormats": "Supported date formats: YYYY-MM-DD, DD/MM/YYYY, DD.MM.YYYY",
+        "downloadTemplate": "Download Template",
+        "selectFile": "Select CSV File"
+      }
+    },
     "viewer": {
       "title": "Receipt Copy",
       "description": "Digital copy of the fiscal receipt. You can print or share it.",

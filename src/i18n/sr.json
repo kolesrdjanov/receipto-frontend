@@ -336,6 +336,32 @@
       "loadError": "Greška pri učitavanju šablona: {{message}}",
       "currency": "Valuta"
     },
+    "export": {
+      "button": "Izvezi",
+      "success": "Računi uspešno izvezeni",
+      "error": "Greška pri izvozu računa"
+    },
+    "import": {
+      "button": "Uvezi",
+      "success": "Uspešno uvezeno {{count}} računa",
+      "partialSuccess": "Uvezeno {{imported}} od {{total}} računa",
+      "error": "Greška pri uvozu računa",
+      "errorsOccurred": "grešaka se desilo",
+      "guide": {
+        "title": "Vodič za CSV uvoz",
+        "description": "Uvezite račune iz CSV fajla. Fajl mora sadržati određene kolone.",
+        "columns": "CSV kolone",
+        "columnStoreName": "storeName - Naziv prodavnice (opciono)",
+        "columnTotalAmount": "totalAmount - Ukupan iznos (obavezno)",
+        "columnCurrency": "currency - Kod valute, npr. RSD, EUR (opciono, podrazumevano RSD)",
+        "columnReceiptDate": "receiptDate - Datum u formatu YYYY-MM-DD (obavezno)",
+        "columnReceiptNumber": "receiptNumber - Broj računa (opciono)",
+        "columnCategoryName": "categoryName - Naziv kategorije, mora odgovarati postojećoj (opciono)",
+        "dateFormats": "Podržani formati datuma: YYYY-MM-DD, DD/MM/YYYY, DD.MM.YYYY",
+        "downloadTemplate": "Preuzmi šablon",
+        "selectFile": "Izaberi CSV fajl"
+      }
+    },
     "viewer": {
       "title": "Kopija računa",
       "description": "Digitalna kopija fiskalnog računa. Možete ga odštampati ili podeliti.",
