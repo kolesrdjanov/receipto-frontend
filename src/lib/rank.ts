@@ -20,7 +20,7 @@ export function deriveRankByCount(receiptCount: number): ReceiptRank {
   return 'none'
 }
 
-export function normalizeRank(rank: ReceiptRank | undefined, receiptCount: number): ReceiptRank {
+export function normalizeRank(_rank: ReceiptRank | undefined, receiptCount: number): ReceiptRank {
   return deriveRankByCount(receiptCount)
 }
 

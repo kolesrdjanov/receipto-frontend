@@ -15,7 +15,7 @@ interface CategoryBudgetProgressProps {
 export function CategoryBudgetProgress({
   aggCategoryStats,
   exchangeRates,
-  displayCurrency,
+  displayCurrency: _displayCurrency,
 }: CategoryBudgetProgressProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()

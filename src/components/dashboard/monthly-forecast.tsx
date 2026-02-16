@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getDaysInMonth } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus, Calculator } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, Calculator } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type CurrencyBreakdown, type DailyStatsByCurrency, type MonthlyStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 
