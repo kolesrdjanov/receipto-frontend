@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
+import { useSettingsStore } from '@/store/settings'
 
 interface CurrencyAmountDetail {
   currency: string
@@ -73,8 +74,9 @@ export interface CoachResponse {
 }
 
 export function useCoach() {
+  const { language } = useSettingsStore()
   return useQuery({
-    queryKey: queryKeys.coach(),
+    queryKey: queryKeys.coach(language),
     queryFn: () => api.get<CoachResponse>('/coach'),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,

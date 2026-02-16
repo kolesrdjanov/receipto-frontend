@@ -102,7 +102,7 @@ export const queryKeys = {
   },
 
   // Coach (Financial Insights)
-  coach: () => ['coach'] as const,
+  coach: (language?: string) => ['coach', language] as const,
 
   // Announcements
   announcements: {
