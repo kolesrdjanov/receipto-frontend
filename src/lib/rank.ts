@@ -21,10 +21,13 @@ export function deriveRankByCount(receiptCount: number): ReceiptRank {
 }
 
 export function normalizeRank(rank: ReceiptRank | undefined, receiptCount: number): ReceiptRank {
+  const derived = deriveRankByCount(receiptCount)
   if (!rank || rank === 'none') {
-    return deriveRankByCount(receiptCount)
+    return derived
   }
-  return rank
+  const storedIdx = rankOrder.findIndex((r) => r.code === rank)
+  const derivedIdx = rankOrder.findIndex((r) => r.code === derived)
+  return derivedIdx > storedIdx ? derived : rank
 }
 
 export function getRankInfo(rank: ReceiptRank): RankInfo {
