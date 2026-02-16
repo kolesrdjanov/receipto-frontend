@@ -83,6 +83,7 @@
     "supportUs": "Podrži nas",
     "ratings": "Ocene",
     "announcements": "Obaveštenja",
+    "appSettings": "Podešavanja",
     "collapseSidebar": "Skupi meni",
     "expandSidebar": "Proširi meni"
   },
@@ -189,6 +190,15 @@
     "unknownStore": "Nepoznat objekat",
     "scan_now": "Skeniraj QR kod odmah",
     "clickToViewReceipts": "Klikni za pregled računa",
+    "forecast": {
+      "title": "Mesečna prognoza",
+      "projectedTotal": "Projekcija do kraja meseca",
+      "monthTotal": "Ukupno za mesec",
+      "spentSoFar": "Potrošeno do sada",
+      "dailyAvg": "Dnevni prosek",
+      "daysProgress": "Protekli dani",
+      "lastMonth": "Prošli mesec"
+    },
     "budgetProgress": {
       "title": "Praćenje budžeta",
       "selectCategory": "Izaberite kategoriju",
@@ -336,6 +346,12 @@
       "loadError": "Greška pri učitavanju šablona: {{message}}",
       "currency": "Valuta"
     },
+    "selected": "{{count}} izabrano",
+    "removeSelected": "Obriši izabrane",
+    "clearSelection": "Poništi izbor",
+    "bulkDeleteConfirm": "Da li ste sigurni da želite da obrišete {{count}} računa? Ova akcija se ne može poništiti.",
+    "bulkDeleteSuccess": "Uspešno obrisano {{deleted}} računa",
+    "bulkDeletePartial": "Obrisano {{deleted}} računa, {{skipped}} preskočeno (arhivirane grupe)",
     "export": {
       "button": "Izvezi",
       "success": "Računi uspešno izvezeni",
@@ -972,6 +988,17 @@
         "success": "Uspeh",
         "info": "Info"
       }
+    },
+    "settings": {
+      "title": "Podešavanja aplikacije",
+      "subtitle": "Upravljajte AI funkcijama i ponašanjem aplikacije",
+      "aiFeatures": "AI Funkcije",
+      "aiDescription": "Kontrolišite AI funkcije. Kada su isključene, aplikacija koristi standardnu logiku.",
+      "aiCoach": "AI Trener",
+      "aiCoachDescription": "Koristi Gemini AI za personalizovane finansijske savete umesto standardne analize.",
+      "aiCategorization": "AI Auto-kategorizacija",
+      "aiCategorizationDescription": "Koristi AI za predlaganje kategorija kada standardno podudaranje ne uspe.",
+      "updated": "Podešavanja su uspešno ažurirana"
     }
   },
   "categorization": {
@@ -1029,6 +1056,8 @@
     "vsLastWeek": "vs prošla nedelja",
     "topCategory": "Najveća kategorija",
     "topSpending": "Najviše potrošeno na",
+    "insightsTitle": "Uvidi",
+    "receiptsThisWeek": "{{count}} računa ove nedelje",
     "noInsights": "Nema novih uvida. Nastavi sa praćenjem troškova!",
     "topCategoryMessage": "Potrošio/la si {{amount}} na {{category}} ove nedelje.",
     "spendingUpMessage": "Tvoja potrošnja je porasla {{percent}}% u odnosu na prošlu nedelju.",

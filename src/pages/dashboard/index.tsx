@@ -13,7 +13,7 @@ import {
 import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
-import { CategoryInsights } from '@/components/dashboard/category-insights'
+import { MonthlyForecast } from '@/components/dashboard/monthly-forecast'
 import { CoachCard } from '@/components/coach/coach-card'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
 import { useMe } from '@/hooks/users/use-me'
@@ -23,7 +23,6 @@ import {
   useAggregatedCategoryStats,
   useAggregatedDailyStats,
   useAggregatedMonthlyStats,
-  useAggregatedTopStores,
   type CurrencyBreakdown,
 } from '@/hooks/dashboard/use-dashboard'
 import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
@@ -39,7 +38,6 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
-  Store,
   PieChart as PieChartIcon,
   BarChart3,
   Coins,
@@ -123,7 +121,6 @@ export default function Dashboard() {
     selectedYear, selectedMonth
   )
   const { data: aggMonthlyStats, isLoading: aggMonthlyLoading } = useAggregatedMonthlyStats(selectedYear)
-  const { data: aggTopStores, isLoading: aggStoresLoading } = useAggregatedTopStores(5)
 
   const convertBreakdownToTotal = (breakdown: CurrencyBreakdown[] | undefined): number => {
     if (!breakdown || !exchangeRates) return 0
@@ -250,15 +247,6 @@ export default function Dashboard() {
   }, [aggCategoryStats, exchangeRates])
 
   const totalMonthAmount = categoryChartData.reduce((sum, c) => sum + c.value, 0)
-
-  const topStoresData = useMemo(() => {
-    if (!aggTopStores) return []
-    return aggTopStores.map((s) => ({
-      storeName: s.storeName,
-      totalAmount: convertBreakdownToTotal(s.byCurrency),
-      receiptCount: s.byCurrency.reduce((sum, b) => sum + b.receiptCount, 0),
-    })).sort((a, b) => b.totalAmount - a.totalAmount)
-  }, [aggTopStores, exchangeRates])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -461,20 +449,20 @@ export default function Dashboard() {
             </Card>
 
             {/* Daily Bar Chart */}
-            <Card className="card-interactive chart-card">
+            <Card className="card-interactive chart-card flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   {t('dashboard.dailySpending')}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 min-h-0">
                 {aggDailyLoading ? (
-                  <div className="flex items-center justify-center h-[250px]">
+                  <div className="flex items-center justify-center h-full min-h-[200px]">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height="100%" minHeight={200}>
                     <BarChart data={dailyChartData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis
@@ -557,47 +545,20 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Top Stores */}
-            <Card className="card-interactive">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Store className="h-4 w-4 text-primary" />
-                  {t('dashboard.topStores')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {aggStoresLoading ? (
-                  <div className="flex items-center justify-center h-[200px]">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : topStoresData && topStoresData.length > 0 ? (
-                  <div className="space-y-3">
-                    {topStoresData.slice(0, 5).map((store, index) => (
-                      <div key={store.storeName} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-muted-foreground w-4">{index + 1}.</span>
-                          <span className="text-sm truncate max-w-[120px]">{store.storeName}</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{formatAmount(store.totalAmount)}</p>
-                          <p className="text-xs text-muted-foreground">{t('dashboard.receiptsCount', { count: store.receiptCount })}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-                    {t('dashboard.noStoreData')}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Monthly Forecast */}
+            <MonthlyForecast
+              dailyStats={aggDailyStats}
+              monthlyStats={aggMonthlyStats}
+              selectedYear={selectedYear}
+              selectedMonth={selectedMonth}
+              displayCurrency={displayCurrency}
+              exchangeRates={exchangeRates}
+            />
           </div>
 
-          {/* Coach Card + AI Categorization Insights */}
-          <div className="grid gap-4 lg:grid-cols-2 mb-6">
+          {/* Financial Coach */}
+          <div className="mb-6">
             <CoachCard displayCurrency={displayCurrency} />
-            <CategoryInsights />
           </div>
 
 

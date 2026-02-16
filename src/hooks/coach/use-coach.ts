@@ -48,6 +48,7 @@ interface CurrencyAmount {
 export interface CoachResponse {
   greeting: string
   insights: Insight[]
+  source?: 'ai' | 'rule_based'
   summary?: {
     totalSpentThisWeek: number
     totalSpentLastWeek: number

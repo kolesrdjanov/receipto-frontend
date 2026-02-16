@@ -29,6 +29,7 @@ import {
   useReceipts,
   useReceipt,
   useDeleteReceipt,
+  useBulkDeleteReceipts,
   useExportReceipts,
   useImportReceipts,
   type Receipt,
@@ -38,7 +39,8 @@ import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 
@@ -99,6 +101,9 @@ export default function Receipts() {
   const deleteReceipt = useDeleteReceipt()
   const exportReceipts = useExportReceipts()
   const importReceipts = useImportReceipts()
+  const bulkDelete = useBulkDeleteReceipts()
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
@@ -230,6 +235,38 @@ export default function Receipts() {
       : <ArrowUp className="h-4 w-4 ml-1" />
   }
 
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === receipts.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(receipts.map((r) => r.id)))
+    }
+  }
+
+  const confirmBulkDelete = async () => {
+    try {
+      const result = await bulkDelete.mutateAsync(Array.from(selectedIds))
+      if (result.skipped > 0) {
+        toast.warning(t('receipts.bulkDeletePartial', { deleted: result.deleted, skipped: result.skipped }))
+      } else {
+        toast.success(t('receipts.bulkDeleteSuccess', { deleted: result.deleted }))
+      }
+      setSelectedIds(new Set())
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(errorMessage)
+    }
+  }
 
   const handleExport = async () => {
     try {
@@ -470,6 +507,31 @@ export default function Receipts() {
         </div>
       ) : (
         <>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-muted/50 border rounded-lg">
+              <span className="text-sm font-medium">
+                {t('receipts.selected', { count: selectedIds.size })}
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkDeleteConfirmOpen(true)}
+                disabled={bulkDelete.isPending}
+              >
+                {bulkDelete.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                {t('receipts.removeSelected')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                <X className="h-4 w-4" />
+                {t('receipts.clearSelection')}
+              </Button>
+            </div>
+          )}
+
           {/* Mobile Card View */}
           <StaggerContainer key={receipts.map(r => r.id).join()} className="md:hidden space-y-3">
             {receipts.map((receipt) => (
@@ -477,13 +539,20 @@ export default function Receipts() {
               <Card className="overflow-hidden card-interactive">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">
-                        {receipt.storeName || t('receipts.unknownStore')}
-                      </h3>
+                    <div className="flex items-start gap-3 flex-1">
+                      <Checkbox
+                        checked={selectedIds.has(receipt.id)}
+                        onCheckedChange={() => toggleSelect(receipt.id)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg mb-1">
+                          {receipt.storeName || t('receipts.unknownStore')}
+                        </h3>
                       <p className="text-2xl font-bold text-primary">
                         {formatAmount(receipt)}
                       </p>
+                      </div>
                     </div>
                     <div className="flex gap-1 shrink-0">
                       {receipt.hasJournal && (
@@ -584,6 +653,12 @@ export default function Receipts() {
             <Table className="table-fixed w-full" data-testid="receipts-table">
               <TableHeader>
                 <TableRow>
+                  <TableHead style={{ width: '40px' }}>
+                    <Checkbox
+                      checked={receipts.length > 0 && selectedIds.size === receipts.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>{t('receipts.table.store')}</TableHead>
                   <TableHead>{t('receipts.table.amount')}</TableHead>
                   <TableHead>
@@ -613,6 +688,12 @@ export default function Receipts() {
               <TableBody>
                 {receipts.map((receipt) => (
                   <TableRow key={receipt.id} data-testid={`receipt-row-${receipt.id}`}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(receipt.id)}
+                        onCheckedChange={() => toggleSelect(receipt.id)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium" data-testid={`receipt-store-${receipt.id}`}>
                       {receipt.storeName || t('receipts.unknownStore')}
                     </TableCell>
@@ -808,6 +889,18 @@ export default function Receipts() {
         cancelText={t('common.cancel')}
         variant="destructive"
         isLoading={deleteReceipt.isPending}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        onConfirm={confirmBulkDelete}
+        title={t('receipts.removeSelected')}
+        description={t('receipts.bulkDeleteConfirm', { count: selectedIds.size })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="destructive"
+        isLoading={bulkDelete.isPending}
       />
       </PageTransition>
     </AppLayout>

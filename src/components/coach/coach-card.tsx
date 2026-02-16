@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
+  Bot,
 } from 'lucide-react'
 import { useCoach, type Insight } from '@/hooks/coach/use-coach'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
@@ -32,7 +33,7 @@ interface CoachCardProps {
 }
 
 function InsightIcon({ insight }: { insight: Insight }) {
-  const iconProps = { className: 'h-3.5 w-3.5 shrink-0' }
+  const iconProps = { className: 'h-4 w-4 shrink-0' }
 
   switch (insight.type) {
     case 'spending_increase':
@@ -64,7 +65,7 @@ function InsightItem({ insight }: { insight: Insight }) {
   return (
     <div
       className={cn(
-        'flex items-start gap-2 px-2.5 py-2 rounded-md border text-xs transition-all duration-200',
+        'flex items-start gap-3 px-3 py-2.5 rounded-lg border text-sm transition-all duration-200',
         toneStyles[insight.tone]
       )}
     >
@@ -73,16 +74,16 @@ function InsightItem({ insight }: { insight: Insight }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-medium">{insight.title}</p>
-        <p className="text-[11px] opacity-75 mt-0.5 line-clamp-2">{insight.message}</p>
+        <p className="text-xs opacity-75 mt-0.5">{insight.message}</p>
       </div>
       {insight.actionRoute && (
         <Button
           variant="ghost"
           size="sm"
-          className="h-5 w-5 p-0 shrink-0"
+          className="h-6 w-6 p-0 shrink-0"
           onClick={() => navigate(insight.actionRoute!)}
         >
-          <ChevronRight className="h-3 w-3" />
+          <ChevronRight className="h-4 w-4" />
         </Button>
       )}
     </div>
@@ -98,13 +99,17 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="coach-card h-full">
-        <CardHeader className="pb-2 pt-4 px-4">
-          <div className="h-5 w-28 bg-muted animate-pulse rounded" />
+      <Card className="coach-card">
+        <CardHeader className="pb-3">
+          <div className="h-5 w-32 bg-muted animate-pulse rounded" />
+          <div className="h-4 w-48 bg-muted animate-pulse rounded mt-2" />
         </CardHeader>
-        <CardContent className="px-4 pb-4 space-y-2">
-          <div className="h-14 bg-muted animate-pulse rounded-lg" />
-          <div className="h-10 bg-muted animate-pulse rounded" />
+        <CardContent className="space-y-3">
+          <div className="h-20 bg-muted animate-pulse rounded-lg" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="h-14 bg-muted animate-pulse rounded-lg" />
+            <div className="h-14 bg-muted animate-pulse rounded-lg" />
+          </div>
         </CardContent>
       </Card>
     )
@@ -149,15 +154,21 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
     ? convertBreakdownToTotal(summary.topCategory.byCurrency)
     : null
 
-  // Re-generate insight messages with converted currency amounts
-  // and filter out spending insights that contradict the actual converted percentage
+  const isAiSource = data.source === 'ai'
+
+  // For rule-based responses: re-generate insight messages with converted currency amounts
+  // and filter out spending insights that contradict the actual converted percentage.
+  // For AI responses: messages are already generated in the correct language, skip overrides.
   const convertedInsights = insights
     .filter((insight: Insight) => {
+      if (isAiSource) return true
       if (insight.type === 'spending_increase' && convertedWeeklyChangePercent <= 0) return false
       if (insight.type === 'spending_decrease' && convertedWeeklyChangePercent >= 0) return false
       return true
     })
     .map((insight: Insight) => {
+      if (isAiSource) return insight
+
       const details = insight.details
       if (!details) return insight
 
@@ -194,81 +205,106 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
     })
 
   return (
-    <Card className="coach-card overflow-hidden h-full">
-      <CardHeader className="pb-2 pt-4 px-4 coach-header">
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-md bg-primary/10">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
+    <Card className="coach-card overflow-hidden">
+      <CardHeader className="pb-3 coach-header">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <Bot className="h-4 w-4 text-primary" />
+            </div>
+            <CardTitle className="text-base font-semibold">
+              {t('coach.title')}
+            </CardTitle>
           </div>
-          <CardTitle className="text-sm font-semibold">
-            {t('coach.title')}
-          </CardTitle>
+          {summary && summary.receiptsThisWeek > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {t('coach.receiptsThisWeek', { count: summary.receiptsThisWeek })}
+            </span>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{greeting}</p>
+        <p className="text-sm text-muted-foreground mt-1">{greeting}</p>
       </CardHeader>
 
-      <CardContent className="px-4 pb-4 space-y-3">
-        {/* Weekly Summary */}
+      <CardContent className="space-y-4">
+        {/* Weekly Summary — two-column layout */}
         {summary && (
-          <div className="p-2.5 rounded-lg bg-muted/40 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{t('coach.thisWeek')}</span>
-              {convertedWeeklyChangePercent !== 0 && (
-                <div
-                  className={cn(
-                    'flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded',
-                    convertedWeeklyChangePercent > 0
-                      ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10'
-                      : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
-                  )}
-                >
-                  {convertedWeeklyChangePercent > 0 ? (
-                    <ArrowUpRight className="h-3 w-3" />
-                  ) : (
-                    <ArrowDownRight className="h-3 w-3" />
-                  )}
-                  {Math.abs(convertedWeeklyChangePercent)}% {t('coach.vsLastWeek')}
-                </div>
-              )}
-            </div>
-            <p className="text-lg font-semibold">
-              {formatAmount(thisWeekConverted, targetCurrency)}
-            </p>
-            {summary.topCategory && (
-              <p className="text-[11px] text-muted-foreground">
-                {t('coach.topSpending')}: {summary.topCategory.name} (
-                {formatAmount(
-                  topCategoryConverted ?? summary.topCategory.amount,
-                  targetCurrency
+          <div className="grid gap-3 sm:grid-cols-2">
+            {/* This week spending */}
+            <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-medium">{t('coach.thisWeek')}</span>
+                {convertedWeeklyChangePercent !== 0 && (
+                  <div
+                    className={cn(
+                      'flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full',
+                      convertedWeeklyChangePercent > 0
+                        ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                        : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
+                    )}
+                  >
+                    {convertedWeeklyChangePercent > 0 ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    {Math.abs(convertedWeeklyChangePercent)}%
+                  </div>
                 )}
-                )
+              </div>
+              <p className="text-xl font-bold">
+                {formatAmount(thisWeekConverted, targetCurrency)}
               </p>
+              <p className="text-[11px] text-muted-foreground">
+                {t('coach.vsLastWeek')}: {formatAmount(lastWeekConverted, targetCurrency)}
+              </p>
+            </div>
+
+            {/* Top category */}
+            {summary.topCategory ? (
+              <div className="p-3 rounded-lg bg-muted/40 space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">{t('coach.topSpending')}</span>
+                <p className="text-xl font-bold">
+                  {formatAmount(topCategoryConverted ?? summary.topCategory.amount, targetCurrency)}
+                </p>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {summary.topCategory.icon} {summary.topCategory.name}
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 rounded-lg bg-muted/40 flex items-center justify-center">
+                <p className="text-xs text-muted-foreground">{t('coach.noInsights')}</p>
+              </div>
             )}
           </div>
         )}
 
-        {/* Insights with full messages */}
+        {/* Insights — show all (up to 5) */}
         {convertedInsights.length > 0 && (
-          <div className="space-y-1.5">
-            {convertedInsights.slice(0, 2).map((insight: Insight) => (
-              <InsightItem key={insight.id} insight={insight} />
-            ))}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('coach.insightsTitle')}
+            </h4>
+            <div className="space-y-2">
+              {convertedInsights.map((insight: Insight) => (
+                <InsightItem key={insight.id} insight={insight} />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Tip */}
-        {tip && convertedInsights.length === 0 && (
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/40 text-xs">
-            <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+        {/* Tip — always show when available */}
+        {tip && (
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-sm">
+            <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-foreground">{tip.title}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{tip.message}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{tip.message}</p>
             </div>
           </div>
         )}
 
         {convertedInsights.length === 0 && !tip && (
-          <p className="text-xs text-muted-foreground text-center py-2">
+          <p className="text-sm text-muted-foreground text-center py-4">
             {t('coach.noInsights')}
           </p>
         )}

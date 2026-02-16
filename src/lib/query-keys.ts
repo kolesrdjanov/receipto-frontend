@@ -113,6 +113,11 @@ export const queryKeys = {
       [...queryKeys.announcements.adminLists(), filters] as const,
   },
 
+  // Admin
+  admin: {
+    settings: () => ['admin', 'settings'] as const,
+  },
+
   // Ratings
   ratings: {
     all: ['ratings'] as const,

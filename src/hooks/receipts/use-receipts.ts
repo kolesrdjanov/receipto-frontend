@@ -190,6 +190,10 @@ const deleteReceipt = async (id: string): Promise<void> => {
   return api.delete<void>(`/receipts/${id}`)
 }
 
+const bulkDeleteReceipts = async (ids: string[]): Promise<{ deleted: number; skipped: number }> => {
+  return api.delete<{ deleted: number; skipped: number }>('/receipts/bulk', { data: { ids } })
+}
+
 export interface ExportReceipt {
   id: string
   storeName?: string
@@ -267,6 +271,19 @@ export function useDeleteReceipt() {
     mutationFn: deleteReceipt,
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: queryKeys.receipts.detail(deletedId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+    },
+  })
+}
+
+export function useBulkDeleteReceipts() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: bulkDeleteReceipts,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })

@@ -83,6 +83,7 @@
     "supportUs": "Support us",
     "ratings": "Ratings",
     "announcements": "Announcements",
+    "appSettings": "Settings",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar"
   },
@@ -189,6 +190,15 @@
     "unknownStore": "Unknown Store",
     "scan_now": "Scan QR Code now",
     "clickToViewReceipts": "Click to view receipts",
+    "forecast": {
+      "title": "Monthly Forecast",
+      "projectedTotal": "Projected end of month",
+      "monthTotal": "Month total",
+      "spentSoFar": "Spent so far",
+      "dailyAvg": "Daily average",
+      "daysProgress": "Days elapsed",
+      "lastMonth": "Last month"
+    },
     "budgetProgress": {
       "title": "Budget Tracker",
       "selectCategory": "Select a category",
@@ -336,6 +346,12 @@
       "loadError": "Error loading templates: {{message}}",
       "currency": "Currency"
     },
+    "selected": "{{count}} selected",
+    "removeSelected": "Remove selected",
+    "clearSelection": "Clear selection",
+    "bulkDeleteConfirm": "Are you sure you want to delete {{count}} receipts? This action cannot be undone.",
+    "bulkDeleteSuccess": "Successfully deleted {{deleted}} receipts",
+    "bulkDeletePartial": "Deleted {{deleted}} receipts, {{skipped}} skipped (archived groups)",
     "export": {
       "button": "Export",
       "success": "Receipts exported successfully",
@@ -985,6 +1001,17 @@
         "success": "Success",
         "info": "Info"
       }
+    },
+    "settings": {
+      "title": "App Settings",
+      "subtitle": "Configure AI features and application behavior",
+      "aiFeatures": "AI Features",
+      "aiDescription": "Control AI-powered features. When disabled, the app falls back to rule-based logic.",
+      "aiCoach": "AI Coach",
+      "aiCoachDescription": "Use Gemini AI for personalized financial insights instead of rule-based analysis.",
+      "aiCategorization": "AI Auto-Categorization",
+      "aiCategorizationDescription": "Use AI to suggest categories for receipts when rule-based matching fails.",
+      "updated": "Settings updated successfully"
     }
   },
   "categorization": {
@@ -1042,6 +1069,8 @@
     "vsLastWeek": "vs last week",
     "topCategory": "Top Category",
     "topSpending": "Most spent on",
+    "insightsTitle": "Insights",
+    "receiptsThisWeek": "{{count}} receipts this week",
     "noInsights": "No new insights right now. Keep tracking your expenses!",
     "topCategoryMessage": "You spent {{amount}} on {{category}} this week.",
     "spendingUpMessage": "Your spending is up {{percent}}% compared to last week.",
