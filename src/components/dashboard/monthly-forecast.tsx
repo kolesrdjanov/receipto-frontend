@@ -169,7 +169,7 @@ export function MonthlyForecast({
 
         {/* Last month comparison */}
         {forecast.lastMonthTotal > 0 && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t">
+          <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
             <span>{t('dashboard.forecast.lastMonth')}</span>
             <span className="font-medium">{formatAmount(forecast.lastMonthTotal)}</span>
           </div>

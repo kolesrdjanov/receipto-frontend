@@ -294,7 +294,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
         {/* Tip — always show when available */}
         {tip && (
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-sm">
+          <div className="-mt-2 flex items-start gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-sm">
             <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-foreground">{tip.title}</p>
