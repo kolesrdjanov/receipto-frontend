@@ -224,6 +224,14 @@
     "addFromTemplate": "From Template",
     "addViaPfr": "Via PFR Number",
     "scanQr": "Scan",
+    "scanCamera": "Scan QR Code",
+    "scanGallery": "From Gallery",
+    "importExport": "Import / Export",
+    "gallery": {
+      "noQrFound": "No QR code found in this image. Try a clearer photo.",
+      "invalidImage": "Could not read this image. Please try another file.",
+      "error": "Failed to scan QR code from image"
+    },
     "total": "Total",
     "filteredTotal": "Filtered total",
     "convertedNote": "Converted to your display currency",

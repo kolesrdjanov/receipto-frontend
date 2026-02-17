@@ -96,8 +96,10 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
                                 <span>{template.category.icon}</span>
                               )}
                               <span
+                                className="rounded-full px-1.5 py-0.5 text-xs"
                                 style={{
-                                  color: template.category.color || 'inherit',
+                                  backgroundColor: template.category.color ? template.category.color + '20' : 'var(--muted)',
+                                  color: 'var(--foreground)',
                                 }}
                               >
                                 {template.category.name}

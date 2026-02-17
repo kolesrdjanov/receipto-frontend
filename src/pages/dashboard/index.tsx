@@ -505,9 +505,9 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3 mb-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
             {/* Monthly Trend */}
-            <Card className="lg:col-span-2 card-interactive chart-card">
+            <Card className="md:col-span-2 lg:col-span-2 card-interactive chart-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <TrendingUp className="h-4 w-4 text-primary" />

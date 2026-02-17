@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -16,6 +16,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+
+const mediaQuery = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)') : null
+function useIsMobile() {
+  return useSyncExternalStore(
+    (cb) => { mediaQuery?.addEventListener('change', cb); return () => mediaQuery?.removeEventListener('change', cb) },
+    () => mediaQuery?.matches ?? false,
+    () => false,
+  )
+}
 import {
   useCreateCategory,
   useUpdateCategory,
@@ -39,6 +48,7 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const isMobile = useIsMobile()
   const {
     register,
     handleSubmit,
@@ -202,31 +212,60 @@ export function CategoryModal({ open, onOpenChange, category, mode }: CategoryMo
           <div className="space-y-2">
             <Label>{t('categories.modal.icon')}</Label>
             <div className="flex items-center gap-2">
-              <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-                <PopoverTrigger asChild>
+              {isMobile ? (
+                <>
                   <Button
                     type="button"
                     variant="outline"
                     className="h-10 w-10 text-lg p-0"
                     data-testid="category-icon-input"
+                    onClick={() => setEmojiPickerOpen(true)}
                   >
                     {iconValue || '😀'}
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-fit p-0" align="start">
-                  <EmojiPicker
-                    className="h-[340px]"
-                    onEmojiSelect={(emoji) => {
-                      setValue('icon', emoji.emoji)
-                      setEmojiPickerOpen(false)
-                    }}
-                  >
-                    <EmojiPickerSearch placeholder={t('categories.modal.iconSearchPlaceholder')} />
-                    <EmojiPickerContent />
-                    <EmojiPickerFooter />
-                  </EmojiPicker>
-                </PopoverContent>
-              </Popover>
+                  <Dialog open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                    <DialogContent className="p-0 gap-0 max-w-[min(24rem,calc(100vw-2rem))]">
+                      <EmojiPicker
+                        className="h-[min(24rem,60vh)] w-full"
+                        onEmojiSelect={(emoji) => {
+                          setValue('icon', emoji.emoji)
+                          setEmojiPickerOpen(false)
+                        }}
+                      >
+                        <EmojiPickerSearch placeholder={t('categories.modal.iconSearchPlaceholder')} />
+                        <EmojiPickerContent />
+                        <EmojiPickerFooter />
+                      </EmojiPicker>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : (
+                <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 w-10 text-lg p-0"
+                      data-testid="category-icon-input"
+                    >
+                      {iconValue || '😀'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-fit p-0" align="start" collisionPadding={16}>
+                    <EmojiPicker
+                      className="h-[340px]"
+                      onEmojiSelect={(emoji) => {
+                        setValue('icon', emoji.emoji)
+                        setEmojiPickerOpen(false)
+                      }}
+                    >
+                      <EmojiPickerSearch placeholder={t('categories.modal.iconSearchPlaceholder')} />
+                      <EmojiPickerContent />
+                      <EmojiPickerFooter />
+                    </EmojiPicker>
+                  </PopoverContent>
+                </Popover>
+              )}
               {iconValue && (
                 <Button
                   type="button"

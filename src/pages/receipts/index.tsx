@@ -40,7 +40,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X, Image } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 
@@ -82,6 +82,8 @@ export default function Receipts() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
   const [showAddDropdown, setShowAddDropdown] = useState(false)
+  const [showScanDropdown, setShowScanDropdown] = useState(false)
+  const [showImportExportDropdown, setShowImportExportDropdown] = useState(false)
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -89,6 +91,8 @@ export default function Receipts() {
   const [sortBy, setSortBy] = useState<'receiptDate' | 'createdAt'>('receiptDate')
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const scanDropdownRef = useRef<HTMLDivElement>(null)
+  const importExportDropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
   const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10, sortBy, sortOrder })
@@ -97,7 +101,7 @@ export default function Receipts() {
   const totalAmounts = response?.totalAmounts ?? []
   const filtersActive = hasActiveFilters(debouncedFilters)
   const { convert, preferredCurrency } = useCurrencyConverter()
-  const { openQrScanner, openPfrEntry, scannerModals, isCreating } = useReceiptScanner()
+  const { openQrScanner, openPfrEntry, openGalleryScanner, scannerModals, isCreating, isGalleryProcessing } = useReceiptScanner()
   const deleteReceipt = useDeleteReceipt()
   const exportReceipts = useExportReceipts()
   const importReceipts = useImportReceipts()
@@ -123,22 +127,27 @@ export default function Receipts() {
     setPage(1)
   }, [searchParams])
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
+    const anyOpen = showAddDropdown || showScanDropdown || showImportExportDropdown
+    if (!anyOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (showAddDropdown && dropdownRef.current && !dropdownRef.current.contains(target)) {
         setShowAddDropdown(false)
+      }
+      if (showScanDropdown && scanDropdownRef.current && !scanDropdownRef.current.contains(target)) {
+        setShowScanDropdown(false)
+      }
+      if (showImportExportDropdown && importExportDropdownRef.current && !importExportDropdownRef.current.contains(target)) {
+        setShowImportExportDropdown(false)
       }
     }
 
-    if (showAddDropdown) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showAddDropdown])
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showAddDropdown, showScanDropdown, showImportExportDropdown])
 
   const handleFiltersChange = (newFilters: ReceiptsFilters) => {
     setFilters(newFilters)
@@ -390,24 +399,46 @@ export default function Receipts() {
             <Filter className="h-4 w-4" />
             {t('receipts.filtersButton')}
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={exportReceipts.isPending}
-            className="order-3 lg:order-2 flex-1 sm:flex-none"
-          >
-            {exportReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            {t('receipts.export.button')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setImportDialogOpen(true)}
-            className="order-4 lg:order-3 flex-1 sm:flex-none"
-          >
-            <Upload className="h-4 w-4" />
-            {t('receipts.import.button')}
-          </Button>
-          <div className="order-1 lg:order-4 flex gap-4 lg:gap-2 w-full lg:w-auto">
+          <div className="order-1 lg:order-2 flex gap-4 lg:gap-2 w-full lg:w-auto">
+            {/* Scan dropdown */}
+            <div className="relative flex-1 sm:flex-none" ref={scanDropdownRef}>
+              <Button
+                variant="glossy"
+                onClick={() => setShowScanDropdown(!showScanDropdown)}
+                disabled={isCreating || isGalleryProcessing}
+                className="w-full sm:w-auto"
+                data-testid="receipts-scan-dropdown-button"
+              >
+                {(isCreating || isGalleryProcessing) ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+                <span>{t('receipts.scanQr')}</span>
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+              {showScanDropdown && (
+                <div className="absolute left-0 mt-2 w-full sm:w-52 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                  <button
+                    onClick={() => { openQrScanner(); setShowScanDropdown(false) }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                    data-testid="receipts-scan-camera-button"
+                  >
+                    <Camera className="h-4 w-4 text-muted-foreground" />
+                    {t('receipts.scanCamera')}
+                  </button>
+                  <button
+                    onClick={() => { openGalleryScanner(); setShowScanDropdown(false) }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                    data-testid="receipts-scan-gallery-button"
+                  >
+                    <Image className="h-4 w-4 text-muted-foreground" />
+                    {t('receipts.scanGallery')}
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* Add Manually dropdown */}
             <div className="relative flex-1 sm:flex-none" ref={dropdownRef}>
               <Button
                 variant="outline"
@@ -423,36 +454,62 @@ export default function Receipts() {
                 <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95" data-testid="receipts-add-dropdown">
                   <button
                     onClick={handleAddManually}
-                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-blank-button"
                   >
+                    <Plus className="h-4 w-4 text-muted-foreground" />
                     {t('receipts.addBlank')}
                   </button>
                   <button
                     onClick={handleAddFromTemplate}
-                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-from-template-button"
                   >
+                    <Archive className="h-4 w-4 text-muted-foreground" />
                     {t('receipts.addFromTemplate')}
                   </button>
                   <button
                     onClick={handlePfrEntry}
-                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
                     data-testid="receipts-add-pfr-button"
                   >
+                    <Info className="h-4 w-4 text-muted-foreground" />
                     {t('receipts.addViaPfr')}
                   </button>
                 </div>
               )}
             </div>
-            <Button variant="glossy" onClick={openQrScanner} disabled={isCreating} className="flex-1 sm:flex-none" data-testid="receipts-scan-qr-button">
-              {isCreating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="h-4 w-4" />
-              )}
-              {t('receipts.scanQr')}
+          </div>
+          {/* Import/Export dropdown */}
+          <div className="relative order-3 lg:order-3 flex-1 sm:flex-none" ref={importExportDropdownRef}>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportExportDropdown(!showImportExportDropdown)}
+              className="w-full sm:w-auto"
+            >
+              <Download className="h-4 w-4" />
+              <span>{t('receipts.importExport')}</span>
+              <ChevronDown className="h-4 w-4 ml-1" />
             </Button>
+            {showImportExportDropdown && (
+              <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                <button
+                  onClick={() => { handleExport(); setShowImportExportDropdown(false) }}
+                  disabled={exportReceipts.isPending}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {exportReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <Download className="h-4 w-4 text-muted-foreground" />}
+                  {t('receipts.export.button')}
+                </button>
+                <button
+                  onClick={() => { setImportDialogOpen(true); setShowImportExportDropdown(false) }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                >
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                  {t('receipts.import.button')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -600,17 +657,17 @@ export default function Receipts() {
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">{t('receipts.table.category')}</span>
                       {receipt.category ? (
-                        <span className="inline-flex items-center gap-1 font-medium">
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: receipt.category.color ? receipt.category.color + '20' : 'var(--muted)',
+                            color: 'var(--foreground)',
+                          }}
+                        >
                           {receipt.category.icon && (
                             <span>{receipt.category.icon}</span>
                           )}
-                          <span
-                            style={{
-                              color: receipt.category.color || 'inherit',
-                            }}
-                          >
-                            {receipt.category.name}
-                          </span>
+                          {receipt.category.name}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
@@ -702,17 +759,17 @@ export default function Receipts() {
                     <TableCell>{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</TableCell>
                     <TableCell>
                       {receipt.category ? (
-                        <span className="inline-flex items-center gap-1">
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: receipt.category.color ? receipt.category.color + '20' : 'var(--muted)',
+                            color: 'var(--foreground)',
+                          }}
+                        >
                           {receipt.category.icon && (
                             <span>{receipt.category.icon}</span>
                           )}
-                          <span
-                            style={{
-                              color: receipt.category.color || 'inherit',
-                            }}
-                          >
-                            {receipt.category.name}
-                          </span>
+                          {receipt.category.name}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>

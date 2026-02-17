@@ -224,6 +224,14 @@
     "addFromTemplate": "Iz šablona",
     "addViaPfr": "Preko PFR broja",
     "scanQr": "Skeniraj",
+    "scanCamera": "Skeniraj QR kod",
+    "scanGallery": "Iz galerije",
+    "importExport": "Uvoz / Izvoz",
+    "gallery": {
+      "noQrFound": "QR kod nije pronađen na ovoj slici. Probajte sa jasnijom fotografijom.",
+      "invalidImage": "Nije moguće pročitati ovu sliku. Pokušajte sa drugom datotekom.",
+      "error": "Neuspelo skeniranje QR koda sa slike"
+    },
     "total": "Ukupno",
     "filteredTotal": "Ukupno za filter",
     "convertedNote": "Konvertovano u vašu valutu",
