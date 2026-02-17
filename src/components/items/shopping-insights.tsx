@@ -54,7 +54,7 @@ export function ShoppingInsights() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-3 flex flex-col">
           {data.insights.map((insight) => {
             const Icon = typeIcons[insight.type] || Lightbulb
             const colorClass = toneColors[insight.tone] || toneColors.neutral
