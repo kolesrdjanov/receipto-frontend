@@ -59,11 +59,11 @@ export default function ItemsPage() {
   }
 
   const getPriceTrend = (item: FrequentItem) => {
-    if (!item) return null
+    if (!item || !item.avgPrice || !item.lastPrice) return null
     const diff = item.lastPrice - item.avgPrice
     const percentChange = (diff / item.avgPrice) * 100
 
-    if (Math.abs(percentChange) < 2) {
+    if (!isFinite(percentChange) || Math.abs(percentChange) < 2) {
       return { icon: Minus, color: 'text-muted-foreground', label: t('items.stable') }
     } else if (diff > 0) {
       return { icon: TrendingUp, color: 'text-destructive', label: `+${percentChange.toFixed(0)}%` }
