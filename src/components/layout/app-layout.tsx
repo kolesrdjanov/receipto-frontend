@@ -23,10 +23,10 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
+  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
   { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
-  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
 
