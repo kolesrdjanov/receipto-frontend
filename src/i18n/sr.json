@@ -1117,13 +1117,25 @@
       "button": "Uvezi artikle",
       "processing": "Obrada...",
       "success": "Uvezeno {{items}} artikala iz {{receipts}} računa",
+      "noNewItems": "Nema novih artikala. Svi računi su već obrađeni.",
       "error": "Greška pri uvozu artikala"
     },
-    "autoMigrate": {
-      "title": "Podešavanje praćenja cena",
-      "description": "Analiziramo vaše račune kako bismo izvukli informacije o proizvodima i cenama. Ovo se dešava samo jednom.",
-      "processing": "Analiziramo vaše račune...",
-      "success": "Pronađeno {{items}} proizvoda iz {{receipts}} računa!"
+    "import": {
+      "title": "Uvoz vaših proizvoda",
+      "description": "Analiziramo vaše račune i koristimo AI za čišćenje naziva proizvoda. Ovo može potrajati.",
+      "processing": "Analiziramo račune..."
+    },
+    "empty": {
+      "title": "Počnite sa praćenjem cena",
+      "description": "Uvezite proizvode iz skeniranih računa da biste počeli da pratite cene, poredite prodavnice i pronalazite uštede.",
+      "step1Title": "Izdvajamo artikle",
+      "step1Description": "Proizvodi i cene se automatski izdvajaju iz vaših skeniranih računa.",
+      "step2Title": "AI čisti podatke",
+      "step2Description": "Nečitljivi nazivi sa kasa se pretvaraju u čitljiva imena proizvoda pomoću AI-a.",
+      "step3Title": "Vi pratite i štedite",
+      "step3Description": "Poredite cene u prodavnicama i pratite trendove tokom vremena.",
+      "importButton": "Uvezi proizvode iz računa",
+      "importHint": "Ovo će obraditi sve vaše skenirane račune i izvući podatke o proizvodima."
     },
     "insights": {
       "title": "Uvidi u kupovinu",

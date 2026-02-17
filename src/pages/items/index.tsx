@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,86 +23,31 @@ import {
   QrCode,
   BarChart3,
   PiggyBank,
-  HelpCircle,
-  X,
   Sparkles,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SavingsCard } from '@/components/items/savings-card'
 import { ShoppingInsights } from '@/components/items/shopping-insights'
 
 export default function ItemsPage() {
   const { t } = useTranslation()
-  const [page, setPage] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page')) || 1
+  const setPage = (updater: number | ((prev: number) => number)) => {
+    const newPage = typeof updater === 'function' ? updater(page) : updater
+    setSearchParams(newPage > 1 ? { page: String(newPage) } : {}, { replace: true })
+  }
   const limit = 15
-  const { data: itemsResponse, isLoading: itemsLoading, refetch: refetchItems } = useFrequentItems({ page, limit })
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useItemStats()
+  const { data: itemsResponse, isLoading: itemsLoading } = useFrequentItems({ page, limit })
+  const { data: stats, isLoading: statsLoading } = useItemStats()
   const items = itemsResponse?.data
   const pagination = itemsResponse?.pagination
   const migrateReceipts = useMigrateReceipts()
   const { currency } = useSettingsStore()
-  const [showGuide, setShowGuide] = useState(() => {
-    return localStorage.getItem('items-guide-dismissed') !== 'true'
-  })
-  const [isAutoMigrating, setIsAutoMigrating] = useState(false)
-  const autoMigrateAttempted = useRef(false)
-
-  // Auto-migrate existing receipts on first visit if user has no items
-  useEffect(() => {
-    const shouldAutoMigrate = async () => {
-      // Only run once per session
-      if (autoMigrateAttempted.current) return
-
-      // Wait for stats to load
-      if (statsLoading) return
-
-      // Check if already migrated before (has items) or already attempted this session
-      const migrationKey = 'items-auto-migration-done'
-      if (localStorage.getItem(migrationKey) === 'true') return
-
-      // If user has no products, try to migrate
-      if (stats?.totalProducts === 0) {
-        autoMigrateAttempted.current = true
-        setIsAutoMigrating(true)
-
-        try {
-          const result = await migrateReceipts.mutateAsync()
-
-          // Mark migration as done
-          localStorage.setItem(migrationKey, 'true')
-
-          // Refetch data after migration
-          await Promise.all([refetchItems(), refetchStats()])
-
-          // Only show toast if items were actually created
-          if (result.itemsCreated > 0) {
-            toast.success(t('items.autoMigrate.success', {
-              items: result.itemsCreated,
-              receipts: result.processed,
-            }))
-          }
-        } catch {
-          // Silent fail for auto-migration - user can still manually migrate
-          console.error('Auto-migration failed')
-        } finally {
-          setIsAutoMigrating(false)
-        }
-      } else {
-        // User already has items, mark as done
-        localStorage.setItem(migrationKey, 'true')
-      }
-    }
-
-    shouldAutoMigrate()
-  }, [statsLoading, stats?.totalProducts, migrateReceipts, refetchItems, refetchStats, t])
-
-  const dismissGuide = () => {
-    setShowGuide(false)
-    localStorage.setItem('items-guide-dismissed', 'true')
-  }
+  const [isMigrating, setIsMigrating] = useState(false)
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('sr-RS', {
@@ -128,36 +73,119 @@ export default function ItemsPage() {
   }
 
   const handleMigrate = async () => {
+    setIsMigrating(true)
     try {
       const result = await migrateReceipts.mutateAsync()
-      toast.success(t('items.migrate.success', {
-        items: result.itemsCreated,
-        receipts: result.processed,
-      }))
+      if (result.itemsCreated > 0) {
+        toast.success(t('items.migrate.success', {
+          items: result.itemsCreated,
+          receipts: result.processed,
+        }))
+      } else {
+        toast.info(t('items.migrate.noNewItems'))
+      }
     } catch {
       toast.error(t('items.migrate.error'))
+    } finally {
+      setIsMigrating(false)
     }
   }
 
-  const isLoading = itemsLoading || statsLoading || isAutoMigrating
+  const isLoading = itemsLoading || statsLoading
+  const hasProducts = stats && stats.totalProducts > 0
 
-  // Show special loading state during auto-migration
-  if (isAutoMigrating) {
+  // Show importing state
+  if (isMigrating) {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-24">
           <div className="relative">
             <Sparkles className="h-12 w-12 text-primary animate-pulse" />
           </div>
-          <h3 className="mt-6 text-xl font-semibold">{t('items.autoMigrate.title')}</h3>
+          <h3 className="mt-6 text-xl font-semibold">{t('items.import.title')}</h3>
           <p className="mt-2 text-muted-foreground text-center max-w-md">
-            {t('items.autoMigrate.description')}
+            {t('items.import.description')}
           </p>
           <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            {t('items.autoMigrate.processing')}
+            {t('items.import.processing')}
           </div>
         </div>
+      </AppLayout>
+    )
+  }
+
+  // Show empty state when no products exist
+  if (!isLoading && !hasProducts) {
+    return (
+      <AppLayout>
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">
+            {t('items.title')}
+          </h2>
+          <p className="text-sm text-muted-foreground md:text-base">
+            {t('items.subtitle')}
+          </p>
+        </div>
+
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16 px-6">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+              <Package className="h-8 w-8 text-primary" />
+            </div>
+
+            <h3 className="text-xl font-semibold mb-2 text-center">
+              {t('items.empty.title')}
+            </h3>
+            <p className="text-muted-foreground text-center max-w-md mb-8">
+              {t('items.empty.description')}
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-3 w-full max-w-2xl mb-8">
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <QrCode className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('items.empty.step1Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('items.empty.step1Description')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('items.empty.step2Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('items.empty.step2Description')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <PiggyBank className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{t('items.empty.step3Title')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('items.empty.step3Description')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button size="lg" onClick={handleMigrate}>
+              <Sparkles className="h-4 w-4" />
+              {t('items.empty.importButton')}
+            </Button>
+            <p className="text-xs text-muted-foreground mt-3">
+              {t('items.empty.importHint')}
+            </p>
+          </CardContent>
+        </Card>
       </AppLayout>
     )
   }
@@ -200,68 +228,6 @@ export default function ItemsPage() {
         </div>
       ) : (
         <>
-          {/* How It Works Guide */}
-          {showGuide && (
-            <Card className="mb-6 border-primary/20 bg-primary/5">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <HelpCircle className="h-5 w-5 text-primary" />
-                    {t('items.guide.title')}
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={dismissGuide}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <QrCode className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{t('items.guide.step1Title')}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t('items.guide.step1Description')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{t('items.guide.step2Title')}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t('items.guide.step2Description')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <PiggyBank className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{t('items.guide.step3Title')}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t('items.guide.step3Description')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 pt-3 border-t">
-                  {t('items.guide.tip')}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Stats Cards */}
           <div className="grid gap-4 sm:grid-cols-3 mb-6">
             <Card>

@@ -88,12 +88,10 @@ export default function ItemDetailPage() {
     <AppLayout>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <Link to="/items">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4" />
-              {t('items.title')}
-            </Button>
-          </Link>
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4" />
+            {t('items.title')}
+          </Button>
           <Button
             variant="ghost"
             size="sm"

@@ -12,6 +12,7 @@ import Categories from './pages/categories'
 import Groups from './pages/groups'
 import Warranties from './pages/warranties'
 import Settings from './pages/settings'
+import Items from './pages/items'
 
 // Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
@@ -19,6 +20,7 @@ const SignUp = lazy(() => import('./pages/auth/sign-up'))
 const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
 const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
 const Templates = lazy(() => import('./pages/templates'))
+const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
 const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
@@ -89,23 +91,22 @@ export const routes: RouteObject[] = [
       </ProtectedRoute>
     ),
   },
-  // Price Tracker routes — hidden from nav, re-enable when feature is ready
-  // {
-  //   path: '/items',
-  //   element: (
-  //     <ProtectedRoute>
-  //       <Items />
-  //     </ProtectedRoute>
-  //   ),
-  // },
-  // {
-  //   path: '/items/:id',
-  //   element: (
-  //     <ProtectedRoute>
-  //       <ItemDetail />
-  //     </ProtectedRoute>
-  //   ),
-  // },
+  {
+    path: '/items',
+    element: (
+      <ProtectedRoute>
+        <Items />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/items/:id',
+    element: (
+      <ProtectedRoute>
+        <ItemDetail />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: '/groups',
     element: (

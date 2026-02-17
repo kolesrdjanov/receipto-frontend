@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp } from 'lucide-react'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
@@ -23,6 +23,7 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
+  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
   { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
@@ -221,7 +222,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             {mainNavItems.map((item) => {
               const isActive = location.pathname === item.path ||
                 (item.path === '/receipts' && location.pathname === '/templates') ||
-                (item.path === '/groups' && location.pathname.startsWith('/groups/'))
+                (item.path === '/groups' && location.pathname.startsWith('/groups/')) ||
+                (item.path === '/items' && location.pathname.startsWith('/items/'))
 
               return (
                 <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined}>

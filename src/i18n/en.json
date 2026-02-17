@@ -1130,13 +1130,25 @@
       "button": "Import Items",
       "processing": "Processing...",
       "success": "Imported {{items}} items from {{receipts}} receipts",
+      "noNewItems": "No new items found. All receipts have already been processed.",
       "error": "Failed to import items"
     },
-    "autoMigrate": {
-      "title": "Setting up Price Tracker",
-      "description": "We're analyzing your receipts to extract product and price information. This only happens once.",
-      "processing": "Analyzing your receipts...",
-      "success": "Found {{items}} products from {{receipts}} receipts!"
+    "import": {
+      "title": "Importing Your Products",
+      "description": "We're analyzing your receipts and using AI to clean up product names. This may take a moment.",
+      "processing": "Analyzing receipts..."
+    },
+    "empty": {
+      "title": "Get Started with Price Tracking",
+      "description": "Import products from your scanned receipts to start tracking prices, comparing stores, and finding savings.",
+      "step1Title": "We extract items",
+      "step1Description": "Products and prices are pulled from your scanned receipts automatically.",
+      "step2Title": "AI cleans the data",
+      "step2Description": "Messy POS names are transformed into readable product names using AI.",
+      "step3Title": "You track & save",
+      "step3Description": "Compare prices across stores and spot trends over time.",
+      "importButton": "Import Products from Receipts",
+      "importHint": "This will process all your scanned receipts and extract product data."
     },
     "insights": {
       "title": "Shopping Insights",
