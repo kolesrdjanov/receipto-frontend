@@ -23,7 +23,6 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
-  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
   { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
@@ -222,8 +221,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {mainNavItems.map((item) => {
               const isActive = location.pathname === item.path ||
                 (item.path === '/receipts' && location.pathname === '/templates') ||
-                (item.path === '/groups' && location.pathname.startsWith('/groups/')) ||
-                (item.path === '/items' && location.pathname.startsWith('/items/'))
+                (item.path === '/groups' && location.pathname.startsWith('/groups/'))
 
               return (
                 <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined}>

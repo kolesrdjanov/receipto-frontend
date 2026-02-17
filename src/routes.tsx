@@ -91,22 +91,23 @@ export const routes: RouteObject[] = [
       </ProtectedRoute>
     ),
   },
-  {
-    path: '/items',
-    element: (
-      <ProtectedRoute>
-        <Items />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/items/:id',
-    element: (
-      <ProtectedRoute>
-        <ItemDetail />
-      </ProtectedRoute>
-    ),
-  },
+  // Price Tracker routes — hidden from nav, re-enable when feature is ready
+  // {
+  //   path: '/items',
+  //   element: (
+  //     <ProtectedRoute>
+  //       <Items />
+  //     </ProtectedRoute>
+  //   ),
+  // },
+  // {
+  //   path: '/items/:id',
+  //   element: (
+  //     <ProtectedRoute>
+  //       <ItemDetail />
+  //     </ProtectedRoute>
+  //   ),
+  // },
   {
     path: '/groups',
     element: (
