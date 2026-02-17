@@ -1011,6 +1011,8 @@
       "aiCoachDescription": "Use Gemini AI for personalized financial insights instead of rule-based analysis.",
       "aiCategorization": "AI Auto-Categorization",
       "aiCategorizationDescription": "Use AI to suggest categories for receipts when rule-based matching fails.",
+      "aiItems": "AI Item Intelligence",
+      "aiItemsDescription": "Use AI for store name normalization, product enrichment, and shopping insights.",
       "updated": "Settings updated successfully"
     }
   },
@@ -1135,6 +1137,10 @@
       "description": "We're analyzing your receipts to extract product and price information. This only happens once.",
       "processing": "Analyzing your receipts...",
       "success": "Found {{items}} products from {{receipts}} receipts!"
+    },
+    "insights": {
+      "title": "Shopping Insights",
+      "noInsights": "No insights yet. Keep scanning receipts!"
     },
     "matching": {
       "title": "Match Products",

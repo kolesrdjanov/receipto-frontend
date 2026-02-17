@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
+import { useSettingsStore } from '@/store/settings'
 
 // Types
 export interface FrequentItem {
@@ -65,9 +66,22 @@ export interface ProductItem {
 export interface ItemAlias {
   id: string
   aliasName: string
-  storeName?: string
   productItemId: string
   createdAt: string
+}
+
+export interface ShoppingInsight {
+  id: string
+  type: 'frequency' | 'price_comparison' | 'trend' | 'store_preference' | 'tip'
+  title: string
+  message: string
+  tone: 'positive' | 'neutral' | 'warning'
+  productId?: string
+}
+
+export interface ShoppingInsightsResponse {
+  insights: ShoppingInsight[]
+  source: 'ai' | 'rule_based'
 }
 
 export interface MigrateResult {
@@ -136,6 +150,10 @@ const searchSimilarProducts = async (query: string, limit: number = 5): Promise<
   return api.get<ProductItem[]>(`/items/search/similar?q=${encodeURIComponent(query)}&limit=${limit}`)
 }
 
+const fetchShoppingInsights = async (): Promise<ShoppingInsightsResponse> => {
+  return api.get<ShoppingInsightsResponse>('/items/insights')
+}
+
 const migrateExistingReceipts = async (): Promise<MigrateResult> => {
   return api.post<MigrateResult>('/items/migrate')
 }
@@ -199,6 +217,14 @@ export function useSearchSimilarProducts(query: string, limit: number = 5) {
     queryKey: queryKeys.items.search(query),
     queryFn: () => searchSimilarProducts(query, limit),
     enabled: query.length >= 2,
+  })
+}
+
+export function useShoppingInsights() {
+  const { language } = useSettingsStore()
+  return useQuery({
+    queryKey: queryKeys.items.insights(language),
+    queryFn: fetchShoppingInsights,
   })
 }
 

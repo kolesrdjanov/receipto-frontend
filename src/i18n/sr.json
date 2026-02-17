@@ -998,6 +998,8 @@
       "aiCoachDescription": "Koristi Gemini AI za personalizovane finansijske savete umesto standardne analize.",
       "aiCategorization": "AI Auto-kategorizacija",
       "aiCategorizationDescription": "Koristi AI za predlaganje kategorija kada standardno podudaranje ne uspe.",
+      "aiItems": "AI Inteligencija artikala",
+      "aiItemsDescription": "Koristi AI za normalizaciju naziva prodavnica, obogaćivanje proizvoda i uvide u kupovinu.",
       "updated": "Podešavanja su uspešno ažurirana"
     }
   },
@@ -1122,6 +1124,10 @@
       "description": "Analiziramo vaše račune kako bismo izvukli informacije o proizvodima i cenama. Ovo se dešava samo jednom.",
       "processing": "Analiziramo vaše račune...",
       "success": "Pronađeno {{items}} proizvoda iz {{receipts}} računa!"
+    },
+    "insights": {
+      "title": "Uvidi u kupovinu",
+      "noInsights": "Nema uvida. Nastavite da skenirate račune!"
     },
     "matching": {
       "title": "Spajanje proizvoda",

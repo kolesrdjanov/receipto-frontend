@@ -31,6 +31,8 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
+import { SavingsCard } from '@/components/items/savings-card'
+import { ShoppingInsights } from '@/components/items/shopping-insights'
 
 export default function ItemsPage() {
   const { t } = useTranslation()
@@ -298,6 +300,12 @@ export default function ItemsPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Shopping Insights (AI or rule-based) */}
+          {stats && stats.totalProducts > 0 && <ShoppingInsights />}
+
+          {/* Savings Opportunities */}
+          <SavingsCard />
 
           {/* Items List */}
           <Card>

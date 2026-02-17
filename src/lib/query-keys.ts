@@ -94,6 +94,7 @@ export const queryKeys = {
     history: (id: string, store?: string) => [...queryKeys.items.detail(id), 'history', store] as const,
     stores: (id: string) => [...queryKeys.items.detail(id), 'stores'] as const,
     search: (query: string) => [...queryKeys.items.all, 'search', query] as const,
+    insights: (language?: string) => [...queryKeys.items.all, 'insights', language] as const,
   },
 
   // Categorization

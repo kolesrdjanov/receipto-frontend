@@ -196,9 +196,6 @@ export default function ItemDetailPage() {
                   className="px-3 py-1 bg-muted rounded-full text-sm"
                 >
                   {alias.aliasName}
-                  {alias.storeName && (
-                    <span className="text-muted-foreground ml-1">({alias.storeName})</span>
-                  )}
                 </span>
               ))}
             </div>

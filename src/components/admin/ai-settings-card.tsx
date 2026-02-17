@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useAppSettings, useUpdateAppSettings } from '@/hooks/admin/use-app-settings'
-import { Bot, Sparkles, Loader2 } from 'lucide-react'
+import { Bot, Sparkles, Loader2, TrendingUp } from 'lucide-react'
 
 export function AiSettingsCard() {
   const { t } = useTranslation()
@@ -13,6 +13,7 @@ export function AiSettingsCard() {
 
   const aiCoachEnabled = settings?.ai_coach_enabled?.value ?? true
   const aiCategorizationEnabled = settings?.ai_categorization_enabled?.value ?? true
+  const aiItemsEnabled = settings?.ai_items_enabled?.value ?? true
 
   const handleToggle = (key: string, value: boolean) => {
     updateSettings.mutate({ [key]: value }, {
@@ -79,6 +80,25 @@ export function AiSettingsCard() {
           <Switch
             checked={aiCategorizationEnabled}
             onCheckedChange={(checked) => handleToggle('ai_categorization_enabled', checked)}
+            disabled={updateSettings.isPending}
+          />
+        </div>
+
+        <div className="h-px bg-border" />
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              {t('admin.settings.aiItems')}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t('admin.settings.aiItemsDescription')}
+            </p>
+          </div>
+          <Switch
+            checked={aiItemsEnabled}
+            onCheckedChange={(checked) => handleToggle('ai_items_enabled', checked)}
             disabled={updateSettings.isPending}
           />
         </div>
