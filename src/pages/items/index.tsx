@@ -283,10 +283,10 @@ export default function ItemsPage() {
             </CardHeader>
             <CardContent>
               {!items || items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <ShoppingCart className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-lg">{t('items.noItemsYet')}</p>
-                  <p className="text-sm mt-1">{t('items.scanReceiptsToTrack')}</p>
+                <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                  <ShoppingCart className="h-10 w-10 mb-4 opacity-50" />
+                  <p className="font-medium">{t('items.noFrequentYet')}</p>
+                  <p className="text-sm mt-1 text-center max-w-sm">{t('items.noFrequentDescription')}</p>
                 </div>
               ) : (
                 <>

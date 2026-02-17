@@ -1085,6 +1085,8 @@
     "savingsOpportunities": "Savings Opportunities",
     "noItemsYet": "No items tracked yet",
     "scanReceiptsToTrack": "Scan receipts to start tracking prices",
+    "noFrequentYet": "No repeat purchases yet",
+    "noFrequentDescription": "Products appear here once you buy them at least twice. Keep scanning receipts — the more data, the better the insights.",
     "guide": {
       "title": "How Price Tracker Works",
       "step1Title": "Scan Receipts",

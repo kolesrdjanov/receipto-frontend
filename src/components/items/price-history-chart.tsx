@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -20,8 +20,8 @@ interface PriceHistoryChartProps {
   productId: string
 }
 
-const STORE_COLORS = [
-  'hsl(var(--primary))',
+// Secondary store colors — primary store uses the accent color
+const SECONDARY_COLORS = [
   '#22c55e',
   '#f59e0b',
   '#ef4444',
@@ -45,15 +45,13 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
     }).format(amount)
   }
 
-  const { chartData, stores } = useMemo(() => {
+  const { chartData, stores, yDomain } = useMemo(() => {
     if (!history || history.length === 0) {
-      return { chartData: [], stores: [] }
+      return { chartData: [], stores: [], yDomain: [0, 100] as [number, number] }
     }
 
-    // Get unique stores
     const uniqueStores = [...new Set(history.map((h) => h.storeName))]
 
-    // Group by date and store
     const dataByDate = new Map<string, Record<string, number>>()
 
     history.forEach((point) => {
@@ -64,7 +62,6 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
       dataByDate.get(dateStr)![point.storeName] = point.price
     })
 
-    // Convert to chart format (sorted by date)
     const sortedHistory = [...history].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     )
@@ -87,18 +84,38 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
       }
     })
 
-    return { chartData: result, stores: uniqueStores }
+    // Calculate Y-axis domain with padding so the line isn't flat
+    const allPrices = history.map((h) => h.price)
+    const minVal = Math.min(...allPrices)
+    const maxVal = Math.max(...allPrices)
+    const padding = Math.max((maxVal - minVal) * 0.2, maxVal * 0.1)
+    const yDomain: [number, number] = [
+      Math.max(0, Math.floor(minVal - padding)),
+      Math.ceil(maxVal + padding),
+    ]
+
+    return { chartData: result, stores: uniqueStores, yDomain }
   }, [history])
+
+  const getStoreColor = (index: number) => {
+    if (index === 0) return 'hsl(var(--primary))'
+    return SECONDARY_COLORS[(index - 1) % SECONDARY_COLORS.length]
+  }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-popover border rounded-lg shadow-lg p-3">
-          <p className="font-medium mb-2">{label}</p>
+          <p className="font-medium mb-2 text-sm">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {formatPrice(entry.value)}
-            </p>
+            <div key={index} className="flex items-center gap-2 text-sm">
+              <div
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium">{formatPrice(entry.value)}</span>
+            </div>
           ))}
         </div>
       )
@@ -151,15 +168,31 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="pl-0 pr-2 sm:pl-6 sm:pr-6">
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={chartData} margin={{ left: 0, right: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+        <ResponsiveContainer width="100%" height={280}>
+          <AreaChart data={chartData} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
+            <defs>
+              {stores.map((store, index) => {
+                const color = getStoreColor(index)
+                return (
+                  <linearGradient key={store} id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+                  </linearGradient>
+                )
+              })}
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              className="stroke-muted/50"
+              vertical={false}
+            />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 10 }}
               tickLine={false}
               axisLine={false}
               interval="preserveStartEnd"
+              className="fill-muted-foreground"
             />
             <YAxis
               tick={{ fontSize: 9 }}
@@ -167,22 +200,32 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
               axisLine={false}
               tickFormatter={(v) => `${v}`}
               width={45}
+              domain={yDomain}
+              className="fill-muted-foreground"
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '12px' }} />
-            {stores.map((store, index) => (
-              <Line
-                key={store}
-                type="monotone"
-                dataKey={store}
-                name={store}
-                stroke={STORE_COLORS[index % STORE_COLORS.length]}
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                connectNulls
-              />
-            ))}
-          </LineChart>
+            <Legend
+              wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }}
+              formatter={(value) => <span className="text-foreground text-xs">{value}</span>}
+            />
+            {stores.map((store, index) => {
+              const color = getStoreColor(index)
+              return (
+                <Area
+                  key={store}
+                  type="monotone"
+                  dataKey={store}
+                  name={store}
+                  stroke={color}
+                  strokeWidth={2.5}
+                  fill={`url(#gradient-${index})`}
+                  dot={{ r: 3, fill: color, strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: color, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                  connectNulls
+                />
+              )
+            })}
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

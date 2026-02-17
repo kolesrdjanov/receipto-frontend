@@ -1072,6 +1072,8 @@
     "savingsOpportunities": "Prilike za uštedu",
     "noItemsYet": "Nema praćenih artikala",
     "scanReceiptsToTrack": "Skenirajte račune da počnete praćenje cena",
+    "noFrequentYet": "Još nema ponovljenih kupovina",
+    "noFrequentDescription": "Proizvodi se ovde pojavljuju kada ih kupite bar dva puta. Nastavite da skenirate račune — što više podataka, to bolji uvidi.",
     "guide": {
       "title": "Kako funkcioniše Praćenje cena",
       "step1Title": "Skenirajte račune",
