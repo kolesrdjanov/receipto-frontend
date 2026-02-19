@@ -5,6 +5,7 @@ import { queryKeys } from '@/lib/query-keys'
 export interface FeatureFlags {
   warranties: boolean
   itemPricing: boolean
+  savings: boolean
 }
 
 const fetchFeatureFlags = async (): Promise<FeatureFlags> => {

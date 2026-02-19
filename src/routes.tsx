@@ -14,6 +14,7 @@ import Groups from './pages/groups'
 import Warranties from './pages/warranties'
 import Settings from './pages/settings'
 import Items from './pages/items'
+import Savings from './pages/savings'
 
 // Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
@@ -22,6 +23,8 @@ const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
 const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
 const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
+const SavingsGoalDetail = lazy(() => import('./pages/savings/goals/[id]'))
+const SavingsReports = lazy(() => import('./pages/savings/reports'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
 const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
@@ -36,6 +39,7 @@ export function prefetchLazyRoutes() {
     import('./pages/items/[id]')
     import('./pages/groups/[id]')
     import('./pages/templates')
+    import('./pages/savings/goals/[id]')
   })
 }
 
@@ -125,6 +129,36 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <GroupDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/savings',
+    element: (
+      <ProtectedRoute>
+        <FeatureRoute feature="savings">
+          <Savings />
+        </FeatureRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/savings/reports',
+    element: (
+      <ProtectedRoute>
+        <FeatureRoute feature="savings">
+          <SavingsReports />
+        </FeatureRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/savings/goals/:id',
+    element: (
+      <ProtectedRoute>
+        <FeatureRoute feature="savings">
+          <SavingsGoalDetail />
+        </FeatureRoute>
       </ProtectedRoute>
     ),
   },

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp, PiggyBank } from 'lucide-react'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
@@ -27,6 +27,7 @@ const mainNavItems = [
   { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp, featureFlag: 'itemPricing' as const },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
+  { path: '/savings', labelKey: 'nav.savings', icon: PiggyBank, featureFlag: 'savings' as const },
   { path: '/warranties', labelKey: 'nav.warranties', icon: Shield, featureFlag: 'warranties' as const },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
@@ -229,7 +230,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               const isActive = location.pathname === item.path ||
                 (item.path === '/receipts' && location.pathname === '/templates') ||
                 (item.path === '/groups' && location.pathname.startsWith('/groups/')) ||
-                (item.path === '/items' && location.pathname.startsWith('/items/'))
+                (item.path === '/items' && location.pathname.startsWith('/items/')) ||
+                (item.path === '/savings' && location.pathname.startsWith('/savings/'))
 
               return (
                 <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined}>

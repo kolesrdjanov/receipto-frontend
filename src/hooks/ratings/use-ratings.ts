@@ -8,6 +8,7 @@ export interface Rating {
   description?: string
   isPublic: boolean
   isApproved: boolean
+  isFeatured: boolean
   adminComment?: string
   userId: string
   createdAt: string
@@ -29,6 +30,7 @@ export interface CreateRatingInput {
 
 export interface AdminUpdateRatingInput {
   isApproved?: boolean
+  isFeatured?: boolean
   adminComment?: string
 }
 

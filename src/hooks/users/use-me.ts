@@ -18,6 +18,9 @@ export interface Me {
   street?: string | null
   zipCode?: string | null
   city?: string | null
+  monthlyIncome?: number | null
+  incomeCurrency?: string | null
+  monthlyReportEnabled?: boolean
 }
 
 export interface UpdateMeData {
@@ -30,6 +33,9 @@ export interface UpdateMeData {
   street?: string
   zipCode?: string
   city?: string
+  monthlyIncome?: number | null
+  incomeCurrency?: string | null
+  monthlyReportEnabled?: boolean
 }
 
 export interface ChangePasswordData {

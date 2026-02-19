@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 
 interface FeatureRouteProps {
-  feature: 'warranties' | 'itemPricing'
+  feature: 'warranties' | 'itemPricing' | 'savings'
   children: React.ReactNode
 }
 

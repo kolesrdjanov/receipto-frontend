@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
 import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
-import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown, MapPin } from 'lucide-react'
+import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown, MapPin, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ import { useMe, useUpdateMe, useUploadProfileImage, useChangePassword, useDelete
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { normalizeRank, getNextRank, getProgressToNextRank, type ReceiptRank } from '@/lib/rank'
+import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 
 const themes: { value: Theme; labelKey: string }[] = [
   { value: 'light', labelKey: 'settings.appearance.light' },
@@ -51,6 +52,7 @@ export default function Settings() {
   const { currencies } = useCurrencies()
 
   const authUser = useAuthStore((s) => s.user)
+  const { data: featureFlags } = useFeatureFlags()
 
   const { data: me } = useMe(true)
   const updateMe = useUpdateMe()
@@ -138,17 +140,21 @@ export default function Settings() {
       street: me?.street ?? '',
       zipCode: me?.zipCode ?? '',
       city: me?.city ?? '',
+      monthlyIncome: me?.monthlyIncome?.toString() ?? '',
+      incomeCurrency: me?.incomeCurrency ?? '',
     }),
-    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.profileImageUrl, effectiveUser?.id, me?.street, me?.zipCode, me?.city]
+    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.profileImageUrl, effectiveUser?.id, me?.street, me?.zipCode, me?.city, me?.monthlyIncome, me?.incomeCurrency]
   )
 
   // Keep a per-user draft without using setState inside an effect (lint rule).
-  const [draft, setDraft] = useState<{ firstName: string; lastName: string; street: string; zipCode: string; city: string }>(() => ({
+  const [draft, setDraft] = useState<{ firstName: string; lastName: string; street: string; zipCode: string; city: string; monthlyIncome: string; incomeCurrency: string }>(() => ({
     firstName: initial.firstName,
     lastName: initial.lastName,
     street: initial.street,
     zipCode: initial.zipCode,
     city: initial.city,
+    monthlyIncome: initial.monthlyIncome,
+    incomeCurrency: initial.incomeCurrency,
   }))
 
   const profileKey = initial.userId ?? 'no-user'
@@ -161,11 +167,13 @@ export default function Settings() {
         street: me.street ?? '',
         zipCode: me.zipCode ?? '',
         city: me.city ?? '',
+        monthlyIncome: me.monthlyIncome?.toString() ?? '',
+        incomeCurrency: me.incomeCurrency ?? '',
       }))
     }
-  }, [me?.street, me?.zipCode, me?.city])
+  }, [me?.street, me?.zipCode, me?.city, me?.monthlyIncome, me?.incomeCurrency])
 
-  const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName || draft.street !== initial.street || draft.zipCode !== initial.zipCode || draft.city !== initial.city
+  const isDirty = draft.firstName !== initial.firstName || draft.lastName !== initial.lastName || draft.street !== initial.street || draft.zipCode !== initial.zipCode || draft.city !== initial.city || draft.monthlyIncome !== initial.monthlyIncome || draft.incomeCurrency !== initial.incomeCurrency
 
   const handleSaveProfile = async () => {
     if (!effectiveUser) return
@@ -177,6 +185,8 @@ export default function Settings() {
         street: draft.street.trim(),
         zipCode: draft.zipCode.trim(),
         city: draft.city.trim(),
+        monthlyIncome: draft.monthlyIncome ? Number(draft.monthlyIncome) : null,
+        incomeCurrency: draft.incomeCurrency || null,
       })
       toast.success(t('settings.profile.saved'))
     } catch (err) {
@@ -496,6 +506,21 @@ export default function Settings() {
                     />
                   </div>
                 </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>{t('settings.notifications.monthlyReport')}</Label>
+                      <p className="text-sm text-muted-foreground">
+                        {t('settings.notifications.monthlyReportHelp')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={effectiveUser?.monthlyReportEnabled ?? true}
+                      onCheckedChange={(checked) => updateMe.mutate({ monthlyReportEnabled: checked })}
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -636,6 +661,52 @@ export default function Settings() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Income — only shown when savings feature is enabled */}
+                    {(featureFlags?.savings ?? false) && (
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                        <Label className="text-base font-medium">{t('settings.profile.income')}</Label>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {t('settings.profile.incomeDescription')}
+                      </p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="monthlyIncome">{t('settings.profile.incomeAmount')}</Label>
+                          <Input
+                            id="monthlyIncome"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={draft.monthlyIncome}
+                            onChange={(e) => setDraft((p) => ({ ...p, monthlyIncome: e.target.value }))}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="incomeCurrency">{t('settings.profile.incomeCurrency')}</Label>
+                          <Select value={draft.incomeCurrency} onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))}>
+                            <SelectTrigger id="incomeCurrency">
+                              <SelectValue placeholder={t('settings.profile.incomeCurrency')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {currencies.map((c) => (
+                                <SelectItem key={c.code} value={c.code}>
+                                  <span className="flex items-center gap-2">
+                                    <span>{getCurrencyFlag(c.icon)}</span>
+                                    <span>{c.name}</span>
+                                    <span className="font-mono text-muted-foreground">{c.symbol}</span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    )}
 
                     {/* Rank */}
                     <div className={cn('rounded-lg border p-4 space-y-3 mt-10', rankConfig.cardClassName)}>

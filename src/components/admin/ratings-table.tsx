@@ -14,7 +14,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAdminRatings, useAdminUpdateRating } from '@/hooks/ratings/use-ratings'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Star, Globe, Check, X, MessageSquare, Send } from 'lucide-react'
+import { Loader2, Star, Globe, Check, X, MessageSquare, Send, Sparkles } from 'lucide-react'
 
 interface RatingsTableProps {
   page: number
@@ -51,6 +51,10 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
 
   const handleToggleApproval = (ratingId: string, currentApproved: boolean) => {
     adminUpdate.mutate({ id: ratingId, data: { isApproved: !currentApproved } })
+  }
+
+  const handleToggleFeatured = (ratingId: string, currentFeatured: boolean) => {
+    adminUpdate.mutate({ id: ratingId, data: { isFeatured: !currentFeatured } })
   }
 
   const handleStartEditComment = (ratingId: string, currentComment?: string) => {
@@ -154,6 +158,18 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                           <><X className="h-3 w-3" />{t('admin.ratings.table.pending')}</>
                         )}
                       </button>
+                      <button
+                        onClick={() => handleToggleFeatured(rating.id, rating.isFeatured)}
+                        disabled={adminUpdate.isPending}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                          rating.isFeatured
+                            ? 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                        }`}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        {t('admin.ratings.table.featured')}
+                      </button>
                     </div>
                   </div>
 
@@ -250,6 +266,7 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                   <TableHead className="max-w-[250px]">{t('admin.ratings.table.description')}</TableHead>
                   <TableHead>{t('admin.ratings.table.public')}</TableHead>
                   <TableHead>{t('admin.ratings.table.approved')}</TableHead>
+                  <TableHead>{t('admin.ratings.table.featured')}</TableHead>
                   <TableHead className="max-w-[250px]">{t('admin.ratings.table.comment')}</TableHead>
                   <TableHead>{t('admin.ratings.table.date')}</TableHead>
                 </TableRow>
@@ -308,6 +325,20 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                         ) : (
                           <><X className="h-3 w-3" />{t('admin.ratings.table.pending')}</>
                         )}
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => handleToggleFeatured(rating.id, rating.isFeatured)}
+                        disabled={adminUpdate.isPending}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
+                          rating.isFeatured
+                            ? 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                        }`}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        {rating.isFeatured ? t('admin.ratings.table.featured') : t('admin.ratings.table.notFeatured')}
                       </button>
                     </TableCell>
                     <TableCell className="max-w-[250px]">

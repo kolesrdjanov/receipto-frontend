@@ -24,6 +24,7 @@
     "noData": "No data",
     "allRightsReserved": "All rights reserved.",
     "unknown": "Unknown",
+    "required": "This field is required",
     "pickDate": "Pick a date",
     "next": "Next",
     "back": "Back",
@@ -73,6 +74,7 @@
     "categories": "Categories",
     "groups": "Group Spending",
     "warranties": "Warranties",
+    "savings": "Savings",
     "priceTracker": "Price Tracker",
     "settings": "Settings",
     "logout": "Logout",
@@ -704,7 +706,9 @@
       "warrantyReminders": "Warranty expiry reminders",
       "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire",
       "budgetAlerts": "Budget alerts",
-      "budgetAlertsHelp": "Receive email alerts when you reach 80% or exceed your category budgets"
+      "budgetAlertsHelp": "Receive email alerts when you reach 80% or exceed your category budgets",
+      "monthlyReport": "Monthly financial reports",
+      "monthlyReportHelp": "Receive a summary of your finances on the 1st of each month"
     },
     "profile": {
       "title": "Profile",
@@ -730,6 +734,10 @@
         "zipCode": "ZIP code",
         "city": "City"
       },
+      "income": "Monthly Income",
+      "incomeDescription": "Used for calculating your savings rate on the Savings page.",
+      "incomeAmount": "Monthly income",
+      "incomeCurrency": "Income currency",
       "rank": {
         "title": "Receipt rank",
         "receiptsTracked": "Receipts tracked: {{count}}",
@@ -947,7 +955,9 @@
         "addComment": "Add comment",
         "editComment": "Edit comment",
         "saveComment": "Save",
-        "cancelComment": "Cancel"
+        "cancelComment": "Cancel",
+        "featured": "Featured",
+        "notFeatured": "Not Featured"
       }
     },
     "announcements": {
@@ -1021,13 +1031,17 @@
       "aiCategorizationDescription": "Use AI to suggest categories for receipts when rule-based matching fails.",
       "aiItems": "AI Item Intelligence",
       "aiItemsDescription": "Use AI for store name normalization, product enrichment, and shopping insights.",
+      "aiSavings": "AI Savings Copilot",
+      "aiSavingsDescription": "Use AI to rank savings actions and personalize savings recommendations.",
       "updated": "Settings updated successfully",
       "featureFlags": "Feature Flags",
       "featureFlagsDescription": "Toggle application features on or off for all users.",
       "featureWarranties": "Warranties",
       "featureWarrantiesDescription": "Allow users to track product warranties and expiration dates.",
       "featureItemPricing": "Price Tracker",
-      "featureItemPricingDescription": "Allow users to track product prices across stores over time."
+      "featureItemPricingDescription": "Allow users to track product prices across stores over time.",
+      "featureSavings": "Savings",
+      "featureSavingsDescription": "Allow users to set savings goals and track contributions."
     }
   },
   "categorization": {
@@ -1179,6 +1193,150 @@
       "createNew": "Create as new product",
       "success": "Products merged successfully",
       "error": "Failed to merge products"
+    }
+  },
+  "savings": {
+    "title": "Savings",
+    "subtitle": "Set goals and track your savings progress",
+    "howItWorks": {
+      "toggleLabel": "Show savings explanation",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "title": "How savings works",
+      "line1": "Set your monthly income and track spending from receipts to see your real savings pace.",
+      "line2": "Receipto analyzes budget leakage, goal pace, and price opportunities to surface where money is being lost.",
+      "line3": "Savings Copilot then suggests top actions and runs what-if simulations so you can test impact before changing habits."
+    },
+    "snapshot": {
+      "title": "Monthly Overview",
+      "income": "Income",
+      "spent": "Spent",
+      "saved": "Saved",
+      "rate": "Savings Rate",
+      "noIncome": "Set your monthly income in Settings to see your savings rate.",
+      "goToSettings": "Go to Settings"
+    },
+    "goals": {
+      "title": "Your Goals",
+      "addGoal": "Add Goal",
+      "empty": "No savings goals yet. Create one to start tracking!",
+      "completed": "Completed",
+      "active": "Active"
+    },
+    "goal": {
+      "noDeadline": "No deadline",
+      "overdue": "Overdue",
+      "daysLeft": "{{count}} days left",
+      "deadline": "Deadline",
+      "projectedCompletion": "Projected",
+      "projectedDays": "~{{count}} days",
+      "linkedCategory": "Category",
+      "notFound": "Goal not found",
+      "completedTitle": "Goal Completed!",
+      "completedMessage": "Congratulations on reaching your savings target!",
+      "created": "Goal created successfully",
+      "updated": "Goal updated successfully",
+      "deleted": "Goal deleted successfully",
+      "deleteConfirmTitle": "Delete Goal",
+      "deleteConfirmDescription": "Are you sure you want to delete this goal? All contributions will be lost. This cannot be undone.",
+      "autoContribution": "Auto-saved from {{category}}"
+    },
+    "goalModal": {
+      "createTitle": "Create Goal",
+      "editTitle": "Edit Goal",
+      "createDescription": "Set a new savings target to work towards.",
+      "editDescription": "Update your savings goal details.",
+      "name": "Goal Name",
+      "namePlaceholder": "e.g. Vacation Fund",
+      "targetAmount": "Target Amount",
+      "currency": "Currency",
+      "deadline": "Deadline",
+      "priority": "Priority",
+      "category": "Linked Category",
+      "noCategory": "None",
+      "icon": "Icon",
+      "color": "Color",
+      "create": "Create Goal"
+    },
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "contributions": {
+      "title": "Contributions",
+      "add": "Add",
+      "empty": "No contributions yet. Start saving towards your goal!",
+      "added": "Contribution added",
+      "removed": "Contribution removed",
+      "deleteConfirmTitle": "Delete Contribution",
+      "deleteConfirmDescription": "Are you sure you want to remove this contribution? The goal progress will be recalculated."
+    },
+    "contributionModal": {
+      "title": "Add Contribution",
+      "description": "Record a savings contribution towards this goal.",
+      "amount": "Amount",
+      "note": "Note",
+      "notePlaceholder": "Optional note...",
+      "add": "Add Contribution"
+    },
+    "insights": {
+      "title": "Category Insights",
+      "spentThisMonth": "Spent This Month",
+      "potentialSavings": "Potential Savings",
+      "monthlyPaceNeeded": "Monthly Pace Needed",
+      "status": "Status",
+      "onTrack": "On Track",
+      "behind": "Behind",
+      "noDeadline": "No deadline set",
+      "noBudget": "Set a budget on {{category}} to enable auto-savings",
+      "autoSaved": "Auto-saved from underspending",
+      "autoSavingsTotal": "Auto-saved",
+      "manualTotal": "Manual contributions"
+    },
+    "viewReports": "View Reports",
+    "reports": {
+      "title": "Monthly Reports",
+      "subtitle": "Review your financial performance month by month",
+      "empty": "Reports are generated on the 1st of each month. Check back soon!",
+      "generateNow": "Generate now",
+      "generating": "Generating...",
+      "generated": "Report generated",
+      "income": "Income",
+      "spent": "Spent",
+      "saved": "Saved",
+      "rate": "Savings Rate",
+      "noIncome": "Not set",
+      "topCategories": "Top Categories",
+      "goalsProgress": "Savings Goals",
+      "vsLastMonth": "vs last month",
+      "thisMonth": "this month",
+      "aiSummary": "AI Summary",
+      "aiTips": "Tips"
+    },
+    "copilot": {
+      "title": "Savings Copilot",
+      "subtitle": "AI-assisted savings plan for {{month}}",
+      "sourceAi": "AI ranked",
+      "sourceRule": "Rule based",
+      "healthScore": "Health score",
+      "projectedSavings": "Projected savings",
+      "potential": "Monthly potential",
+      "leakage": "Budget leakage",
+      "actionsTitle": "Top actions",
+      "impact": "Impact",
+      "noActions": "No high-impact actions right now. Keep tracking receipts for stronger recommendations.",
+      "scenarioTitle": "What-if simulator",
+      "reductionPercent": "Spending cut (%)",
+      "horizonMonths": "Horizon (months)",
+      "runScenario": "Run scenario",
+      "runningScenario": "Running...",
+      "scenarioError": "Scenario simulation failed. Try again.",
+      "monthlySaved": "Monthly savings gain",
+      "horizonSaved": "Horizon gain",
+      "newMonthlySpent": "New monthly spend",
+      "goalsAcceleration": "Goal acceleration",
+      "monthsFaster": "{{count}} months faster"
     }
   },
   "announcements": {

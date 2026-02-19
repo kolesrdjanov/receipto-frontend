@@ -11,6 +11,7 @@ interface User {
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
   receiptMilestoneEmailsEnabled?: boolean
+  monthlyReportEnabled?: boolean
 }
 
 interface AuthState {

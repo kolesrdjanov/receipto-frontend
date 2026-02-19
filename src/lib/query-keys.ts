@@ -124,6 +124,26 @@ export const queryKeys = {
     settings: () => ['admin', 'settings'] as const,
   },
 
+  // Savings
+  savings: {
+    all: ['savings'] as const,
+    goals: () => [...queryKeys.savings.all, 'goals'] as const,
+    goalDetail: (id: string) => [...queryKeys.savings.all, 'goal', id] as const,
+    goalInsights: (id: string) => [...queryKeys.savings.all, 'insights', id] as const,
+    overview: (year: number, month: number) => [...queryKeys.savings.all, 'overview', year, month] as const,
+    intelligenceOverview: (year: number, month: number, language?: string) =>
+      [...queryKeys.savings.all, 'intelligence', 'overview', year, month, language] as const,
+    intelligenceActions: (year: number, month: number, language?: string) =>
+      [...queryKeys.savings.all, 'intelligence', 'actions', year, month, language] as const,
+  },
+
+  // Reports (Monthly Financial)
+  reports: {
+    all: ['reports'] as const,
+    list: () => [...queryKeys.reports.all, 'list'] as const,
+    detail: (year: number, month: number) => [...queryKeys.reports.all, year, month] as const,
+  },
+
   // Ratings
   ratings: {
     all: ['ratings'] as const,
