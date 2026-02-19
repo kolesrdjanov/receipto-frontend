@@ -98,7 +98,7 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
   }, [history])
 
   const getStoreColor = (index: number) => {
-    if (index === 0) return 'hsl(var(--primary))'
+    if (index === 0) return 'var(--primary)'
     return SECONDARY_COLORS[(index - 1) % SECONDARY_COLORS.length]
   }
 
