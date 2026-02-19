@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp } from 'lucide-react'
+import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
@@ -23,10 +24,10 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
-  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp },
+  { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp, featureFlag: 'itemPricing' as const },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },
-  { path: '/warranties', labelKey: 'nav.warranties', icon: Shield },
+  { path: '/warranties', labelKey: 'nav.warranties', icon: Shield, featureFlag: 'warranties' as const },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
 
@@ -50,6 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false)
   const { hasAnnouncements } = useAnnouncementIndicator()
+  const { data: featureFlags } = useFeatureFlags()
 
   // Desktop sidebar collapsed state (persisted)
   const { sidebarCollapsed, setSidebarCollapsed } = useSettingsStore()
@@ -219,7 +221,11 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Navigation */}
           <nav className={cn('flex-1 space-y-1 p-4', collapsed && 'md:px-2')}>
-            {mainNavItems.map((item) => {
+            {mainNavItems.filter((item) => {
+              if (!item.featureFlag) return true
+              // Default to showing while flags load
+              return featureFlags?.[item.featureFlag] ?? true
+            }).map((item) => {
               const isActive = location.pathname === item.path ||
                 (item.path === '/receipts' && location.pathname === '/templates') ||
                 (item.path === '/groups' && location.pathname.startsWith('/groups/')) ||

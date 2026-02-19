@@ -1021,7 +1021,13 @@
       "aiCategorizationDescription": "Use AI to suggest categories for receipts when rule-based matching fails.",
       "aiItems": "AI Item Intelligence",
       "aiItemsDescription": "Use AI for store name normalization, product enrichment, and shopping insights.",
-      "updated": "Settings updated successfully"
+      "updated": "Settings updated successfully",
+      "featureFlags": "Feature Flags",
+      "featureFlagsDescription": "Toggle application features on or off for all users.",
+      "featureWarranties": "Warranties",
+      "featureWarrantiesDescription": "Allow users to track product warranties and expiration dates.",
+      "featureItemPricing": "Price Tracker",
+      "featureItemPricingDescription": "Allow users to track product prices across stores over time."
     }
   },
   "categorization": {

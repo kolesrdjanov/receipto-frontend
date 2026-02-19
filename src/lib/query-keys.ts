@@ -114,6 +114,11 @@ export const queryKeys = {
       [...queryKeys.announcements.adminLists(), filters] as const,
   },
 
+  // Settings (public)
+  settings: {
+    features: () => ['settings', 'features'] as const,
+  },
+
   // Admin
   admin: {
     settings: () => ['admin', 'settings'] as const,

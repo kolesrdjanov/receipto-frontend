@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { AiSettingsCard } from '@/components/admin/ai-settings-card'
+import { FeatureFlagsCard } from '@/components/admin/feature-flags-card'
 
 export default function AdminSettings() {
   const { t } = useTranslation()
@@ -19,6 +20,7 @@ export default function AdminSettings() {
       </div>
 
       <div className="max-w-2xl space-y-6">
+        <FeatureFlagsCard />
         <AiSettingsCard />
       </div>
     </AppLayout>

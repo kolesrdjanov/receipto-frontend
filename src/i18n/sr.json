@@ -1008,7 +1008,13 @@
       "aiCategorizationDescription": "Koristi AI za predlaganje kategorija kada standardno podudaranje ne uspe.",
       "aiItems": "AI Inteligencija artikala",
       "aiItemsDescription": "Koristi AI za normalizaciju naziva prodavnica, obogaćivanje proizvoda i uvide u kupovinu.",
-      "updated": "Podešavanja su uspešno ažurirana"
+      "updated": "Podešavanja su uspešno ažurirana",
+      "featureFlags": "Funkcionalnosti",
+      "featureFlagsDescription": "Uključite ili isključite funkcionalnosti za sve korisnike.",
+      "featureWarranties": "Garancije",
+      "featureWarrantiesDescription": "Omogućite korisnicima praćenje garancija proizvoda i datuma isteka.",
+      "featureItemPricing": "Praćenje cena",
+      "featureItemPricingDescription": "Omogućite korisnicima praćenje cena proizvoda u različitim prodavnicama."
     }
   },
   "categorization": {

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import { ProtectedRoute } from './components/protected-route'
 import { AdminRoute } from './components/admin-route'
+import { FeatureRoute } from './components/feature-route'
 
 // Eagerly load core sidebar pages — they're small (~5-20KB each gzipped)
 // and lazy-loading them causes a jarring navigation delay (sidebar disappears).
@@ -95,7 +96,9 @@ export const routes: RouteObject[] = [
     path: '/items',
     element: (
       <ProtectedRoute>
-        <Items />
+        <FeatureRoute feature="itemPricing">
+          <Items />
+        </FeatureRoute>
       </ProtectedRoute>
     ),
   },
@@ -103,7 +106,9 @@ export const routes: RouteObject[] = [
     path: '/items/:id',
     element: (
       <ProtectedRoute>
-        <ItemDetail />
+        <FeatureRoute feature="itemPricing">
+          <ItemDetail />
+        </FeatureRoute>
       </ProtectedRoute>
     ),
   },
@@ -127,7 +132,9 @@ export const routes: RouteObject[] = [
     path: '/warranties',
     element: (
       <ProtectedRoute>
-        <Warranties />
+        <FeatureRoute feature="warranties">
+          <Warranties />
+        </FeatureRoute>
       </ProtectedRoute>
     ),
   },
