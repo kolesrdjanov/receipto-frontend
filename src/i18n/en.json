@@ -84,6 +84,7 @@
     "version": "Version",
     "supportUs": "Support us",
     "ratings": "Ratings",
+    "recurring": "Recurring",
     "announcements": "Announcements",
     "appSettings": "Settings",
     "collapseSidebar": "Collapse sidebar",
@@ -252,11 +253,13 @@
       "group": "Group"
     },
     "archivedGroupLocked": "This receipt is in an archived group. Unarchive the group to edit or delete.",
+    "recurringLocked": "This receipt was auto-generated from a recurring expense. Manage it from the Recurring page.",
     "status": {
       "completed": "Completed",
       "manual": "Manual",
       "pending": "Pending",
-      "failed": "Failed"
+      "failed": "Failed",
+      "recurring": "Recurring"
     },
     "unknownStore": "Unknown Store",
     "modal": {
@@ -1028,7 +1031,7 @@
       "aiCoach": "AI Coach",
       "aiCoachDescription": "Use Gemini AI for personalized financial insights instead of rule-based analysis.",
       "aiCategorization": "AI Auto-Categorization",
-      "aiCategorizationDescription": "Use AI to suggest categories for receipts when rule-based matching fails.",
+      "aiCategorizationDescription": "Use AI as the default method for auto-categorizing receipts. When disabled, falls back to rule-based matching.",
       "aiItems": "AI Item Intelligence",
       "aiItemsDescription": "Use AI for store name normalization, product enrichment, and shopping insights.",
       "aiSavings": "AI Savings Copilot",
@@ -1041,7 +1044,9 @@
       "featureItemPricing": "Price Tracker",
       "featureItemPricingDescription": "Allow users to track product prices across stores over time.",
       "featureSavings": "Savings",
-      "featureSavingsDescription": "Allow users to set savings goals and track contributions."
+      "featureSavingsDescription": "Allow users to set savings goals and track contributions.",
+      "featureRecurringExpenses": "Recurring Expenses",
+      "featureRecurringExpensesDescription": "Allow users to manage recurring bills and subscriptions."
     }
   },
   "categorization": {
@@ -1337,6 +1342,113 @@
       "newMonthlySpent": "New monthly spend",
       "goalsAcceleration": "Goal acceleration",
       "monthsFaster": "{{count}} months faster"
+    }
+  },
+  "recurring": {
+    "title": "Recurring Expenses",
+    "subtitle": "Manage your recurring bills and subscriptions",
+    "addExpense": "Add Expense",
+    "deleteSuccess": "Recurring expense deleted",
+    "deleteError": "Failed to delete recurring expense",
+    "deleteTitle": "Delete Recurring Expense",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This will also delete all payment history.",
+    "paused": "Expense paused",
+    "resumed": "Expense resumed",
+    "updateError": "Failed to update expense",
+    "frequency": {
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "ended": "Ended"
+    },
+    "stats": {
+      "monthlyCommitment": "Monthly Commitment",
+      "paidThisMonth": "Paid This Month",
+      "pendingThisMonth": "Pending This Month"
+    },
+    "table": {
+      "name": "Name",
+      "amount": "Amount",
+      "frequency": "Frequency",
+      "nextDue": "Next Due",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "pay": "Mark as Paid",
+      "pause": "Pause",
+      "resume": "Resume"
+    },
+    "empty": {
+      "title": "No recurring expenses",
+      "description": "Add your first recurring expense to start tracking bills and subscriptions."
+    },
+    "info": {
+      "title": "How auto-pay works",
+      "description": "Fixed-amount expenses are automatically marked as paid on their due date and appear in your expenses list. Variable-amount expenses require manual payment — you'll see them in your dashboard when they're due."
+    },
+    "modal": {
+      "createTitle": "Add Recurring Expense",
+      "createDescription": "Set up a new recurring bill or subscription.",
+      "editTitle": "Edit Recurring Expense",
+      "editDescription": "Update the details of this recurring expense.",
+      "name": "Name",
+      "nameRequired": "Name is required",
+      "namePlaceholder": "e.g., Internet bill, Gym membership",
+      "amount": "Amount",
+      "amountRequired": "Amount is required",
+      "amountMin": "Amount must be greater than 0",
+      "currency": "Currency",
+      "fixedAmount": "Fixed amount",
+      "frequency": "Frequency",
+      "dayOfMonth": "Day of month",
+      "startDate": "Start date",
+      "startDateRequired": "Start date is required",
+      "endDate": "End date",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "noCategory": "No category",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes...",
+      "createSuccess": "Recurring expense created",
+      "createError": "Failed to create recurring expense",
+      "updateSuccess": "Recurring expense updated",
+      "updateError": "Failed to update recurring expense"
+    },
+    "markPaid": {
+      "title": "Mark as Paid",
+      "dueDate": "Due",
+      "amount": "Amount",
+      "paidDate": "Paid date",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes...",
+      "confirm": "Confirm Payment",
+      "paying": "Processing...",
+      "success": "Payment recorded",
+      "error": "Failed to record payment"
+    },
+    "payments": {
+      "title": "Payment History",
+      "noPayments": "No payments recorded yet.",
+      "dueDate": "Due Date",
+      "paidDate": "Paid Date",
+      "amount": "Amount",
+      "notes": "Notes"
+    },
+    "dashboard": {
+      "title": "Upcoming Bills",
+      "allCaughtUp": "All caught up! No upcoming bills.",
+      "manageExpenses": "Manage recurring expenses",
+      "viewAll": "View all recurring expenses",
+      "overdue": "Overdue",
+      "dueSoon": "Due Soon",
+      "upcoming": "Upcoming",
+      "more": "more"
     }
   },
   "announcements": {

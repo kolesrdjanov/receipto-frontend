@@ -15,6 +15,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { MonthlyForecast } from '@/components/dashboard/monthly-forecast'
 import { CoachCard } from '@/components/coach/coach-card'
+import { UpcomingRecurring } from '@/components/dashboard/upcoming-recurring'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
 import { useMe } from '@/hooks/users/use-me'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
@@ -27,6 +28,7 @@ import {
 } from '@/hooks/dashboard/use-dashboard'
 import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
+import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
 import { cn } from '@/lib/utils'
 import { PageTransition, StaggerContainer, StaggerItem, AnimatedNumber } from '@/components/ui/animated'
@@ -110,6 +112,7 @@ export default function Dashboard() {
 
   const { data: currencies = [] } = useCurrencies()
   const { data: me } = useMe(true)
+  const { data: featureFlags } = useFeatureFlags()
 
   const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
@@ -555,6 +558,12 @@ export default function Dashboard() {
               exchangeRates={exchangeRates}
             />
           </div>
+
+          {(featureFlags?.recurringExpenses ?? true) && (
+            <div className="mb-6">
+              <UpcomingRecurring displayCurrency={displayCurrency} exchangeRates={exchangeRates} />
+            </div>
+          )}
 
           {/* Financial Coach */}
           <div className="mb-6">

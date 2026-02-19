@@ -15,6 +15,7 @@ import Warranties from './pages/warranties'
 import Settings from './pages/settings'
 import Items from './pages/items'
 import Savings from './pages/savings'
+import RecurringExpenses from './pages/recurring-expenses'
 
 // Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
@@ -129,6 +130,16 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <GroupDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/recurring',
+    element: (
+      <ProtectedRoute>
+        <FeatureRoute feature="recurringExpenses">
+          <RecurringExpenses />
+        </FeatureRoute>
       </ProtectedRoute>
     ),
   },

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp, PiggyBank } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp, PiggyBank, CalendarClock } from 'lucide-react'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
@@ -24,6 +24,7 @@ interface AppLayoutProps {
 const mainNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { path: '/receipts', labelKey: 'nav.receipts', icon: Receipt },
+  { path: '/recurring', labelKey: 'nav.recurring', icon: CalendarClock, featureFlag: 'recurringExpenses' as const },
   { path: '/items', labelKey: 'nav.priceTracker', icon: TrendingUp, featureFlag: 'itemPricing' as const },
   { path: '/categories', labelKey: 'nav.categories', icon: FolderOpen },
   { path: '/groups', labelKey: 'nav.groups', icon: Users },

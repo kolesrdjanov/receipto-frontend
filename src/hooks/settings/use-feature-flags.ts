@@ -6,6 +6,7 @@ export interface FeatureFlags {
   warranties: boolean
   itemPricing: boolean
   savings: boolean
+  recurringExpenses: boolean
 }
 
 const fetchFeatureFlags = async (): Promise<FeatureFlags> => {

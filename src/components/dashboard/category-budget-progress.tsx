@@ -69,7 +69,12 @@ export function CategoryBudgetProgress({
             <p className="text-xs mt-1">{t('dashboard.budgetProgress.setBudgetHint')}</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div
+            className={cn(
+              'space-y-3',
+              categoriesWithBudget.length > 4 && 'max-h-[21.5rem] overflow-y-auto pr-1',
+            )}
+          >
             {categoriesWithBudget.map((category) => {
               const budgetCurrency = category.budgetCurrency!
               const budgetAmount = category.monthlyBudget!

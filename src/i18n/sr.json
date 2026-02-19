@@ -84,6 +84,7 @@
     "version": "Verzija",
     "supportUs": "Podrži nas",
     "ratings": "Ocene",
+    "recurring": "Ponavljajući",
     "announcements": "Obaveštenja",
     "appSettings": "Podešavanja",
     "collapseSidebar": "Skupi meni",
@@ -252,11 +253,13 @@
       "group": "Grupa"
     },
     "archivedGroupLocked": "Ovaj račun je u arhiviranoj grupi. Dearhivirajte grupu da biste mogli da menjate ili brišete.",
+    "recurringLocked": "Ovaj račun je automatski kreiran iz ponavljajućeg troška. Upravljajte njime sa stranice Ponavljajući.",
     "status": {
       "completed": "Završeno",
       "manual": "Ručno",
       "pending": "Na čekanju",
-      "failed": "Neuspelo"
+      "failed": "Neuspelo",
+      "recurring": "Ponavljajući"
     },
     "unknownStore": "Nepoznata prodavnica",
     "modal": {
@@ -1015,7 +1018,7 @@
       "aiCoach": "AI Trener",
       "aiCoachDescription": "Koristi Gemini AI za personalizovane finansijske savete umesto standardne analize.",
       "aiCategorization": "AI Auto-kategorizacija",
-      "aiCategorizationDescription": "Koristi AI za predlaganje kategorija kada standardno podudaranje ne uspe.",
+      "aiCategorizationDescription": "Koristi AI kao podrazumevani metod za automatsku kategorizaciju računa. Kada je isključeno, koristi se standardno podudaranje.",
       "aiItems": "AI Inteligencija artikala",
       "aiItemsDescription": "Koristi AI za normalizaciju naziva prodavnica, obogaćivanje proizvoda i uvide u kupovinu.",
       "aiSavings": "AI Copilot za štednju",
@@ -1028,7 +1031,9 @@
       "featureItemPricing": "Praćenje cena",
       "featureItemPricingDescription": "Omogućite korisnicima praćenje cena proizvoda u različitim prodavnicama.",
       "featureSavings": "Štednja",
-      "featureSavingsDescription": "Omogućite korisnicima postavljanje ciljeva štednje i praćenje uplata."
+      "featureSavingsDescription": "Omogućite korisnicima postavljanje ciljeva štednje i praćenje uplata.",
+      "featureRecurringExpenses": "Ponavljajući troškovi",
+      "featureRecurringExpensesDescription": "Omogućite korisnicima upravljanje ponavljajućim računima i pretplatama."
     }
   },
   "categorization": {
@@ -1324,6 +1329,113 @@
       "newMonthlySpent": "Nova mesečna potrošnja",
       "goalsAcceleration": "Ubrzanje ciljeva",
       "monthsFaster": "{{count}} meseci brže"
+    }
+  },
+  "recurring": {
+    "title": "Ponavljajući troškovi",
+    "subtitle": "Upravljajte ponavljajućim računima i pretplatama",
+    "addExpense": "Dodaj trošak",
+    "deleteSuccess": "Ponavljajući trošak obrisan",
+    "deleteError": "Greška pri brisanju troška",
+    "deleteTitle": "Obriši ponavljajući trošak",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete \"{{name}}\"? Ovo će obrisati i istoriju plaćanja.",
+    "paused": "Trošak pauziran",
+    "resumed": "Trošak nastavljen",
+    "updateError": "Greška pri ažuriranju troška",
+    "frequency": {
+      "weekly": "Nedeljno",
+      "monthly": "Mesečno",
+      "quarterly": "Kvartalno",
+      "yearly": "Godišnje"
+    },
+    "status": {
+      "active": "Aktivan",
+      "paused": "Pauziran",
+      "ended": "Završen"
+    },
+    "stats": {
+      "monthlyCommitment": "Mesečna obaveza",
+      "paidThisMonth": "Plaćeno ovog meseca",
+      "pendingThisMonth": "Na čekanju ovog meseca"
+    },
+    "table": {
+      "name": "Naziv",
+      "amount": "Iznos",
+      "frequency": "Učestalost",
+      "nextDue": "Sledeći rok",
+      "status": "Status",
+      "actions": "Akcije"
+    },
+    "actions": {
+      "pay": "Označi kao plaćeno",
+      "pause": "Pauziraj",
+      "resume": "Nastavi"
+    },
+    "empty": {
+      "title": "Nema ponavljajućih troškova",
+      "description": "Dodajte prvi ponavljajući trošak da biste pratili račune i pretplate."
+    },
+    "info": {
+      "title": "Kako funkcioniše automatsko plaćanje",
+      "description": "Troškovi sa fiksnim iznosom se automatski označavaju kao plaćeni na dan dospeća i pojavljuju se u listi troškova. Troškovi sa promenljivim iznosom zahtevaju ručno plaćanje — videćete ih na kontrolnoj tabli kada dospeju."
+    },
+    "modal": {
+      "createTitle": "Dodaj ponavljajući trošak",
+      "createDescription": "Podesite novi ponavljajući račun ili pretplatu.",
+      "editTitle": "Izmeni ponavljajući trošak",
+      "editDescription": "Ažurirajte detalje ponavljajućeg troška.",
+      "name": "Naziv",
+      "nameRequired": "Naziv je obavezan",
+      "namePlaceholder": "npr. Internet, Članarina u teretani",
+      "amount": "Iznos",
+      "amountRequired": "Iznos je obavezan",
+      "amountMin": "Iznos mora biti veći od 0",
+      "currency": "Valuta",
+      "fixedAmount": "Fiksni iznos",
+      "frequency": "Učestalost",
+      "dayOfMonth": "Dan u mesecu",
+      "startDate": "Datum početka",
+      "startDateRequired": "Datum početka je obavezan",
+      "endDate": "Datum završetka",
+      "category": "Kategorija",
+      "selectCategory": "Izaberite kategoriju",
+      "noCategory": "Bez kategorije",
+      "notes": "Napomene",
+      "notesPlaceholder": "Opcione napomene...",
+      "createSuccess": "Ponavljajući trošak kreiran",
+      "createError": "Greška pri kreiranju troška",
+      "updateSuccess": "Ponavljajući trošak ažuriran",
+      "updateError": "Greška pri ažuriranju troška"
+    },
+    "markPaid": {
+      "title": "Označi kao plaćeno",
+      "dueDate": "Rok",
+      "amount": "Iznos",
+      "paidDate": "Datum plaćanja",
+      "notes": "Napomene",
+      "notesPlaceholder": "Opcione napomene...",
+      "confirm": "Potvrdi plaćanje",
+      "paying": "Obrada...",
+      "success": "Plaćanje zabeleženo",
+      "error": "Greška pri beleženju plaćanja"
+    },
+    "payments": {
+      "title": "Istorija plaćanja",
+      "noPayments": "Još nema zabeleženih plaćanja.",
+      "dueDate": "Rok plaćanja",
+      "paidDate": "Datum plaćanja",
+      "amount": "Iznos",
+      "notes": "Napomene"
+    },
+    "dashboard": {
+      "title": "Predstojeći računi",
+      "allCaughtUp": "Sve je plaćeno! Nema predstojećih računa.",
+      "manageExpenses": "Upravljaj ponavljajućim troškovima",
+      "viewAll": "Pogledaj sve ponavljajuće troškove",
+      "overdue": "Zakasnelo",
+      "dueSoon": "Uskoro dospeva",
+      "upcoming": "Predstojeće",
+      "more": "još"
     }
   },
   "announcements": {

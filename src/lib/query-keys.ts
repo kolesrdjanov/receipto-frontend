@@ -144,6 +144,18 @@ export const queryKeys = {
     detail: (year: number, month: number) => [...queryKeys.reports.all, year, month] as const,
   },
 
+  // Recurring Expenses
+  recurringExpenses: {
+    all: ['recurringExpenses'] as const,
+    lists: () => [...queryKeys.recurringExpenses.all, 'list'] as const,
+    list: () => [...queryKeys.recurringExpenses.lists()] as const,
+    details: () => [...queryKeys.recurringExpenses.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.recurringExpenses.details(), id] as const,
+    upcoming: (days?: number) => [...queryKeys.recurringExpenses.all, 'upcoming', days] as const,
+    summary: () => [...queryKeys.recurringExpenses.all, 'summary'] as const,
+    payments: (id: string) => [...queryKeys.recurringExpenses.detail(id), 'payments'] as const,
+  },
+
   // Ratings
   ratings: {
     all: ['ratings'] as const,

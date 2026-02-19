@@ -371,6 +371,12 @@ export default function Receipts() {
             {t('receipts.status.failed')}
           </span>
         )
+      case 'recurring':
+        return (
+          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+            {t('receipts.status.recurring')}
+          </span>
+        )
       default:
         return null
     }
@@ -806,8 +812,8 @@ export default function Receipts() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditReceipt(receipt)}
-                          disabled={!!receipt.group?.isArchived}
-                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
+                          disabled={!!receipt.group?.isArchived || receipt.status === 'recurring'}
+                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : receipt.status === 'recurring' ? t('receipts.recurringLocked') : undefined}
                           data-testid={`receipt-edit-${receipt.id}`}
                         >
                           <Pencil className="h-4 w-4" />
@@ -816,8 +822,8 @@ export default function Receipts() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteReceipt(receipt)}
-                          disabled={deleteReceipt.isPending || !!receipt.group?.isArchived}
-                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
+                          disabled={deleteReceipt.isPending || !!receipt.group?.isArchived || receipt.status === 'recurring'}
+                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : receipt.status === 'recurring' ? t('receipts.recurringLocked') : undefined}
                           data-testid={`receipt-delete-${receipt.id}`}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />

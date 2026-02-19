@@ -50,7 +50,7 @@ export interface Receipt {
   receiptNumber?: string
   scrapedData?: ScrapedData
   hasJournal?: boolean
-  status: 'pending' | 'scraped' | 'failed' | 'manual' | 'completed'
+  status: 'pending' | 'scraped' | 'failed' | 'manual' | 'completed' | 'recurring'
   category?: {
     id: string
     name: string
