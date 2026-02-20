@@ -9,11 +9,23 @@ export interface AdminUser {
   lastName: string
   role: 'user' | 'admin'
   createdAt: string
+  lastLoginAt: string | null
   receiptCount: number
   warrantyCount: number
+  recurringExpenseCount: number
+  recurringPaymentCount: number
+  recurringReceiptCount: number
 }
 
-export type SortField = 'createdAt' | 'receiptCount' | 'warrantyCount' | 'email' | 'firstName' | 'lastName'
+export type SortField =
+  | 'createdAt'
+  | 'lastLoginAt'
+  | 'receiptCount'
+  | 'warrantyCount'
+  | 'recurringExpenseCount'
+  | 'email'
+  | 'firstName'
+  | 'lastName'
 export type SortOrder = 'ASC' | 'DESC'
 
 export interface AdminUsersFilters {
@@ -116,7 +128,12 @@ export interface UserDetails {
   role: 'user' | 'admin'
   profileImageUrl: string | null
   createdAt: string
+  lastLoginAt: string | null
   receiptCount: number
+  warrantyCount: number
+  recurringExpenseCount: number
+  recurringPaymentCount: number
+  recurringReceiptCount: number
   street: string | null
   zipCode: string | null
   city: string | null

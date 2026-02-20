@@ -222,9 +222,18 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      {t('admin.users.table.joined')}
+                      {t('admin.users.table.recurring')}
                     </span>
-                    <span className="font-medium">{formatDateTime(user.createdAt)}</span>
+                    <span className="font-medium">{user.recurringExpenseCount}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t('admin.users.table.lastLogin')}
+                    </span>
+                    <span className="font-medium">
+                      {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : t('admin.users.neverLoggedIn')}
+                    </span>
                   </div>
                 </div>
 
@@ -306,6 +315,16 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
+                  <SortableHeader field="recurringExpenseCount">
+                    {t('admin.users.table.recurring')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="lastLoginAt">
+                    {t('admin.users.table.lastLogin')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
                   <SortableHeader field="createdAt">
                     {t('admin.users.table.joined')}
                   </SortableHeader>
@@ -326,6 +345,8 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{user.receiptCount}</TableCell>
                   <TableCell>{user.warrantyCount}</TableCell>
+                  <TableCell>{user.recurringExpenseCount}</TableCell>
+                  <TableCell>{user.lastLoginAt ? formatDateTime(user.lastLoginAt) : t('admin.users.neverLoggedIn')}</TableCell>
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

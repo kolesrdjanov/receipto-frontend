@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -209,6 +209,18 @@ export default function AdminUserDetailsPage() {
                 </div>
 
                 <div className="flex items-start gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.table.lastLogin')}</p>
+                    <p className="text-sm font-medium">
+                      {userDetails.lastLoginAt
+                        ? formatDateTime(userDetails.lastLoginAt)
+                        : t('admin.users.neverLoggedIn')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
                   <Receipt className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">{t('admin.users.table.receipts')}</p>
@@ -227,6 +239,54 @@ export default function AdminUserDetailsPage() {
                     ) : (
                       <p className="text-sm text-muted-foreground">{t('admin.users.noAddress')}</p>
                     )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('admin.users.usage.title')}</CardTitle>
+              <p className="text-sm text-muted-foreground">{t('admin.users.usage.description')}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">{t('admin.users.table.warranties')}</p>
+                  <p className="text-2xl font-bold">{userDetails.warrantyCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">{t('admin.users.table.recurring')}</p>
+                  <p className="text-2xl font-bold">{userDetails.recurringExpenseCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringPayments')}</p>
+                  <p className="text-2xl font-bold">{userDetails.recurringPaymentCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringReceipts')}</p>
+                  <p className="text-2xl font-bold">{userDetails.recurringReceiptCount}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="flex items-center gap-2 rounded-lg border p-4">
+                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.warrantyAdoption')}</p>
+                    <p className="text-sm font-semibold">
+                      {userDetails.warrantyCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border p-4">
+                  <Repeat2 className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringAdoption')}</p>
+                    <p className="text-sm font-semibold">
+                      {userDetails.recurringExpenseCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
+                    </p>
                   </div>
                 </div>
               </div>

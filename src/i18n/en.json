@@ -904,6 +904,17 @@
       "detailsSubtitle": "Detailed user profile, expenses, and spending insights",
       "backToUsers": "Back to users",
       "invalidUser": "Invalid user",
+      "neverLoggedIn": "Never logged in",
+      "usage": {
+        "title": "Feature Usage",
+        "description": "How this user is using warranties and recurring expenses",
+        "warrantyAdoption": "Warranty usage",
+        "recurringAdoption": "Recurring usage",
+        "recurringPayments": "Recurring payments",
+        "recurringReceipts": "Recurring receipts",
+        "used": "Used",
+        "notUsed": "Not used"
+      },
       "analytics": {
         "title": "Spending Analytics",
         "description": "Where this user spends the most, grouped by category",
@@ -919,6 +930,8 @@
         "role": "Role",
         "receipts": "Expenses",
         "warranties": "Warranties",
+        "recurring": "Recurring",
+        "lastLogin": "Last login",
         "joined": "Joined",
         "delete": "Delete"
       },

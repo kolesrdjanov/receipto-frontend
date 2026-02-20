@@ -891,6 +891,17 @@
       "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
       "backToUsers": "Nazad na korisnike",
       "invalidUser": "Neispravan korisnik",
+      "neverLoggedIn": "Nikada se nije prijavio",
+      "usage": {
+        "title": "Korišćenje funkcija",
+        "description": "Kako ovaj korisnik koristi garancije i ponavljajuće troškove",
+        "warrantyAdoption": "Korišćenje garancija",
+        "recurringAdoption": "Korišćenje ponavljajućih troškova",
+        "recurringPayments": "Uplate ponavljajućih troškova",
+        "recurringReceipts": "Računi iz ponavljajućih troškova",
+        "used": "Koristi",
+        "notUsed": "Ne koristi"
+      },
       "analytics": {
         "title": "Analitika potrošnje",
         "description": "Gde ovaj korisnik najviše troši, grupisano po kategoriji",
@@ -906,6 +917,8 @@
         "role": "Uloga",
         "receipts": "Troškovi",
         "warranties": "Garancije",
+        "recurring": "Ponavljajući",
+        "lastLogin": "Poslednja prijava",
         "joined": "Pridružen",
         "delete": "Obriši"
       },
