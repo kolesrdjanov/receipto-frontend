@@ -24,6 +24,7 @@ import {
   BarChart3,
   PiggyBank,
   Sparkles,
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
@@ -48,6 +49,7 @@ export default function ItemsPage() {
   const migrateReceipts = useMigrateReceipts()
   const { currency } = useSettingsStore()
   const [isMigrating, setIsMigrating] = useState(false)
+  const [showNoDataWarning, setShowNoDataWarning] = useState(false)
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('sr-RS', {
@@ -81,8 +83,9 @@ export default function ItemsPage() {
           items: result.itemsCreated,
           receipts: result.processed,
         }))
+        setShowNoDataWarning(false)
       } else {
-        toast.info(t('items.migrate.noNewItems'))
+        setShowNoDataWarning(true)
       }
     } catch {
       toast.error(t('items.migrate.error'))
@@ -176,6 +179,15 @@ export default function ItemsPage() {
                 </div>
               </div>
             </div>
+
+            {showNoDataWarning && (
+              <div className="flex gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20 w-full max-w-2xl mb-6">
+                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">
+                  {t('items.empty.noDataWarning')}
+                </p>
+              </div>
+            )}
 
             <Button size="lg" onClick={handleMigrate}>
               <Sparkles className="h-4 w-4" />

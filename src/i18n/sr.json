@@ -1175,15 +1175,16 @@
     },
     "empty": {
       "title": "Počnite sa praćenjem cena",
-      "description": "Uvezite proizvode iz skeniranih računa da biste počeli da pratite cene, poredite prodavnice i pronalazite uštede.",
-      "step1Title": "Izdvajamo artikle",
-      "step1Description": "Proizvodi i cene se automatski izdvajaju iz vaših skeniranih računa.",
+      "description": "Ova funkcija koristi podatke iz računa skeniranih putem QR koda. Ručno uneti računi ne sadrže podatke o artiklima potrebne za praćenje cena.",
+      "step1Title": "Skenirajte QR kod",
+      "step1Description": "Skenirajte QR kodove sa fiskalnih računa da biste automatski preuzeli sve artikle i cene.",
       "step2Title": "AI čisti podatke",
       "step2Description": "Nečitljivi nazivi sa kasa se pretvaraju u čitljiva imena proizvoda pomoću AI-a.",
       "step3Title": "Vi pratite i štedite",
-      "step3Description": "Poredite cene u prodavnicama i pratite trendove tokom vremena.",
+      "step3Description": "Poredite cene istih proizvoda u različitim prodavnicama i pratite trendove.",
       "importButton": "Uvezi proizvode iz računa",
-      "importHint": "Ovo će obraditi sve vaše skenirane račune i izvući podatke o proizvodima."
+      "importHint": "Ovo će obraditi sve vaše skenirane račune i izvući podatke o proizvodima.",
+      "noDataWarning": "Nemate skenirane račune sa podacima o artiklima. Ova funkcija je namenjena za praćenje cena istih proizvoda u različitim prodavnicama — skenirajte QR kodove sa fiskalnih računa da biste počeli."
     },
     "insights": {
       "title": "Uvidi u kupovinu",

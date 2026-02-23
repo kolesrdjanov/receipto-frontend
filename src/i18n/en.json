@@ -1188,15 +1188,16 @@
     },
     "empty": {
       "title": "Get Started with Price Tracking",
-      "description": "Import products from your scanned receipts to start tracking prices, comparing stores, and finding savings.",
-      "step1Title": "We extract items",
-      "step1Description": "Products and prices are pulled from your scanned receipts automatically.",
+      "description": "This feature uses data from QR-scanned receipts. Manually entered receipts don't contain the item details needed for price tracking.",
+      "step1Title": "Scan QR codes",
+      "step1Description": "Scan QR codes from fiscal receipts to automatically pull all items and prices.",
       "step2Title": "AI cleans the data",
       "step2Description": "Messy POS names are transformed into readable product names using AI.",
       "step3Title": "You track & save",
-      "step3Description": "Compare prices across stores and spot trends over time.",
+      "step3Description": "Compare prices of the same products across different stores and spot trends.",
       "importButton": "Import Products from Receipts",
-      "importHint": "This will process all your scanned receipts and extract product data."
+      "importHint": "This will process all your scanned receipts and extract product data.",
+      "noDataWarning": "You don't have any scanned receipts with item data. This feature is designed for tracking prices of the same products across different stores — scan QR codes from fiscal receipts to get started."
     },
     "insights": {
       "title": "Shopping Insights",

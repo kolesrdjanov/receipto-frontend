@@ -179,7 +179,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Mobile: always show full logo + announcements */}
             <div className={cn('flex items-center gap-2', collapsed && 'md:hidden')}>
               <Link to={'/dashboard'}>
-                <img src="/logo-full.svg" alt="Receipto" className="h-8 w-auto" />
+                <img src="/logo-text.svg" alt="Receipto" className="h-6 w-auto" />
               </Link>
               <button
                 onClick={() => setIsAnnouncementsOpen(true)}
@@ -192,14 +192,16 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
               </button>
             </div>
-            {/* Desktop collapsed: show just icon logo */}
-            {collapsed && (
-              <Link to={'/dashboard'} className="hidden md:block relative">
-                <img src="/logo-icon.svg" alt="Receipto" className="h-8 w-8" />
-                {hasAnnouncements && (
-                  <span className="absolute -top-0.5 -right-1.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                )}
-              </Link>
+            {/* Desktop collapsed: no logo, just announcements indicator */}
+            {collapsed && hasAnnouncements && (
+              <button
+                onClick={() => setIsAnnouncementsOpen(true)}
+                className="hidden md:block relative p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={t('announcements.title')}
+              >
+                <Megaphone className="h-4 w-4" />
+                <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              </button>
             )}
             {/* Desktop: collapse/expand toggle */}
             <button
