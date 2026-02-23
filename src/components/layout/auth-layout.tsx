@@ -19,8 +19,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row">
       {/* Mobile branded header */}
-      <div className="lg:hidden bg-gradient-to-r from-primary to-primary/80 px-6 py-4">
-        <Logo size="sm" className="text-primary-foreground [&_span]:text-primary-foreground" />
+      <div className="lg:hidden border-b px-6 py-4">
+        <Logo size="sm" />
       </div>
 
       {/* Form side */}
@@ -55,34 +55,26 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Branded panel (desktop only) */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground flex-col items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] relative overflow-hidden bg-muted/40 border-l flex-col items-center justify-center p-12">
         {/* Decorative orbs */}
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
-
-        {/* Grid pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/3 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
 
         {/* Content */}
         <div className="relative z-10 text-center space-y-8">
-          <Logo size="lg" className="justify-center text-primary-foreground [&_span]:text-primary-foreground" />
+          <Logo size="lg" className="justify-center" />
 
-          <p className="text-xl font-medium text-primary-foreground/90">
+          <p className="text-xl font-medium text-primary">
             {t('auth.brandTagline')}
           </p>
 
           <div className="space-y-4 text-left">
             {features.map((feature) => (
               <div key={feature.key} className="flex items-center gap-3">
-                <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center">
-                  <feature.icon className="h-5 w-5" />
+                <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
-                <span className="text-sm font-medium text-primary-foreground/85">
+                <span className="text-sm font-medium text-foreground/80">
                   {t(feature.key)}
                 </span>
               </div>
