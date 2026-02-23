@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AuthLayout } from '@/components/layout/auth-layout'
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { formData, errors, apiError, isLoading, handleChange, handleSubmit } = useSignUp()
+  const { formData, errors, apiError, setApiError, isLoading, handleChange, handleSubmit } = useSignUp()
 
   return (
     <AuthLayout>
@@ -145,6 +146,19 @@ export default function SignUp() {
             <Button type="submit" className="w-full" disabled={isLoading} data-testid="signup-submit-button">
               {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
             </Button>
+
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  {t('auth.orContinueWith')}
+                </span>
+              </div>
+            </div>
+
+            <GoogleSignInButton onError={setApiError} />
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signUp.hasAccount')}{' '}

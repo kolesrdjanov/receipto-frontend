@@ -45,6 +45,7 @@ export function Avatar({
           src={imageUrl}
           alt={`${firstName || ''} ${lastName || ''}`.trim() || 'User avatar'}
           className="h-full w-full object-cover"
+          referrerPolicy="no-referrer"
         />
       </div>
     )
