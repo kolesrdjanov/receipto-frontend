@@ -35,7 +35,7 @@ export function Drawer({ open, onOpenChange, children }: DrawerProps) {
       {/* Drawer */}
       <div
         className={cn(
-          'fixed right-0 top-0 z-50 h-full w-full md:w-1/3 bg-background shadow-lg transition-transform duration-300 ease-in-out flex flex-col',
+          'fixed right-0 top-0 z-50 h-full w-full md:w-1/4 bg-background shadow-lg transition-transform duration-300 ease-in-out flex flex-col',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
       >
