@@ -95,6 +95,7 @@
     "brandFeature1": "Scan & track receipts instantly",
     "brandFeature2": "Budget insights & spending analysis",
     "brandFeature3": "Warranty tracking & reminders",
+    "orContinueWith": "or",
     "signIn": {
       "title": "Welcome back",
       "subtitle": "Sign in to your account to continue",

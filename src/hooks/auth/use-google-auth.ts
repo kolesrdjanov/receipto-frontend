@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
-interface LoginResponse {
+interface GoogleAuthResponse {
   accessToken: string
   refreshToken: string
   user: {
@@ -16,50 +16,44 @@ interface LoginResponse {
   }
 }
 
-export function useSignIn() {
+export function useGoogleAuth() {
   const navigate = useNavigate()
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGoogleSuccess = async (credential: string) => {
     setError('')
     setIsLoading(true)
 
     try {
-      const response = await api.post<LoginResponse>(
-        '/auth/login',
-        {
-          email,
-          password,
-        },
-        { requiresAuth: false }
+      const response = await api.post<GoogleAuthResponse>(
+        '/auth/google',
+        { idToken: credential },
+        { requiresAuth: false },
       )
 
       login(response.user, response.accessToken, response.refreshToken)
 
-      // Redirect to the page they were trying to access, or dashboard
       const from = (location.state as { from?: string })?.from || '/dashboard'
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.')
+      const message = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handleGoogleError = () => {
+    setError('Google sign-in was cancelled or failed. Please try again.')
+  }
+
   return {
-    email,
-    setEmail,
-    password,
-    setPassword,
     error,
-    setError,
     isLoading,
-    handleSubmit,
+    handleGoogleSuccess,
+    handleGoogleError,
   }
 }

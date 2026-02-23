@@ -112,6 +112,7 @@ export function useSignUp() {
     formData,
     errors,
     apiError,
+    setApiError,
     isLoading,
     handleChange,
     handleSubmit,
