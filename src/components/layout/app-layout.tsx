@@ -179,7 +179,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Mobile: always show full logo + announcements */}
             <div className={cn('flex items-center gap-2', collapsed && 'md:hidden')}>
               <Link to={'/dashboard'}>
-                <h1 className="text-2xl font-bold text-primary font-display">{t('common.appName')}</h1>
+                <img src="/logo-full.svg" alt="Receipto" className="h-8 w-auto" />
               </Link>
               <button
                 onClick={() => setIsAnnouncementsOpen(true)}
@@ -192,10 +192,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
               </button>
             </div>
-            {/* Desktop collapsed: show just "R" logo */}
+            {/* Desktop collapsed: show just icon logo */}
             {collapsed && (
               <Link to={'/dashboard'} className="hidden md:block relative">
-                <span className="text-xl font-bold text-primary font-display">R</span>
+                <img src="/logo-icon.svg" alt="Receipto" className="h-8 w-8" />
                 {hasAnnouncements && (
                   <span className="absolute -top-0.5 -right-1.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                 )}
