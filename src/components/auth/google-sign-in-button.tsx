@@ -29,7 +29,7 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
           }
         }}
         onError={handleGoogleError}
-        theme="filled_blue"
+        theme="outline"
         size="large"
         width="400"
         shape="pill"
