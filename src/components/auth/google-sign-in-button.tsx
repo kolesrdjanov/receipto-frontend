@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
-import { useTranslation } from 'react-i18next'
 import { useGoogleAuth } from '@/hooks/auth/use-google-auth'
 
 interface GoogleSignInButtonProps {
@@ -8,7 +7,6 @@ interface GoogleSignInButtonProps {
 }
 
 export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
-  const { i18n } = useTranslation()
   const { handleGoogleSuccess, handleGoogleError, error } = useGoogleAuth()
 
   // Bubble errors to parent if callback provided
@@ -31,7 +29,6 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
           }
         }}
         onError={handleGoogleError}
-        locale={i18n.language === 'sr' ? 'sr' : 'en'}
         theme="filled_blue"
         size="large"
         width="400"
