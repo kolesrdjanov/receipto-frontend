@@ -96,36 +96,18 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
   useEffect(() => {
     if (!open || !ScannerComponent) return
 
-    let attempts = 0
-    const maxAttempts = 10
     let intervalId: number | null = null
 
-    const checkTorchSupport = () => {
-      attempts++
+    const checkForVideoTrack = () => {
       const container = containerRef.current
-      if (!container) {
-        if (attempts >= maxAttempts && intervalId) {
-          clearInterval(intervalId)
-        }
-        return
-      }
+      if (!container) return
 
       const video = container.querySelector('video')
-      if (!video || !video.srcObject) {
-        if (attempts >= maxAttempts && intervalId) {
-          clearInterval(intervalId)
-        }
-        return
-      }
+      if (!video || !video.srcObject) return
 
       const stream = video.srcObject as MediaStream
       const tracks = stream.getVideoTracks()
-      if (!tracks || tracks.length === 0) {
-        if (attempts >= maxAttempts && intervalId) {
-          clearInterval(intervalId)
-        }
-        return
-      }
+      if (!tracks || tracks.length === 0) return
 
       const track = tracks[0]
       videoTrackRef.current = track
@@ -143,14 +125,15 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         setTorchSupported(false)
       }
 
-      // Stop checking once we have the track
+      // Stop polling once we have the track
       if (intervalId) {
         clearInterval(intervalId)
       }
     }
 
-    // Check every 200ms until we find the video track or max attempts
-    intervalId = window.setInterval(checkTorchSupport, 200)
+    // Poll until video track is available (no attempt limit — user may take
+    // a while to approve the camera permission prompt)
+    intervalId = window.setInterval(checkForVideoTrack, 300)
 
     return () => {
       if (intervalId) {

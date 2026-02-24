@@ -50,6 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false)
+  const onboardingDismissedRef = useRef(false)
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false)
   const { hasAnnouncements } = useAnnouncementIndicator()
@@ -75,9 +76,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         ? { icon: Compass, className: 'text-emerald-400 bg-emerald-500/10 border-emerald-400/25' }
         : { icon: Compass, className: 'text-muted-foreground bg-muted/40 border-border' }
 
-  // Show onboarding on first login
+  // Show onboarding on first login (ref prevents re-show if localStorage fails in Safari incognito)
   useEffect(() => {
-    if (user && localStorage.getItem('receipto-onboarding-completed') !== 'true') {
+    if (user && !onboardingDismissedRef.current && localStorage.getItem('receipto-onboarding-completed') !== 'true') {
       setIsOnboardingOpen(true)
     }
   }, [user])
@@ -435,7 +436,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Onboarding Modal */}
       <OnboardingModal
         open={isOnboardingOpen}
-        onOpenChange={setIsOnboardingOpen}
+        onOpenChange={(open) => {
+          setIsOnboardingOpen(open)
+          if (!open) onboardingDismissedRef.current = true
+        }}
       />
 
       {/* Announcements Drawer */}
