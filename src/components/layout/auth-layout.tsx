@@ -19,7 +19,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row">
       {/* Mobile branded header */}
-      <div className="lg:hidden border-b px-6 py-4">
+      <div className="lg:hidden border-b px-6 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <Logo size="sm" />
       </div>
 

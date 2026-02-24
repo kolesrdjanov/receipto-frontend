@@ -311,8 +311,12 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
                 scanDelay={100}
                 constraints={{
                   facingMode: 'environment',
-                  width: { min: 640, ideal: 1280, max: 1920 },
-                  height: { min: 480, ideal: 720, max: 1080 },
+                  width: { min: 640, ideal: 1920, max: 3840 },
+                  height: { min: 480, ideal: 1080, max: 2160 },
+                  advanced: [
+                    { zoom: 1.0 } as MediaTrackConstraintSet,
+                    { focusMode: 'continuous' } as MediaTrackConstraintSet,
+                  ],
                 }}
                 styles={{
                   container: {

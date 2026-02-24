@@ -652,7 +652,7 @@ export default function Dashboard() {
 
       {/* Floating QR Scanner button - mobile only */}
       <button
-        className="md:hidden !fixed bottom-6 right-6 z-50 btn-glossy text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
+        className="md:hidden !fixed bottom-6 right-6 z-10 btn-glossy text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
         onClick={openQrScanner}
       >
         <QrCode className="h-6 w-6" />

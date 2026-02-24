@@ -160,7 +160,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full sidebar-glass transition-all duration-200 ease-in-out md:translate-x-0',
+          'fixed left-0 top-0 z-50 h-full sidebar-glass transition-all duration-200 ease-in-out md:translate-x-0 z-50',
           // Mobile: full width, slide in/out
           'w-full md:w-64',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
