@@ -21,7 +21,7 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
   }
 
   return (
-    <div className="flex justify-center [&>div]:w-full [&>div]:overflow-hidden [&>div]:rounded-md [&_iframe]:!rounded-md">
+    <div className="flex justify-center">
       <GoogleLogin
         onSuccess={(response) => {
           if (response.credential) {
