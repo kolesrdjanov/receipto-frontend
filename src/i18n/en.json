@@ -328,7 +328,10 @@
       "scanError": "Failed to create receipt from QR code",
       "torchOn": "Turn on flashlight",
       "torchOff": "Turn off flashlight",
-      "permissionHint": "Tip: To avoid being asked for camera permission every time, select \"Allow\" and check \"Remember this decision\" in your browser's permission dialog."
+      "permissionHint": "Tip: To avoid being asked for camera permission every time, select \"Allow\" and check \"Remember this decision\" in your browser's permission dialog.",
+      "cameraSlowTitle": "Camera is taking too long to start",
+      "cameraSlowDescription": "This can happen on some devices. Try again, or scan a QR code from your photo gallery instead.",
+      "useGallery": "Use Gallery"
     },
     "pfrEntry": {
       "title": "Manual Entry via PFR Number",

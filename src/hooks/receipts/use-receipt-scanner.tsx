@@ -263,6 +263,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
             open={isScannerOpen}
             onOpenChange={setIsScannerOpen}
             onScan={handleQrScan}
+            onGalleryFallback={() => galleryInputRef.current?.click()}
           />
         )}
       </Suspense>

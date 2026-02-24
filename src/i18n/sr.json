@@ -328,7 +328,10 @@
       "scanError": "Greška pri kreiranju računa iz QR koda",
       "torchOn": "Uključi blic",
       "torchOff": "Isključi blic",
-      "permissionHint": "Savet: Da ne biste svaki put dozvoljavali pristup kameri, izaberite \"Dozvoli\" i čekirajte \"Zapamti ovu odluku\" u browser-ovom dijalogu za dozvole."
+      "permissionHint": "Savet: Da ne biste svaki put dozvoljavali pristup kameri, izaberite \"Dozvoli\" i čekirajte \"Zapamti ovu odluku\" u browser-ovom dijalogu za dozvole.",
+      "cameraSlowTitle": "Kamera se predugo učitava",
+      "cameraSlowDescription": "Ovo se može desiti na nekim uređajima. Pokušajte ponovo ili skenirajte QR kod iz galerije.",
+      "useGallery": "Iz galerije"
     },
     "pfrEntry": {
       "title": "Ručni unos preko PFR broja",

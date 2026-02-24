@@ -8,12 +8,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, X, Info, Flashlight, FlashlightOff, Loader2 } from 'lucide-react'
+import { Camera, X, Info, Flashlight, FlashlightOff, Loader2, ImageIcon, CameraOff } from 'lucide-react'
 
 interface QrScannerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onScan: (url: string) => Promise<void>
+  onGalleryFallback?: () => void
 }
 
 type ScannerResult = { rawValue: string }
@@ -37,9 +38,12 @@ interface TorchConstraints extends MediaTrackConstraintSet {
   torch?: boolean
 }
 
-export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
+const CAMERA_TIMEOUT_MS = 10_000
+
+export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrScannerProps) {
   const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
+  const [cameraTimedOut, setCameraTimedOut] = useState(false)
   const [torchEnabled, setTorchEnabled] = useState(false)
   const [torchSupported, setTorchSupported] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
@@ -97,6 +101,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     if (!open || !ScannerComponent) return
 
     let intervalId: number | null = null
+    let timeoutId: number | null = null
 
     const checkForVideoTrack = () => {
       const container = containerRef.current
@@ -112,8 +117,13 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       const track = tracks[0]
       videoTrackRef.current = track
 
-      // Camera is now ready - hide loading
+      // Camera is now ready - hide loading and cancel timeout
       setIsLoading(false)
+      setCameraTimedOut(false)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
 
       // Check if torch is supported
       try {
@@ -135,10 +145,15 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
     // a while to approve the camera permission prompt)
     intervalId = window.setInterval(checkForVideoTrack, 300)
 
+    // Timeout: if camera hasn't started after 10s, show fallback options
+    // (keeps polling in case permission is granted late)
+    timeoutId = window.setTimeout(() => {
+      setCameraTimedOut(true)
+    }, CAMERA_TIMEOUT_MS)
+
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
+      if (intervalId) clearInterval(intervalId)
+      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [open, ScannerComponent])
 
@@ -151,6 +166,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
       lastScannedRef.current = null
       scanningRef.current = false
       setError(null)
+      setCameraTimedOut(false)
       setTorchEnabled(false)
       setTorchSupported(false)
       setIsProcessing(false)
@@ -231,6 +247,7 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
 
   const handleTryAgain = () => {
     setError(null)
+    setCameraTimedOut(false)
     scanningRef.current = false
     lastScannedRef.current = null
     setIsLoading(true)
@@ -244,6 +261,11 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
         setIsLoading(false)
       })
     }, 100)
+  }
+
+  const handleGalleryFallback = () => {
+    onOpenChange(false)
+    onGalleryFallback?.()
   }
 
   return (
@@ -270,18 +292,60 @@ export function QrScanner({ open, onOpenChange, onScan }: QrScannerProps) {
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
               <X className="h-12 w-12 text-destructive mb-2" />
               <p className="text-sm text-center text-destructive mb-4">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleTryAgain}
-              >
-                {t('receipts.qrScanner.tryAgain')}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTryAgain}
+                >
+                  {t('receipts.qrScanner.tryAgain')}
+                </Button>
+                {onGalleryFallback && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGalleryFallback}
+                    className="gap-1.5"
+                  >
+                    <ImageIcon className="h-3.5 w-3.5" />
+                    {t('receipts.qrScanner.useGallery')}
+                  </Button>
+                )}
+              </div>
             </div>
           ) : isLoading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
-              <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
-              <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-6 z-10">
+              {cameraTimedOut ? (
+                <>
+                  <CameraOff className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-sm font-medium text-center mb-1">{t('receipts.qrScanner.cameraSlowTitle')}</p>
+                  <p className="text-xs text-center text-muted-foreground mb-4">{t('receipts.qrScanner.cameraSlowDescription')}</p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTryAgain}
+                    >
+                      {t('receipts.qrScanner.tryAgain')}
+                    </Button>
+                    {onGalleryFallback && (
+                      <Button
+                        size="sm"
+                        onClick={handleGalleryFallback}
+                        className="gap-1.5"
+                      >
+                        <ImageIcon className="h-3.5 w-3.5" />
+                        {t('receipts.qrScanner.useGallery')}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
+                  <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
+                </>
+              )}
             </div>
           ) : null}
 
