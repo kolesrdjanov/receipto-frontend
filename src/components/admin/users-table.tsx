@@ -18,7 +18,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
@@ -215,13 +215,6 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      {t('admin.users.table.warranties')}
-                    </span>
-                    <span className="font-medium">{user.warrantyCount}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
                       {t('admin.users.table.recurring')}
                     </span>
                     <span className="font-medium">{user.recurringExpenseCount}</span>
@@ -229,10 +222,10 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      {t('admin.users.table.lastLogin')}
+                      {t('admin.users.table.googleAuth')}
                     </span>
                     <span className="font-medium">
-                      {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : t('admin.users.neverLoggedIn')}
+                      {user.hasGoogleAuth ? <Check className="h-4 w-4 text-green-600" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
                     </span>
                   </div>
                 </div>
@@ -310,20 +303,11 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
-                  <SortableHeader field="warrantyCount">
-                    {t('admin.users.table.warranties')}
-                  </SortableHeader>
-                </TableHead>
-                <TableHead>
                   <SortableHeader field="recurringExpenseCount">
                     {t('admin.users.table.recurring')}
                   </SortableHeader>
                 </TableHead>
-                <TableHead>
-                  <SortableHeader field="lastLoginAt">
-                    {t('admin.users.table.lastLogin')}
-                  </SortableHeader>
-                </TableHead>
+                <TableHead>{t('admin.users.table.googleAuth')}</TableHead>
                 <TableHead>
                   <SortableHeader field="createdAt">
                     {t('admin.users.table.joined')}
@@ -344,9 +328,10 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{user.receiptCount}</TableCell>
-                  <TableCell>{user.warrantyCount}</TableCell>
                   <TableCell>{user.recurringExpenseCount}</TableCell>
-                  <TableCell>{user.lastLoginAt ? formatDateTime(user.lastLoginAt) : t('admin.users.neverLoggedIn')}</TableCell>
+                  <TableCell>
+                    {user.hasGoogleAuth ? <Check className="h-4 w-4 text-green-600" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
+                  </TableCell>
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

@@ -930,9 +930,8 @@
         "email": "Email",
         "role": "Role",
         "receipts": "Expenses",
-        "warranties": "Warranties",
         "recurring": "Recurring",
-        "lastLogin": "Last login",
+        "googleAuth": "Google Auth",
         "joined": "Joined",
         "delete": "Delete"
       },

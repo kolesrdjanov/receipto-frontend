@@ -9,9 +9,8 @@ export interface AdminUser {
   lastName: string
   role: 'user' | 'admin'
   createdAt: string
-  lastLoginAt: string | null
+  hasGoogleAuth: boolean
   receiptCount: number
-  warrantyCount: number
   recurringExpenseCount: number
   recurringPaymentCount: number
   recurringReceiptCount: number
@@ -19,9 +18,7 @@ export interface AdminUser {
 
 export type SortField =
   | 'createdAt'
-  | 'lastLoginAt'
   | 'receiptCount'
-  | 'warrantyCount'
   | 'recurringExpenseCount'
   | 'email'
   | 'firstName'

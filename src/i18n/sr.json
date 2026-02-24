@@ -917,9 +917,8 @@
         "email": "Email",
         "role": "Uloga",
         "receipts": "Troškovi",
-        "warranties": "Garancije",
         "recurring": "Ponavljajući",
-        "lastLogin": "Poslednja prijava",
+        "googleAuth": "Google nalog",
         "joined": "Pridružen",
         "delete": "Obriši"
       },
