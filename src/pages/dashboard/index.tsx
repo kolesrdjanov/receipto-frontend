@@ -253,8 +253,24 @@ export default function Dashboard() {
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      // Check if this is daily chart data (has date property)
       const data = payload[0]?.payload
+      const isPieChart = data?.icon !== undefined && data?.color !== undefined
+
+      if (isPieChart) {
+        return (
+          <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <div
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: data.color }}
+              />
+              <span className="font-semibold text-sm">{data.icon} {data.name}</span>
+            </div>
+            <p className="text-sm font-medium">{formatAmount(data.value)}</p>
+          </div>
+        )
+      }
+
       const displayLabel = data?.date
         ? format(new Date(data.date), 'd MMM yyyy')
         : label
