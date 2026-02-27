@@ -29,7 +29,8 @@ import {
   type GroupMember,
 } from '@/hooks/groups/use-groups'
 import { useGroupPolling } from '@/hooks/groups/use-group-polling'
-import { useCreateReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
+import type { Receipt } from '@/hooks/receipts/use-receipts'
+import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useAuthStore } from '@/store/auth'
 import { queryKeys } from '@/lib/query-keys'
 import { GroupModal } from '@/components/groups/group-modal'
@@ -57,7 +58,6 @@ import {
 } from 'lucide-react'
 
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
-const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
 
 export default function GroupDetail() {
   const { t } = useTranslation()
@@ -77,7 +77,6 @@ export default function GroupDetail() {
 
   // Receipt entry state
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
-  const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -91,7 +90,7 @@ export default function GroupDetail() {
   const leaveGroup = useLeaveGroup()
   const archiveGroup = useArchiveGroup()
   const unarchiveGroup = useUnarchiveGroup()
-  const createReceipt = useCreateReceipt()
+  const { openQrScannerWithContext, scannerModals, isCreating } = useReceiptScanner()
 
   // Set display currency to group's default currency when group is loaded
   useEffect(() => {
@@ -279,24 +278,11 @@ export default function GroupDetail() {
   }
 
   const handleScanQr = () => {
-    setIsScannerOpen(true)
+    openQrScannerWithContext({
+      groupId: group.id,
+      paidById: user?.id,
+    })
     setShowAddDropdown(false)
-  }
-
-  const handleQrScan = async (url: string) => {
-    try {
-      await createReceipt.mutateAsync({
-        qrCodeUrl: url,
-        groupId: group.id,
-        paidById: user?.id,
-      })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('receipts.qrScanner.scanError')
-      toast.error(errorMessage)
-    }
   }
 
   return (
@@ -424,9 +410,9 @@ export default function GroupDetail() {
               variant="glossy"
               className="flex-1 sm:flex-none"
               onClick={handleScanQr}
-              disabled={createReceipt.isPending}
+              disabled={isCreating}
             >
-              {createReceipt.isPending ? (
+              {isCreating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Camera className="h-4 w-4" />
@@ -739,16 +725,7 @@ export default function GroupDetail() {
         )}
       </Suspense>
 
-      {/* QR Scanner */}
-      <Suspense fallback={null}>
-        {isScannerOpen && (
-          <QrScanner
-            open={isScannerOpen}
-            onOpenChange={setIsScannerOpen}
-            onScan={handleQrScan}
-          />
-        )}
-      </Suspense>
+      {scannerModals}
     </AppLayout>
   )
 }

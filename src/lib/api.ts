@@ -9,6 +9,22 @@ interface ApiRequestOptions extends AxiosRequestConfig {
   requiresAuth?: boolean
 }
 
+export class ApiError extends Error {
+  status?: number
+  rawMessage?: string
+
+  constructor(message: string, options?: { status?: number; rawMessage?: string }) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = options?.status
+    this.rawMessage = options?.rawMessage
+  }
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError
+}
+
 // Track ongoing refresh requests to prevent concurrent calls
 let refreshPromise: Promise<boolean> | null = null
 
@@ -67,7 +83,9 @@ axiosInstance.interceptors.response.use(
       } else {
         // Refresh failed, logout user
         useAuthStore.getState().logout()
-        return Promise.reject(new Error('Session expired. Please sign in again.'))
+        return Promise.reject(
+          new ApiError('Session expired. Please sign in again.', { status: 401 }),
+        )
       }
     }
 
@@ -91,8 +109,17 @@ export async function apiRequest<T>(
     return response.data
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const message = error.response?.data?.message || error.message || 'An error occurred'
-      throw new Error(message)
+      const payload = error.response?.data as
+        | { message?: string | string[] }
+        | undefined
+      const rawMessage = payload?.message
+      const message = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : rawMessage || error.message || 'An error occurred'
+      throw new ApiError(message, {
+        status: error.response?.status,
+        rawMessage: Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage,
+      })
     }
     throw error
   }

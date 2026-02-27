@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, type ComponentType } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -8,13 +8,41 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, X, Info, Flashlight, FlashlightOff, Loader2, ImageIcon, CameraOff } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Camera,
+  X,
+  Info,
+  Flashlight,
+  FlashlightOff,
+  Loader2,
+  ImageIcon,
+  CameraOff,
+  RefreshCw,
+  RotateCcw,
+  Smartphone,
+} from 'lucide-react'
+import * as Sentry from '@sentry/react'
+import { useDevices } from '@yudiel/react-qr-scanner'
+import type { RetryMeta, ScanFlowState } from '@/hooks/receipts/scan-flow'
 
 interface QrScannerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onScan: (url: string) => Promise<void>
   onGalleryFallback?: () => void
+  flowState?: ScanFlowState
+  retryMeta?: RetryMeta | null
+  errorMessage?: string | null
+  onCancelRetry?: () => void
+  onRetryNow?: () => void
+  onFlowStateChange?: (state: ScanFlowState) => void
 }
 
 type ScannerResult = { rawValue: string }
@@ -26,6 +54,7 @@ type ScannerProps = {
   constraints?: unknown
   styles?: unknown
   components?: unknown
+  formats?: string[]
 }
 
 // Extended MediaTrackCapabilities with torch
@@ -38,22 +67,85 @@ interface TorchConstraints extends MediaTrackConstraintSet {
   torch?: boolean
 }
 
+interface RecoverableScanError extends Error {
+  recoverable: true
+}
+
 const CAMERA_TIMEOUT_MS = 10_000
 
-export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrScannerProps) {
+type CameraSelection = 'auto' | 'rear' | 'front' | `device:${string}`
+
+function isRecoverableScanError(error: unknown): error is RecoverableScanError {
+  return error instanceof Error && 'recoverable' in error && (error as RecoverableScanError).recoverable === true
+}
+
+export function QrScanner({
+  open,
+  onOpenChange,
+  onScan,
+  onGalleryFallback,
+  flowState = 'idle',
+  retryMeta,
+  errorMessage,
+  onCancelRetry,
+  onRetryNow,
+  onFlowStateChange,
+}: QrScannerProps) {
   const { t } = useTranslation()
-  const [error, setError] = useState<string | null>(null)
+  const devices = useDevices()
+  const [localError, setLocalError] = useState<string | null>(null)
+  const [inlineNotice, setInlineNotice] = useState<string | null>(null)
   const [cameraTimedOut, setCameraTimedOut] = useState(false)
   const [torchEnabled, setTorchEnabled] = useState(false)
   const [torchSupported, setTorchSupported] = useState(false)
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [scannerKey, setScannerKey] = useState(0)
+  const [cameraSelection, setCameraSelection] = useState<CameraSelection>('auto')
+  const [useSimpleConstraints, setUseSimpleConstraints] = useState(false)
 
   const lastScannedRef = useRef<string | null>(null)
   const scanningRef = useRef(false)
   const videoTrackRef = useRef<MediaStreamTrack | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const torchTelemetrySentRef = useRef(false)
+  const noticeTimeoutRef = useRef<number | null>(null)
+
+  const activeError = errorMessage || localError
+  const isSubmitting = flowState === 'submitting'
+  const isRetrying = flowState === 'retrying_portal'
+  const showBlockingState = isSubmitting || isRetrying
+
+  const cameraConstraints = useMemo(() => {
+    const constraints: MediaTrackConstraints = {}
+
+    if (cameraSelection.startsWith('device:')) {
+      const deviceId = cameraSelection.replace('device:', '')
+      constraints.deviceId = { exact: deviceId }
+    } else if (cameraSelection === 'front') {
+      constraints.facingMode = 'user'
+    } else {
+      constraints.facingMode = 'environment'
+    }
+
+    if (!useSimpleConstraints) {
+      constraints.width = { ideal: 1280 }
+      constraints.height = { ideal: 720 }
+      constraints.aspectRatio = { ideal: 1.7777777778 }
+    }
+
+    return constraints
+  }, [cameraSelection, useSimpleConstraints])
+
+  const setNotice = useCallback((message: string) => {
+    setInlineNotice(message)
+    if (noticeTimeoutRef.current) {
+      clearTimeout(noticeTimeoutRef.current)
+    }
+    noticeTimeoutRef.current = window.setTimeout(() => {
+      setInlineNotice(null)
+    }, 2600)
+  }, [])
 
   // Toggle torch using the MediaStream API
   const toggleTorch = useCallback(async (enable: boolean) => {
@@ -74,7 +166,6 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
     }
 
     if (!track || track.readyState !== 'live') {
-      console.warn('No active video track for torch control')
       return
     }
 
@@ -84,7 +175,12 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       })
       setTorchEnabled(enable)
     } catch (err) {
-      console.error('Failed to toggle torch:', err)
+      Sentry.captureException(err, {
+        tags: {
+          feature: 'qr_scan',
+          stage: 'torch_toggle',
+        },
+      })
       try {
         const capabilities = track.getCapabilities() as TorchCapabilities
         if (!capabilities.torch) {
@@ -93,6 +189,20 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       } catch {
         setTorchSupported(false)
       }
+    }
+  }, [])
+
+  const resetCameraRuntime = useCallback(() => {
+    setCameraTimedOut(false)
+    setTorchEnabled(false)
+    setTorchSupported(false)
+    setInlineNotice(null)
+    setIsLoading(true)
+    setLocalError(null)
+    videoTrackRef.current = null
+    if (noticeTimeoutRef.current) {
+      clearTimeout(noticeTimeoutRef.current)
+      noticeTimeoutRef.current = null
     }
   }, [])
 
@@ -128,18 +238,32 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       // Check if torch is supported
       try {
         const capabilities = track.getCapabilities() as TorchCapabilities
-        if (capabilities.torch) {
-          setTorchSupported(true)
+        const hasTorch = Boolean(capabilities.torch)
+        setTorchSupported(hasTorch)
+
+        if (!torchTelemetrySentRef.current) {
+          torchTelemetrySentRef.current = true
+          Sentry.captureMessage('qr_scan_torch_capability', {
+            level: 'info',
+            tags: {
+              feature: 'qr_scan',
+              torch_supported: String(hasTorch),
+            },
+          })
         }
       } catch {
         setTorchSupported(false)
       }
+
+      onFlowStateChange?.('scanning')
 
       // Stop polling once we have the track
       if (intervalId) {
         clearInterval(intervalId)
       }
     }
+
+    onFlowStateChange?.('camera_loading')
 
     // Poll until video track is available (no attempt limit — user may take
     // a while to approve the camera permission prompt)
@@ -155,7 +279,7 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       if (intervalId) clearInterval(intervalId)
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [open, ScannerComponent])
+  }, [open, ScannerComponent, onFlowStateChange, scannerKey])
 
   // Load QR scanner component
   useEffect(() => {
@@ -165,19 +289,17 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       setScannerComponent(null)
       lastScannedRef.current = null
       scanningRef.current = false
-      setError(null)
-      setCameraTimedOut(false)
-      setTorchEnabled(false)
-      setTorchSupported(false)
-      setIsProcessing(false)
-      setIsLoading(true)
-      videoTrackRef.current = null
+      resetCameraRuntime()
+      setUseSimpleConstraints(false)
+      setCameraSelection('auto')
+      torchTelemetrySentRef.current = false
       return
     }
 
     // Reset refs when opening
     lastScannedRef.current = null
     scanningRef.current = false
+    resetCameraRuntime()
 
     ;(async () => {
       try {
@@ -186,7 +308,7 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
         setScannerComponent(() => mod.Scanner as ComponentType<ScannerProps>)
       } catch {
         if (cancelled) return
-        setError(t('receipts.qrScanner.cameraError'))
+        setLocalError(t('receipts.qrScanner.cameraError'))
         setIsLoading(false)
       }
     })()
@@ -194,14 +316,14 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
     return () => {
       cancelled = true
     }
-  }, [open, t])
+  }, [open, t, resetCameraRuntime])
 
   const handleScan = async (result: ScannerResult[]) => {
     if (result && result.length > 0) {
       const scannedText = result[0].rawValue
 
       // Prevent duplicate scans or scanning while processing
-      if (!scannedText || scanningRef.current || lastScannedRef.current === scannedText || isProcessing) {
+      if (!scannedText || scanningRef.current || lastScannedRef.current === scannedText || showBlockingState) {
         return
       }
 
@@ -209,55 +331,80 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
       scanningRef.current = true
       lastScannedRef.current = scannedText
 
-      // Set processing state
-      setIsProcessing(true)
-      setError(null)
+      setLocalError(null)
+      setInlineNotice(null)
 
       try {
+        onFlowStateChange?.('submitting')
         await onScan(scannedText)
         // Only close modal on success
         onOpenChange(false)
       } catch (err) {
-        // Show error in modal
+        if (isRecoverableScanError(err)) {
+          setNotice(err.message)
+          scanningRef.current = false
+          lastScannedRef.current = null
+          onFlowStateChange?.('scanning')
+          return
+        }
+
         const errorMessage = err instanceof Error ? err.message : t('receipts.qrScanner.scanError')
-        setError(errorMessage)
+        setLocalError(errorMessage)
+        onFlowStateChange?.('failed_terminal')
         // Reset scanning refs so user can try again
         scanningRef.current = false
         lastScannedRef.current = null
-      } finally {
-        setIsProcessing(false)
       }
     }
   }
 
   const handleError = (err: unknown) => {
-    console.error('QR Scanner error:', err)
-    if (err instanceof Error) {
-      setError(err.message)
-    } else {
-      setError(t('receipts.qrScanner.cameraError'))
+    const message = err instanceof Error ? err.message.toLowerCase() : ''
+
+    if (!useSimpleConstraints && (message.includes('constraint') || message.includes('overconstrained'))) {
+      setUseSimpleConstraints(true)
+      setNotice(t('receipts.qrScanner.cameraFallbackApplied'))
+      setScannerKey((prev) => prev + 1)
+      onFlowStateChange?.('camera_loading')
+      return
     }
+
+    Sentry.captureException(err, {
+      tags: {
+        feature: 'qr_scan',
+        stage: 'camera_start',
+      },
+    })
+
+    if (err instanceof Error) {
+      setLocalError(err.message)
+    } else {
+      setLocalError(t('receipts.qrScanner.cameraError'))
+    }
+    onFlowStateChange?.('failed_terminal')
     setIsLoading(false)
   }
 
   const handleClose = () => {
-    if (isProcessing) return
+    if (isSubmitting) return
     onOpenChange(false)
   }
 
   const handleTryAgain = () => {
-    setError(null)
-    setCameraTimedOut(false)
+    setLocalError(null)
+    resetCameraRuntime()
+    onFlowStateChange?.('camera_loading')
     scanningRef.current = false
     lastScannedRef.current = null
-    setIsLoading(true)
+    setScannerKey((prev) => prev + 1)
+
     // Re-trigger scanner component load
     setScannerComponent(null)
     setTimeout(() => {
       import('@yudiel/react-qr-scanner').then(mod => {
         setScannerComponent(() => mod.Scanner as ComponentType<ScannerProps>)
       }).catch(() => {
-        setError(t('receipts.qrScanner.cameraError'))
+        setLocalError(t('receipts.qrScanner.cameraError'))
         setIsLoading(false)
       })
     }, 100)
@@ -268,8 +415,22 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
     onGalleryFallback?.()
   }
 
+  const handleCameraSelectionChange = (value: string) => {
+    setCameraSelection(value as CameraSelection)
+    setUseSimpleConstraints(false)
+    setScannerKey((prev) => prev + 1)
+    setTorchEnabled(false)
+    setTorchSupported(false)
+    onFlowStateChange?.('camera_loading')
+  }
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) handleClose()
+      }}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -281,17 +442,93 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
           </DialogDescription>
         </DialogHeader>
 
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-muted-foreground" />
+            <Select value={cameraSelection} onValueChange={handleCameraSelectionChange}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder={t('receipts.qrScanner.cameraAuto')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">{t('receipts.qrScanner.cameraAuto')}</SelectItem>
+                <SelectItem value="rear">{t('receipts.qrScanner.cameraRear')}</SelectItem>
+                <SelectItem value="front">{t('receipts.qrScanner.cameraFront')}</SelectItem>
+                {devices.map((device) => (
+                  <SelectItem key={device.deviceId} value={`device:${device.deviceId}`}>
+                    {device.label || t('receipts.qrScanner.cameraDeviceFallback')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {inlineNotice && (
+            <p className="text-xs text-muted-foreground bg-muted/60 px-2 py-1.5 rounded-md">
+              {inlineNotice}
+            </p>
+          )}
+        </div>
+
         <div ref={containerRef} className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
-          {isProcessing ? (
+          {showBlockingState ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
               <Loader2 className="h-12 w-12 text-primary mb-4 animate-spin" />
-              <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.processing')}</p>
-              <p className="text-sm text-center text-muted-foreground">{t('receipts.qrScanner.processingDescription')}</p>
+              {isRetrying ? (
+                <>
+                  <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.retryingTitle')}</p>
+                  <p className="text-sm text-center text-muted-foreground mb-3">
+                    {retryMeta
+                      ? t('receipts.qrScanner.retryingDescription', { attempt: retryMeta.attempt, max: retryMeta.maxAttempts })
+                      : t('receipts.qrScanner.retryingGeneric')}
+                  </p>
+                  <p className="text-xs text-center text-muted-foreground mb-4">
+                    {t('receipts.qrScanner.portalDelayHint')}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onRetryNow}
+                      disabled={!onRetryNow}
+                      className="gap-1.5"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      {t('receipts.qrScanner.retryNow')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onCancelRetry}
+                      disabled={!onCancelRetry}
+                      className="gap-1.5"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      {t('receipts.qrScanner.cancelRetry')}
+                    </Button>
+                    {onGalleryFallback && (
+                      <Button
+                        size="sm"
+                        onClick={handleGalleryFallback}
+                        className="gap-1.5"
+                      >
+                        <ImageIcon className="h-3.5 w-3.5" />
+                        {t('receipts.qrScanner.useGallery')}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.processing')}</p>
+                  <p className="text-sm text-center text-muted-foreground">{t('receipts.qrScanner.processingDescription')}</p>
+                  <p className="text-xs text-center text-muted-foreground mt-3">{t('receipts.qrScanner.portalDelayHint')}</p>
+                </>
+              )}
             </div>
-          ) : error ? (
+          ) : activeError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
               <X className="h-12 w-12 text-destructive mb-2" />
-              <p className="text-sm text-center text-destructive mb-4">{error}</p>
+              <p className="text-sm text-center text-destructive mb-4">{activeError}</p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -350,21 +587,15 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
           ) : null}
 
           {/* Scanner component */}
-          {open && ScannerComponent && !error && (
+          {open && ScannerComponent && !activeError && (
             <>
               <ScannerComponent
+                key={scannerKey}
                 onScan={handleScan}
                 onError={handleError}
-                scanDelay={100}
-                constraints={{
-                  facingMode: 'environment',
-                  width: { min: 640, ideal: 1920, max: 3840 },
-                  height: { min: 480, ideal: 1080, max: 2160 },
-                  advanced: [
-                    { zoom: 1.0 } as MediaTrackConstraintSet,
-                    { focusMode: 'continuous' } as MediaTrackConstraintSet,
-                  ],
-                }}
+                scanDelay={250}
+                formats={['qr_code']}
+                constraints={cameraConstraints}
                 styles={{
                   container: {
                     width: '100%',
@@ -381,21 +612,33 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
                 }}
               />
 
-              {/* Torch button */}
-              {torchSupported && !isProcessing && !isLoading && (
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
-                  onClick={() => toggleTorch(!torchEnabled)}
-                  title={t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')}
-                >
-                  {torchEnabled ? (
-                    <FlashlightOff className="h-5 w-5" />
-                  ) : (
-                    <Flashlight className="h-5 w-5" />
+              {/* Torch controls (always visible area, explicit unsupported state) */}
+              {!showBlockingState && !isLoading && (
+                <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                    onClick={() => toggleTorch(!torchEnabled)}
+                    disabled={!torchSupported}
+                    title={
+                      torchSupported
+                        ? t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')
+                        : t('receipts.qrScanner.torchUnsupported')
+                    }
+                  >
+                    {torchEnabled ? (
+                      <FlashlightOff className="h-5 w-5" />
+                    ) : (
+                      <Flashlight className="h-5 w-5" />
+                    )}
+                  </Button>
+                  {!torchSupported && (
+                    <p className="max-w-[230px] rounded-md bg-background/80 px-2 py-1 text-[11px] text-right text-muted-foreground backdrop-blur-sm">
+                      {t('receipts.qrScanner.torchUnsupportedHint')}
+                    </p>
                   )}
-                </Button>
+                </div>
               )}
             </>
           )}
@@ -407,7 +650,7 @@ export function QrScanner({ open, onOpenChange, onScan, onGalleryFallback }: QrS
         </div>
 
         <div className="flex justify-end">
-          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
+          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
             {t('common.cancel')}
           </Button>
         </div>
