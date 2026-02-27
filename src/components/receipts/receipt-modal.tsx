@@ -38,7 +38,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { useSuggestCategory } from '@/hooks/receipts/use-suggest-category'
 import { useCategories } from '@/hooks/categories/use-categories'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { useGroups, useGroup } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
 import { CategorySuggestionCard } from './category-suggestion-card'
@@ -99,7 +99,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   })
 
   const { data: categories = [] } = useCategories()
-  const { data: currencies = [] } = useCurrencies()
+
   const includeArchivedGroups = mode === 'edit'
   const { data: groups = [] } = useGroups(includeArchivedGroups)
   const user = useAuthStore((state) => state.user)
@@ -334,21 +334,13 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                 name="currency"
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
+                  <CurrencySelect
+                    id="currency"
                     value={field.value}
-                  >
-                    <SelectTrigger id="currency" data-testid="receipt-currency-select">
-                      <SelectValue placeholder={t('receipts.modal.currency')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency.id} value={currency.code} data-testid={`receipt-currency-option-${currency.code}`}>
-                          {currency.code} - {currency.symbol}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onValueChange={field.onChange}
+                    placeholder={t('receipts.modal.currency')}
+                    data-testid="receipt-currency-select"
+                  />
                 )}
               />
             </div>

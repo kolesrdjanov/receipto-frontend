@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useSettingsStore, type Theme, type AccentColor, type Language } from '@/store/settings'
-import { useCurrencies, getCurrencyFlag  } from '@/hooks/currencies/use-currencies'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { Settings as SettingsIcon, Palette, DollarSign, Check, Languages, User as UserIcon, Image as ImageIcon, Trash2, Save, Bell, KeyRound, AlertTriangle, Sparkles, Compass, Crown, MapPin, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -49,7 +49,6 @@ const languages: { value: Language; labelKey: string }[] = [
 export default function Settings() {
   const { t } = useTranslation()
   const { currency, theme, accentColor, language, setCurrency, setTheme, setAccentColor, setLanguage } = useSettingsStore()
-  const { currencies } = useCurrencies()
 
   const authUser = useAuthStore((s) => s.user)
   const { data: featureFlags } = useFeatureFlags()
@@ -432,22 +431,14 @@ export default function Settings() {
                       {t('settings.currency.help')}
                     </p>
                   </div>
-                  <Select value={currency} onValueChange={(value: string) => setCurrency(value)}>
-                    <SelectTrigger id="currency" className="w-full sm:w-auto">
-                      <SelectValue placeholder={t('settings.currency.label')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>
-                          <span className="flex items-center gap-2">
-                            <span>{getCurrencyFlag(c.icon)}</span>
-                            <span>{c.name}</span>
-                            <span className="font-mono text-muted-foreground">{c.symbol}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CurrencySelect
+                    id="currency"
+                    value={currency}
+                    onValueChange={(value: string) => setCurrency(value)}
+                    placeholder={t('settings.currency.label')}
+                    triggerClassName="w-full sm:w-auto"
+                    variant="full"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -687,22 +678,13 @@ export default function Settings() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="incomeCurrency">{t('settings.profile.incomeCurrency')}</Label>
-                          <Select value={draft.incomeCurrency} onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))}>
-                            <SelectTrigger id="incomeCurrency">
-                              <SelectValue placeholder={t('settings.profile.incomeCurrency')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {currencies.map((c) => (
-                                <SelectItem key={c.code} value={c.code}>
-                                  <span className="flex items-center gap-2">
-                                    <span>{getCurrencyFlag(c.icon)}</span>
-                                    <span>{c.name}</span>
-                                    <span className="font-mono text-muted-foreground">{c.symbol}</span>
-                                  </span>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <CurrencySelect
+                            id="incomeCurrency"
+                            value={draft.incomeCurrency}
+                            onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))}
+                            placeholder={t('settings.profile.incomeCurrency')}
+                            variant="full"
+                          />
                         </div>
                       </div>
                     </div>

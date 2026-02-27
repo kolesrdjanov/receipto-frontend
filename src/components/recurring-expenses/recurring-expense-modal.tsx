@@ -29,7 +29,7 @@ import {
   type CreateRecurringExpenseInput,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { useCategories } from '@/hooks/categories/use-categories'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { useSettingsStore } from '@/store/settings'
 import { toast } from 'sonner'
 
@@ -46,7 +46,6 @@ export function RecurringExpenseModal({ open, onOpenChange, expense, mode }: Rec
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: categories } = useCategories()
-  const { data: currencies } = useCurrencies()
 
   const {
     register,
@@ -190,21 +189,10 @@ export function RecurringExpenseModal({ open, onOpenChange, expense, mode }: Rec
 
             <div className="space-y-2">
               <Label htmlFor="currency">{t('recurring.modal.currency')}</Label>
-              <Select
+              <CurrencySelect
                 value={currency || preferredCurrency}
                 onValueChange={(value) => setValue('currency', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies?.map((curr) => (
-                    <SelectItem key={curr.code} value={curr.code}>
-                      {curr.symbol} {curr.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           </div>
 

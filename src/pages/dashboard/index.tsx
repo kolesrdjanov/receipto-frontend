@@ -3,13 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
@@ -26,7 +20,6 @@ import {
   useAggregatedMonthlyStats,
   type CurrencyBreakdown,
 } from '@/hooks/dashboard/use-dashboard'
-import {getCurrencyFlag, useCurrencies} from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
@@ -110,7 +103,6 @@ export default function Dashboard() {
   const primaryColor = usePrimaryColor()
   const { openQrScanner, scannerModals } = useReceiptScanner({ navigateOnSuccess: true })
 
-  const { data: currencies = [] } = useCurrencies()
   const { data: me } = useMe(true)
   const { data: featureFlags } = useFeatureFlags()
 
@@ -317,22 +309,12 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <div className="ml-auto md:ml-0 flex items-center gap-2 p-1 rounded-lg bg-muted/30">
           <Coins className="h-4 w-4 text-muted-foreground ml-2" />
-          <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
-            <SelectTrigger className="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
-              <SelectValue placeholder={t('dashboard.currency')} />
-            </SelectTrigger>
-            <SelectContent>
-              {currencies.map((c) => (
-                <SelectItem key={c.id} value={c.code}>
-                  <div className="flex items-center gap-2">
-                    <span>{getCurrencyFlag(c.icon)}</span>
-                    <span>{c.code}</span>
-                    <span>({c.symbol})</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <CurrencySelect
+            value={displayCurrency}
+            onValueChange={setDisplayCurrency}
+            placeholder={t('dashboard.currency')}
+            triggerClassName="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
+          />
         </div>
         </div>
       </div>

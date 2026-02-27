@@ -929,6 +929,19 @@
         "topCategory": "Najveća kategorija",
         "convertedTo": "Iznosi konvertovani u {{currency}}"
       },
+      "filters": {
+        "minReceipts": "Min računa",
+        "maxReceipts": "Max računa",
+        "minWarranties": "Min garancija",
+        "maxWarranties": "Max garancija",
+        "joinedFrom": "Pridružen od",
+        "joinedTo": "Pridružen do",
+        "hasGoogleAuth": "Google nalog",
+        "googleAuthAll": "Svi",
+        "googleAuthYes": "Da",
+        "googleAuthNo": "Ne",
+        "clearFilters": "Obriši filtere"
+      },
       "table": {
         "firstName": "Ime",
         "lastName": "Prezime",
@@ -936,6 +949,7 @@
         "role": "Uloga",
         "receipts": "Troškovi",
         "recurring": "Ponavljajući",
+        "warranties": "Garancije",
         "googleAuth": "Google nalog",
         "joined": "Pridružen",
         "delete": "Obriši"

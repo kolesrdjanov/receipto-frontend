@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useCurrencies, getCurrencyFlag } from '@/hooks/currencies/use-currencies'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCreateSavingsGoal, useUpdateSavingsGoal, type SavingsGoal } from '@/hooks/savings/use-savings'
 import { useSettingsStore } from '@/store/settings'
@@ -58,7 +58,6 @@ interface GoalFormData {
 export function GoalModal({ open, onOpenChange, goal, mode }: GoalModalProps) {
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
-  const { currencies } = useCurrencies()
   const { data: categories } = useCategories()
   const createGoal = useCreateSavingsGoal()
   const updateGoal = useUpdateSavingsGoal()
@@ -180,21 +179,11 @@ export function GoalModal({ open, onOpenChange, goal, mode }: GoalModalProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">{t('savings.goalModal.currency')}</Label>
-              <Select value={watch('currency')} onValueChange={(v) => setValue('currency', v)}>
-                <SelectTrigger id="currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      <span className="flex items-center gap-1.5">
-                        <span>{getCurrencyFlag(c.icon)}</span>
-                        <span>{c.code}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CurrencySelect
+                id="currency"
+                value={watch('currency')}
+                onValueChange={(v) => setValue('currency', v)}
+              />
             </div>
           </div>
 

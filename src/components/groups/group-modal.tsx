@@ -19,13 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,7 +31,6 @@ import {
   type Group,
   type CreateGroupInput,
 } from '@/hooks/groups/use-groups'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { toast } from 'sonner'
 import { Loader2, Trash2 } from 'lucide-react'
 
@@ -58,7 +51,6 @@ type GroupFormData = {
 export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps) {
   const { t } = useTranslation()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const { data: currencies = [] } = useCurrencies()
 
   const {
     register,
@@ -187,18 +179,12 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
               name="currency"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger id="currency">
-                    <SelectValue placeholder={t('groups.modal.defaultCurrency')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((currency) => (
-                      <SelectItem key={currency.id} value={currency.code}>
-                        {currency.code} - {currency.symbol}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CurrencySelect
+                  id="currency"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t('groups.modal.defaultCurrency')}
+                />
               )}
             />
             <p className="text-xs text-muted-foreground">

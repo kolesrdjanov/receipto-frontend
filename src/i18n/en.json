@@ -942,6 +942,19 @@
         "topCategory": "Top category",
         "convertedTo": "Amounts converted to {{currency}}"
       },
+      "filters": {
+        "minReceipts": "Min Receipts",
+        "maxReceipts": "Max Receipts",
+        "minWarranties": "Min Warranties",
+        "maxWarranties": "Max Warranties",
+        "joinedFrom": "Joined From",
+        "joinedTo": "Joined To",
+        "hasGoogleAuth": "Google Auth",
+        "googleAuthAll": "All",
+        "googleAuthYes": "Yes",
+        "googleAuthNo": "No",
+        "clearFilters": "Clear Filters"
+      },
       "table": {
         "firstName": "First Name",
         "lastName": "Last Name",
@@ -949,6 +962,7 @@
         "role": "Role",
         "receipts": "Expenses",
         "recurring": "Recurring",
+        "warranties": "Warranties",
         "googleAuth": "Google Auth",
         "joined": "Joined",
         "delete": "Delete"

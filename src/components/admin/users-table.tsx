@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -15,10 +15,18 @@ import { Pagination } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { DatePicker } from '@/components/ui/date-picker'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus } from 'lucide-react'
+import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus, Filter, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
@@ -31,7 +39,32 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortField>('createdAt')
   const [sortOrder, setSortOrder] = useState<SortOrder>('DESC')
+  const [showFilters, setShowFilters] = useState(false)
+  const [minReceipts, setMinReceipts] = useState('')
+  const [maxReceipts, setMaxReceipts] = useState('')
+  const [minWarranties, setMinWarranties] = useState('')
+  const [maxWarranties, setMaxWarranties] = useState('')
+  const [joinedFrom, setJoinedFrom] = useState('')
+  const [joinedTo, setJoinedTo] = useState('')
+  const [googleAuthFilter, setGoogleAuthFilter] = useState<'all' | 'yes' | 'no'>('all')
   const debouncedSearch = useDebouncedValue(search, 500)
+  const debouncedMinReceipts = useDebouncedValue(minReceipts, 500)
+  const debouncedMaxReceipts = useDebouncedValue(maxReceipts, 500)
+  const debouncedMinWarranties = useDebouncedValue(minWarranties, 500)
+  const debouncedMaxWarranties = useDebouncedValue(maxWarranties, 500)
+
+  const hasActiveFilters = minReceipts || maxReceipts || minWarranties || maxWarranties || joinedFrom || joinedTo || googleAuthFilter !== 'all'
+
+  const clearFilters = useCallback(() => {
+    setMinReceipts('')
+    setMaxReceipts('')
+    setMinWarranties('')
+    setMaxWarranties('')
+    setJoinedFrom('')
+    setJoinedTo('')
+    setGoogleAuthFilter('all')
+    onPageChange(1)
+  }, [onPageChange])
 
   const { data: response, isLoading, error } = useAdminUsers({
     page,
@@ -39,6 +72,13 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
     search: debouncedSearch || undefined,
     sortBy,
     sortOrder,
+    minReceipts: debouncedMinReceipts ? Number(debouncedMinReceipts) : undefined,
+    maxReceipts: debouncedMaxReceipts ? Number(debouncedMaxReceipts) : undefined,
+    minWarranties: debouncedMinWarranties ? Number(debouncedMinWarranties) : undefined,
+    maxWarranties: debouncedMaxWarranties ? Number(debouncedMaxWarranties) : undefined,
+    joinedFrom: joinedFrom || undefined,
+    joinedTo: joinedTo || undefined,
+    hasGoogleAuth: googleAuthFilter === 'all' ? undefined : googleAuthFilter === 'yes',
   })
 
   const handleSort = (field: SortField) => {
@@ -116,34 +156,147 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
 
   return (
     <>
-      {/* Search users filter - Always visible */}
+      {/* Search & Filters */}
       <Card className="mb-4">
         <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder={t('admin.users.searchPlaceholder')}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                if (e.target.value !== '' && page !== 1) {
-                  onPageChange(1)
-                }
-              }}
-              className="pl-10 pr-10"
-            />
-            {search && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSearch('')}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={t('admin.users.searchPlaceholder')}
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  if (e.target.value !== '' && page !== 1) {
+                    onPageChange(1)
+                  }
+                }}
+                className="pl-10 pr-10"
+              />
+              {search && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearch('')}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <Button
+              variant={hasActiveFilters ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setShowFilters(!showFilters)}
+              className="shrink-0"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
           </div>
+
+          {showFilters && (
+            <div className="mt-4 space-y-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.minReceipts')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={minReceipts}
+                    onChange={(e) => { setMinReceipts(e.target.value); onPageChange(1) }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.maxReceipts')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="∞"
+                    value={maxReceipts}
+                    onChange={(e) => { setMaxReceipts(e.target.value); onPageChange(1) }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.minWarranties')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={minWarranties}
+                    onChange={(e) => { setMinWarranties(e.target.value); onPageChange(1) }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.maxWarranties')}
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="∞"
+                    value={maxWarranties}
+                    onChange={(e) => { setMaxWarranties(e.target.value); onPageChange(1) }}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.joinedFrom')}
+                  </label>
+                  <DatePicker
+                    value={joinedFrom}
+                    onChange={(value) => { setJoinedFrom(value); onPageChange(1) }}
+                    placeholder={t('admin.users.filters.joinedFrom')}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.joinedTo')}
+                  </label>
+                  <DatePicker
+                    value={joinedTo}
+                    onChange={(value) => { setJoinedTo(value); onPageChange(1) }}
+                    placeholder={t('admin.users.filters.joinedTo')}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    {t('admin.users.filters.hasGoogleAuth')}
+                  </label>
+                  <Select
+                    value={googleAuthFilter}
+                    onValueChange={(value: string) => { setGoogleAuthFilter(value as 'all' | 'yes' | 'no'); onPageChange(1) }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('admin.users.filters.googleAuthAll')}</SelectItem>
+                      <SelectItem value="yes">{t('admin.users.filters.googleAuthYes')}</SelectItem>
+                      <SelectItem value="no">{t('admin.users.filters.googleAuthNo')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  {hasActiveFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full">
+                      <X className="h-4 w-4 mr-1" />
+                      {t('admin.users.filters.clearFilters')}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -211,6 +364,13 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                       {t('admin.users.table.receipts')}
                     </span>
                     <span className="font-medium">{user.receiptCount}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t('admin.users.table.warranties')}
+                    </span>
+                    <span className="font-medium">{user.warrantyCount}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -303,6 +463,11 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
+                  <SortableHeader field="warrantyCount">
+                    {t('admin.users.table.warranties')}
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
                   <SortableHeader field="recurringExpenseCount">
                     {t('admin.users.table.recurring')}
                   </SortableHeader>
@@ -328,6 +493,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell>{user.receiptCount}</TableCell>
+                  <TableCell>{user.warrantyCount}</TableCell>
                   <TableCell>{user.recurringExpenseCount}</TableCell>
                   <TableCell>
                     {user.hasGoogleAuth ? <Check className="h-4 w-4 text-green-600" /> : <Minus className="h-4 w-4 text-muted-foreground" />}

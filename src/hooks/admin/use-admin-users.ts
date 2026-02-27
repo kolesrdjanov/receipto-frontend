@@ -11,6 +11,7 @@ export interface AdminUser {
   createdAt: string
   hasGoogleAuth: boolean
   receiptCount: number
+  warrantyCount: number
   recurringExpenseCount: number
   recurringPaymentCount: number
   recurringReceiptCount: number
@@ -19,6 +20,7 @@ export interface AdminUser {
 export type SortField =
   | 'createdAt'
   | 'receiptCount'
+  | 'warrantyCount'
   | 'recurringExpenseCount'
   | 'email'
   | 'firstName'
@@ -31,6 +33,13 @@ export interface AdminUsersFilters {
   search?: string
   sortBy?: SortField
   sortOrder?: SortOrder
+  minReceipts?: number
+  maxReceipts?: number
+  minWarranties?: number
+  maxWarranties?: number
+  joinedFrom?: string
+  joinedTo?: string
+  hasGoogleAuth?: boolean
 }
 
 export interface PaginationMeta {
@@ -54,6 +63,13 @@ const fetchAdminUsers = async (
   if (filters?.search?.length) params.append('search', filters.search)
   if (filters?.sortBy) params.append('sortBy', filters.sortBy)
   if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
+  if (filters?.minReceipts !== undefined) params.append('minReceipts', filters.minReceipts.toString())
+  if (filters?.maxReceipts !== undefined) params.append('maxReceipts', filters.maxReceipts.toString())
+  if (filters?.minWarranties !== undefined) params.append('minWarranties', filters.minWarranties.toString())
+  if (filters?.maxWarranties !== undefined) params.append('maxWarranties', filters.maxWarranties.toString())
+  if (filters?.joinedFrom) params.append('joinedFrom', filters.joinedFrom)
+  if (filters?.joinedTo) params.append('joinedTo', filters.joinedTo)
+  if (filters?.hasGoogleAuth !== undefined) params.append('hasGoogleAuth', filters.hasGoogleAuth.toString())
 
   const queryString = params.toString()
   const endpoint = `/users${queryString ? `?${queryString}` : ''}`
