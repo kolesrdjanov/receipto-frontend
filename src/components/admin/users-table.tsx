@@ -26,7 +26,7 @@ import {
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus, Filter, ChevronDown, ChevronUp } from 'lucide-react'
+import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus, Filter } from 'lucide-react'
 
 interface UsersTableProps {
   page: number
