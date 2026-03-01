@@ -908,7 +908,6 @@
       "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
       "backToUsers": "Nazad na korisnike",
       "invalidUser": "Neispravan korisnik",
-      "neverLoggedIn": "Nikada se nije prijavio",
       "usage": {
         "title": "Korišćenje funkcija",
         "description": "Kako ovaj korisnik koristi garancije i ponavljajuće troškove",

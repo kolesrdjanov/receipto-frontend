@@ -72,8 +72,21 @@ interface RecoverableScanError extends Error {
 }
 
 const CAMERA_TIMEOUT_MS = 10_000
+const CAMERA_SELECTION_KEY = 'receipto-camera-selection'
 
 type CameraSelection = 'auto' | 'rear' | 'front' | `device:${string}`
+
+function getSavedCameraSelection(): CameraSelection {
+  try {
+    const saved = localStorage.getItem(CAMERA_SELECTION_KEY)
+    if (saved === 'auto' || saved === 'rear' || saved === 'front' || saved?.startsWith('device:')) {
+      return saved as CameraSelection
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return 'auto'
+}
 
 function isRecoverableScanError(error: unknown): error is RecoverableScanError {
   return error instanceof Error && 'recoverable' in error && (error as RecoverableScanError).recoverable === true
@@ -101,7 +114,7 @@ export function QrScanner({
   const [ScannerComponent, setScannerComponent] = useState<null | ComponentType<ScannerProps>>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [scannerKey, setScannerKey] = useState(0)
-  const [cameraSelection, setCameraSelection] = useState<CameraSelection>('auto')
+  const [cameraSelection, setCameraSelection] = useState<CameraSelection>(getSavedCameraSelection)
   const [useSimpleConstraints, setUseSimpleConstraints] = useState(false)
 
   const lastScannedRef = useRef<string | null>(null)
@@ -291,7 +304,6 @@ export function QrScanner({
       scanningRef.current = false
       resetCameraRuntime()
       setUseSimpleConstraints(false)
-      setCameraSelection('auto')
       torchTelemetrySentRef.current = false
       return
     }
@@ -416,7 +428,9 @@ export function QrScanner({
   }
 
   const handleCameraSelectionChange = (value: string) => {
-    setCameraSelection(value as CameraSelection)
+    const selection = value as CameraSelection
+    setCameraSelection(selection)
+    try { localStorage.setItem(CAMERA_SELECTION_KEY, selection) } catch { /* noop */ }
     setUseSimpleConstraints(false)
     setScannerKey((prev) => prev + 1)
     setTorchEnabled(false)

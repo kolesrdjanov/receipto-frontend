@@ -132,18 +132,6 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('admin.users.table.lastLogin')}</p>
-                      <p className="text-sm font-medium">
-                        {userDetails.lastLoginAt
-                          ? formatDateTime(userDetails.lastLoginAt)
-                          : t('admin.users.neverLoggedIn')}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
                     <div className="h-4 w-4 flex items-center justify-center text-muted-foreground">
                       <Receipt className="h-4 w-4 text-muted-foreground" />
                     </div>
