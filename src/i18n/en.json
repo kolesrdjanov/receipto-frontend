@@ -728,9 +728,7 @@
       "warrantyReminders": "Warranty expiry reminders",
       "warrantyRemindersHelp": "Receive email reminders 30 and 7 days before your warranties expire",
       "budgetAlerts": "Budget alerts",
-      "budgetAlertsHelp": "Receive email alerts when you reach 80% or exceed your category budgets",
-      "monthlyReport": "Monthly financial reports",
-      "monthlyReportHelp": "Receive a summary of your finances on the 1st of each month"
+      "budgetAlertsHelp": "Receive email alerts when you reach 80% or exceed your category budgets"
     },
     "profile": {
       "title": "Profile",

@@ -20,7 +20,6 @@ export interface Me {
   city?: string | null
   monthlyIncome?: number | null
   incomeCurrency?: string | null
-  monthlyReportEnabled?: boolean
 }
 
 export interface UpdateMeData {
@@ -35,7 +34,6 @@ export interface UpdateMeData {
   city?: string
   monthlyIncome?: number | null
   incomeCurrency?: string | null
-  monthlyReportEnabled?: boolean
 }
 
 export interface ChangePasswordData {

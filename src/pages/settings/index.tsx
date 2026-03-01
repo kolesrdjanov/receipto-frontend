@@ -498,20 +498,6 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className="border-t pt-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>{t('settings.notifications.monthlyReport')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.notifications.monthlyReportHelp')}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={effectiveUser?.monthlyReportEnabled ?? true}
-                      onCheckedChange={(checked) => updateMe.mutate({ monthlyReportEnabled: checked })}
-                    />
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
