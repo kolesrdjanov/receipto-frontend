@@ -43,6 +43,7 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.groups.details(), id] as const,
     stats: (id: string) => [...queryKeys.groups.detail(id), 'stats'] as const,
     invites: () => [...queryKeys.groups.all, 'invites'] as const,
+    inviteLink: (id: string) => [...queryKeys.groups.detail(id), 'invite-link'] as const,
   },
 
   // Dashboard stats (if needed)

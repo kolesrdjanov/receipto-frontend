@@ -34,6 +34,7 @@ import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useAuthStore } from '@/store/auth'
 import { queryKeys } from '@/lib/query-keys'
 import { GroupModal } from '@/components/groups/group-modal'
+import { InviteLinkCard } from '@/components/groups/invite-link-card'
 import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
 import { GroupReceiptsTable } from '@/components/groups/group-receipts-table'
 import { ActivityFeed } from '@/components/groups/activity-feed'
@@ -659,6 +660,11 @@ export default function GroupDetail() {
                     </Button>
                   </div>
                 </div>
+              )}
+
+              {/* Invite Link - hidden when archived */}
+              {isAdmin && !group.isArchived && (
+                <InviteLinkCard groupId={group.id} />
               )}
             </CardContent>
           </Card>

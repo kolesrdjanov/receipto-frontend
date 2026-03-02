@@ -680,8 +680,25 @@
         "receipt_added": "je dodao/la račun",
         "receipt_updated": "je ažurirao/la račun",
         "receipt_deleted": "je obrisao/la račun",
-        "settlement_created": "je zabeležio/la poravnanje"
+        "settlement_created": "je zabeležio/la poravnanje",
+        "member_joined_via_link": "se pridružio/la putem linka"
       }
+    },
+    "inviteLink": {
+      "title": "Link za pozivnicu",
+      "description": "Podelite ovaj link da se bilo ko odmah pridruži grupi.",
+      "copy": "Kopiraj link",
+      "copied": "Link kopiran!",
+      "regenerate": "Regeneriši",
+      "regenerated": "Novi link za pozivnicu je generisan",
+      "regenerateConfirm": "Ovo će poništiti trenutni link. Svako ko ima stari link neće moći da se pridruži. Nastaviti?",
+      "share": "Podeli",
+      "shareTitle": "Pridruži se mojoj grupi na Receipto",
+      "joining": "Pridruživanje grupi...",
+      "joinSuccess": "Pridružili ste se grupi!",
+      "joinFailed": "Nije moguće pridružiti se grupi",
+      "invalidLink": "Ovaj link za pozivnicu je nevažeći ili je onemogućen.",
+      "goToGroups": "Idi na Grupe"
     }
   },
   "settings": {

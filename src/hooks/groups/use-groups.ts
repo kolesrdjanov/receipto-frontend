@@ -189,6 +189,12 @@ export interface GroupActivity {
   createdAt: string
 }
 
+export interface InviteLinkResponse {
+  inviteCode: string | null
+  inviteCodeEnabled: boolean
+  inviteUrl: string | null
+}
+
 // Legacy alias for backwards compatibility
 export type Settlement = SuggestedSettlement
 
@@ -268,6 +274,22 @@ const removeMember = async (groupId: string, memberId: string): Promise<void> =>
 
 const leaveGroup = async (groupId: string): Promise<void> => {
   return api.post<void>(`/groups/${groupId}/leave`, {})
+}
+
+const fetchInviteLink = async (groupId: string): Promise<InviteLinkResponse> => {
+  return api.get<InviteLinkResponse>(`/groups/${groupId}/invite-link`)
+}
+
+const generateInviteLink = async (groupId: string): Promise<InviteLinkResponse> => {
+  return api.post<InviteLinkResponse>(`/groups/${groupId}/invite-link`, {})
+}
+
+const updateInviteLink = async (groupId: string, enabled: boolean): Promise<InviteLinkResponse> => {
+  return api.patch<InviteLinkResponse>(`/groups/${groupId}/invite-link`, { enabled })
+}
+
+const joinGroupViaLink = async (code: string): Promise<Group> => {
+  return api.post<Group>(`/groups/join/${code}`, {})
 }
 
 // Hooks
@@ -454,6 +476,48 @@ export function useUnarchiveGroup() {
     onSuccess: (_data, groupId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(groupId) })
+    },
+  })
+}
+
+export function useInviteLink(groupId: string) {
+  return useQuery({
+    queryKey: queryKeys.groups.inviteLink(groupId),
+    queryFn: () => fetchInviteLink(groupId),
+    enabled: !!groupId,
+  })
+}
+
+export function useGenerateInviteLink() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (groupId: string) => generateInviteLink(groupId),
+    onSuccess: (_data, groupId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.inviteLink(groupId) })
+    },
+  })
+}
+
+export function useUpdateInviteLink() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ groupId, enabled }: { groupId: string; enabled: boolean }) =>
+      updateInviteLink(groupId, enabled),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.inviteLink(variables.groupId) })
+    },
+  })
+}
+
+export function useJoinGroupViaLink() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (code: string) => joinGroupViaLink(code),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
     },
   })
 }

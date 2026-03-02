@@ -692,8 +692,25 @@
         "receipt_added": "added a receipt",
         "receipt_updated": "updated a receipt",
         "receipt_deleted": "deleted a receipt",
-        "settlement_created": "recorded a settlement"
+        "settlement_created": "recorded a settlement",
+        "member_joined_via_link": "joined via invite link"
       }
+    },
+    "inviteLink": {
+      "title": "Invite Link",
+      "description": "Share this link to let anyone join the group instantly.",
+      "copy": "Copy Link",
+      "copied": "Link copied!",
+      "regenerate": "Regenerate",
+      "regenerated": "New invite link generated",
+      "regenerateConfirm": "This will invalidate the current link. Anyone with the old link will no longer be able to join. Continue?",
+      "share": "Share",
+      "shareTitle": "Join my group on Receipto",
+      "joining": "Joining group...",
+      "joinSuccess": "You joined the group!",
+      "joinFailed": "Could not join group",
+      "invalidLink": "This invite link is invalid or has been disabled.",
+      "goToGroups": "Go to Groups"
     }
   },
   "settings": {

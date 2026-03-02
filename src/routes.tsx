@@ -26,6 +26,7 @@ const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const SavingsGoalDetail = lazy(() => import('./pages/savings/goals/[id]'))
 const SavingsReports = lazy(() => import('./pages/savings/reports'))
+const JoinGroup = lazy(() => import('./pages/groups/join'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
 const AdminUserDetails = lazy(() => import('./pages/admin/user-details'))
@@ -122,6 +123,14 @@ export const routes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <Groups />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/groups/join/:code',
+    element: (
+      <ProtectedRoute>
+        <JoinGroup />
       </ProtectedRoute>
     ),
   },
