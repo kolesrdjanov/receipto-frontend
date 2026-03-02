@@ -216,6 +216,22 @@
       "selectToView": "Select a category to view budget status",
       "setBudgetHint": "Set budgets in category settings",
       "currencyNote": "All amounts converted to {{currency}}"
+    },
+    "widgets": {
+      "customize": "Customize",
+      "done": "Done",
+      "resetToDefault": "Reset to Default",
+      "editHint": "Drag to reorder, toggle visibility with the eye icon",
+      "statsCards": "Stats Cards",
+      "categoryPieChart": "Spending by Category",
+      "dailyBarChart": "Daily Spending",
+      "budgetTracker": "Budget Tracker",
+      "monthlyTrend": "Monthly Trend",
+      "monthlyForecast": "Monthly Forecast",
+      "upcomingRecurring": "Upcoming Recurring",
+      "coachCard": "Financial Coach",
+      "rankCard": "Your Rank",
+      "recentActivity": "Recent Activity"
     }
   },
   "receipts": {
@@ -559,8 +575,9 @@
       "descriptionPlaceholder": "Optional description",
       "defaultCurrency": "Default Currency",
       "defaultCurrencyHelp": "This currency will be pre-selected when adding receipts to this group",
-      "icon": "Icon (emoji)",
-      "iconPlaceholder": "e.g., house, plane, shopping-cart",
+      "icon": "Icon",
+      "iconPlaceholder": "Select an emoji",
+      "iconSearchPlaceholder": "Search emoji...",
       "deleteTitle": "Delete Group",
       "deleteConfirmDescription": "Are you sure you want to delete \"{{name}}\"? All receipts will be removed from this group. This action cannot be undone.",
       "createSuccess": "Group created successfully",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -19,11 +19,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from '@/components/ui/emoji-picker'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+
+const mediaQuery = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)') : null
+function useIsMobile() {
+  return useSyncExternalStore(
+    (cb) => { mediaQuery?.addEventListener('change', cb); return () => mediaQuery?.removeEventListener('change', cb) },
+    () => mediaQuery?.matches ?? false,
+    () => false,
+  )
+}
 import {
   useCreateGroup,
   useUpdateGroup,
@@ -50,13 +61,17 @@ type GroupFormData = {
 
 export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
 
   const {
     register,
     handleSubmit,
     reset,
     control,
+    watch,
+    setValue,
     formState: { isSubmitting },
   } = useForm<GroupFormData>({
     defaultValues: {
@@ -193,13 +208,77 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="icon">{t('groups.modal.icon')}</Label>
-            <Input
-              id="icon"
-              {...register('icon')}
-              placeholder={t('groups.modal.iconPlaceholder')}
-              maxLength={4}
-            />
+            <Label>{t('groups.modal.icon')}</Label>
+            <div className="flex items-center gap-2">
+              {isMobile ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-10 w-10 text-lg p-0"
+                    onClick={() => setEmojiPickerOpen(true)}
+                  >
+                    {watch('icon') || '😀'}
+                  </Button>
+                  <Dialog open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                    <DialogContent className="p-0 gap-0 max-w-[min(24rem,calc(100vw-2rem))]">
+                      <EmojiPicker
+                        className="h-[min(24rem,60vh)] w-full"
+                        onEmojiSelect={(emoji) => {
+                          setValue('icon', emoji.emoji)
+                          setEmojiPickerOpen(false)
+                        }}
+                      >
+                        <EmojiPickerSearch placeholder={t('groups.modal.iconSearchPlaceholder')} />
+                        <EmojiPickerContent />
+                        <EmojiPickerFooter />
+                      </EmojiPicker>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : (
+                <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 w-10 text-lg p-0"
+                    >
+                      {watch('icon') || '😀'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-fit p-0" align="start" collisionPadding={16}>
+                    <EmojiPicker
+                      className="h-[340px]"
+                      onEmojiSelect={(emoji) => {
+                        setValue('icon', emoji.emoji)
+                        setEmojiPickerOpen(false)
+                      }}
+                    >
+                      <EmojiPickerSearch placeholder={t('groups.modal.iconSearchPlaceholder')} />
+                      <EmojiPickerContent />
+                      <EmojiPickerFooter />
+                    </EmojiPicker>
+                  </PopoverContent>
+                </Popover>
+              )}
+              {watch('icon') && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground text-xs"
+                  onClick={() => setValue('icon', '')}
+                >
+                  {t('common.clear')}
+                </Button>
+              )}
+              {!watch('icon') && (
+                <span className="text-sm text-muted-foreground">
+                  {t('groups.modal.iconPlaceholder')}
+                </span>
+              )}
+            </div>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">

@@ -216,6 +216,22 @@
       "selectToView": "Izaberite kategoriju da vidite status budžeta",
       "setBudgetHint": "Postavite budžete u podešavanjima kategorija",
       "currencyNote": "Svi iznosi konvertovani u {{currency}}"
+    },
+    "widgets": {
+      "customize": "Prilagodi",
+      "done": "Gotovo",
+      "resetToDefault": "Vrati na podrazumevano",
+      "editHint": "Prevucite za promena redosleda, uključite/isključite vidljivost ikonom oka",
+      "statsCards": "Statistika",
+      "categoryPieChart": "Potrošnja po kategoriji",
+      "dailyBarChart": "Dnevna potrošnja",
+      "budgetTracker": "Praćenje budžeta",
+      "monthlyTrend": "Mesečni trend",
+      "monthlyForecast": "Mesečna prognoza",
+      "upcomingRecurring": "Predstojeći ponavljajući",
+      "coachCard": "Finansijski savetnik",
+      "rankCard": "Vaš rang",
+      "recentActivity": "Nedavne aktivnosti"
     }
   },
   "receipts": {
@@ -547,8 +563,9 @@
       "descriptionPlaceholder": "Opcioni opis",
       "defaultCurrency": "Podrazumevana valuta",
       "defaultCurrencyHelp": "Ova valuta će biti unapred izabrana pri dodavanju računa u ovu grupu",
-      "icon": "Ikona (emoji)",
-      "iconPlaceholder": "npr. house, plane, shopping-cart",
+      "icon": "Ikona",
+      "iconPlaceholder": "Izaberite emoji",
+      "iconSearchPlaceholder": "Pretraži emoji...",
       "deleteTitle": "Obriši grupu",
       "deleteConfirmDescription": "Da li ste sigurni da želite da obrišete \"{{name}}\"? Svi računi će biti uklonjeni iz ove grupe. Ova akcija se ne može poništiti.",
       "createSuccess": "Grupa uspešno kreirana",

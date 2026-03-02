@@ -8,6 +8,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { MonthlyForecast } from '@/components/dashboard/monthly-forecast'
+import { WidgetRenderer } from '@/components/dashboard/widget-renderer'
 import { CoachCard } from '@/components/coach/coach-card'
 import { UpcomingRecurring } from '@/components/dashboard/upcoming-recurring'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
@@ -23,6 +24,7 @@ import {
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
+import { useDashboardStore } from '@/store/dashboard'
 import { cn } from '@/lib/utils'
 import { PageTransition, StaggerContainer, StaggerItem, AnimatedNumber } from '@/components/ui/animated'
 import {
@@ -39,6 +41,7 @@ import {
   Compass,
   Sparkles,
   Crown,
+  RotateCcw,
 } from 'lucide-react'
 import {
   PieChart,
@@ -102,6 +105,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const primaryColor = usePrimaryColor()
   const { openQrScanner, scannerModals } = useReceiptScanner({ navigateOnSuccess: true })
+
+  const { isEditMode, setEditMode, resetToDefault } = useDashboardStore()
 
   const { data: me } = useMe(true)
   const { data: featureFlags } = useFeatureFlags()
@@ -293,6 +298,313 @@ export default function Dashboard() {
     }).format(amount)
   }, [displayCurrency])
 
+  // Build widget content map — each entry matches a widget ID from the registry
+  const widgetContent: Record<string, React.ReactNode> = {
+    'stats-cards': (
+      <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerItem className="sm:col-span-2">
+          <Card className="stat-card-gradient stat-card-hero">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
+              <div className="stat-icon-container">
+                <PieChartIcon className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display">
+                <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
+              </p>
+            </CardContent>
+          </Card>
+        </StaggerItem>
+
+        <StaggerItem>
+          <Card className="stat-card-gradient h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
+              <div className="stat-icon-container">
+                <TrendingUp className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <p className="text-2xl sm:text-3xl font-bold font-display">
+                <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
+              </p>
+            </CardContent>
+          </Card>
+        </StaggerItem>
+
+        <StaggerItem>
+          <Link to="/receipts" className="block h-full">
+            <Card className="stat-card-gradient cursor-pointer h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
+                <div className="stat-icon-container">
+                  <Receipt className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-2xl sm:text-3xl font-bold font-display">
+                  <AnimatedNumber value={totalReceipts} />
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </StaggerItem>
+      </StaggerContainer>
+    ),
+
+    'category-pie-chart': (
+      <Card className="card-interactive chart-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <PieChartIcon className="h-4 w-4 text-primary" />
+            {t('dashboard.spendingByCategory')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {aggCategoryLoading ? (
+            <div className="flex items-center justify-center h-[250px]">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : categoryChartData.length === 0 ? (
+            <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+              {t('dashboard.noDataThisMonth')}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={categoryChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {categoryChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-1 text-sm w-full">
+                {categoryChartData.slice(0, 5).map((c) => (
+                  <div key={c.name} className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: c.color }}
+                    />
+                    <span className="truncate max-w-[100px]">
+                      {c.icon} {c.name}
+                    </span>
+                    <span className="text-muted-foreground ml-auto">{formatAmount(c.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    ),
+
+    'daily-bar-chart': (
+      <Card className="card-interactive chart-card flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            {t('dashboard.dailySpending')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 min-h-0">
+          {aggDailyLoading ? (
+            <div className="flex items-center justify-center h-full min-h-[200px]">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+              <BarChart data={dailyChartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="totalAmount"
+                  name="Amount"
+                  fill={primaryColor}
+                  radius={[4, 4, 0, 0]}
+                  cursor="pointer"
+                  onClick={(data: any) => {
+                    const date = data?.payload?.date || data?.date
+                    if (date) {
+                      navigate(`/receipts?startDate=${date}&endDate=${date}`)
+                    }
+                  }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+    ),
+
+    'budget-tracker': (
+      <CategoryBudgetProgress
+        aggCategoryStats={aggCategoryStats}
+        exchangeRates={exchangeRates}
+        displayCurrency={displayCurrency}
+      />
+    ),
+
+    'monthly-trend': (
+      <Card className="card-interactive chart-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            {t('dashboard.monthlyTrend', { year: selectedYear })}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {aggMonthlyLoading ? (
+            <div className="flex items-center justify-center h-[200px]">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={monthlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                <YAxis
+                  tick={{ fontSize: 10 }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="totalAmount"
+                  name="Amount"
+                  stroke={primaryColor}
+                  strokeWidth={2}
+                  dot={{ fill: primaryColor }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+    ),
+
+    'monthly-forecast': (
+      <MonthlyForecast
+        dailyStats={aggDailyStats}
+        monthlyStats={aggMonthlyStats}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        displayCurrency={displayCurrency}
+        exchangeRates={exchangeRates}
+      />
+    ),
+
+    'coach-card': (
+      <CoachCard displayCurrency={displayCurrency} />
+    ),
+
+    'rank-card': (
+      <Card className={cn('card-interactive', rankVisual.cardClassName)}>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between gap-3 text-base">
+            <span>{t('dashboard.rank.title')}</span>
+            <span className="inline-flex items-center gap-2">
+              <rankVisual.icon className={cn('h-4 w-4', rankVisual.iconClassName)} />
+              <span className="font-semibold">{rankName}</span>
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {t('dashboard.rank.receiptsTracked', { count: rankReceiptCount })}
+          </p>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{t('dashboard.rank.progress')}</span>
+              <span>{Math.round(rankProgress)}%</span>
+            </div>
+            <Progress value={rankProgress} className="h-2" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {nextRank
+              ? t('dashboard.rank.nextTarget', {
+                  count: Math.max(nextRank.minReceipts - rankReceiptCount, 0),
+                  rank: t(nextRank.nameKey),
+                })
+              : t('dashboard.rank.topTier')}
+          </p>
+          <p className="text-sm">{rankDescription}</p>
+        </CardContent>
+      </Card>
+    ),
+
+    'recent-activity': (
+      <Card className="card-interactive card-gradient-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Clock className="h-4 w-4 text-primary" />
+            {t('dashboard.recentActivity')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentReceipts && recentReceipts.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {recentReceipts.slice(0, 5).map((receipt) => (
+                <Link
+                  key={receipt.id}
+                  to="/receipts"
+                  className="truncate flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                >
+                  <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
+                  <span className="text-xl font-bold mt-1">
+                    {new Intl.NumberFormat('sr-RS', {
+                      style: 'currency',
+                      currency: receipt.currency || 'RSD',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(Number(receipt.totalAmount) || 0)}
+                  </span>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {formatDate(receipt.receiptDate || receipt.createdAt)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t('dashboard.noRecentActivity')}</p>
+          )}
+        </CardContent>
+      </Card>
+    ),
+  }
+
+  // Conditionally add recurring expenses widget
+  if (featureFlags?.recurringExpenses ?? true) {
+    widgetContent['upcoming-recurring'] = (
+      <UpcomingRecurring displayCurrency={displayCurrency} exchangeRates={exchangeRates} />
+    )
+  }
 
   return (
     <AppLayout>
@@ -316,8 +628,52 @@ export default function Dashboard() {
             triggerClassName="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
           />
         </div>
+          {/* Customize button — hidden for now
+          <Button
+            type="button"
+            onClick={toggleEditMode}
+            size="xl"
+            className={cn(
+              'flex items-center gap-2 p-1 pl-3 pr-3 rounded-lg transition-colors',
+              isEditMode
+                ? 'bg-primary/15 text-primary'
+                : 'bg-muted/30 hover:bg-muted/50 text-muted-foreground'
+            )}
+          >
+            <Settings2 className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              {isEditMode ? t('dashboard.widgets.done') : t('dashboard.widgets.customize')}
+            </span>
+          </Button>
+          */}
         </div>
       </div>
+
+      {/* Edit Mode Toolbar */}
+      {isEditMode && (
+        <div className="mb-4 flex items-center justify-between gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
+          <p className="text-sm text-muted-foreground">
+            {t('dashboard.widgets.editHint')}
+          </p>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { resetToDefault() }}
+              className="gap-1.5"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              {t('dashboard.widgets.resetToDefault')}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setEditMode(false)}
+            >
+              {t('dashboard.widgets.done')}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       {isLoading ? (
@@ -326,58 +682,6 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            <StaggerItem className="sm:col-span-2">
-              <Card className="stat-card-gradient stat-card-hero">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
-                  <div className="stat-icon-container">
-                    <TrendingUp className="h-4 w-4" />
-                  </div>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display">
-                    <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
-                  </p>
-                </CardContent>
-              </Card>
-            </StaggerItem>
-
-            <StaggerItem>
-              <Card className="stat-card-gradient h-full">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                  <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
-                  <div className="stat-icon-container">
-                    <PieChartIcon className="h-4 w-4" />
-                  </div>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <p className="text-2xl sm:text-3xl font-bold font-display">
-                    <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
-                  </p>
-                </CardContent>
-              </Card>
-            </StaggerItem>
-
-            <StaggerItem>
-              <Link to="/receipts" className="block h-full">
-                <Card className="stat-card-gradient cursor-pointer h-full">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                    <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
-                    <div className="stat-icon-container">
-                      <Receipt className="h-4 w-4" />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative z-10">
-                    <p className="text-2xl sm:text-3xl font-bold font-display">
-                      <AnimatedNumber value={totalReceipts} />
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            </StaggerItem>
-          </StaggerContainer>
-
           {/* Month Selector */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{t('dashboard.spendingAnalysis')}</h3>
@@ -392,254 +696,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-            {/* Category Pie Chart */}
-            <Card className="card-interactive chart-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <PieChartIcon className="h-4 w-4 text-primary" />
-                  {t('dashboard.spendingByCategory')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {aggCategoryLoading ? (
-                  <div className="flex items-center justify-center h-[250px]">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : categoryChartData.length === 0 ? (
-                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    {t('dashboard.noDataThisMonth')}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-4">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={categoryChartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          {categoryChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<CustomTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="flex flex-col gap-1 text-sm w-full">
-                      {categoryChartData.slice(0, 5).map((c) => (
-                        <div key={c.name} className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: c.color }}
-                          />
-                          <span className="truncate max-w-[100px]">
-                            {c.icon} {c.name}
-                          </span>
-                          <span className="text-muted-foreground ml-auto">{formatAmount(c.value)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Daily Bar Chart */}
-            <Card className="card-interactive chart-card flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  {t('dashboard.dailySpending')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 min-h-0">
-                {aggDailyLoading ? (
-                  <div className="flex items-center justify-center h-full min-h-[200px]">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-                    <BarChart data={dailyChartData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis
-                        dataKey="day"
-                        tick={{ fontSize: 10 }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 10 }}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar
-                        dataKey="totalAmount"
-                        name="Amount"
-                        fill={primaryColor}
-                        radius={[4, 4, 0, 0]}
-                        cursor="pointer"
-                        onClick={(data: any) => {
-                          const date = data?.payload?.date || data?.date
-                          if (date) {
-                            navigate(`/receipts?startDate=${date}&endDate=${date}`)
-                          }
-                        }}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Budget Progress */}
-            <CategoryBudgetProgress
-              aggCategoryStats={aggCategoryStats}
-              exchangeRates={exchangeRates}
-              displayCurrency={displayCurrency}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-            {/* Monthly Trend */}
-            <Card className="md:col-span-2 lg:col-span-2 card-interactive chart-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  {t('dashboard.monthlyTrend', { year: selectedYear })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {aggMonthlyLoading ? (
-                  <div className="flex items-center justify-center h-[200px]">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={monthlyChartData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                      <YAxis
-                        tick={{ fontSize: 10 }}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="totalAmount"
-                        name="Amount"
-                        stroke={primaryColor}
-                        strokeWidth={2}
-                        dot={{ fill: primaryColor }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Monthly Forecast */}
-            <MonthlyForecast
-              dailyStats={aggDailyStats}
-              monthlyStats={aggMonthlyStats}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-              displayCurrency={displayCurrency}
-              exchangeRates={exchangeRates}
-            />
-          </div>
-
-          {(featureFlags?.recurringExpenses ?? true) && (
-            <div className="mb-6">
-              <UpcomingRecurring displayCurrency={displayCurrency} exchangeRates={exchangeRates} />
-            </div>
-          )}
-
-          {/* Financial Coach */}
-          <div className="mb-6">
-            <CoachCard displayCurrency={displayCurrency} />
-          </div>
-
-
-          <Card className={cn('mb-6 card-interactive', rankVisual.cardClassName)}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center justify-between gap-3 text-base">
-                <span>{t('dashboard.rank.title')}</span>
-                <span className="inline-flex items-center gap-2">
-                  <rankVisual.icon className={cn('h-4 w-4', rankVisual.iconClassName)} />
-                  <span className="font-semibold">{rankName}</span>
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                {t('dashboard.rank.receiptsTracked', { count: rankReceiptCount })}
-              </p>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t('dashboard.rank.progress')}</span>
-                  <span>{Math.round(rankProgress)}%</span>
-                </div>
-                <Progress value={rankProgress} className="h-2" />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {nextRank
-                  ? t('dashboard.rank.nextTarget', {
-                      count: Math.max(nextRank.minReceipts - rankReceiptCount, 0),
-                      rank: t(nextRank.nameKey),
-                    })
-                  : t('dashboard.rank.topTier')}
-              </p>
-              <p className="text-sm">{rankDescription}</p>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="card-interactive card-gradient-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="h-4 w-4 text-primary" />
-                {t('dashboard.recentActivity')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentReceipts && recentReceipts.length > 0 ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                  {recentReceipts.slice(0, 5).map((receipt) => (
-                    <Link
-                      key={receipt.id}
-                      to="/receipts"
-                      className="truncate flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
-                    >
-                      <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
-                      <span className="text-xl font-bold mt-1">
-                        {new Intl.NumberFormat('sr-RS', {
-                          style: 'currency',
-                          currency: receipt.currency || 'RSD',
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(Number(receipt.totalAmount) || 0)}
-                      </span>
-                      <span className="text-xs text-muted-foreground mt-1">
-                        {formatDate(receipt.receiptDate || receipt.createdAt)}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t('dashboard.noRecentActivity')}</p>
-              )}
-            </CardContent>
-          </Card>
-
+          <WidgetRenderer widgetContent={widgetContent} />
         </>
       )}
 
