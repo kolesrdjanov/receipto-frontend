@@ -85,8 +85,8 @@ export function GeographyTab({ filters }: GeographyTabProps) {
       )}
 
       {/* City Table with expandable rows */}
-      <div className="rounded-lg border bg-card">
-        <div className="p-4 border-b">
+      <div className="rounded-lg bg-card">
+        <div className="p-4">
           <h3 className="font-semibold">{t('analytics.cityBreakdown')}</h3>
         </div>
         <Table>

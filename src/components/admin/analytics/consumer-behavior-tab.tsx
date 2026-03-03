@@ -241,8 +241,8 @@ export function ConsumerBehaviorTab({ filters }: ConsumerBehaviorTabProps) {
       </div>
 
       {/* Row 3: Chain Switching */}
-      <div className="rounded-lg border bg-card">
-        <div className="p-4 border-b">
+      <div className="rounded-lg bg-card">
+        <div className="p-4">
           <h3 className="font-semibold">{t('analytics.chainSwitching')}</h3>
           <p className="text-xs text-muted-foreground mt-1">{t('analytics.chainSwitchingDesc')}</p>
         </div>
