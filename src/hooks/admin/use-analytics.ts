@@ -114,6 +114,77 @@ export interface PromoAnalysis {
   newCustomers: number
 }
 
+export interface OverviewTrendPoint {
+  month: string
+  transactions: number
+  totalRevenue: string
+  activeUsers: number
+  uniqueProducts: number
+}
+
+export interface OverviewComparison {
+  current: OverviewStats
+  previous: OverviewStats | null
+}
+
+export interface ChainTrendPoint {
+  chainName: string
+  month: string
+  transactions: number
+  revenue: string
+}
+
+export interface CpiPoint {
+  month: string
+  indexValue: string
+}
+
+export interface PriceMover {
+  productItemId: string
+  displayName: string
+  currentPrice: string
+  previousPrice: string
+  changePercent: string
+  purchases: number
+  currency: string
+}
+
+export interface UserActivityPoint {
+  month: string
+  newUsers: number
+  returningUsers: number
+  totalActive: number
+}
+
+export interface WalletTrendPoint {
+  month: string
+  chainName: string
+  avgSharePercent: string
+  userCount: number
+}
+
+export interface ChainSwitch {
+  fromChain: string
+  toChain: string
+  userCount: number
+}
+
+export interface GeoHeatmapCell {
+  chainName: string
+  city: string
+  transactions: number
+  revenue: string
+  users: number
+}
+
+export interface CityChainDetail {
+  chainName: string
+  transactions: number
+  users: number
+  revenue: string
+  products: number
+}
+
 export interface CreatePromoDto {
   name: string
   chainName: string
@@ -245,6 +316,97 @@ export function useAnalyticsPromoAnalysis(id: string) {
     queryKey: queryKeys.analytics.promoAnalysis(id),
     queryFn: () => api.get<PromoAnalysis>(`/admin/analytics/promos/${id}/analysis`),
     enabled: !!id,
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsOverviewTrend(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.overviewTrend(params),
+    queryFn: () => api.get<OverviewTrendPoint[]>(`/admin/analytics/overview/trend${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsOverviewComparison(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.overviewComparison(params),
+    queryFn: () => api.get<OverviewComparison>(`/admin/analytics/overview/comparison${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsChainTrends(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.chainTrends(params),
+    queryFn: () => api.get<ChainTrendPoint[]>(`/admin/analytics/chains/trends${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsCpi(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.cpi(params),
+    queryFn: () => api.get<CpiPoint[]>(`/admin/analytics/prices/cpi${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsPriceMovers(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.priceMovers(params),
+    queryFn: () => api.get<PriceMover[]>(`/admin/analytics/prices/movers${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsUserActivity(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.userActivity(params),
+    queryFn: () => api.get<UserActivityPoint[]>(`/admin/analytics/users/activity${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsWalletTrend(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.walletTrend(params),
+    queryFn: () => api.get<WalletTrendPoint[]>(`/admin/analytics/wallet/trend${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsChainSwitching(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.chainSwitching(params),
+    queryFn: () => api.get<ChainSwitch[]>(`/admin/analytics/chains/switching${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsGeoHeatmap(filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.geoHeatmap(params),
+    queryFn: () => api.get<GeoHeatmapCell[]>(`/admin/analytics/geo/heatmap${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
+  })
+}
+
+export function useAnalyticsCityDetail(city: string, filters?: AnalyticsFilters) {
+  const params = filtersToParams(filters)
+  return useQuery({
+    queryKey: queryKeys.analytics.cityDetail(city, params),
+    queryFn: () => api.get<CityChainDetail[]>(`/admin/analytics/geo/cities/${encodeURIComponent(city)}${toQueryString(params)}`),
+    enabled: !!city,
     staleTime: ANALYTICS_STALE_TIME,
   })
 }

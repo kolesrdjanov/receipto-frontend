@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownRight, UserPlus } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, UserPlus, ShoppingCart, Users, DollarSign } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { KpiCard } from './kpi-card'
 import {
   useAnalyticsPromos,
   useAnalyticsPromoAnalysis,
@@ -98,11 +99,6 @@ function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete }
 
   const Icon = isExpanded ? ChevronUp : ChevronDown
 
-  const pctChange = (promo_val: number, baseline_val: number) => {
-    if (!baseline_val) return null
-    return ((promo_val - baseline_val) / baseline_val * 100).toFixed(1)
-  }
-
   return (
     <>
       <TableRow className="cursor-pointer" onClick={onToggle}>
@@ -123,56 +119,34 @@ function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete }
         <TableRow className="hover:bg-transparent">
           <TableCell colSpan={6} className="bg-muted/20">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetricCard
+              <KpiCard
                 label={t('analytics.transactions')}
-                baseline={analysis.baseline?.transactions}
-                promo={analysis.promo?.transactions}
-                pctChange={pctChange(analysis.promo?.transactions || 0, analysis.baseline?.transactions || 0)}
+                value={analysis.promo?.transactions || 0}
+                previousValue={analysis.baseline?.transactions}
+                icon={ShoppingCart}
               />
-              <MetricCard
+              <KpiCard
                 label={t('analytics.users')}
-                baseline={analysis.baseline?.uniqueUsers}
-                promo={analysis.promo?.uniqueUsers}
-                pctChange={pctChange(analysis.promo?.uniqueUsers || 0, analysis.baseline?.uniqueUsers || 0)}
+                value={analysis.promo?.uniqueUsers || 0}
+                previousValue={analysis.baseline?.uniqueUsers}
+                icon={Users}
               />
-              <MetricCard
+              <KpiCard
                 label={t('analytics.revenue')}
-                baseline={analysis.baseline?.totalRevenue ? Number(analysis.baseline.totalRevenue).toLocaleString() : '0'}
-                promo={analysis.promo?.totalRevenue ? Number(analysis.promo.totalRevenue).toLocaleString() : '0'}
-                pctChange={pctChange(Number(analysis.promo?.totalRevenue) || 0, Number(analysis.baseline?.totalRevenue) || 0)}
+                value={Number(analysis.promo?.totalRevenue) || 0}
+                previousValue={Number(analysis.baseline?.totalRevenue) || undefined}
+                icon={DollarSign}
+                format="currency"
               />
-              <div className="rounded-lg border bg-card p-3">
-                <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                  <UserPlus className="h-3.5 w-3.5" />
-                  <span className="text-xs font-medium">{t('analytics.newCustomers')}</span>
-                </div>
-                <div className="text-xl font-bold">{analysis.newCustomers}</div>
-              </div>
+              <KpiCard
+                label={t('analytics.newCustomers')}
+                value={analysis.newCustomers}
+                icon={UserPlus}
+              />
             </div>
           </TableCell>
         </TableRow>
       )}
     </>
-  )
-}
-
-function MetricCard({ label, baseline, promo, pctChange }: { label: string; baseline: any; promo: any; pctChange: string | null }) {
-  const { t } = useTranslation()
-  const isPositive = pctChange && Number(pctChange) > 0
-  const ChangeIcon = isPositive ? ArrowUpRight : ArrowDownRight
-
-  return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="text-xs font-medium text-muted-foreground mb-1">{label}</div>
-      <div className="text-xl font-bold">{promo ?? 0}</div>
-      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-        <span>{t('analytics.baseline')}: {baseline ?? 0}</span>
-        {pctChange && (
-          <span className={`flex items-center ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            <ChangeIcon className="h-3 w-3" />{pctChange}%
-          </span>
-        )}
-      </div>
-    </div>
   )
 }

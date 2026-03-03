@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DatePicker } from '@/components/ui/date-picker'
-import { OverviewTab } from '@/components/admin/analytics/overview-tab'
-import { ProductsTab } from '@/components/admin/analytics/products-tab'
-import { WalletTab } from '@/components/admin/analytics/wallet-tab'
+import { MarketOverviewTab } from '@/components/admin/analytics/market-overview-tab'
+import { PriceIntelligenceTab } from '@/components/admin/analytics/price-intelligence-tab'
+import { ConsumerBehaviorTab } from '@/components/admin/analytics/consumer-behavior-tab'
+import { GeographyTab } from '@/components/admin/analytics/geography-tab'
 import { PromosTab } from '@/components/admin/analytics/promos-tab'
-import { GeoTab } from '@/components/admin/analytics/geo-tab'
 import type { AnalyticsFilters } from '@/hooks/admin/use-analytics'
 
 function getDefaultDateRange(): Pick<AnalyticsFilters, 'dateFrom' | 'dateTo'> {
@@ -56,33 +56,33 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue="market-overview">
         <TabsList className="mb-6 w-full sm:w-auto overflow-x-auto">
-          <TabsTrigger value="overview">{t('analytics.tabOverview')}</TabsTrigger>
-          <TabsTrigger value="products">{t('analytics.tabProducts')}</TabsTrigger>
-          <TabsTrigger value="wallet">{t('analytics.tabWallet')}</TabsTrigger>
+          <TabsTrigger value="market-overview">{t('analytics.tabMarketOverview')}</TabsTrigger>
+          <TabsTrigger value="price-intelligence">{t('analytics.tabPriceIntelligence')}</TabsTrigger>
+          <TabsTrigger value="consumer-behavior">{t('analytics.tabConsumerBehavior')}</TabsTrigger>
+          <TabsTrigger value="geography">{t('analytics.tabGeography')}</TabsTrigger>
           <TabsTrigger value="promos">{t('analytics.tabPromos')}</TabsTrigger>
-          <TabsTrigger value="geo">{t('analytics.tabGeo')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <OverviewTab filters={filters} />
+        <TabsContent value="market-overview">
+          <MarketOverviewTab filters={filters} />
         </TabsContent>
 
-        <TabsContent value="products">
-          <ProductsTab filters={filters} />
+        <TabsContent value="price-intelligence">
+          <PriceIntelligenceTab filters={filters} />
         </TabsContent>
 
-        <TabsContent value="wallet">
-          <WalletTab filters={filters} />
+        <TabsContent value="consumer-behavior">
+          <ConsumerBehaviorTab filters={filters} />
+        </TabsContent>
+
+        <TabsContent value="geography">
+          <GeographyTab filters={filters} />
         </TabsContent>
 
         <TabsContent value="promos">
           <PromosTab filters={filters} />
-        </TabsContent>
-
-        <TabsContent value="geo">
-          <GeoTab filters={filters} />
         </TabsContent>
       </Tabs>
     </AppLayout>
