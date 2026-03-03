@@ -1,18 +1,10 @@
 import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { RecurringExpense, RecurringFrequency } from '@/hooks/recurring-expenses/use-recurring-expenses'
 
 const FALLBACK_COLORS = [
   '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6',
   '#8b5cf6', '#ef4444', '#14b8a6', '#f97316', '#06b6d4',
 ]
-
-interface CategoryBreakdownProps {
-  expenses: RecurringExpense[]
-  convertAmount: (amount: number, fromCurrency: string) => number
-  formatAmount: (amount: number, currency?: string) => string
-}
 
 function getMonthlyEquivalent(amount: number, frequency: RecurringFrequency): number {
   switch (frequency) {
