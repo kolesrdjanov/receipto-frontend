@@ -10,9 +10,19 @@ import { PromosTab } from '@/components/admin/analytics/promos-tab'
 import { GeoTab } from '@/components/admin/analytics/geo-tab'
 import type { AnalyticsFilters } from '@/hooks/admin/use-analytics'
 
+function getDefaultDateRange(): Pick<AnalyticsFilters, 'dateFrom' | 'dateTo'> {
+  const to = new Date()
+  const from = new Date()
+  from.setDate(from.getDate() - 30)
+  return {
+    dateFrom: from.toISOString().split('T')[0],
+    dateTo: to.toISOString().split('T')[0],
+  }
+}
+
 export default function AdminAnalytics() {
   const { t } = useTranslation()
-  const [filters, setFilters] = useState<AnalyticsFilters>({})
+  const [filters, setFilters] = useState<AnalyticsFilters>(getDefaultDateRange)
 
   return (
     <AppLayout>

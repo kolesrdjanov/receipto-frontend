@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownRight, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import {
   useAnalyticsPromos,
   useAnalyticsPromoAnalysis,
@@ -41,66 +42,61 @@ export function PromosTab({ filters }: PromosTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button size="sm" onClick={() => setShowModal(true)}>
-          <Plus className="h-4 w-4 mr-1" />
+        <Button onClick={() => setShowModal(true)}>
+          <Plus className="h-4 w-4" />
           {t('analytics.createCampaign')}
         </Button>
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left p-3 font-medium w-8"></th>
-                <th className="text-left p-3 font-medium">{t('analytics.campaignName')}</th>
-                <th className="text-left p-3 font-medium">{t('analytics.chain')}</th>
-                <th className="text-left p-3 font-medium">{t('analytics.promoDates')}</th>
-                <th className="text-left p-3 font-medium">{t('analytics.status')}</th>
-                <th className="text-right p-3 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">{t('common.loading')}</td></tr>
-              ) : !promos?.length ? (
-                <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">{t('analytics.noPromos')}</td></tr>
-              ) : (
-                promos.map((promo) => {
-                  const status = getStatus(promo.startDate, promo.endDate)
-                  const isExpanded = expandedId === promo.id
-                  const Icon = isExpanded ? ChevronUp : ChevronDown
-                  return (
-                    <PromoRow
-                      key={promo.id}
-                      promo={promo}
-                      status={status}
-                      statusColor={statusColors[status]}
-                      isExpanded={isExpanded}
-                      onToggle={() => setExpandedId(isExpanded ? null : promo.id)}
-                      onDelete={() => {
-                        if (confirm(t('analytics.confirmDelete'))) {
-                          deletePromo.mutate(promo.id)
-                        }
-                      }}
-                      Icon={Icon}
-                    />
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-8"></TableHead>
+            <TableHead>{t('analytics.campaignName')}</TableHead>
+            <TableHead>{t('analytics.chain')}</TableHead>
+            <TableHead>{t('analytics.promoDates')}</TableHead>
+            <TableHead>{t('analytics.status')}</TableHead>
+            <TableHead className="text-right"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('common.loading')}</TableCell></TableRow>
+          ) : !promos?.length ? (
+            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('analytics.noPromos')}</TableCell></TableRow>
+          ) : (
+            promos.map((promo) => {
+              const status = getStatus(promo.startDate, promo.endDate)
+              return (
+                <PromoRow
+                  key={promo.id}
+                  promo={promo}
+                  status={status}
+                  statusColor={statusColors[status]}
+                  isExpanded={expandedId === promo.id}
+                  onToggle={() => setExpandedId(expandedId === promo.id ? null : promo.id)}
+                  onDelete={() => {
+                    if (confirm(t('analytics.confirmDelete'))) {
+                      deletePromo.mutate(promo.id)
+                    }
+                  }}
+                />
+              )
+            })
+          )}
+        </TableBody>
+      </Table>
 
       <PromoCampaignModal isOpen={showModal} onClose={() => setShowModal(false)} chains={chainNames} />
     </div>
   )
 }
 
-function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete, Icon }: any) {
+function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete }: any) {
   const { t } = useTranslation()
   const { data: analysis } = useAnalyticsPromoAnalysis(isExpanded ? promo.id : '')
+
+  const Icon = isExpanded ? ChevronUp : ChevronDown
 
   const pctChange = (promo_val: number, baseline_val: number) => {
     if (!baseline_val) return null
@@ -109,23 +105,23 @@ function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete, 
 
   return (
     <>
-      <tr className="border-b hover:bg-muted/30 cursor-pointer" onClick={onToggle}>
-        <td className="p-3"><Icon className="h-4 w-4 text-muted-foreground" /></td>
-        <td className="p-3 font-medium">{promo.name}</td>
-        <td className="p-3">{promo.chainName}</td>
-        <td className="p-3">{promo.startDate} — {promo.endDate}</td>
-        <td className="p-3">
+      <TableRow className="cursor-pointer" onClick={onToggle}>
+        <TableCell><Icon className="h-4 w-4 text-muted-foreground" /></TableCell>
+        <TableCell className="font-medium">{promo.name}</TableCell>
+        <TableCell>{promo.chainName}</TableCell>
+        <TableCell>{promo.startDate} — {promo.endDate}</TableCell>
+        <TableCell>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>{t(`analytics.${status}`)}</span>
-        </td>
-        <td className="p-3 text-right">
+        </TableCell>
+        <TableCell className="text-right">
           <button onClick={(e) => { e.stopPropagation(); onDelete() }} className="text-muted-foreground hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </button>
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
       {isExpanded && analysis && (
-        <tr>
-          <td colSpan={6} className="p-4 bg-muted/20">
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={6} className="bg-muted/20">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <MetricCard
                 label={t('analytics.transactions')}
@@ -153,8 +149,8 @@ function PromoRow({ promo, status, statusColor, isExpanded, onToggle, onDelete, 
                 <div className="text-xl font-bold">{analysis.newCustomers}</div>
               </div>
             </div>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       )}
     </>
   )

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useAnalyticsWalletShare, type AnalyticsFilters } from '@/hooks/admin/use-analytics'
 
 const COLORS = [
@@ -72,34 +73,30 @@ export function WalletTab({ filters }: WalletTabProps) {
           </div>
 
           {/* Detail table */}
-          <div className="rounded-lg border bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-3 font-medium">{t('analytics.chain')}</th>
-                    <th className="text-right p-3 font-medium">{t('analytics.avgShare')}</th>
-                    <th className="text-right p-3 font-medium">{t('analytics.minShare')}</th>
-                    <th className="text-right p-3 font-medium">{t('analytics.maxShare')}</th>
-                    <th className="text-right p-3 font-medium">{t('analytics.users')}</th>
-                    <th className="text-right p-3 font-medium">{t('analytics.totalSpend')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {shares.map((share) => (
-                    <tr key={share.chainName} className="border-b last:border-0 hover:bg-muted/30">
-                      <td className="p-3 font-medium">{share.chainName}</td>
-                      <td className="p-3 text-right">{share.avgSharePercent}%</td>
-                      <td className="p-3 text-right">{share.minSharePercent}%</td>
-                      <td className="p-3 text-right">{share.maxSharePercent}%</td>
-                      <td className="p-3 text-right">{share.userCount}</td>
-                      <td className="p-3 text-right">{Number(share.totalSpend).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('analytics.chain')}</TableHead>
+                <TableHead className="text-right">{t('analytics.avgShare')}</TableHead>
+                <TableHead className="text-right">{t('analytics.minShare')}</TableHead>
+                <TableHead className="text-right">{t('analytics.maxShare')}</TableHead>
+                <TableHead className="text-right">{t('analytics.users')}</TableHead>
+                <TableHead className="text-right">{t('analytics.totalSpend')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {shares.map((share) => (
+                <TableRow key={share.chainName}>
+                  <TableCell className="font-medium">{share.chainName}</TableCell>
+                  <TableCell className="text-right">{share.avgSharePercent}%</TableCell>
+                  <TableCell className="text-right">{share.minSharePercent}%</TableCell>
+                  <TableCell className="text-right">{share.maxSharePercent}%</TableCell>
+                  <TableCell className="text-right">{share.userCount}</TableCell>
+                  <TableCell className="text-right">{Number(share.totalSpend).toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </>
       )}
     </div>

@@ -146,11 +146,14 @@ function toQueryString(params?: Record<string, string>): string {
 
 // --- Hooks ---
 
+const ANALYTICS_STALE_TIME = 5 * 60 * 1000 // 5 minutes
+
 export function useAnalyticsOverview(filters?: AnalyticsFilters) {
   const params = filtersToParams(filters)
   return useQuery({
     queryKey: queryKeys.analytics.overview(params),
     queryFn: () => api.get<OverviewStats>(`/admin/analytics/overview${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -159,6 +162,7 @@ export function useAnalyticsChains(filters?: AnalyticsFilters) {
   return useQuery({
     queryKey: queryKeys.analytics.chains(params),
     queryFn: () => api.get<ChainOverview[]>(`/admin/analytics/chains${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -168,6 +172,7 @@ export function useAnalyticsChainDetail(name: string, filters?: AnalyticsFilters
     queryKey: queryKeys.analytics.chainDetail(name, params),
     queryFn: () => api.get<ChainDetail>(`/admin/analytics/chains/${encodeURIComponent(name)}${toQueryString(params)}`),
     enabled: !!name,
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -176,6 +181,7 @@ export function useAnalyticsTopProducts(filters?: AnalyticsFilters) {
   return useQuery({
     queryKey: queryKeys.analytics.topProducts(params),
     queryFn: () => api.get<TopProduct[]>(`/admin/analytics/products/top${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -190,6 +196,7 @@ export function useAnalyticsProductPrices(productId: string, filters?: { dateFro
     queryKey: queryKeys.analytics.productPrices(productId, qsParams),
     queryFn: () => api.get<ProductPriceComparison[]>(`/admin/analytics/products/${productId}/prices${toQueryString(qsParams)}`),
     enabled: !!productId,
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -198,6 +205,7 @@ export function useAnalyticsWalletShare(filters?: AnalyticsFilters) {
   return useQuery({
     queryKey: queryKeys.analytics.walletShare(params),
     queryFn: () => api.get<WalletShare[]>(`/admin/analytics/wallet/share${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -211,6 +219,7 @@ export function useAnalyticsPriceTrends(productId: string, filters?: { dateFrom?
     queryKey: queryKeys.analytics.priceTrends(productId, params),
     queryFn: () => api.get<PriceTrend[]>(`/admin/analytics/prices/trends?${new URLSearchParams(params).toString()}`),
     enabled: !!productId,
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -219,6 +228,7 @@ export function useAnalyticsCities(filters?: AnalyticsFilters) {
   return useQuery({
     queryKey: queryKeys.analytics.cities(params),
     queryFn: () => api.get<CityStats[]>(`/admin/analytics/geo/cities${toQueryString(params)}`),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -226,6 +236,7 @@ export function useAnalyticsPromos() {
   return useQuery({
     queryKey: queryKeys.analytics.promos(),
     queryFn: () => api.get<PromoCampaign[]>('/admin/analytics/promos'),
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 
@@ -234,6 +245,7 @@ export function useAnalyticsPromoAnalysis(id: string) {
     queryKey: queryKeys.analytics.promoAnalysis(id),
     queryFn: () => api.get<PromoAnalysis>(`/admin/analytics/promos/${id}/analysis`),
     enabled: !!id,
+    staleTime: ANALYTICS_STALE_TIME,
   })
 }
 

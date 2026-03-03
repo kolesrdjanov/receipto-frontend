@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Database, Package, Store, MapPin, Users } from 'lucide-react'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { useAnalyticsOverview, useAnalyticsChains, type AnalyticsFilters } from '@/hooks/admin/use-analytics'
 
 interface OverviewTabProps {
@@ -37,43 +38,36 @@ export function OverviewTab({ filters }: OverviewTabProps) {
       </div>
 
       {/* Chain overview table */}
-      <div className="rounded-lg border bg-card">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">{t('analytics.chainOverview')}</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left p-3 font-medium">{t('analytics.chain')}</th>
-                <th className="text-right p-3 font-medium">{t('analytics.transactions')}</th>
-                <th className="text-right p-3 font-medium">{t('analytics.users')}</th>
-                <th className="text-right p-3 font-medium">{t('analytics.revenue')}</th>
-                <th className="text-right p-3 font-medium">{t('analytics.products')}</th>
-                <th className="text-right p-3 font-medium">{t('analytics.cities')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chainsLoading ? (
-                <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">{t('common.loading')}</td></tr>
-              ) : !chains?.length ? (
-                <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">{t('analytics.noData')}</td></tr>
-              ) : (
-                chains.map((chain) => (
-                  <tr key={chain.chainName} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="p-3 font-medium">{chain.chainName}</td>
-                    <td className="p-3 text-right">{chain.transactions.toLocaleString()}</td>
-                    <td className="p-3 text-right">{chain.uniqueUsers.toLocaleString()}</td>
-                    <td className="p-3 text-right">{Number(chain.totalRevenue).toLocaleString()}</td>
-                    <td className="p-3 text-right">{chain.uniqueProducts.toLocaleString()}</td>
-                    <td className="p-3 text-right">{chain.cities}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('analytics.chain')}</TableHead>
+            <TableHead className="text-right">{t('analytics.transactions')}</TableHead>
+            <TableHead className="text-right">{t('analytics.users')}</TableHead>
+            <TableHead className="text-right">{t('analytics.revenue')}</TableHead>
+            <TableHead className="text-right">{t('analytics.products')}</TableHead>
+            <TableHead className="text-right">{t('analytics.cities')}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {chainsLoading ? (
+            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('common.loading')}</TableCell></TableRow>
+          ) : !chains?.length ? (
+            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">{t('analytics.noData')}</TableCell></TableRow>
+          ) : (
+            chains.map((chain) => (
+              <TableRow key={chain.chainName}>
+                <TableCell className="font-medium">{chain.chainName}</TableCell>
+                <TableCell className="text-right">{chain.transactions.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{chain.uniqueUsers.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{Number(chain.totalRevenue).toLocaleString()}</TableCell>
+                <TableCell className="text-right">{chain.uniqueProducts.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{chain.cities}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 }
