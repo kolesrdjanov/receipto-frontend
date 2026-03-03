@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp, PiggyBank, CalendarClock } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Receipt, FolderOpen, Users, Shield, Settings, UserCog, MessageCircle, Heart, Compass, Sparkles, Crown, Star, Megaphone, EllipsisVertical, LogOut, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, TrendingUp, PiggyBank, CalendarClock, BarChart3 } from 'lucide-react'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
@@ -38,6 +38,7 @@ const adminNavItems = [
   { path: '/admin/ratings', labelKey: 'nav.ratings', icon: Star },
   { path: '/admin/announcements', labelKey: 'nav.announcements', icon: Megaphone },
   { path: '/admin/settings', labelKey: 'nav.appSettings', icon: SlidersHorizontal },
+  { path: '/admin/analytics', labelKey: 'nav.analytics', icon: BarChart3 },
 ]
 
 export function AppLayout({ children }: AppLayoutProps) {
