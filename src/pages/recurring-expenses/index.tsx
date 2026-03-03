@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,12 +22,14 @@ import {
   useDeleteRecurringExpense,
   useUpdateRecurringExpense,
   type RecurringExpense,
+  type RecurringFrequency,
   type UpcomingExpense,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { useSettingsStore } from '@/store/settings'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { formatDate } from '@/lib/date-utils'
 import { toast } from 'sonner'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   Plus,
   Pencil,
@@ -42,6 +44,8 @@ import {
   Wallet,
   CheckCircle2,
   AlertCircle,
+  TrendingUp,
+  PieChart as PieChartIcon,
   Info,
   X,
 } from 'lucide-react'
@@ -66,6 +70,8 @@ export default function RecurringExpenses() {
   const [markPaidOpen, setMarkPaidOpen] = useState(false)
   const [expenseToPay, setExpenseToPay] = useState<UpcomingExpense | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 10
   const [showInfoBanner, setShowInfoBanner] = useState(() => {
     return localStorage.getItem('recurring-info-dismissed') !== 'true'
   })
@@ -161,6 +167,62 @@ export default function RecurringExpenses() {
     return sum + convertAmount(item.amount, item.currency)
   }, 0) ?? 0
 
+  const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+
+  const toMonthly = (amount: number, freq: RecurringFrequency) => {
+    switch (freq) {
+      case 'weekly': return amount * 4.33
+      case 'monthly': return amount
+      case 'quarterly': return amount / 3
+      case 'yearly': return amount / 12
+    }
+  }
+
+  const categoryChartData = useMemo(() => {
+    if (!expenses) return []
+    const active = expenses.filter(
+      (e) => !e.isPaused && !(e.endDate && new Date(e.endDate) < new Date())
+    )
+    const map = new Map<string, { name: string; icon?: string; color: string; value: number; count: number }>()
+    for (const e of active) {
+      const val = convertAmount(toMonthly(Number(e.amount), e.frequency), e.currency)
+      const key = e.category?.id ?? '_none_'
+      const prev = map.get(key)
+      if (prev) {
+        prev.value += val
+        prev.count += 1
+      } else {
+        map.set(key, {
+          name: e.category?.name ?? t('recurring.categoryBreakdown.uncategorized'),
+          icon: e.category?.icon,
+          color: e.category?.color || FALLBACK_COLORS[map.size % FALLBACK_COLORS.length],
+          value: val,
+          count: 1,
+        })
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.value - a.value)
+  }, [expenses, exchangeRates])
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0]?.payload
+      return (
+        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <div
+              className="w-3 h-3 rounded-full shrink-0"
+              style={{ backgroundColor: data.color }}
+            />
+            <span className="font-semibold text-sm">{data.icon} {data.name}</span>
+          </div>
+          <p className="text-sm font-medium">{formatAmount(data.value)}</p>
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
     <AppLayout>
       <PageTransition>
@@ -180,7 +242,7 @@ export default function RecurringExpenses() {
         </div>
 
         {/* Stats Cards */}
-        <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-3 mb-6">
+        <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <StaggerItem>
             <Card className="stat-card-gradient">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -189,6 +251,17 @@ export default function RecurringExpenses() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">{formatAmount(monthlyTotal)}</p>
+              </CardContent>
+            </Card>
+          </StaggerItem>
+          <StaggerItem>
+            <Card className="stat-card-gradient">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">{t('recurring.stats.annualProjection')}</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">{formatAmount(monthlyTotal * 12)}</p>
               </CardContent>
             </Card>
           </StaggerItem>
@@ -215,6 +288,57 @@ export default function RecurringExpenses() {
             </Card>
           </StaggerItem>
         </StaggerContainer>
+
+        {/* Category Breakdown */}
+        {categoryChartData.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <PieChartIcon className="h-4 w-4 text-primary" />
+                {t('recurring.categoryBreakdown.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center gap-4">
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={categoryChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {categoryChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-1 text-sm w-full">
+                  {categoryChartData.map((c) => (
+                    <div key={c.name} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: c.color }}
+                      />
+                      <span className="truncate max-w-[120px]">
+                        {c.icon} {c.name}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        ({c.count})
+                      </span>
+                      <span className="text-muted-foreground ml-auto">{formatAmount(c.value)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Info Banner */}
         {showInfoBanner && (
@@ -273,7 +397,7 @@ export default function RecurringExpenses() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {expenses.map((expense) => (
+                {expenses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((expense) => (
                   <Fragment key={expense.id}>
                     <TableRow className="group">
                       <TableCell>
@@ -365,6 +489,35 @@ export default function RecurringExpenses() {
                 ))}
               </TableBody>
             </Table>
+            {expenses.length > PAGE_SIZE && (
+              <div className="flex items-center justify-between border-t px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  {t('common.pagination.showing', {
+                    from: (page - 1) * PAGE_SIZE + 1,
+                    to: Math.min(page * PAGE_SIZE, expenses.length),
+                    total: expenses.length,
+                  })}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => p - 1)}
+                    disabled={page === 1}
+                  >
+                    {t('common.pagination.previous')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={page * PAGE_SIZE >= expenses.length}
+                  >
+                    {t('common.pagination.next')}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

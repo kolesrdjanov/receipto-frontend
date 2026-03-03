@@ -1446,7 +1446,14 @@
     "stats": {
       "monthlyCommitment": "Monthly Commitment",
       "paidThisMonth": "Paid This Month",
-      "pendingThisMonth": "Pending This Month"
+      "pendingThisMonth": "Pending This Month",
+      "annualProjection": "Annual Projection"
+    },
+    "categoryBreakdown": {
+      "title": "Spending by Category",
+      "expenses": "expenses",
+      "uncategorized": "Uncategorized",
+      "noData": "No active expenses"
     },
     "table": {
       "name": "Name",

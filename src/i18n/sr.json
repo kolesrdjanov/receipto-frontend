@@ -1433,7 +1433,14 @@
     "stats": {
       "monthlyCommitment": "Mesečna obaveza",
       "paidThisMonth": "Plaćeno ovog meseca",
-      "pendingThisMonth": "Na čekanju ovog meseca"
+      "pendingThisMonth": "Na čekanju ovog meseca",
+      "annualProjection": "Godišnja projekcija"
+    },
+    "categoryBreakdown": {
+      "title": "Potrošnja po kategoriji",
+      "expenses": "troškova",
+      "uncategorized": "Bez kategorije",
+      "noData": "Nema aktivnih troškova"
     },
     "table": {
       "name": "Naziv",
