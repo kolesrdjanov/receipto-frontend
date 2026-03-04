@@ -10,6 +10,7 @@ export interface Me {
   firstName: string
   lastName: string
   profileImageUrl?: string | null
+  preferredLanguage?: string
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
   receiptMilestoneEmailsEnabled?: boolean
@@ -26,6 +27,7 @@ export interface UpdateMeData {
   firstName?: string
   lastName?: string
   removeProfileImage?: boolean
+  preferredLanguage?: string
   warrantyReminderEnabled?: boolean
   budgetAlertEnabled?: boolean
   receiptMilestoneEmailsEnabled?: boolean

@@ -396,7 +396,10 @@ export default function Settings() {
                       {t('settings.language.help')}
                     </p>
                   </div>
-                  <Select value={language} onValueChange={(value: Language) => setLanguage(value)}>
+                  <Select value={language} onValueChange={(value: Language) => {
+                    setLanguage(value)
+                    updateMe.mutate({ preferredLanguage: value })
+                  }}>
                     <SelectTrigger id="language" className="w-full sm:w-[180px]">
                       <SelectValue placeholder={t('settings.language.label')} />
                     </SelectTrigger>
