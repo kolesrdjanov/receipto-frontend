@@ -89,7 +89,36 @@
     "appSettings": "Podešavanja",
     "analytics": "Analitika",
     "collapseSidebar": "Skupi meni",
-    "expandSidebar": "Proširi meni"
+    "expandSidebar": "Proširi meni",
+    "loyaltyCards": "Kartice lojalnosti"
+  },
+  "loyaltyCards": {
+    "title": "Kartice lojalnosti",
+    "subtitle": "Sačuvajte i pokažite kartice lojalnosti prilikom kupovine",
+    "addCard": "Dodaj karticu",
+    "editCard": "Izmeni karticu",
+    "addDescription": "Skenirajte barkod ili QR kod sa kartice lojalnosti da je sačuvate",
+    "editDescription": "Ažurirajte podatke kartice lojalnosti",
+    "cardName": "Naziv kartice",
+    "cardNamePlaceholder": "npr. Maxi kartica lojalnosti",
+    "codeValue": "Kod kartice",
+    "codeValuePlaceholder": "Skenirajte ili unesite kod kartice",
+    "cardColor": "Boja kartice",
+    "detectedFormat": "Detektovani format",
+    "barcode": "Barkod",
+    "scanCard": "Skeniraj karticu",
+    "scanDescription": "Usmerite kameru na barkod ili QR kod na kartici lojalnosti",
+    "show": "Prikaži",
+    "edit": "Izmeni",
+    "noCards": "Nemate kartice lojalnosti",
+    "noCardsDescription": "Dodajte prvu karticu lojalnosti da je imate spremnu kad vam zatreba",
+    "cardAdded": "Kartica lojalnosti je dodata",
+    "cardUpdated": "Kartica lojalnosti je ažurirana",
+    "cardDeleted": "Kartica lojalnosti je obrisana",
+    "cameraError": "Nije moguće pristupiti kameri",
+    "cameraSlowTitle": "Kamera se predugo učitava",
+    "cameraSlowDescription": "Proverite dozvole kamere i pokušajte ponovo",
+    "tryAgain": "Pokušaj ponovo"
   },
   "auth": {
     "brandTagline": "Vaš pametni pratilac za račune",
@@ -1110,7 +1139,9 @@
       "featureSavings": "Štednja",
       "featureSavingsDescription": "Omogućite korisnicima postavljanje ciljeva štednje i praćenje uplata.",
       "featureRecurringExpenses": "Ponavljajući troškovi",
-      "featureRecurringExpensesDescription": "Omogućite korisnicima upravljanje ponavljajućim računima i pretplatama."
+      "featureRecurringExpensesDescription": "Omogućite korisnicima upravljanje ponavljajućim računima i pretplatama.",
+      "featureLoyaltyCards": "Kartice lojalnosti",
+      "featureLoyaltyCardsDescription": "Omogućite korisnicima čuvanje i prikazivanje barkodova i QR kodova kartica lojalnosti."
     }
   },
   "categorization": {

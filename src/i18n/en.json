@@ -89,7 +89,36 @@
     "appSettings": "Settings",
     "analytics": "Analytics",
     "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar"
+    "expandSidebar": "Expand sidebar",
+    "loyaltyCards": "Loyalty Cards"
+  },
+  "loyaltyCards": {
+    "title": "Loyalty Cards",
+    "subtitle": "Store and show your loyalty cards when shopping",
+    "addCard": "Add Card",
+    "editCard": "Edit Card",
+    "addDescription": "Scan your loyalty card barcode or QR code to save it",
+    "editDescription": "Update your loyalty card details",
+    "cardName": "Card Name",
+    "cardNamePlaceholder": "e.g. Maxi Loyalty Card",
+    "codeValue": "Card Code",
+    "codeValuePlaceholder": "Scan or enter card code",
+    "cardColor": "Card Color",
+    "detectedFormat": "Detected format",
+    "barcode": "Barcode",
+    "scanCard": "Scan Card",
+    "scanDescription": "Point your camera at the barcode or QR code on your loyalty card",
+    "show": "Show",
+    "edit": "Edit",
+    "noCards": "No loyalty cards yet",
+    "noCardsDescription": "Add your first loyalty card to have it ready when you need it",
+    "cardAdded": "Loyalty card added",
+    "cardUpdated": "Loyalty card updated",
+    "cardDeleted": "Loyalty card deleted",
+    "cameraError": "Could not access camera",
+    "cameraSlowTitle": "Camera is taking too long",
+    "cameraSlowDescription": "Please check your camera permissions and try again",
+    "tryAgain": "Try Again"
   },
   "auth": {
     "brandTagline": "Your smart receipt companion",
@@ -1123,7 +1152,9 @@
       "featureSavings": "Savings",
       "featureSavingsDescription": "Allow users to set savings goals and track contributions.",
       "featureRecurringExpenses": "Recurring Expenses",
-      "featureRecurringExpensesDescription": "Allow users to manage recurring bills and subscriptions."
+      "featureRecurringExpensesDescription": "Allow users to manage recurring bills and subscriptions.",
+      "featureLoyaltyCards": "Loyalty Cards",
+      "featureLoyaltyCardsDescription": "Allow users to store and display loyalty card barcodes and QR codes."
     }
   },
   "categorization": {

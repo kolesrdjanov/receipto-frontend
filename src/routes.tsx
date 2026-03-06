@@ -16,6 +16,7 @@ import Settings from './pages/settings'
 import Items from './pages/items'
 import Savings from './pages/savings'
 import RecurringExpenses from './pages/recurring-expenses'
+import LoyaltyCards from './pages/loyalty-cards'
 
 // Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
@@ -179,6 +180,16 @@ export const routes: RouteObject[] = [
       <ProtectedRoute>
         <FeatureRoute feature="savings">
           <SavingsGoalDetail />
+        </FeatureRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/loyalty-cards',
+    element: (
+      <ProtectedRoute>
+        <FeatureRoute feature="loyaltyCards">
+          <LoyaltyCards />
         </FeatureRoute>
       </ProtectedRoute>
     ),

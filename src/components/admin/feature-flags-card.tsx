@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useAppSettings, useUpdateAppSettings } from '@/hooks/admin/use-app-settings'
 import { queryKeys } from '@/lib/query-keys'
-import { ToggleLeft, Shield, TrendingUp, PiggyBank, Loader2, CalendarClock } from 'lucide-react'
+import { ToggleLeft, Shield, TrendingUp, PiggyBank, Loader2, CalendarClock, CreditCard } from 'lucide-react'
 
 export function FeatureFlagsCard() {
   const { t } = useTranslation()
@@ -18,6 +18,7 @@ export function FeatureFlagsCard() {
   const itemPricingEnabled = settings?.feature_item_pricing?.value ?? true
   const savingsEnabled = settings?.feature_savings?.value ?? true
   const recurringEnabled = settings?.feature_recurring_expenses?.value ?? true
+  const loyaltyCardsEnabled = settings?.feature_loyalty_cards?.value ?? true
 
   const handleToggle = (key: string, value: boolean) => {
     updateSettings.mutate({ [key]: value }, {
@@ -123,6 +124,25 @@ export function FeatureFlagsCard() {
           <Switch
             checked={recurringEnabled}
             onCheckedChange={(checked) => handleToggle('feature_recurring_expenses', checked)}
+            disabled={updateSettings.isPending}
+          />
+        </div>
+
+        <div className="h-px bg-border" />
+
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <CreditCard className="h-4 w-4 text-amber-500" />
+              {t('admin.settings.featureLoyaltyCards')}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t('admin.settings.featureLoyaltyCardsDescription')}
+            </p>
+          </div>
+          <Switch
+            checked={loyaltyCardsEnabled}
+            onCheckedChange={(checked) => handleToggle('feature_loyalty_cards', checked)}
             disabled={updateSettings.isPending}
           />
         </div>

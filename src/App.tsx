@@ -61,7 +61,15 @@ function App() {
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
               <AppRoutes />
             </Suspense>
-            <Toaster />
+            <Toaster
+              closeButton
+              toastOptions={{
+                classNames: {
+                  success: '!bg-emerald-600 !text-white !border-2 !border-emerald-800 [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-emerald-800 [&_[data-close-button]]:!bg-emerald-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
+                  error: '!bg-red-600 !text-white !border-2 !border-red-800 [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-red-800 [&_[data-close-button]]:!bg-red-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
+                },
+              }}
+            />
           </TooltipProvider>
         </BrowserRouter>
       </QueryClientProvider>

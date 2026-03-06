@@ -182,6 +182,15 @@ export const queryKeys = {
     promoAnalysis: (id: string) => [...queryKeys.analytics.all, 'promos', id, 'analysis'] as const,
   },
 
+  // Loyalty Cards
+  loyaltyCards: {
+    all: ['loyaltyCards'] as const,
+    lists: () => [...queryKeys.loyaltyCards.all, 'list'] as const,
+    list: () => [...queryKeys.loyaltyCards.lists()] as const,
+    details: () => [...queryKeys.loyaltyCards.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.loyaltyCards.details(), id] as const,
+  },
+
   // Ratings
   ratings: {
     all: ['ratings'] as const,
