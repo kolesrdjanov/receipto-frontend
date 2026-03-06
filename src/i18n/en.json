@@ -208,6 +208,8 @@
     "currency": "Currency",
     "totalReceipts": "Total Receipts",
     "totalSpent": "Total Spent",
+    "hideAmounts": "Hide amounts",
+    "showAmounts": "Show amounts",
     "thisMonth": "This Month",
     "categories": "Categories",
     "available": "Available",

@@ -65,8 +65,7 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
         { facingMode: 'environment' },
         {
           fps: 10,
-          qrbox: { width: 280, height: 160 },
-          aspectRatio: 1.7778,
+          qrbox: { width: 280, height: 280 },
           disableFlip: false,
         },
         (decodedText, decodedResult) => {

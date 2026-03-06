@@ -81,8 +81,8 @@ export function AnimatedNumber({
 }) {
   const motionValue = useMotionValue(0)
   const springValue = useSpring(motionValue, {
-    stiffness: 60,
-    damping: 20,
+    stiffness: 200,
+    damping: 30,
     mass: 1,
   })
   const display = useTransform(springValue, (latest) =>
@@ -91,7 +91,7 @@ export function AnimatedNumber({
 
   useEffect(() => {
     const controls = animate(motionValue, value, {
-      duration: 0.8,
+      duration: 0.4,
       ease: [0.25, 0.1, 0.25, 1],
     })
     return () => controls.stop()

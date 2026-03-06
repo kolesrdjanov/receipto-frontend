@@ -42,6 +42,8 @@ import {
   Sparkles,
   Crown,
   RotateCcw,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import {
   PieChart,
@@ -98,7 +100,7 @@ function usePrimaryColor() {
 
 export default function Dashboard() {
   const { t } = useTranslation()
-  const { currency: preferredCurrency } = useSettingsStore()
+  const { currency: preferredCurrency, amountsVisible, toggleAmountsVisible } = useSettingsStore()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [displayCurrency, setDisplayCurrency] = useState<string>(preferredCurrency || 'RSD')
@@ -306,13 +308,21 @@ export default function Dashboard() {
           <Card className="stat-card-gradient stat-card-hero">
             <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
-              <div className="stat-icon-container">
-                <PieChartIcon className="h-4 w-4" />
-              </div>
+              <button
+                type="button"
+                onClick={toggleAmountsVisible}
+                className="stat-icon-container cursor-pointer"
+                aria-label={amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
+              >
+                {amountsVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </button>
             </CardHeader>
             <CardContent className="relative z-10">
               <p className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display">
-                <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
+                {amountsVisible
+                  ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
+                  : <span className="tracking-wider">••••••</span>
+                }
               </p>
             </CardContent>
           </Card>
@@ -328,7 +338,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="relative z-10">
               <p className="text-2xl sm:text-3xl font-bold font-display">
-                <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
+                {amountsVisible
+                  ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
+                  : <span className="tracking-wider">••••••</span>
+                }
               </p>
             </CardContent>
           </Card>

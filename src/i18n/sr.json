@@ -208,6 +208,8 @@
     "currency": "Valuta",
     "totalReceipts": "Ukupno računa",
     "totalSpent": "Ukupno potrošeno",
+    "hideAmounts": "Sakrij iznose",
+    "showAmounts": "Prikaži iznose",
     "thisMonth": "Ovaj mesec",
     "categories": "Kategorije",
     "available": "Dostupno",
