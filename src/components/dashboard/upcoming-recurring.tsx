@@ -23,10 +23,11 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
   const [expenseToPay, setExpenseToPay] = useState<UpcomingExpense | null>(null)
 
   const convertAmount = (amount: number, fromCurrency: string): number => {
-    if (fromCurrency === displayCurrency || !exchangeRates) return amount
+    const num = Number(amount)
+    if (fromCurrency === displayCurrency || !exchangeRates) return num
     const rate = exchangeRates[fromCurrency]
-    if (!rate || rate === 0) return amount
-    return amount / rate
+    if (!rate || rate === 0) return num
+    return num / rate
   }
 
   const formatAmount = (amount: number) =>
