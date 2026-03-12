@@ -239,7 +239,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isActive ? 'page' : undefined}>
                   <div
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150',
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
                       isActive
                         ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-accent hover:text-accent-foreground',
@@ -272,7 +272,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isAdminItemActive ? 'page' : undefined}>
                       <div
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150',
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
                           isAdminItemActive
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent hover:text-accent-foreground',

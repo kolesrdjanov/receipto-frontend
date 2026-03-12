@@ -26,7 +26,7 @@ import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
 import { useDashboardStore } from '@/store/dashboard'
 import { cn } from '@/lib/utils'
-import { PageTransition, StaggerContainer, StaggerItem, AnimatedNumber } from '@/components/ui/animated'
+import { PageTransition, AnimatedNumber } from '@/components/ui/animated'
 import {
   Loader2,
   Receipt,
@@ -287,75 +287,82 @@ export default function Dashboard() {
   // Build widget content map — each entry matches a widget ID from the registry
   const widgetContent: Record<string, React.ReactNode> = {
     'stats-cards': (
-      <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StaggerItem className="sm:col-span-2">
-          <Card className="border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
-              <button
-                type="button"
-                onClick={toggleAmountsVisible}
-                className="stat-icon-container cursor-pointer"
-                aria-label={amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
-              >
-                {amountsVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              </button>
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-1">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{monthName}</CardTitle>
+            <button
+              type="button"
+              onClick={toggleAmountsVisible}
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label={amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
+            >
+              {amountsVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            </button>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold font-display tabular-nums">
+              {amountsVisible
+                ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
+                : <span className="tracking-wider">••••••</span>
+              }
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-1">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.totalSpent')}</CardTitle>
+            <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold font-display tabular-nums">
+              {amountsVisible
+                ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
+                : <span className="tracking-wider">••••••</span>
+              }
+            </p>
+          </CardContent>
+        </Card>
+
+        <Link to="/receipts" className="block">
+          <Card className="h-full hover:bg-muted/30 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.totalReceipts')}</CardTitle>
+              <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="relative z-10">
-              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display">
-                {amountsVisible
-                  ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
-                  : <span className="tracking-wider">••••••</span>
-                }
+            <CardContent>
+              <p className="text-2xl font-semibold font-display tabular-nums">
+                <AnimatedNumber value={totalReceipts} />
               </p>
             </CardContent>
           </Card>
-        </StaggerItem>
+        </Link>
 
-        <StaggerItem>
-          <Card className="border h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
-              <div className="stat-icon-container">
-                <TrendingUp className="h-4 w-4" />
-              </div>
+        <Link to="/receipts" className="block">
+          <Card className="h-full hover:bg-muted/30 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.recentActivity')}</CardTitle>
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="relative z-10">
-              <p className="text-2xl sm:text-3xl font-bold font-display">
-                {amountsVisible
-                  ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
-                  : <span className="tracking-wider">••••••</span>
-                }
+            <CardContent>
+              <p className="text-sm font-medium truncate">
+                {recentReceipts?.[0]?.storeName || '-'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {recentReceipts?.[0] ? formatDate(recentReceipts[0].receiptDate || recentReceipts[0].createdAt) : ''}
               </p>
             </CardContent>
           </Card>
-        </StaggerItem>
-
-        <StaggerItem>
-          <Link to="/receipts" className="block h-full">
-            <Card className="border cursor-pointer h-full">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
-                <div className="stat-icon-container">
-                  <Receipt className="h-4 w-4" />
-                </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <p className="text-2xl sm:text-3xl font-bold font-display">
-                  <AnimatedNumber value={totalReceipts} />
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        </StaggerItem>
-      </StaggerContainer>
+        </Link>
+      </div>
     ),
 
     'category-pie-chart': (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <PieChartIcon className="h-4 w-4 text-primary" />
+            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
             {t('dashboard.spendingByCategory')}
           </CardTitle>
         </CardHeader>
@@ -412,7 +419,7 @@ export default function Dashboard() {
       <Card className="flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <BarChart3 className="h-4 w-4 text-primary" />
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
             {t('dashboard.dailySpending')}
           </CardTitle>
         </CardHeader>
@@ -470,7 +477,7 @@ export default function Dashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="h-4 w-4 text-primary" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
             {t('dashboard.monthlyTrend', { year: selectedYear })}
           </CardTitle>
         </CardHeader>
@@ -560,30 +567,30 @@ export default function Dashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4 text-primary" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             {t('dashboard.recentActivity')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {recentReceipts && recentReceipts.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="divide-y divide-border">
               {recentReceipts.slice(0, 5).map((receipt) => (
                 <Link
                   key={receipt.id}
                   to="/receipts"
-                  className="truncate flex flex-col p-4 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors"
+                  className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-muted/30 -mx-1 px-1 rounded transition-colors"
                 >
-                  <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
-                  <span className="text-xl font-bold mt-1">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
+                  </div>
+                  <span className="text-sm font-medium tabular-nums shrink-0 ml-4">
                     {new Intl.NumberFormat('sr-RS', {
                       style: 'currency',
                       currency: receipt.currency || 'RSD',
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
                     }).format(Number(receipt.totalAmount) || 0)}
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    {formatDate(receipt.receiptDate || receipt.createdAt)}
                   </span>
                 </Link>
               ))}
@@ -608,23 +615,14 @@ export default function Dashboard() {
       <PageTransition>
       <div>
       <AnnouncementBanner />
-      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl font-display">{t('dashboard.title')}</h2>
-          <p className="text-sm text-muted-foreground md:text-base">
-            {t('dashboard.subtitle')}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="ml-auto md:ml-0 flex items-center gap-2 p-1 rounded-lg bg-muted/30">
-          <Coins className="h-4 w-4 text-muted-foreground ml-2" />
-          <CurrencySelect
-            value={displayCurrency}
-            onValueChange={setDisplayCurrency}
-            placeholder={t('dashboard.currency')}
-            triggerClassName="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
-          />
-        </div>
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight mb-1 md:text-3xl font-display">{t('dashboard.title')}</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
+              {t('dashboard.subtitle')}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -661,14 +659,23 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          {/* Month Selector */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">{t('dashboard.spendingAnalysis')}</h3>
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
+          {/* Section Title + Controls */}
+          <h3 className="text-lg font-semibold mb-3">{t('dashboard.spendingAnalysis')}</h3>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/50">
+              <Coins className="h-4 w-4 text-muted-foreground ml-2 shrink-0" />
+              <CurrencySelect
+                value={displayCurrency}
+                onValueChange={setDisplayCurrency}
+                placeholder={t('dashboard.currency')}
+                triggerClassName="w-full border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
+              />
+            </div>
+            <div className="flex items-center justify-center gap-1 p-1 rounded-lg bg-muted/50">
               <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8 hover:bg-background">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium min-w-[120px] text-center px-2">{monthName}</span>
+              <span className="text-sm font-medium min-w-[80px] text-center">{monthName}</span>
               <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8 hover:bg-background">
                 <ChevronRight className="h-4 w-4" />
               </Button>

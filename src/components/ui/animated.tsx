@@ -2,49 +2,31 @@ import { type ReactNode } from 'react'
 import { motion, useSpring, useTransform, useMotionValue, animate } from 'framer-motion'
 import { useEffect } from 'react'
 
-// Page entrance: fade + slide up
+// Page entrance: subtle fade only
 export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15 }}
     >
       {children}
     </motion.div>
   )
 }
 
-// Staggered container
+// No-op wrappers — render children instantly
 export function StaggerContainer({
   children,
   className,
-  staggerDelay = 0.04,
 }: {
   children: ReactNode
   className?: string
   staggerDelay?: number
 }) {
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: staggerDelay,
-          },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div className={className}>{children}</div>
 }
 
-// Staggered item
 export function StaggerItem({
   children,
   className,
@@ -52,24 +34,10 @@ export function StaggerItem({
   children: ReactNode
   className?: string
 }) {
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 6 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div className={className}>{children}</div>
 }
 
-// Animated number count-up
+// Animated number count-up (functional, not decorative)
 export function AnimatedNumber({
   value,
   formatFn,
