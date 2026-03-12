@@ -74,7 +74,7 @@ export function SavingsCopilot({ year, month }: SavingsCopilotProps) {
   const acceleratedGoals = scenario?.goalForecasts?.filter((goal) => (goal.timeSavedMonths || 0) > 0) || []
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-amber-500/5">
+    <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">

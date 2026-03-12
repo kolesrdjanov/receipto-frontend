@@ -108,7 +108,7 @@ export default function AdminUserDetailsPage() {
       const data = point?.payload
 
       return (
-        <div className="rounded-xl border border-border/50 bg-popover/95 p-3 shadow-xl backdrop-blur-sm">
+        <div className="rounded-lg border border-border bg-popover p-3 shadow-md">
           <p className="mb-1 text-sm font-semibold">
             {data?.icon} {data?.name}
           </p>

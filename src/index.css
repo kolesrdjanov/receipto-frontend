@@ -10,6 +10,15 @@ body {
   overscroll-behavior: none;
 }
 
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @theme inline {
   --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
@@ -212,211 +221,8 @@ body {
 }
 
 /* ============================================
-   MODERN UI EFFECTS (Using CSS Variables for Accent Color Support)
+   UI UTILITIES
    ============================================ */
-
-/* Glassmorphism Sidebar */
-.sidebar-glass {
-  background: oklch(1 0 0 / 85%);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-right: 1px solid oklch(0 0 0 / 6%);
-}
-
-.dark .sidebar-glass {
-  background: oklch(0.12 0.01 0 / 90%);
-  border-right: 1px solid oklch(1 1 1 / 8%);
-}
-
-/* Nav Item with Subtle Glow Effect - Uses CSS variable for accent color */
-.nav-item-glow {
-  position: relative;
-  background: var(--primary);
-  box-shadow: 0 2px 8px color-mix(in oklch, var(--primary) 25%, transparent);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-item-glow:hover {
-  box-shadow: 0 4px 12px color-mix(in oklch, var(--primary) 30%, transparent);
-}
-
-/* Gradient Stat Cards - Primary color based */
-.stat-card-gradient {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid oklch(0 0 0 / 5%);
-}
-
-.stat-card-gradient::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 8%, transparent) 0%,
-    color-mix(in oklch, var(--primary) 3%, transparent) 100%
-  );
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.stat-card-gradient:hover {
-  transform: translateY(-4px);
-  border-color: color-mix(in oklch, var(--primary) 20%, transparent);
-  box-shadow:
-    0 20px 40px oklch(0 0 0 / 10%),
-    0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent);
-}
-
-.stat-card-gradient:hover::before {
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 12%, transparent) 0%,
-    color-mix(in oklch, var(--primary) 5%, transparent) 100%
-  );
-}
-
-.dark .stat-card-gradient {
-  border: 1px solid oklch(1 1 1 / 5%);
-}
-
-.dark .stat-card-gradient::before {
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 15%, transparent) 0%,
-    color-mix(in oklch, var(--primary) 5%, transparent) 100%
-  );
-}
-
-.dark .stat-card-gradient:hover {
-  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
-  box-shadow:
-    0 20px 40px oklch(0 0 0 / 30%),
-    0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent);
-}
-
-/* Animated Background Blob - Uses primary color */
-.page-bg-gradient {
-  position: relative;
-}
-
-.page-bg-gradient::before,
-.page-bg-gradient::after {
-  content: '';
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: -1;
-  filter: blur(80px);
-}
-
-.page-bg-gradient::before {
-  top: -15%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: color-mix(in oklch, var(--primary) 15%, transparent);
-  animation: blob-float 20s ease-in-out infinite;
-}
-
-.page-bg-gradient::after {
-  bottom: -10%;
-  left: -5%;
-  width: 400px;
-  height: 400px;
-  background: color-mix(in oklch, var(--primary) 10%, transparent);
-  animation: blob-float 25s ease-in-out infinite reverse;
-}
-
-.dark .page-bg-gradient::before {
-  background: color-mix(in oklch, var(--primary) 12%, transparent);
-}
-
-.dark .page-bg-gradient::after {
-  background: color-mix(in oklch, var(--primary) 8%, transparent);
-}
-
-@keyframes blob-float {
-  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  33% { transform: translate(20px, -20px) scale(1.05) rotate(5deg); }
-  66% { transform: translate(-15px, 15px) scale(0.95) rotate(-5deg); }
-}
-
-/* Glossy Button - Uses primary color */
-.btn-glossy {
-  position: relative;
-  background: var(--primary);
-  color: var(--primary-foreground);
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 20%),
-    0 2px 8px color-mix(in oklch, var(--primary) 30%, transparent),
-    0 1px 3px oklch(0 0 0 / 10%);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  overflow: hidden;
-}
-
-.btn-glossy::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, oklch(1 0 0 / 15%) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.btn-glossy:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 25%),
-    0 8px 24px color-mix(in oklch, var(--primary) 40%, transparent),
-    0 4px 8px oklch(0 0 0 / 15%);
-}
-
-.btn-glossy:active {
-  transform: translateY(0);
-  box-shadow:
-    inset 0 2px 4px oklch(0 0 0 / 10%),
-    0 1px 4px color-mix(in oklch, var(--primary) 20%, transparent);
-}
-
-/* Interactive Card with Hover */
-.card-interactive {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border);
-}
-
-.card-interactive:hover {
-  transform: translateY(-4px);
-  border-color: color-mix(in oklch, var(--primary) 30%, var(--border));
-  box-shadow:
-    0 20px 40px oklch(0 0 0 / 10%),
-    0 8px 16px oklch(0 0 0 / 5%);
-}
-
-.dark .card-interactive:hover {
-  box-shadow:
-    0 20px 40px oklch(0 0 0 / 40%),
-    0 8px 16px oklch(0 0 0 / 20%);
-}
-
-/* Gradient Border Card - Uses primary color */
-.card-gradient-border {
-  position: relative;
-  background: var(--card);
-}
-
-.card-gradient-border:hover::before {
-  opacity: 1;
-}
-
-/* Icon Glow */
-.icon-glow {
-  filter: drop-shadow(0 0 8px currentColor);
-}
-
-/* Chart Card Enhancement */
-.chart-card {
-  position: relative;
-  overflow: hidden;
-}
 
 
 /* ============================================
@@ -431,10 +237,7 @@ body {
 }
 
 .table-modern thead {
-  background: linear-gradient(180deg,
-    color-mix(in oklch, var(--primary) 8%, var(--muted)) 0%,
-    color-mix(in oklch, var(--primary) 4%, var(--muted)) 100%
-  );
+  background: var(--muted);
 }
 
 .table-modern thead th {
@@ -459,10 +262,7 @@ body {
 }
 
 .dark .table-modern thead {
-  background: linear-gradient(180deg,
-    color-mix(in oklch, var(--primary) 12%, var(--muted)) 0%,
-    color-mix(in oklch, var(--primary) 6%, var(--muted)) 100%
-  );
+  background: var(--muted);
 }
 
 /* ============================================
@@ -470,26 +270,18 @@ body {
    ============================================ */
 
 .dialog-modern {
-  border: 1px solid color-mix(in oklch, var(--primary) 15%, var(--border));
-  box-shadow:
-    0 24px 48px oklch(0 0 0 / 20%),
-    0 12px 24px oklch(0 0 0 / 10%),
-    0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 32px oklch(0 0 0 / 12%);
   background: var(--background);
 }
 
 .dark .dialog-modern {
-  box-shadow:
-    0 24px 48px oklch(0 0 0 / 50%),
-    0 12px 24px oklch(0 0 0 / 30%),
-    0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent);
+  box-shadow: 0 16px 32px oklch(0 0 0 / 40%);
 }
 
-/* Dialog overlay with blur */
+/* Dialog overlay */
 .dialog-overlay-blur {
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
-  background: oklch(0 0 0 / 60%);
+  background: oklch(0 0 0 / 50%);
 }
 
 /* ============================================
@@ -535,10 +327,10 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  border-radius: 2px;
+  width: 40px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
 }
 
 /* Stat icon containers */
@@ -552,11 +344,6 @@ body {
   background: color-mix(in oklch, var(--primary) 12%, transparent);
   color: var(--primary);
   transition: all 0.3s ease;
-}
-
-.stat-card-gradient:hover .stat-icon-container {
-  background: color-mix(in oklch, var(--primary) 20%, transparent);
-  transform: scale(1.1);
 }
 
 /* Empty state styling */
@@ -578,11 +365,6 @@ body {
   margin-bottom: 1rem;
   color: var(--muted-foreground);
   opacity: 0.5;
-}
-
-/* Badge enhancements */
-.badge-glow {
-  box-shadow: 0 0 12px color-mix(in oklch, var(--primary) 40%, transparent);
 }
 
 /* Scrollbar styling */
@@ -621,34 +403,6 @@ body {
   box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
 }
 
-/* ============================================
-   COACH CARD
-   ============================================ */
-
-.coach-header {
-  position: relative;
-}
-
-.dark .coach-card {
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 6%, var(--card)) 0%,
-    var(--card) 50%,
-    color-mix(in oklch, var(--primary) 4%, var(--card)) 100%
-  );
-}
-
-/* ============================================
-   ANIMATED EMPTY STATES
-   ============================================ */
-
-@keyframes empty-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.empty-state .empty-state-icon {
-  animation: empty-float 3s ease-in-out infinite;
-}
 
 /* ============================================
    RECEIPT PAPER VIEWER
@@ -713,20 +467,3 @@ body {
   border-top-color: oklch(1 1 1 / 15%);
 }
 
-/* ============================================
-   STAT CARD HERO (Bento Grid)
-   ============================================ */
-
-.stat-card-hero::before {
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 12%, transparent) 0%,
-    color-mix(in oklch, var(--primary) 5%, transparent) 100%
-  ) !important;
-}
-
-.dark .stat-card-hero::before {
-  background: linear-gradient(135deg,
-    color-mix(in oklch, var(--primary) 20%, transparent) 0%,
-    color-mix(in oklch, var(--primary) 8%, transparent) 100%
-  ) !important;
-}

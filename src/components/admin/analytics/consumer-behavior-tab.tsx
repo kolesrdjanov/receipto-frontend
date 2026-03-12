@@ -90,7 +90,7 @@ export function ConsumerBehaviorTab({ filters }: ConsumerBehaviorTabProps) {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
                       return (
-                        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3 space-y-0.5">
+                        <div className="bg-popover border border-border rounded-lg shadow-md p-3 space-y-0.5">
                           <p className="font-semibold text-sm">{label}</p>
                           {payload.map((p) => (
                             <p key={p.dataKey as string} className="text-xs" style={{ color: p.color }}>
@@ -179,7 +179,7 @@ export function ConsumerBehaviorTab({ filters }: ConsumerBehaviorTabProps) {
                       if (!active || !payload?.length) return null
                       const d = payload[0].payload
                       return (
-                        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+                        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
                           <p className="font-semibold text-sm">{d.name}</p>
                           <p className="text-sm">{d.value}%</p>
                         </div>
@@ -208,7 +208,7 @@ export function ConsumerBehaviorTab({ filters }: ConsumerBehaviorTabProps) {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
                       return (
-                        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3 space-y-0.5">
+                        <div className="bg-popover border border-border rounded-lg shadow-md p-3 space-y-0.5">
                           <p className="font-semibold text-sm">{label}</p>
                           {payload.map((p) => (
                             <p key={p.dataKey as string} className="text-xs" style={{ color: p.color }}>

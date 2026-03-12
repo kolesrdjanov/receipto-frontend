@@ -409,7 +409,7 @@ export default function Receipts() {
             {/* Scan dropdown */}
             <div className="relative flex-1 sm:flex-none" ref={scanDropdownRef}>
               <Button
-                variant="glossy"
+                variant="default"
                 onClick={() => setShowScanDropdown(!showScanDropdown)}
                 disabled={isCreating || isGalleryProcessing}
                 className="w-full sm:w-auto"
@@ -424,7 +424,7 @@ export default function Receipts() {
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
               {showScanDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-52 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                <div className="absolute left-0 mt-2 w-full sm:w-52 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
                   <button
                     onClick={() => { openQrScanner(); setShowScanDropdown(false) }}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
@@ -457,7 +457,7 @@ export default function Receipts() {
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
               {showAddDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95" data-testid="receipts-add-dropdown">
+                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95" data-testid="receipts-add-dropdown">
                   <button
                     onClick={handleAddManually}
                     className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
@@ -498,7 +498,7 @@ export default function Receipts() {
               <ChevronDown className="h-4 w-4 ml-1" />
             </Button>
             {showImportExportDropdown && (
-              <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+              <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
                 <button
                   onClick={() => { handleExport(); setShowImportExportDropdown(false) }}
                   disabled={exportReceipts.isPending}
@@ -555,15 +555,12 @@ export default function Receipts() {
         </div>
       ) : receipts.length === 0 ? (
         <div className="empty-state" data-testid="receipts-empty">
-          <div className="relative mb-2">
-            <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
-            <Camera className="empty-state-icon !mb-0 relative" />
-          </div>
+          <Camera className="empty-state-icon" />
           <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-sm">
             {t('receipts.noReceiptsText')}
           </p>
-          <Button variant="glossy" onClick={openQrScanner}>
+          <Button variant="default" onClick={openQrScanner}>
             <Camera className="h-4 w-4" />
             {t('receipts.scanQr')}
           </Button>
@@ -599,7 +596,7 @@ export default function Receipts() {
           <StaggerContainer key={receipts.map(r => r.id).join()} className="md:hidden space-y-3">
             {receipts.map((receipt) => (
               <StaggerItem key={receipt.id}>
-              <Card className="overflow-hidden card-interactive">
+              <Card className="overflow-hidden">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3 flex-1">

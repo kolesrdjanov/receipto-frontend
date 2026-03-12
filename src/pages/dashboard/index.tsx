@@ -241,7 +241,7 @@ export default function Dashboard() {
 
       if (isPieChart) {
         return (
-          <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+          <div className="bg-popover border border-border rounded-lg shadow-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <div
                 className="w-3 h-3 rounded-full shrink-0"
@@ -259,7 +259,7 @@ export default function Dashboard() {
         : label
 
       return (
-        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
           <p className="font-semibold text-sm mb-1">{displayLabel}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
@@ -289,8 +289,8 @@ export default function Dashboard() {
     'stats-cards': (
       <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StaggerItem className="sm:col-span-2">
-          <Card className="stat-card-gradient stat-card-hero">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+          <Card className="border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">{monthName}</CardTitle>
               <button
                 type="button"
@@ -313,8 +313,8 @@ export default function Dashboard() {
         </StaggerItem>
 
         <StaggerItem>
-          <Card className="stat-card-gradient h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+          <Card className="border h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">{t('dashboard.totalSpent')}</CardTitle>
               <div className="stat-icon-container">
                 <TrendingUp className="h-4 w-4" />
@@ -333,8 +333,8 @@ export default function Dashboard() {
 
         <StaggerItem>
           <Link to="/receipts" className="block h-full">
-            <Card className="stat-card-gradient cursor-pointer h-full">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+            <Card className="border cursor-pointer h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{t('dashboard.totalReceipts')}</CardTitle>
                 <div className="stat-icon-container">
                   <Receipt className="h-4 w-4" />
@@ -352,7 +352,7 @@ export default function Dashboard() {
     ),
 
     'category-pie-chart': (
-      <Card className="card-interactive chart-card">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <PieChartIcon className="h-4 w-4 text-primary" />
@@ -409,7 +409,7 @@ export default function Dashboard() {
     ),
 
     'daily-bar-chart': (
-      <Card className="card-interactive chart-card flex flex-col">
+      <Card className="flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <BarChart3 className="h-4 w-4 text-primary" />
@@ -467,7 +467,7 @@ export default function Dashboard() {
     ),
 
     'monthly-trend': (
-      <Card className="card-interactive chart-card">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4 text-primary" />
@@ -522,7 +522,7 @@ export default function Dashboard() {
     ),
 
     'rank-card': (
-      <Card className={cn('card-interactive', rankVisual.cardClassName)}>
+      <Card className={cn(rankVisual.cardClassName)}>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between gap-3 text-base">
             <span>{t('dashboard.rank.title')}</span>
@@ -557,7 +557,7 @@ export default function Dashboard() {
     ),
 
     'recent-activity': (
-      <Card className="card-interactive card-gradient-border">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Clock className="h-4 w-4 text-primary" />
@@ -571,7 +571,7 @@ export default function Dashboard() {
                 <Link
                   key={receipt.id}
                   to="/receipts"
-                  className="truncate flex flex-col p-4 rounded-xl border bg-gradient-to-br from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                  className="truncate flex flex-col p-4 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors"
                 >
                   <span className="font-medium truncate text-sm">{receipt.storeName || t('dashboard.unknownStore')}</span>
                   <span className="text-xl font-bold mt-1">
@@ -610,7 +610,7 @@ export default function Dashboard() {
       <AnnouncementBanner />
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text font-display">{t('dashboard.title')}</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl font-display">{t('dashboard.title')}</h2>
           <p className="text-sm text-muted-foreground md:text-base">
             {t('dashboard.subtitle')}
           </p>
@@ -663,7 +663,7 @@ export default function Dashboard() {
         <>
           {/* Month Selector */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{t('dashboard.spendingAnalysis')}</h3>
+            <h3 className="text-lg font-semibold">{t('dashboard.spendingAnalysis')}</h3>
             <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
               <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8 hover:bg-background">
                 <ChevronLeft className="h-4 w-4" />
@@ -686,7 +686,7 @@ export default function Dashboard() {
 
       {/* Floating QR Scanner button - mobile only */}
       <button
-        className="md:hidden !fixed bottom-6 right-6 z-10 btn-glossy text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
+        className="md:hidden !fixed bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full h-14 w-14 shadow-lg flex items-center justify-center active:scale-[0.97] transition-transform"
         onClick={openQrScanner}
       >
         <QrCode className="h-6 w-6" />

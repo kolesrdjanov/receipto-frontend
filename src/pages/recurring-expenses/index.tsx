@@ -208,7 +208,7 @@ export default function RecurringExpenses() {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload
       return (
-        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-3 h-3 rounded-full shrink-0"
@@ -244,7 +244,7 @@ export default function RecurringExpenses() {
         {/* Stats Cards */}
         <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <StaggerItem>
-            <Card className="stat-card-gradient">
+            <Card className="border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{t('recurring.stats.monthlyCommitment')}</CardTitle>
                 <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -255,7 +255,7 @@ export default function RecurringExpenses() {
             </Card>
           </StaggerItem>
           <StaggerItem>
-            <Card className="stat-card-gradient">
+            <Card className="border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{t('recurring.stats.annualProjection')}</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -266,7 +266,7 @@ export default function RecurringExpenses() {
             </Card>
           </StaggerItem>
           <StaggerItem>
-            <Card className="stat-card-gradient">
+            <Card className="border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{t('recurring.stats.paidThisMonth')}</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
@@ -277,7 +277,7 @@ export default function RecurringExpenses() {
             </Card>
           </StaggerItem>
           <StaggerItem>
-            <Card className="stat-card-gradient">
+            <Card className="border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{t('recurring.stats.pendingThisMonth')}</CardTitle>
                 <AlertCircle className="h-4 w-4 text-muted-foreground" />

@@ -106,7 +106,7 @@ export function MarketOverviewTab({ filters }: MarketOverviewTabProps) {
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null
                     return (
-                      <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3 space-y-1">
+                      <div className="bg-popover border border-border rounded-lg shadow-md p-3 space-y-1">
                         <p className="font-semibold text-sm">{label}</p>
                         {payload.map((p) => (
                           <p key={p.dataKey as string} className="text-xs" style={{ color: p.color }}>

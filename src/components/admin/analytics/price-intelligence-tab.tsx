@@ -57,7 +57,7 @@ export function PriceIntelligenceTab({ filters }: PriceIntelligenceTabProps) {
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
                       return (
-                        <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+                        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
                           <p className="font-semibold text-sm">{label}</p>
                           <p className="text-sm">CPI: {Number(payload[0].value).toFixed(1)}</p>
                         </div>
@@ -217,7 +217,7 @@ function ProductRow({ product, isExpanded, onToggle, filters }: {
                         content={({ active, payload, label }) => {
                           if (!active || !payload?.length) return null
                           return (
-                            <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3 space-y-0.5">
+                            <div className="bg-popover border border-border rounded-lg shadow-md p-3 space-y-0.5">
                               <p className="font-semibold text-xs">{label}</p>
                               {payload.map((p) => (
                                 <p key={p.dataKey as string} className="text-xs" style={{ color: p.color }}>
@@ -257,7 +257,7 @@ function ProductRow({ product, isExpanded, onToggle, filters }: {
                           if (!active || !payload?.length) return null
                           const d = payload[0]
                           return (
-                            <div className="bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl p-3">
+                            <div className="bg-popover border border-border rounded-lg shadow-md p-3">
                               <p className="font-semibold text-sm">{d.payload.chainName}</p>
                               <p className="text-sm">{Number(d.value).toLocaleString()} {prices[0]?.currency || ''}</p>
                             </div>

@@ -56,13 +56,13 @@ export function WidgetWrapper({ id, children, isEditMode }: WidgetWrapperProps) 
 
       {isEditMode && (
         <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
-          <span className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
+          <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded">
             {t(definition?.nameKey || id)}
           </span>
           <button
             type="button"
             onClick={() => setWidgetVisible(id, !isVisible)}
-            className="p-1.5 rounded-md bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-muted transition-colors"
+            className="p-1.5 rounded-md bg-background border border-border hover:bg-muted transition-colors"
           >
             {isVisible ? (
               <Eye className="h-3.5 w-3.5 text-primary" />
@@ -75,7 +75,7 @@ export function WidgetWrapper({ id, children, isEditMode }: WidgetWrapperProps) 
 
       {isEditMode && (
         <div
-          className="absolute top-1/2 left-2 -translate-y-1/2 z-20 p-1 rounded-md bg-background/80 backdrop-blur-sm border border-border/50 cursor-grab active:cursor-grabbing hover:bg-muted transition-colors"
+          className="absolute top-1/2 left-2 -translate-y-1/2 z-20 p-1 rounded-md bg-background border border-border cursor-grab active:cursor-grabbing hover:bg-muted transition-colors"
           {...listeners}
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -84,7 +84,7 @@ export function WidgetWrapper({ id, children, isEditMode }: WidgetWrapperProps) 
 
       {/* Size selector — bottom center in edit mode */}
       {isEditMode && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 p-0.5 rounded-md bg-background/80 backdrop-blur-sm border border-border/50">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 p-0.5 rounded-md bg-background border border-border">
           {WIDGET_SIZE_OPTIONS.map((opt) => (
             <button
               key={opt.value}

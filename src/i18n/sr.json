@@ -21,7 +21,7 @@
     "success": "Uspeh",
     "actions": "Akcije",
     "view": "Prikaži",
-    "noData": "Nema podataka",
+    "noData": "Još nema ničega za prikaz",
     "allRightsReserved": "Sva prava zadržana.",
     "unknown": "Nepoznato",
     "required": "Ovo polje je obavezno",
@@ -40,7 +40,7 @@
     "getStarted": "Započni",
     "installApp": {
       "title": "Instaliraj na početni ekran",
-      "description": "Koristite Receipto kao aplikaciju: iPhone (Safari) pritisnite Share, pa Add to Home Screen. Android (Chrome) otvorite meni (tri tačke), pa Add to Home screen ili Install app.",
+      "description": "iPhone: pritisnite Podeli → Dodaj na početni ekran. Android: pritisnite ⋮ meni → Instaliraj aplikaciju.",
       "tip": "Otvorite Receipto sa početnog ekrana za brži pristup i prikaz preko celog ekrana."
     },
     "step1": {
@@ -217,12 +217,12 @@
     "spendingAnalysis": "Analiza potrošnje",
     "spendingByCategory": "Potrošnja po kategoriji",
     "dailySpending": "Dnevna potrošnja",
-    "noDataThisMonth": "Nema podataka za ovaj mesec",
+    "noDataThisMonth": "Nema zabeležene potrošnje ovog meseca",
     "monthlyTrend": "Mesečni trend ({{year}})",
     "topStores": "Najposećeniji objekti",
-    "noStoreData": "Nema podataka o objektima",
+    "noStoreData": "Još nema praćenih objekata",
     "recentActivity": "Nedavne aktivnosti",
-    "noRecentActivity": "Nema nedavnih aktivnosti",
+    "noRecentActivity": "Nema nedavnih računa za prikaz",
     "receiptsCount": "{{count}} računa",
     "unknownStore": "Nepoznat objekat",
     "scan_now": "Skeniraj QR kod odmah",
@@ -765,7 +765,7 @@
       "title": "Valuta",
       "description": "Podesite željenu valutu za prikaz iznosa",
       "label": "Valuta za prikaz",
-      "help": "Izaberite valutu koja će se koristiti u aplikaciji"
+      "help": "Iznosi na kontrolnoj tabli i izveštajima biće konvertovani u ovu valutu"
     },
     "language": {
       "title": "Jezik",

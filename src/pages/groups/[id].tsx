@@ -397,7 +397,7 @@ export default function GroupDetail() {
                 <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
               {showAddDropdown && (
-                <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-48 bg-popover/95 backdrop-blur-lg border border-border/50 rounded-xl shadow-xl z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
                   <button
                     onClick={handleAddManually}
                     className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
@@ -408,7 +408,7 @@ export default function GroupDetail() {
               )}
             </div>
             <Button
-              variant="glossy"
+              variant="default"
               className="flex-1 sm:flex-none"
               onClick={handleScanQr}
               disabled={isCreating}

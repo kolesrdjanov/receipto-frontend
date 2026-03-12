@@ -151,7 +151,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
         {receipts.map((receipt) => (
-          <Card key={receipt.id} className="overflow-hidden card-interactive">
+          <Card key={receipt.id} className="overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">

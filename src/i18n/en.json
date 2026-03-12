@@ -21,7 +21,7 @@
     "success": "Success",
     "actions": "Actions",
     "view": "View",
-    "noData": "No data",
+    "noData": "Nothing to show yet",
     "allRightsReserved": "All rights reserved.",
     "unknown": "Unknown",
     "required": "This field is required",
@@ -40,7 +40,7 @@
     "getStarted": "Get Started",
     "installApp": {
       "title": "Install on Home Screen",
-      "description": "Use Receipto like an app: iPhone (Safari) tap Share, then Add to Home Screen. Android (Chrome) tap menu (three dots), then Add to Home screen or Install app.",
+      "description": "iPhone: tap Share → Add to Home Screen. Android: tap ⋮ menu → Install app.",
       "tip": "Open Receipto from your home screen for faster access and a full-screen experience."
     },
     "step1": {
@@ -217,12 +217,12 @@
     "spendingAnalysis": "Spending Analysis",
     "spendingByCategory": "Spending by Category",
     "dailySpending": "Daily Spending",
-    "noDataThisMonth": "No data for this month",
+    "noDataThisMonth": "No spending recorded this month",
     "monthlyTrend": "Monthly Trend ({{year}})",
     "topStores": "Top Stores",
-    "noStoreData": "No store data",
+    "noStoreData": "No stores tracked yet",
     "recentActivity": "Recent Activity",
-    "noRecentActivity": "No recent activity",
+    "noRecentActivity": "No recent receipts to show",
     "receiptsCount": "{{count}} receipts",
     "unknownStore": "Unknown Store",
     "scan_now": "Scan QR Code now",
@@ -777,7 +777,7 @@
       "title": "Currency",
       "description": "Set your preferred currency for displaying amounts",
       "label": "Display Currency",
-      "help": "Choose which currency to use throughout the app"
+      "help": "Amounts on your dashboard and reports will be converted to this currency"
     },
     "language": {
       "title": "Language",

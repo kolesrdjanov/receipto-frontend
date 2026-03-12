@@ -93,7 +93,7 @@ export function MonthlyForecast({
 
   if (!forecast) {
     return (
-      <Card className="card-interactive">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Calculator className="h-4 w-4 text-primary" />
@@ -110,7 +110,7 @@ export function MonthlyForecast({
   }
 
   return (
-    <Card className="card-interactive">
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Calculator className="h-4 w-4 text-primary" />

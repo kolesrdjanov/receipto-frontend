@@ -119,7 +119,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)] md:hidden sidebar-glass">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b bg-background px-4 pt-[env(safe-area-inset-top)] md:hidden">
         <div className="flex items-center gap-2">
           <Link to={'/dashboard'}>
             <h1 className="text-2xl font-bold text-primary font-display">{t('common.appName')}</h1>
@@ -159,7 +159,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full sidebar-glass transition-all duration-200 ease-in-out md:translate-x-0 z-50',
+          'fixed left-0 top-0 z-50 h-full bg-background border-r border-border transition-all duration-200 ease-in-out md:translate-x-0',
           // Mobile: full width, slide in/out
           'w-full md:w-64',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
@@ -239,14 +239,14 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isActive ? 'page' : undefined}>
                   <div
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
+                      'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150',
                       isActive
-                        ? 'nav-item-glow text-primary-foreground'
+                        ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-accent hover:text-accent-foreground',
                       collapsed && 'md:justify-center md:px-0'
                     )}
                   >
-                    <item.icon className={cn("h-4 w-4 shrink-0", isActive && "icon-glow")} />
+                    <item.icon className="h-4 w-4 shrink-0" />
                     <span className={cn(collapsed && 'md:hidden')}>{t(item.labelKey)}</span>
                   </div>
                 </Link>
@@ -272,14 +272,14 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isAdminItemActive ? 'page' : undefined}>
                       <div
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
+                          'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors duration-150',
                           isAdminItemActive
-                            ? 'nav-item-glow text-primary-foreground'
+                            ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent hover:text-accent-foreground',
                           collapsed && 'md:justify-center md:px-0'
                         )}
                       >
-                        <item.icon className={cn("h-4 w-4 shrink-0", isAdminItemActive && "icon-glow")} />
+                        <item.icon className="h-4 w-4 shrink-0" />
                         <span className={cn(collapsed && 'md:hidden')}>{t(item.labelKey)}</span>
                       </div>
                     </Link>
@@ -291,7 +291,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* User section */}
           <div className={cn(
-            'border-t border-border/50 p-4 bg-gradient-to-t from-muted/30 to-transparent',
+            'border-t border-border/50 p-4',
             collapsed && 'md:p-2'
           )}>
             {/* Expanded user card */}
@@ -413,7 +413,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Main content */}
       <div className={cn(
-        'pt-[calc(3.5rem+env(safe-area-inset-top))] md:pt-0 page-bg-gradient min-h-screen transition-[padding] duration-200',
+        'pt-[calc(3.5rem+env(safe-area-inset-top))] md:pt-0 min-h-screen transition-[padding] duration-200',
         collapsed ? 'md:pl-[4.5rem]' : 'md:pl-64'
       )}>
         <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">{children}</main>

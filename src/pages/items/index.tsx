@@ -103,7 +103,7 @@ export default function ItemsPage() {
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-24">
           <div className="relative">
-            <Sparkles className="h-12 w-12 text-primary animate-pulse" />
+            <Sparkles className="h-12 w-12 text-primary" />
           </div>
           <h3 className="mt-6 text-xl font-semibold">{t('items.import.title')}</h3>
           <p className="mt-2 text-muted-foreground text-center max-w-md">

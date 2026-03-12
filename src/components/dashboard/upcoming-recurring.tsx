@@ -50,7 +50,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
 
   if (isLoading) {
     return (
-      <Card className="card-interactive">
+      <Card>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </CardContent>
@@ -62,7 +62,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
 
   if (totalItems === 0) {
     return (
-      <Card className="card-interactive">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <CalendarClock className="h-4 w-4 text-primary" />
@@ -129,7 +129,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 onClick={() => handlePay(item)}
                 title={t('recurring.actions.pay')}
               >
@@ -148,7 +148,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
   }
 
   return (
-    <Card className="card-interactive">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-base">
           <span className="flex items-center gap-2">

@@ -99,7 +99,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="coach-card">
+      <Card>
         <CardHeader className="pb-3">
           <div className="h-5 w-32 bg-muted animate-pulse rounded" />
           <div className="h-4 w-48 bg-muted animate-pulse rounded mt-2" />
@@ -205,8 +205,8 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
     })
 
   return (
-    <Card className="coach-card overflow-hidden">
-      <CardHeader className="pb-3 coach-header">
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10">
