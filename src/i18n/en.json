@@ -28,6 +28,7 @@
     "pickDate": "Pick a date",
     "next": "Next",
     "back": "Back",
+    "me": "(Me)",
     "pagination": {
       "showing": "Showing {{from}}-{{to}} of {{total}}",
       "previous": "Previous",
@@ -925,7 +926,9 @@
       "deleteError": "Failed to delete warranty",
       "captureImage": "Take Photo",
       "imageSlots": "Add up to 3 files (images or PDFs)",
-      "heicNotice": "HEIC images cannot be previewed but will be converted after upload."
+      "heicNotice": "HEIC images cannot be previewed but will be converted after upload.",
+      "heicPlaceholder": "HEIC Image",
+      "pdfPlaceholder": "PDF Document"
     },
     "export": {
       "button": "Export",

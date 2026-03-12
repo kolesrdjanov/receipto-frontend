@@ -24,7 +24,7 @@ export default defineConfig({
     '__APP_VERSION__': JSON.stringify(packageJson.version),
   },
   build: {
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV !== 'production',
     chunkSizeWarningLimit: 1500, // heic2any is ~1.3MB, recharts ~400kB
     rollupOptions: {
       output: {

@@ -236,7 +236,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 (item.path === '/savings' && location.pathname.startsWith('/savings/'))
 
               return (
-                <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined}>
+                <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isActive ? 'page' : undefined}>
                   <div
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',
@@ -269,7 +269,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   const isAdminItemActive = location.pathname.startsWith(item.path)
 
                   return (
-                    <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined}>
+                    <Link key={item.path} to={item.path} onClick={closeSidebar} title={collapsed ? t(item.labelKey) : undefined} aria-current={isAdminItemActive ? 'page' : undefined}>
                       <div
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300',

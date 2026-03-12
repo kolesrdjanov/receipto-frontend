@@ -28,8 +28,7 @@ export function CategoryInsights() {
       try {
         // api.get already returns response.data, not the full AxiosResponse
         return await api.get<CategorizationAccuracy>('/dashboard/categorization-accuracy')
-      } catch (error) {
-        console.error('Failed to fetch categorization accuracy:', error)
+      } catch {
         // Return default empty data instead of throwing
         return {
           totalSuggestions: 0,

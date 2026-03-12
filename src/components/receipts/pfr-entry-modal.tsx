@@ -71,8 +71,6 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
       TotalAmount: pfrAmount,
     }
 
-    console.log('Submitting PFR data:', pfrData)
-
     onSubmit(pfrData)
     // Reset form
     resetForm()

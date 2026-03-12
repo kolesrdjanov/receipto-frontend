@@ -1,4 +1,4 @@
-import {useState, useMemo, useEffect, useCallback} from 'react'
+import {useState, useMemo, useCallback} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -65,37 +65,21 @@ import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } f
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
-// Hook to get the computed primary color for charts
+// Static color map — avoids DOM thrashing from getComputedStyle + temp elements
+const ACCENT_HEX_MAP: Record<string, { light: string; dark: string }> = {
+  zinc:   { light: '#3f3f46', dark: '#e4e4e7' },
+  blue:   { light: '#3b82f6', dark: '#60a5fa' },
+  green:  { light: '#22c55e', dark: '#4ade80' },
+  purple: { light: '#8b5cf6', dark: '#a78bfa' },
+  orange: { light: '#f59e0b', dark: '#fbbf24' },
+  rose:   { light: '#f43f5e', dark: '#fb7185' },
+}
+
 function usePrimaryColor() {
-  const [primaryColor, setPrimaryColor] = useState('#3b82f6')
   const { accentColor } = useSettingsStore()
-
-  useEffect(() => {
-    // Get computed color from CSS
-    const root = document.documentElement
-    const computedStyle = getComputedStyle(root)
-    const primary = computedStyle.getPropertyValue('--primary').trim()
-
-    if (primary) {
-      // Create a temporary element to convert oklch to rgb
-      const temp = document.createElement('div')
-      temp.style.color = primary
-      document.body.appendChild(temp)
-      const rgb = getComputedStyle(temp).color
-      document.body.removeChild(temp)
-
-      // Convert rgb(r, g, b) to hex
-      const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
-      if (match) {
-        const hex = '#' + [match[1], match[2], match[3]]
-          .map(x => parseInt(x).toString(16).padStart(2, '0'))
-          .join('')
-        setPrimaryColor(hex)
-      }
-    }
-  }, [accentColor])
-
-  return primaryColor
+  const isDark = document.documentElement.classList.contains('dark')
+  const colors = ACCENT_HEX_MAP[accentColor] || ACCENT_HEX_MAP.zinc
+  return isDark ? colors.dark : colors.light
 }
 
 export default function Dashboard() {
@@ -641,24 +625,6 @@ export default function Dashboard() {
             triggerClassName="w-[140px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
           />
         </div>
-          {/* Customize button — hidden for now
-          <Button
-            type="button"
-            onClick={toggleEditMode}
-            size="xl"
-            className={cn(
-              'flex items-center gap-2 p-1 pl-3 pr-3 rounded-lg transition-colors',
-              isEditMode
-                ? 'bg-primary/15 text-primary'
-                : 'bg-muted/30 hover:bg-muted/50 text-muted-foreground'
-            )}
-          >
-            <Settings2 className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {isEditMode ? t('dashboard.widgets.done') : t('dashboard.widgets.customize')}
-            </span>
-          </Button>
-          */}
         </div>
       </div>
 

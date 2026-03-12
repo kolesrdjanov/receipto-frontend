@@ -508,7 +508,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
                         const isCurrentUser = member.userId === user?.id
                         return (
                           <SelectItem key={member.userId} value={member.userId}>
-                            {name} {isCurrentUser && '(Me)'}
+                            {name} {isCurrentUser && t('common.me')}
                           </SelectItem>
                         )
                       })}

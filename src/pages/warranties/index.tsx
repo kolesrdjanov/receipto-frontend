@@ -357,6 +357,7 @@ export default function WarrantiesPage() {
                                   src={`${url}${url.includes('?') ? '&' : '?'}f_auto,q_auto`}
                                   alt={warranty.productName}
                                   className="w-full h-full object-contain"
+                                  loading="lazy"
                                 />
                               )}
                             </button>

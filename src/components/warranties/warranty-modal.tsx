@@ -220,8 +220,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
           return URL.createObjectURL(f)
         }),
       ])
-    } catch (error) {
-      console.log(error)
+    } catch {
       toast.error(t('warranties.modal.createError'), {
         description: 'Failed to process file. Please try a different format.',
       })
@@ -418,12 +417,12 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                           <div key={`${item.type}-${item.remoteIndex ?? item.localIndex}-${idx}`} className="relative overflow-hidden rounded-lg border">
                             {item.src === 'heic-placeholder' ? (
                               <div className="w-full h-48 bg-muted flex items-center justify-center">
-                                <span className="text-sm text-muted-foreground">HEIC Image</span>
+                                <span className="text-sm text-muted-foreground">{t('warranties.modal.heicPlaceholder')}</span>
                               </div>
                             ) : isPdf ? (
                               <div className="w-full h-48 bg-muted flex flex-col items-center justify-center gap-2">
                                 <FileText className="h-12 w-12 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">PDF Document</span>
+                                <span className="text-sm text-muted-foreground">{t('warranties.modal.pdfPlaceholder')}</span>
                               </div>
                             ) : (
                               <img
@@ -434,6 +433,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
                                 }
                                 alt={`Preview ${idx + 1}`}
                                 className="w-full h-48 object-cover"
+                                loading="lazy"
                               />
                             )}
                             <Button

@@ -28,6 +28,7 @@
     "pickDate": "Izaberite datum",
     "next": "Sledeće",
     "back": "Nazad",
+    "me": "(Ja)",
     "pagination": {
       "showing": "Prikazano {{from}}-{{to}} od {{total}}",
       "previous": "Prethodna",
@@ -913,7 +914,9 @@
       "deleteError": "Greška pri brisanju garancije",
       "captureImage": "Slikaj kamerom",
       "imageSlots": "Dodajte do 3 fajla (slike ili PDF)",
-      "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada."
+      "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada.",
+      "heicPlaceholder": "HEIC slika",
+      "pdfPlaceholder": "PDF dokument"
     },
     "export": {
       "button": "Izvezi",

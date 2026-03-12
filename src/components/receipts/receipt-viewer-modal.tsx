@@ -95,8 +95,7 @@ export function ReceiptViewerModal({
         await navigator.clipboard.writeText(journalText)
         toast.success(t('receipts.viewer.copiedToClipboard'))
       }
-    } catch (error) {
-      console.error('Share error:', error)
+    } catch {
       toast.error(t('receipts.viewer.shareError'))
     }
   }

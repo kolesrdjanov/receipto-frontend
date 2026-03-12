@@ -78,7 +78,6 @@ export function useCurrencyConverter() {
 
     const fromRate = rates[fromCurrency]
     if (fromRate === undefined || fromRate === 0) {
-      console.warn(`No rate found for ${fromCurrency}`)
       return amount
     }
 
