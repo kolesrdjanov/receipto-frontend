@@ -80,6 +80,39 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
     setCodeType(QR_FORMATS.includes(format) ? 'qr' : 'barcode')
   }
 
+  const resizeImage = (file: File, maxDimension = 1200): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        // No resize needed if already small enough
+        if (img.width <= maxDimension && img.height <= maxDimension) {
+          URL.revokeObjectURL(img.src)
+          resolve(file)
+          return
+        }
+        const scale = maxDimension / Math.max(img.width, img.height)
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * scale)
+        canvas.height = Math.round(img.height * scale)
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        URL.revokeObjectURL(img.src)
+        canvas.toBlob(
+          (blob) => {
+            resolve(new File([blob!], file.name, { type: 'image/jpeg' }))
+          },
+          'image/jpeg',
+          0.9,
+        )
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src)
+        resolve(file)
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const handleFileScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -87,10 +120,11 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
 
     setScanningFile(true)
     try {
+      const resized = await resizeImage(file)
       const { Html5Qrcode } = await import('html5-qrcode')
       const html5QrCode = new Html5Qrcode(FILE_SCANNER_ID, { verbose: false })
 
-      const result = await html5QrCode.scanFileV2(file, false)
+      const result = await html5QrCode.scanFileV2(resized, false)
       const format = result?.result?.format?.formatName || 'CODE_128'
       const normalizedFormat = format.toLowerCase().replace(/-/g, '_')
 
