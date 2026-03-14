@@ -470,6 +470,8 @@ export default function Dashboard() {
         aggCategoryStats={aggCategoryStats}
         exchangeRates={exchangeRates}
         displayCurrency={displayCurrency}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
       />
     ),
 

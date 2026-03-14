@@ -10,12 +10,16 @@ interface CategoryBudgetProgressProps {
   aggCategoryStats: CategoryStatsByCurrency[] | undefined
   exchangeRates: Record<string, number> | undefined
   displayCurrency: string
+  selectedYear: number
+  selectedMonth: number
 }
 
 export function CategoryBudgetProgress({
   aggCategoryStats,
   exchangeRates,
   displayCurrency: _displayCurrency,
+  selectedYear,
+  selectedMonth,
 }: CategoryBudgetProgressProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -99,7 +103,12 @@ export function CategoryBudgetProgress({
                 <div
                   key={category.id}
                   className="group cursor-pointer rounded-lg p-2.5 -mx-1 hover:bg-muted/40 transition-colors"
-                  onClick={() => navigate(`/receipts?categoryId=${category.id}`)}
+                  onClick={() => {
+                    const startDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`
+                    const lastDay = new Date(selectedYear, selectedMonth, 0).getDate()
+                    const endDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+                    navigate(`/receipts?startDate=${startDate}&endDate=${endDate}&categoryId=${category.id}`)
+                  }}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2 min-w-0">
