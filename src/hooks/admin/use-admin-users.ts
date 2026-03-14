@@ -147,6 +147,7 @@ export interface UserDetails {
   recurringExpenseCount: number
   recurringPaymentCount: number
   recurringReceiptCount: number
+  loyaltyCardCount: number
   street: string | null
   zipCode: string | null
   city: string | null

@@ -1000,6 +1000,8 @@
         "recurringAdoption": "Recurring usage",
         "recurringPayments": "Recurring payments",
         "recurringReceipts": "Recurring receipts",
+        "loyaltyCards": "Loyalty cards",
+        "loyaltyCardAdoption": "Loyalty cards usage",
         "used": "Used",
         "notUsed": "Not used"
       },

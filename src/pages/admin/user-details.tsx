@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, CreditCard, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -256,9 +256,13 @@ export default function AdminUserDetailsPage() {
                   <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringReceipts')}</p>
                   <p className="text-2xl font-bold">{userDetails.recurringReceiptCount}</p>
                 </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.loyaltyCards')}</p>
+                  <p className="text-2xl font-bold">{userDetails.loyaltyCardCount}</p>
+                </div>
               </div>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
                 <div className="flex items-center gap-2 rounded-lg border p-4">
                   <ShieldCheck className="h-4 w-4 text-muted-foreground" />
                   <div>
@@ -274,6 +278,15 @@ export default function AdminUserDetailsPage() {
                     <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringAdoption')}</p>
                     <p className="text-sm font-semibold">
                       {userDetails.recurringExpenseCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border p-4">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.loyaltyCardAdoption')}</p>
+                    <p className="text-sm font-semibold">
+                      {userDetails.loyaltyCardCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
                     </p>
                   </div>
                 </div>
