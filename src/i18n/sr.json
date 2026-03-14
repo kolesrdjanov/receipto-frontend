@@ -119,7 +119,9 @@
     "cameraError": "Nije moguće pristupiti kameri",
     "cameraSlowTitle": "Kamera se predugo učitava",
     "cameraSlowDescription": "Proverite dozvole kamere i pokušajte ponovo",
-    "tryAgain": "Pokušaj ponovo"
+    "tryAgain": "Pokušaj ponovo",
+    "scanFromImage": "Otpremi sliku",
+    "imageScanError": "Nije moguće detektovati barkod ili QR kod na ovoj slici"
   },
   "auth": {
     "brandTagline": "Vaš pametni pratilac za račune",

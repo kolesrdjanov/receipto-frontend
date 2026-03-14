@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Camera, Loader2, CameraOff, X } from 'lucide-react'
+import { Camera, Loader2, CameraOff, X, ImagePlus } from 'lucide-react'
 
 interface LoyaltyCardScannerProps {
   open: boolean
@@ -25,9 +25,12 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
   const [isLoading, setIsLoading] = useState(true)
   const [cameraTimedOut, setCameraTimedOut] = useState(false)
 
+  const [scanningFile, setScanningFile] = useState(false)
+
   const scannerRef = useRef<{ stop: () => Promise<void>; clear: () => void } | null>(null)
   const scanningRef = useRef(false)
   const timeoutRef = useRef<number | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const cleanup = useCallback(async () => {
     if (timeoutRef.current) {
@@ -122,6 +125,37 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
     startScanner()
   }
 
+  const handleFileScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    // Reset so the same file can be re-selected
+    e.target.value = ''
+
+    setScanningFile(true)
+    setError(null)
+    try {
+      // Stop camera scanner before using the element for file scanning
+      await cleanup()
+
+      const { Html5Qrcode } = await import('html5-qrcode')
+      const html5QrCode = new Html5Qrcode(READER_ID, { verbose: false })
+
+      const result = await html5QrCode.scanFileV2(file, false)
+      const format = result?.result?.format?.formatName || 'CODE_128'
+      const normalizedFormat = format.toLowerCase().replace(/-/g, '_')
+
+      html5QrCode.clear()
+      onScan(result.decodedText, normalizedFormat)
+      onOpenChange(false)
+    } catch {
+      setError(t('loyaltyCards.imageScanError'))
+      // Restart the camera scanner after failed file scan
+      startScanner()
+    } finally {
+      setScanningFile(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[500px]">
@@ -167,7 +201,28 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
           <div id={READER_ID} className="w-full" />
         </div>
 
-        <div className="flex justify-end">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileScan}
+        />
+
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            className="gap-2"
+            disabled={scanningFile}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {scanningFile ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImagePlus className="h-4 w-4" />
+            )}
+            {t('loyaltyCards.scanFromImage')}
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
           </Button>
