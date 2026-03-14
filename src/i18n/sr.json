@@ -120,8 +120,9 @@
     "cameraSlowTitle": "Kamera se predugo učitava",
     "cameraSlowDescription": "Proverite dozvole kamere i pokušajte ponovo",
     "tryAgain": "Pokušaj ponovo",
-    "scanFromImage": "Otpremi sliku",
-    "imageScanError": "Nije moguće detektovati barkod ili QR kod na ovoj slici"
+    "scanFromImage": "Iz galerije",
+    "imageScanError": "Nije moguće detektovati barkod ili QR kod na ovoj slici",
+    "imageScanSuccess": "Kod je detektovan sa slike"
   },
   "auth": {
     "brandTagline": "Vaš pametni pratilac za račune",

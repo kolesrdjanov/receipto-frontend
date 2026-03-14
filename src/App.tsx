@@ -66,8 +66,8 @@ function App() {
               closeButton
               toastOptions={{
                 classNames: {
-                  success: '!bg-emerald-600 !text-white !border-none [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-none [&_[data-close-button]]:!bg-emerald-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
-                  error: '!bg-red-600 !text-white !border-none [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-none [&_[data-close-button]]:!bg-red-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
+                  success: '!bg-emerald-600 !text-white !border-none [&_[data-description]]:!text-white [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-none [&_[data-close-button]]:!bg-emerald-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
+                  error: '!bg-red-600 !text-white !border-none [&_[data-description]]:!text-white [&_[data-close-button]]:!text-white [&_[data-close-button]]:!border-none [&_[data-close-button]]:!bg-red-700 [&_[data-close-button]]:!h-6 [&_[data-close-button]]:!w-6',
                 },
               }}
             />

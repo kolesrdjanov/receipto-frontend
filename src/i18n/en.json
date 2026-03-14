@@ -120,8 +120,9 @@
     "cameraSlowTitle": "Camera is taking too long",
     "cameraSlowDescription": "Please check your camera permissions and try again",
     "tryAgain": "Try Again",
-    "scanFromImage": "Upload Image",
-    "imageScanError": "Could not detect a barcode or QR code in this image"
+    "scanFromImage": "From Gallery",
+    "imageScanError": "Could not detect a barcode or QR code in this image",
+    "imageScanSuccess": "Code detected from image"
   },
   "auth": {
     "brandTagline": "Your smart receipt companion",

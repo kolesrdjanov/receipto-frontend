@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera, Loader2, ImagePlus } from 'lucide-react'
 import {
   useCreateLoyaltyCard,
   useUpdateLoyaltyCard,
@@ -36,6 +36,9 @@ const CARD_COLORS = [
 
 const QR_FORMATS = ['qr_code', 'data_matrix', 'aztec', 'pdf417']
 
+// Hidden element ID for html5-qrcode file scanning (needs a DOM element)
+const FILE_SCANNER_ID = 'loyalty-file-scanner'
+
 export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalProps) {
   const { t } = useTranslation()
   const createCard = useCreateLoyaltyCard()
@@ -47,6 +50,9 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
   const [codeFormat, setCodeFormat] = useState('code_128')
   const [color, setColor] = useState(CARD_COLORS[0])
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [scanningFile, setScanningFile] = useState(false)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isEditing = !!card
 
@@ -68,10 +74,34 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
     }
   }, [open, card])
 
-  const handleScan = (value: string, format: string) => {
+  const applyScanResult = (value: string, format: string) => {
     setCodeValue(value)
     setCodeFormat(format)
     setCodeType(QR_FORMATS.includes(format) ? 'qr' : 'barcode')
+  }
+
+  const handleFileScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+
+    setScanningFile(true)
+    try {
+      const { Html5Qrcode } = await import('html5-qrcode')
+      const html5QrCode = new Html5Qrcode(FILE_SCANNER_ID, { verbose: false })
+
+      const result = await html5QrCode.scanFileV2(file, false)
+      const format = result?.result?.format?.formatName || 'CODE_128'
+      const normalizedFormat = format.toLowerCase().replace(/-/g, '_')
+
+      html5QrCode.clear()
+      applyScanResult(result.decodedText, normalizedFormat)
+      toast.success(t('loyaltyCards.imageScanSuccess'))
+    } catch {
+      toast.error(t('loyaltyCards.imageScanError'))
+    } finally {
+      setScanningFile(false)
+    }
   }
 
   const handleSubmit = async () => {
@@ -126,21 +156,36 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
 
             <div className="space-y-2">
               <Label>{t('loyaltyCards.codeValue')}</Label>
+              <Input
+                value={codeValue}
+                onChange={(e) => setCodeValue(e.target.value)}
+                placeholder={t('loyaltyCards.codeValuePlaceholder')}
+              />
               <div className="flex gap-2">
-                <Input
-                  value={codeValue}
-                  onChange={(e) => setCodeValue(e.target.value)}
-                  placeholder={t('loyaltyCards.codeValuePlaceholder')}
-                  className="flex-1"
-                />
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
+                  size="sm"
+                  className="gap-2 flex-1"
+                  disabled={scanningFile}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {scanningFile ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4" />
+                  )}
+                  {t('loyaltyCards.scanFromImage')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 flex-1"
                   onClick={() => setScannerOpen(true)}
-                  title={t('loyaltyCards.scanCard')}
                 >
                   <Camera className="h-4 w-4" />
+                  {t('loyaltyCards.scanCard')}
                 </Button>
               </div>
               {codeValue && (
@@ -182,6 +227,16 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
               {isEditing ? t('common.save') : t('loyaltyCards.addCard')}
             </Button>
           </div>
+
+          {/* Hidden elements for file scanning */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileScan}
+          />
+          <div id={FILE_SCANNER_ID} className="hidden" />
         </DialogContent>
       </Dialog>
 
@@ -189,7 +244,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card }: LoyaltyCardModalP
         <LoyaltyCardScanner
           open={scannerOpen}
           onOpenChange={setScannerOpen}
-          onScan={handleScan}
+          onScan={applyScanResult}
         />
       </Suspense>
     </>
