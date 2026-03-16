@@ -194,6 +194,10 @@ const bulkDeleteReceipts = async (ids: string[]): Promise<{ deleted: number; ski
   return api.delete<{ deleted: number; skipped: number }>('/receipts/bulk', { data: { ids } })
 }
 
+const bulkUpdateCategory = async (data: { ids: string[]; categoryId: string | null }): Promise<{ updated: number; skipped: number }> => {
+  return api.patch<{ updated: number; skipped: number }>('/receipts/bulk/category', data)
+}
+
 export interface ExportReceipt {
   id: string
   storeName?: string
@@ -283,6 +287,19 @@ export function useBulkDeleteReceipts() {
 
   return useMutation({
     mutationFn: bulkDeleteReceipts,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all })
+    },
+  })
+}
+
+export function useBulkUpdateCategory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: bulkUpdateCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.receipts.lists() })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })

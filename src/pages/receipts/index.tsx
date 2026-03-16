@@ -17,9 +17,17 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
@@ -30,17 +38,19 @@ import {
   useReceipt,
   useDeleteReceipt,
   useBulkDeleteReceipts,
+  useBulkUpdateCategory,
   useExportReceipts,
   useImportReceipts,
   type Receipt,
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
+import { useCategories } from '@/hooks/categories/use-categories'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X, Image } from 'lucide-react'
+import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 
@@ -106,8 +116,12 @@ export default function Receipts() {
   const exportReceipts = useExportReceipts()
   const importReceipts = useImportReceipts()
   const bulkDelete = useBulkDeleteReceipts()
+  const bulkUpdateCategory = useBulkUpdateCategory()
+  const { data: categories = [] } = useCategories()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false)
+  const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false)
+  const [bulkCategoryId, setBulkCategoryId] = useState<string>('')
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
@@ -271,6 +285,26 @@ export default function Receipts() {
         toast.success(t('receipts.bulkDeleteSuccess', { deleted: result.deleted }))
       }
       setSelectedIds(new Set())
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(errorMessage)
+    }
+  }
+
+  const confirmBulkCategoryUpdate = async () => {
+    try {
+      const result = await bulkUpdateCategory.mutateAsync({
+        ids: Array.from(selectedIds),
+        categoryId: bulkCategoryId || null,
+      })
+      if (result.skipped > 0) {
+        toast.warning(t('receipts.bulkCategoryPartial', { updated: result.updated, skipped: result.skipped }))
+      } else {
+        toast.success(t('receipts.bulkCategorySuccess', { updated: result.updated }))
+      }
+      setSelectedIds(new Set())
+      setBulkCategoryOpen(false)
+      setBulkCategoryId('')
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       toast.error(errorMessage)
@@ -572,6 +606,14 @@ export default function Receipts() {
               <span className="text-sm font-medium">
                 {t('receipts.selected', { count: selectedIds.size })}
               </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setBulkCategoryId(''); setBulkCategoryOpen(true) }}
+              >
+                <Tag className="h-4 w-4" />
+                {t('receipts.assignCategory')}
+              </Button>
               <Button
                 variant="destructive"
                 size="sm"
@@ -962,6 +1004,42 @@ export default function Receipts() {
         variant="destructive"
         isLoading={bulkDelete.isPending}
       />
+
+      <Dialog open={bulkCategoryOpen} onOpenChange={setBulkCategoryOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('receipts.assignCategory')}</DialogTitle>
+            <DialogDescription>
+              {t('receipts.bulkCategoryDescription', { count: selectedIds.size })}
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={bulkCategoryId} onValueChange={setBulkCategoryId}>
+            <SelectTrigger>
+              <SelectValue placeholder={t('receipts.modal.selectCategory')} />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.icon && <span className="mr-2">{category.icon}</span>}
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkCategoryOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={confirmBulkCategoryUpdate}
+              disabled={!bulkCategoryId || bulkUpdateCategory.isPending}
+            >
+              {bulkUpdateCategory.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              {t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </PageTransition>
     </AppLayout>
   )

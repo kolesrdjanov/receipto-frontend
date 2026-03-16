@@ -441,6 +441,10 @@
     "bulkDeleteConfirm": "Da li ste sigurni da želite da obrišete {{count}} računa? Ova akcija se ne može poništiti.",
     "bulkDeleteSuccess": "Uspešno obrisano {{deleted}} računa",
     "bulkDeletePartial": "Obrisano {{deleted}} računa, {{skipped}} preskočeno (arhivirane grupe)",
+    "assignCategory": "Dodeli kategoriju",
+    "bulkCategoryDescription": "Izaberite kategoriju za {{count}} izabranih računa.",
+    "bulkCategorySuccess": "Kategorija ažurirana za {{updated}} računa",
+    "bulkCategoryPartial": "Kategorija ažurirana za {{updated}} računa, {{skipped}} preskočeno (arhivirane grupe)",
     "export": {
       "button": "Izvezi",
       "success": "Računi uspešno izvezeni",

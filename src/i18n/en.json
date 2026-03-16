@@ -441,6 +441,10 @@
     "bulkDeleteConfirm": "Are you sure you want to delete {{count}} receipts? This action cannot be undone.",
     "bulkDeleteSuccess": "Successfully deleted {{deleted}} receipts",
     "bulkDeletePartial": "Deleted {{deleted}} receipts, {{skipped}} skipped (archived groups)",
+    "assignCategory": "Assign category",
+    "bulkCategoryDescription": "Select a category to assign to {{count}} selected receipts.",
+    "bulkCategorySuccess": "Category updated for {{updated}} receipts",
+    "bulkCategoryPartial": "Category updated for {{updated}} receipts, {{skipped}} skipped (archived groups)",
     "export": {
       "button": "Export",
       "success": "Receipts exported successfully",
