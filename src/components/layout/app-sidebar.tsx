@@ -152,7 +152,7 @@ export function AppSidebar({
             </SidebarMenuItem>
 
             {/* Expenses - collapsible */}
-            <Collapsible defaultOpen={isExpensesSection} className="group/collapsible">
+            <Collapsible asChild defaultOpen={isExpensesSection} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={t('nav.expenses')}>
@@ -288,7 +288,7 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupLabel>{t('nav.settings')}</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible defaultOpen={isSettingsSection} className="group/collapsible">
+            <Collapsible asChild defaultOpen={isSettingsSection} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={t('nav.settings')}>
@@ -344,7 +344,7 @@ export function AppSidebar({
           <SidebarGroup>
             <SidebarGroupLabel>{t('nav.admin')}</SidebarGroupLabel>
             <SidebarMenu>
-              <Collapsible defaultOpen={isAdminSection} className="group/collapsible">
+              <Collapsible asChild defaultOpen={isAdminSection} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip={t('nav.admin')}>
