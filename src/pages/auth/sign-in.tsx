@@ -30,6 +30,19 @@ export default function SignIn() {
               </div>
             )}
 
+            <GoogleSignInButton onError={setError} />
+
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  {t('auth.orContinueWith')}
+                </span>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">{t('auth.signIn.email')}</Label>
               <Input
@@ -48,7 +61,12 @@ export default function SignIn() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.signIn.password')}</Label>
+              <div className="flex items-center">
+                <Label htmlFor="password">{t('auth.signIn.password')}</Label>
+                <Link to="/forgot-password" className="ml-auto text-sm underline-offset-4 hover:underline" data-testid="signin-forgot-password-link">
+                  {t('auth.signIn.forgotPassword')}
+                </Link>
+              </div>
               <Input
                 id="password"
                 name="password"
@@ -63,42 +81,9 @@ export default function SignIn() {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-input"
-                  disabled={isLoading}
-                  data-testid="signin-remember-checkbox"
-                />
-                <Label htmlFor="remember-me" className="font-normal cursor-pointer text-sm">
-                  {t('auth.signIn.rememberMe')}
-                </Label>
-              </div>
-
-              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline" data-testid="signin-forgot-password-link">
-                {t('auth.signIn.forgotPassword')}
-              </Link>
-            </div>
-
             <Button type="submit" className="w-full" disabled={isLoading} data-testid="signin-submit-button">
               {isLoading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
             </Button>
-
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  {t('auth.orContinueWith')}
-                </span>
-              </div>
-            </div>
-
-            <GoogleSignInButton onError={setError} />
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signIn.noAccount')}{' '}

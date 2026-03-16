@@ -23,14 +23,14 @@ export function useGoogleAuth() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleGoogleSuccess = async (credential: string) => {
+  const handleGoogleAccessToken = async (googleAccessToken: string) => {
     setError('')
     setIsLoading(true)
 
     try {
       const response = await api.post<GoogleAuthResponse>(
         '/auth/google',
-        { idToken: credential },
+        { accessToken: googleAccessToken },
         { requiresAuth: false },
       )
 
@@ -53,7 +53,7 @@ export function useGoogleAuth() {
   return {
     error,
     isLoading,
-    handleGoogleSuccess,
+    handleGoogleAccessToken,
     handleGoogleError,
   }
 }

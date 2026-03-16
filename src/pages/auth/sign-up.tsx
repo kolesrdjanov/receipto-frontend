@@ -30,6 +30,19 @@ export default function SignUp() {
               </div>
             )}
 
+            <GoogleSignInButton onError={setApiError} />
+
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  {t('auth.orContinueWith')}
+                </span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">{t('auth.signUp.firstName')}</Label>
@@ -146,19 +159,6 @@ export default function SignUp() {
             <Button type="submit" className="w-full" disabled={isLoading} data-testid="signup-submit-button">
               {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
             </Button>
-
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  {t('auth.orContinueWith')}
-                </span>
-              </div>
-            </div>
-
-            <GoogleSignInButton onError={setApiError} />
 
             <p className="text-center text-sm text-muted-foreground">
               {t('auth.signUp.hasAccount')}{' '}

@@ -91,7 +91,10 @@
     "analytics": "Analitika",
     "collapseSidebar": "Skupi meni",
     "expandSidebar": "Proširi meni",
-    "loyaltyCards": "Kartice lojalnosti"
+    "loyaltyCards": "Kartice lojalnosti",
+    "expenses": "Troškovi",
+    "profile": "Profil",
+    "account": "Nalog"
   },
   "loyaltyCards": {
     "title": "Kartice lojalnosti",
@@ -130,6 +133,8 @@
     "brandFeature2": "Uvid u budžet i analiza potrošnje",
     "brandFeature3": "Praćenje garancija i podsetnici",
     "orContinueWith": "ili",
+    "continueWithGoogle": "Nastavi sa Google nalogom",
+    "googleSignInFailed": "Google prijava je otkazana ili nije uspela. Pokušajte ponovo.",
     "signIn": {
       "title": "Dobrodošli nazad",
       "subtitle": "Prijavite se na svoj nalog da nastavite",

@@ -91,7 +91,10 @@
     "analytics": "Analytics",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
-    "loyaltyCards": "Loyalty Cards"
+    "loyaltyCards": "Loyalty Cards",
+    "expenses": "Expenses",
+    "profile": "Profile",
+    "account": "Account"
   },
   "loyaltyCards": {
     "title": "Loyalty Cards",
@@ -130,6 +133,8 @@
     "brandFeature2": "Budget insights & spending analysis",
     "brandFeature3": "Warranty tracking & reminders",
     "orContinueWith": "or",
+    "continueWithGoogle": "Continue with Google",
+    "googleSignInFailed": "Google sign-in was cancelled or failed. Please try again.",
     "signIn": {
       "title": "Welcome back",
       "subtitle": "Sign in to your account to continue",
