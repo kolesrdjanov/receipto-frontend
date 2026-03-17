@@ -26,6 +26,8 @@ const SignIn = lazy(() => import('./pages/auth/sign-in'))
 const SignUp = lazy(() => import('./pages/auth/sign-up'))
 const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
 const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
+const CheckEmail = lazy(() => import('./pages/auth/check-email'))
+const VerifyEmail = lazy(() => import('./pages/auth/verify-email'))
 const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const SavingsGoalDetail = lazy(() => import('./pages/savings/goals/[id]'))
@@ -70,6 +72,14 @@ export const routes: RouteObject[] = [
   {
     path: '/reset-password',
     element: <ResetPassword />,
+  },
+  {
+    path: '/check-email',
+    element: <CheckEmail />,
+  },
+  {
+    path: '/verify-email',
+    element: <VerifyEmail />,
   },
   {
     path: '/dashboard',

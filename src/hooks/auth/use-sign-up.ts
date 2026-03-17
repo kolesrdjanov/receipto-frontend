@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api } from '@/lib/api'
-import { useAuthStore } from '@/store/auth'
 
 function createSignUpSchema(t: (key: string) => string) {
   return z
@@ -26,24 +25,9 @@ function createSignUpSchema(t: (key: string) => string) {
 
 type SignUpFormData = z.infer<ReturnType<typeof createSignUpSchema>>
 
-interface RegisterResponse {
-  accessToken: string
-  refreshToken: string
-  user: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    profileImageUrl?: string | null
-    role: 'user' | 'admin'
-  }
-}
-
 export function useSignUp() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const location = useLocation()
-  const login = useAuthStore((state) => state.login)
   const [formData, setFormData] = useState<SignUpFormData>({
     firstName: '',
     lastName: '',
@@ -62,7 +46,6 @@ export function useSignUp() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }))
-    // Clear error for this field when user starts typing
     if (errors[name as keyof SignUpFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }))
     }
@@ -89,7 +72,7 @@ export function useSignUp() {
     setIsLoading(true)
 
     try {
-      const response = await api.post<RegisterResponse>(
+      await api.post(
         '/auth/register',
         {
           firstName: result.data.firstName,
@@ -100,11 +83,8 @@ export function useSignUp() {
         { requiresAuth: false }
       )
 
-      login(response.user, response.accessToken, response.refreshToken)
-
-      // Redirect to the page they were trying to access, or dashboard
-      const from = (location.state as { from?: string })?.from || '/dashboard'
-      navigate(from, { replace: true })
+      // Redirect to check-email page with the email in state
+      navigate('/check-email', { replace: true, state: { email: result.data.email } })
     } catch (err) {
       setApiError(err instanceof Error ? err.message : t('auth.validation.signUpFailed'))
     } finally {

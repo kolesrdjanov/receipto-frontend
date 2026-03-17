@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { api, isApiError } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
 interface LoginResponse {
@@ -24,10 +24,12 @@ export function useSignIn() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [emailNotVerified, setEmailNotVerified] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setEmailNotVerified(false)
     setIsLoading(true)
 
     try {
@@ -42,10 +44,12 @@ export function useSignIn() {
 
       login(response.user, response.accessToken, response.refreshToken)
 
-      // Redirect to the page they were trying to access, or dashboard
       const from = (location.state as { from?: string })?.from || '/dashboard'
       navigate(from, { replace: true })
     } catch (err) {
+      if (isApiError(err) && err.code === 'auth.emailNotVerified') {
+        setEmailNotVerified(true)
+      }
       setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.')
     } finally {
       setIsLoading(false)
@@ -60,6 +64,7 @@ export function useSignIn() {
     error,
     setError,
     isLoading,
+    emailNotVerified,
     handleSubmit,
   }
 }

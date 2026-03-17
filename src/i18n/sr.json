@@ -146,7 +146,8 @@
       "submit": "Prijavi se",
       "submitting": "Prijavljivanje...",
       "noAccount": "Nemate nalog?",
-      "signUp": "Registrujte se"
+      "signUp": "Registrujte se",
+      "resendVerification": "Ponovo pošalji verifikacioni email"
     },
     "signUp": {
       "title": "Kreirajte nalog",
@@ -210,6 +211,26 @@
       "invalidResetLink": "Nevažeći link za resetovanje. Zatražite novo resetovanje lozinke.",
       "signUpFailed": "Kreiranje naloga nije uspelo. Pokušajte ponovo.",
       "resetPasswordFailed": "Resetovanje lozinke nije uspelo. Pokušajte ponovo."
+    },
+    "checkEmail": {
+      "title": "Proverite email",
+      "subtitle": "Poslali smo link za verifikaciju na",
+      "instruction": "Kliknite na link u emailu da biste verifikovali vaš nalog. Može potrajati minut da stigne.",
+      "resend": "Ponovo pošalji verifikacioni email",
+      "resending": "Slanje...",
+      "resent": "Verifikacioni email je poslat! Proverite inbox.",
+      "resendFailed": "Slanje nije uspelo. Pokušajte ponovo.",
+      "backToSignIn": "Nazad na prijavu"
+    },
+    "verifyEmail": {
+      "title": "Verifikacija emaila",
+      "verifying": "Verifikujemo vaš email...",
+      "success": "Email je verifikovan!",
+      "redirecting": "Preusmeravanje na prijavu...",
+      "failed": "Verifikacija nije uspela",
+      "failedMessage": "Link za verifikaciju je nevažeći ili je istekao.",
+      "resendDescription": "Unesite email da biste primili novi link za verifikaciju.",
+      "resendLink": "Pošalji novi link za verifikaciju"
     }
   },
   "dashboard": {

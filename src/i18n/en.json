@@ -146,7 +146,8 @@
       "submit": "Sign in",
       "submitting": "Signing in...",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "resendVerification": "Resend verification email"
     },
     "signUp": {
       "title": "Create an account",
@@ -210,6 +211,26 @@
       "invalidResetLink": "Invalid reset link. Please request a new password reset.",
       "signUpFailed": "Failed to create account. Please try again.",
       "resetPasswordFailed": "Failed to reset password. Please try again."
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "subtitle": "We've sent a verification link to",
+      "instruction": "Click the link in the email to verify your account. It may take a minute to arrive.",
+      "resend": "Resend verification email",
+      "resending": "Resending...",
+      "resent": "Verification email sent! Check your inbox.",
+      "resendFailed": "Failed to resend. Please try again.",
+      "backToSignIn": "Back to sign in"
+    },
+    "verifyEmail": {
+      "title": "Email Verification",
+      "verifying": "Verifying your email...",
+      "success": "Email verified!",
+      "redirecting": "Redirecting to sign in...",
+      "failed": "Verification Failed",
+      "failedMessage": "The verification link is invalid or has expired.",
+      "resendDescription": "Enter your email to receive a new verification link.",
+      "resendLink": "Send new verification link"
     }
   },
   "dashboard": {

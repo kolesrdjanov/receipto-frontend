@@ -12,12 +12,14 @@ interface ApiRequestOptions extends AxiosRequestConfig {
 export class ApiError extends Error {
   status?: number
   rawMessage?: string
+  code?: string
 
-  constructor(message: string, options?: { status?: number; rawMessage?: string }) {
+  constructor(message: string, options?: { status?: number; rawMessage?: string; code?: string }) {
     super(message)
     this.name = 'ApiError'
     this.status = options?.status
     this.rawMessage = options?.rawMessage
+    this.code = options?.code
   }
 }
 
@@ -110,7 +112,7 @@ export async function apiRequest<T>(
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const payload = error.response?.data as
-        | { message?: string | string[] }
+        | { message?: string | string[]; code?: string }
         | undefined
       const rawMessage = payload?.message
       const message = Array.isArray(rawMessage)
@@ -119,6 +121,7 @@ export async function apiRequest<T>(
       throw new ApiError(message, {
         status: error.response?.status,
         rawMessage: Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage,
+        code: payload?.code,
       })
     }
     throw error

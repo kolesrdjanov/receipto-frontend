@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,8 @@ import { useSignIn } from '@/hooks/auth/use-sign-in'
 export default function SignIn() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { email, setEmail, password, setPassword, error, setError, isLoading, handleSubmit } = useSignIn()
+  const navigate = useNavigate()
+  const { email, setEmail, password, setPassword, error, setError, isLoading, emailNotVerified, handleSubmit } = useSignIn()
 
   return (
     <AuthLayout>
@@ -27,6 +28,15 @@ export default function SignIn() {
             {error && (
               <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm" data-testid="signin-error">
                 {error}
+                {emailNotVerified && (
+                  <button
+                    type="button"
+                    className="mt-1.5 block w-full text-center font-medium text-primary hover:underline"
+                    onClick={() => navigate('/check-email', { state: { email } })}
+                  >
+                    {t('auth.signIn.resendVerification')}
+                  </button>
+                )}
               </div>
             )}
 
