@@ -87,7 +87,7 @@
     "ratings": "Ratings",
     "recurring": "Recurring",
     "announcements": "Announcements",
-    "appSettings": "Settings",
+    "appSettings": "Application",
     "analytics": "Analytics",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
@@ -869,8 +869,9 @@
       "changePasswordError": "Failed to change password",
       "currentPasswordRequired": "Current password is required",
       "newPasswordRequired": "New password is required",
-      "passwordTooShort": "Password must be at least 6 characters",
-      "passwordsDoNotMatch": "New passwords do not match"
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordsDoNotMatch": "New passwords do not match",
+      "passwordRequirements": "Password must contain at least one lowercase letter, one uppercase letter, and one number"
     },
     "dangerZone": {
       "title": "Danger Zone",
@@ -1053,9 +1054,9 @@
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email address",
         "password": "Password",
-        "passwordPlaceholder": "Minimum 6 characters",
+        "passwordPlaceholder": "Minimum 8 characters",
         "passwordRequired": "Password is required",
-        "passwordMinLength": "Password must be at least 6 characters",
+        "passwordMinLength": "Password must be at least 8 characters",
         "firstName": "First Name",
         "firstNamePlaceholder": "John",
         "lastName": "Last Name",

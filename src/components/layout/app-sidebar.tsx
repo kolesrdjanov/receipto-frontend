@@ -12,7 +12,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
+
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -134,7 +134,6 @@ export function AppSidebar({
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.dashboard')}</SidebarGroupLabel>
           <SidebarMenu>
             {/* Dashboard - standalone */}
             <SidebarMenuItem>
@@ -286,7 +285,6 @@ export function AppSidebar({
 
         {/* Settings group */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.settings')}</SidebarGroupLabel>
           <SidebarMenu>
             <Collapsible defaultOpen={isSettingsSection} className="group/collapsible">
               <SidebarMenuItem>
@@ -342,7 +340,6 @@ export function AppSidebar({
         {/* Admin group */}
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>{t('nav.admin')}</SidebarGroupLabel>
             <SidebarMenu>
               <Collapsible defaultOpen={isAdminSection} className="group/collapsible">
                 <SidebarMenuItem>
