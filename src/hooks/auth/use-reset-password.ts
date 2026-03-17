@@ -1,25 +1,28 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 
-const resetPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters long')
-      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-      .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+function createResetPasswordSchema(t: (key: string) => string) {
+  return z
+    .object({
+      password: z
+        .string()
+        .min(8, t('auth.validation.passwordMinLength'))
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, { message: t('auth.validation.passwordRequirements') }),
+      confirmPassword: z.string().min(1, t('auth.validation.confirmPasswordRequired')),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('auth.validation.passwordsMismatch'),
+      path: ['confirmPassword'],
+    })
+}
 
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
+type ResetPasswordFormData = z.infer<ReturnType<typeof createResetPasswordSchema>>
 
 export function useResetPassword() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
@@ -48,10 +51,11 @@ export function useResetPassword() {
     e.preventDefault()
 
     if (!token) {
-      setApiError('Invalid reset link. Please request a new password reset.')
+      setApiError(t('auth.validation.invalidResetLink'))
       return
     }
 
+    const resetPasswordSchema = createResetPasswordSchema(t)
     const result = resetPasswordSchema.safeParse(formData)
 
     if (!result.success) {
@@ -83,7 +87,7 @@ export function useResetPassword() {
         navigate('/sign-in')
       }, 2000)
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Failed to reset password. Please try again.')
+      setApiError(err instanceof Error ? err.message : t('auth.validation.resetPasswordFailed'))
     } finally {
       setIsLoading(false)
     }

@@ -196,6 +196,20 @@
       "requestNewLink": "Zatraži novi link",
       "rememberPassword": "Sećate se lozinke?",
       "signIn": "Prijavite se"
+    },
+    "validation": {
+      "firstNameRequired": "Ime je obavezno",
+      "lastNameRequired": "Prezime je obavezno",
+      "emailRequired": "Email je obavezan",
+      "emailInvalid": "Unesite ispravnu email adresu",
+      "passwordMinLength": "Lozinka mora imati najmanje 8 karaktera",
+      "passwordRequirements": "Lozinka mora sadržati najmanje jedno malo slovo, jedno veliko slovo i jedan broj",
+      "confirmPasswordRequired": "Potvrdite lozinku",
+      "passwordsMismatch": "Lozinke se ne poklapaju",
+      "termsRequired": "Morate se složiti sa uslovima korišćenja",
+      "invalidResetLink": "Nevažeći link za resetovanje. Zatražite novo resetovanje lozinke.",
+      "signUpFailed": "Kreiranje naloga nije uspelo. Pokušajte ponovo.",
+      "resetPasswordFailed": "Resetovanje lozinke nije uspelo. Pokušajte ponovo."
     }
   },
   "dashboard": {

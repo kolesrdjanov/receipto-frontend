@@ -196,6 +196,20 @@
       "requestNewLink": "Request a new link",
       "rememberPassword": "Remember your password?",
       "signIn": "Sign in"
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordRequirements": "Password must contain at least one lowercase letter, one uppercase letter, and one number",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsMismatch": "Passwords don't match",
+      "termsRequired": "You must agree to the terms and conditions",
+      "invalidResetLink": "Invalid reset link. Please request a new password reset.",
+      "signUpFailed": "Failed to create account. Please try again.",
+      "resetPasswordFailed": "Failed to reset password. Please try again."
     }
   },
   "dashboard": {

@@ -1,28 +1,30 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
-const signUpSchema = z
-  .object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
-    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters long')
-      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-      .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    terms: z.boolean().refine((val) => val === true, 'You must agree to the terms and conditions'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+function createSignUpSchema(t: (key: string) => string) {
+  return z
+    .object({
+      firstName: z.string().min(1, t('auth.validation.firstNameRequired')),
+      lastName: z.string().min(1, t('auth.validation.lastNameRequired')),
+      email: z.string().min(1, t('auth.validation.emailRequired')).email(t('auth.validation.emailInvalid')),
+      password: z
+        .string()
+        .min(8, t('auth.validation.passwordMinLength'))
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, { message: t('auth.validation.passwordRequirements') }),
+      confirmPassword: z.string().min(1, t('auth.validation.confirmPasswordRequired')),
+      terms: z.boolean().refine((val) => val === true, t('auth.validation.termsRequired')),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('auth.validation.passwordsMismatch'),
+      path: ['confirmPassword'],
+    })
+}
 
-type SignUpFormData = z.infer<typeof signUpSchema>
+type SignUpFormData = z.infer<ReturnType<typeof createSignUpSchema>>
 
 interface RegisterResponse {
   accessToken: string
@@ -38,6 +40,7 @@ interface RegisterResponse {
 }
 
 export function useSignUp() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
@@ -68,6 +71,7 @@ export function useSignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const signUpSchema = createSignUpSchema(t)
     const result = signUpSchema.safeParse(formData)
 
     if (!result.success) {
@@ -102,7 +106,7 @@ export function useSignUp() {
       const from = (location.state as { from?: string })?.from || '/dashboard'
       navigate(from, { replace: true })
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Failed to create account. Please try again.')
+      setApiError(err instanceof Error ? err.message : t('auth.validation.signUpFailed'))
     } finally {
       setIsLoading(false)
     }
