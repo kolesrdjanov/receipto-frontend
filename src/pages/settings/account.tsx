@@ -38,8 +38,12 @@ export default function AccountSettings() {
       setPasswordError(t('settings.security.newPasswordRequired'))
       return
     }
-    if (passwordForm.newPassword.length < 6) {
+    if (passwordForm.newPassword.length < 8) {
       setPasswordError(t('settings.security.passwordTooShort'))
+      return
+    }
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordForm.newPassword)) {
+      setPasswordError(t('settings.security.passwordRequirements'))
       return
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
