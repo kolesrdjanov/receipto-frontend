@@ -69,7 +69,8 @@ export function AppSidebar({
   const isAdmin = useIsAdmin()
   const logout = useLogout()
   const { data: featureFlags } = useFeatureFlags()
-  const { setOpenMobile } = useSidebar()
+  const { setOpenMobile, state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   const closeMobile = () => setOpenMobile(false)
 
@@ -150,8 +151,18 @@ export function AppSidebar({
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            {/* Expenses - collapsible */}
-            <Collapsible defaultOpen={isExpensesSection} className="group/collapsible">
+            {/* Expenses - collapsible (link when icon-collapsed) */}
+            {isCollapsed ? (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t('nav.expenses')} isActive={isExpensesSection}>
+                  <Link to="/receipts" onClick={closeMobile}>
+                    <Receipt />
+                    <span>{t('nav.expenses')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ) : (
+            <Collapsible asChild defaultOpen={isExpensesSection} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={t('nav.expenses')}>
@@ -214,6 +225,7 @@ export function AppSidebar({
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
+            )}
 
             {/* Group Spending - standalone */}
             <SidebarMenuItem>
@@ -286,7 +298,17 @@ export function AppSidebar({
         {/* Settings group */}
         <SidebarGroup>
           <SidebarMenu>
-            <Collapsible defaultOpen={isSettingsSection} className="group/collapsible">
+            {isCollapsed ? (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={t('nav.settings')} isActive={isSettingsSection}>
+                  <Link to="/settings/app" onClick={closeMobile}>
+                    <Settings />
+                    <span>{t('nav.settings')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ) : (
+            <Collapsible asChild defaultOpen={isSettingsSection} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={t('nav.settings')}>
@@ -334,6 +356,7 @@ export function AppSidebar({
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
+            )}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -341,7 +364,17 @@ export function AppSidebar({
         {isAdmin && (
           <SidebarGroup>
             <SidebarMenu>
-              <Collapsible defaultOpen={isAdminSection} className="group/collapsible">
+              {isCollapsed ? (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip={t('nav.admin')} isActive={isAdminSection}>
+                    <Link to="/admin/users" onClick={closeMobile}>
+                      <SlidersHorizontal />
+                      <span>{t('nav.admin')}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : (
+              <Collapsible asChild defaultOpen={isAdminSection} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip={t('nav.admin')}>
@@ -411,6 +444,7 @@ export function AppSidebar({
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+              )}
             </SidebarMenu>
           </SidebarGroup>
         )}

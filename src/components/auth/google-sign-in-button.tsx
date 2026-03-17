@@ -8,6 +8,14 @@ interface GoogleSignInButtonProps {
 }
 
 export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+    return null
+  }
+
+  return <GoogleSignInButtonInner onError={onError} />
+}
+
+function GoogleSignInButtonInner({ onError }: GoogleSignInButtonProps) {
   const { t } = useTranslation()
   const { handleGoogleAccessToken, isLoading } = useGoogleAuth()
 
@@ -19,10 +27,6 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
       onError?.(t('auth.googleSignInFailed'))
     },
   })
-
-  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
-    return null
-  }
 
   return (
     <Button

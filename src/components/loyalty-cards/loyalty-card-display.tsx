@@ -52,9 +52,9 @@ export function LoyaltyCardDisplay({ card, open, onOpenChange }: LoyaltyCardDisp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[480px] bg-white text-black">
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle className="text-center text-black text-lg">
+          <DialogTitle className="text-center text-lg">
             {card.cardName}
           </DialogTitle>
         </DialogHeader>
@@ -91,7 +91,11 @@ export function LoyaltyCardDisplay({ card, open, onOpenChange }: LoyaltyCardDisp
         </div>
 
         <div className="flex justify-center">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="text-black border-gray-300">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className=""
+          >
             {t('common.close')}
           </Button>
         </div>
