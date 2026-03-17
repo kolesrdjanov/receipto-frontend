@@ -857,8 +857,9 @@
       "changePasswordError": "Greška pri promeni lozinke",
       "currentPasswordRequired": "Trenutna lozinka je obavezna",
       "newPasswordRequired": "Nova lozinka je obavezna",
-      "passwordTooShort": "Lozinka mora imati najmanje 6 karaktera",
-      "passwordsDoNotMatch": "Nove lozinke se ne poklapaju"
+      "passwordTooShort": "Lozinka mora imati najmanje 8 karaktera",
+      "passwordsDoNotMatch": "Nove lozinke se ne poklapaju",
+      "passwordRequirements": "Lozinka mora sadržati najmanje jedno malo slovo, jedno veliko slovo i jedan broj"
     },
     "dangerZone": {
       "title": "Opasna zona",
@@ -1040,9 +1041,9 @@
         "emailRequired": "Email je obavezan",
         "emailInvalid": "Neispravna email adresa",
         "password": "Lozinka",
-        "passwordPlaceholder": "Minimum 6 karaktera",
+        "passwordPlaceholder": "Minimum 8 karaktera",
         "passwordRequired": "Lozinka je obavezna",
-        "passwordMinLength": "Lozinka mora imati najmanje 6 karaktera",
+        "passwordMinLength": "Lozinka mora imati najmanje 8 karaktera",
         "firstName": "Ime",
         "firstNamePlaceholder": "Petar",
         "lastName": "Prezime",
