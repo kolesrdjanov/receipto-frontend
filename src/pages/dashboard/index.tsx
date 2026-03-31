@@ -31,7 +31,6 @@ import {
   Loader2,
   Receipt,
   QrCode,
-  Plus,
   Clock,
   ChevronLeft,
   ChevronRight,
