@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import { useSettingsStore } from '@/store/settings'
-import { Megaphone } from 'lucide-react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { Avatar } from '@/components/ui/avatar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
@@ -40,24 +40,23 @@ export function AppLayout({ children }: AppLayoutProps) {
         hasAnnouncements={hasAnnouncements}
       />
       <SidebarInset>
-        {/* Mobile header */}
-        <header className="flex h-[calc(3rem+env(safe-area-inset-top))] items-center gap-2 border-b px-4 pt-[env(safe-area-inset-top)] md:hidden">
+        {/* Mobile header: hamburger | centered logo | user avatar */}
+        <header className="relative flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between px-4 pt-[env(safe-area-inset-top)] border-b md:hidden">
           <SidebarTrigger className="-ml-1" />
-          <div className="flex-1">
-            <Link to="/dashboard">
-              <h1 className="text-lg font-bold text-primary font-display">{t('common.appName')}</h1>
-            </Link>
-          </div>
-          {hasAnnouncements && (
-            <button
-              onClick={() => setIsAnnouncementsOpen(true)}
-              className="relative p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={t('announcements.title')}
-            >
-              <Megaphone className="h-4 w-4" />
-              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-            </button>
-          )}
+          <Link
+            to="/dashboard"
+            className="absolute left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)]"
+          >
+            <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
+          </Link>
+          <Link to="/settings/profile" className="shrink-0">
+            <Avatar
+              firstName={user?.firstName}
+              lastName={user?.lastName}
+              imageUrl={user?.profileImageUrl}
+              size="sm"
+            />
+          </Link>
         </header>
 
         {/* Main content */}

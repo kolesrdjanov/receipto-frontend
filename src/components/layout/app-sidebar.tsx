@@ -12,38 +12,33 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarRail,
+  SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import {
   LayoutDashboard,
   Receipt,
+  Repeat,
+  Tag,
+  TrendingUp,
   Users,
+  Shield,
   PiggyBank,
   CreditCard,
-  Shield,
   Settings,
-  Star,
-  Megaphone,
   SlidersHorizontal,
-  ChevronRight,
   EllipsisVertical,
   LogOut,
   Heart,
   MessageCircle,
+  Star,
+  Megaphone,
   Compass,
   Sparkles,
   Crown,
@@ -55,6 +50,9 @@ interface AppSidebarProps {
   onOpenAnnouncements: () => void
   hasAnnouncements: boolean
 }
+
+// Active state: subtle primary tint + primary text
+const activeClass = 'bg-primary/[0.08] text-primary font-semibold hover:bg-primary/[0.12] hover:text-primary'
 
 export function AppSidebar({
   onOpenSupportModal,
@@ -69,8 +67,7 @@ export function AppSidebar({
   const isAdmin = useIsAdmin()
   const logout = useLogout()
   const { data: featureFlags } = useFeatureFlags()
-  const { setOpenMobile, state } = useSidebar()
-  const isCollapsed = state === 'collapsed'
+  const { setOpenMobile } = useSidebar()
 
   const closeMobile = () => setOpenMobile(false)
 
@@ -84,20 +81,21 @@ export function AppSidebar({
         ? t('settings.profile.rank.names.statusC')
         : t('settings.profile.rank.names.noStatus')
   const rankVisual = receiptRank === 'status_a'
-    ? { icon: Crown, className: 'text-amber-400 bg-amber-500/10 border-amber-400/25' }
+    ? { icon: Crown, className: 'text-amber-500' }
     : receiptRank === 'status_b'
-      ? { icon: Sparkles, className: 'text-blue-400 bg-blue-500/10 border-blue-400/25' }
+      ? { icon: Sparkles, className: 'text-blue-500' }
       : receiptRank === 'status_c'
-        ? { icon: Compass, className: 'text-emerald-400 bg-emerald-500/10 border-emerald-400/25' }
-        : { icon: Compass, className: 'text-muted-foreground bg-muted/40 border-border' }
+        ? { icon: Compass, className: 'text-emerald-500' }
+        : { icon: Compass, className: 'text-muted-foreground' }
 
-  // Route matching helpers
   const path = location.pathname
-  const isExpensesSection = path === '/receipts' || path === '/templates' || path === '/recurring' || path === '/categories' || path.startsWith('/items')
-  const isSettingsSection = path.startsWith('/settings')
-  const isAdminSection = path.startsWith('/admin')
-
   const isFeatureEnabled = (flag: string) => featureFlags?.[flag as keyof typeof featureFlags] ?? true
+
+  const userName = user?.firstName || user?.lastName
+    ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+    : user?.email
+
+  const RankIcon = rankVisual.icon
 
   return (
     <Sidebar collapsible="icon">
@@ -111,7 +109,7 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <img src="/logo-text.svg" alt="Receipto" className="h-5 w-auto" />
-                  <span className="truncate text-xs text-sidebar-foreground/60">{t('nav.version')} {__APP_VERSION__}</span>
+                  <span className="truncate text-xs text-sidebar-foreground/50">{t('nav.version')} {__APP_VERSION__}</span>
                 </div>
                 {hasAnnouncements && (
                   <button
@@ -134,15 +132,15 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Overview */}
         <SidebarGroup>
           <SidebarMenu>
-            {/* Dashboard - standalone */}
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
                 isActive={path === '/dashboard'}
                 tooltip={t('nav.dashboard')}
-                className={path === '/dashboard' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
+                className={path === '/dashboard' ? activeClass : ''}
               >
                 <Link to="/dashboard" onClick={closeMobile}>
                   <LayoutDashboard />
@@ -150,90 +148,85 @@ export function AppSidebar({
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
 
-            {/* Expenses - collapsible (link when icon-collapsed) */}
-            {isCollapsed ? (
+        {/* Expenses */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t('nav.expenses')}</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={path === '/receipts' || path === '/templates'}
+                tooltip={t('nav.receipts')}
+                className={path === '/receipts' || path === '/templates' ? activeClass : ''}
+              >
+                <Link to="/receipts" onClick={closeMobile}>
+                  <Receipt />
+                  <span>{t('nav.receipts')}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {isFeatureEnabled('recurringExpenses') && (
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t('nav.expenses')} isActive={isExpensesSection}>
-                  <Link to="/receipts" onClick={closeMobile}>
-                    <Receipt />
-                    <span>{t('nav.expenses')}</span>
+                <SidebarMenuButton
+                  asChild
+                  isActive={path === '/recurring'}
+                  tooltip={t('nav.recurring')}
+                  className={path === '/recurring' ? activeClass : ''}
+                >
+                  <Link to="/recurring" onClick={closeMobile}>
+                    <Repeat />
+                    <span>{t('nav.recurring')}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            ) : (
-            <Collapsible asChild defaultOpen={isExpensesSection} className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={t('nav.expenses')}>
-                    <Receipt />
-                    <span>{t('nav.expenses')}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={path === '/receipts' || path === '/templates'}
-                        className={path === '/receipts' || path === '/templates' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                      >
-                        <Link to="/receipts" onClick={closeMobile}>
-                          <span>{t('nav.receipts')}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    {isFeatureEnabled('recurringExpenses') && (
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path === '/recurring'}
-                          className={path === '/recurring' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/recurring" onClick={closeMobile}>
-                            <span>{t('nav.recurring')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    )}
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={path === '/categories'}
-                        className={path === '/categories' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                      >
-                        <Link to="/categories" onClick={closeMobile}>
-                          <span>{t('nav.categories')}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    {isFeatureEnabled('itemPricing') && (
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path.startsWith('/items')}
-                          className={path.startsWith('/items') ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/items" onClick={closeMobile}>
-                            <span>{t('nav.priceTracker')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    )}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
             )}
 
-            {/* Group Spending - standalone */}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={path === '/categories'}
+                tooltip={t('nav.categories')}
+                className={path === '/categories' ? activeClass : ''}
+              >
+                <Link to="/categories" onClick={closeMobile}>
+                  <Tag />
+                  <span>{t('nav.categories')}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {isFeatureEnabled('itemPricing') && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={path.startsWith('/items')}
+                  tooltip={t('nav.priceTracker')}
+                  className={path.startsWith('/items') ? activeClass : ''}
+                >
+                  <Link to="/items" onClick={closeMobile}>
+                    <TrendingUp />
+                    <span>{t('nav.priceTracker')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Manage */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t('nav.manage')}</SidebarGroupLabel>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
                 isActive={path === '/groups' || path.startsWith('/groups/')}
                 tooltip={t('nav.groups')}
-                className={path === '/groups' || path.startsWith('/groups/') ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
+                className={path === '/groups' || path.startsWith('/groups/') ? activeClass : ''}
               >
                 <Link to="/groups" onClick={closeMobile}>
                   <Users />
@@ -242,14 +235,29 @@ export function AppSidebar({
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            {/* Savings - standalone (if enabled) */}
+            {isFeatureEnabled('warranties') && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={path === '/warranties'}
+                  tooltip={t('nav.warranties')}
+                  className={path === '/warranties' ? activeClass : ''}
+                >
+                  <Link to="/warranties" onClick={closeMobile}>
+                    <Shield />
+                    <span>{t('nav.warranties')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+
             {isFeatureEnabled('savings') && (
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={path === '/savings' || path.startsWith('/savings/')}
                   tooltip={t('nav.savings')}
-                  className={path === '/savings' || path.startsWith('/savings/') ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
+                  className={path === '/savings' || path.startsWith('/savings/') ? activeClass : ''}
                 >
                   <Link to="/savings" onClick={closeMobile}>
                     <PiggyBank />
@@ -259,14 +267,13 @@ export function AppSidebar({
               </SidebarMenuItem>
             )}
 
-            {/* Loyalty Cards - standalone (if enabled) */}
             {isFeatureEnabled('loyaltyCards') && (
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={path === '/loyalty-cards'}
                   tooltip={t('nav.loyaltyCards')}
-                  className={path === '/loyalty-cards' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
+                  className={path === '/loyalty-cards' ? activeClass : ''}
                 >
                   <Link to="/loyalty-cards" onClick={closeMobile}>
                     <CreditCard />
@@ -275,183 +282,49 @@ export function AppSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}
+          </SidebarMenu>
+        </SidebarGroup>
 
-            {/* Warranties - standalone (if enabled) */}
-            {isFeatureEnabled('warranties') && (
+        <SidebarSeparator />
+
+        {/* Settings & Admin */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={path.startsWith('/settings')}
+                tooltip={t('nav.settings')}
+                className={path.startsWith('/settings') ? activeClass : ''}
+              >
+                <Link to="/settings/app" onClick={closeMobile}>
+                  <Settings />
+                  <span>{t('nav.settings')}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {isAdmin && (
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={path === '/warranties'}
-                  tooltip={t('nav.warranties')}
-                  className={path === '/warranties' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
+                  isActive={path.startsWith('/admin')}
+                  tooltip={t('nav.admin')}
+                  className={path.startsWith('/admin') ? activeClass : ''}
                 >
-                  <Link to="/warranties" onClick={closeMobile}>
-                    <Shield />
-                    <span>{t('nav.warranties')}</span>
+                  <Link to="/admin/users" onClick={closeMobile}>
+                    <SlidersHorizontal />
+                    <span>{t('nav.admin')}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}
           </SidebarMenu>
         </SidebarGroup>
-
-        {/* Settings group */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {isCollapsed ? (
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={t('nav.settings')} isActive={isSettingsSection}>
-                  <Link to="/settings/app" onClick={closeMobile}>
-                    <Settings />
-                    <span>{t('nav.settings')}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ) : (
-            <Collapsible asChild defaultOpen={isSettingsSection} className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={t('nav.settings')}>
-                    <Settings />
-                    <span>{t('nav.settings')}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={path === '/settings/app'}
-                        className={path === '/settings/app' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                      >
-                        <Link to="/settings/app" onClick={closeMobile}>
-                          <span>{t('nav.appSettings')}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={path === '/settings/profile'}
-                        className={path === '/settings/profile' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                      >
-                        <Link to="/settings/profile" onClick={closeMobile}>
-                          <span>{t('nav.profile')}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={path === '/settings/account'}
-                        className={path === '/settings/account' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                      >
-                        <Link to="/settings/account" onClick={closeMobile}>
-                          <span>{t('nav.account')}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-            )}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Admin group */}
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarMenu>
-              {isCollapsed ? (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={t('nav.admin')} isActive={isAdminSection}>
-                    <Link to="/admin/users" onClick={closeMobile}>
-                      <SlidersHorizontal />
-                      <span>{t('nav.admin')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ) : (
-              <Collapsible asChild defaultOpen={isAdminSection} className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={t('nav.admin')}>
-                      <SlidersHorizontal />
-                      <span>{t('nav.admin')}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path.startsWith('/admin/users')}
-                          className={path.startsWith('/admin/users') ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/admin/users" onClick={closeMobile}>
-                            <span>{t('nav.users')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path === '/admin/ratings'}
-                          className={path === '/admin/ratings' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/admin/ratings" onClick={closeMobile}>
-                            <span>{t('nav.ratings')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path === '/admin/announcements'}
-                          className={path === '/admin/announcements' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/admin/announcements" onClick={closeMobile}>
-                            <span>{t('nav.announcements')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path === '/admin/settings'}
-                          className={path === '/admin/settings' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/admin/settings" onClick={closeMobile}>
-                            <span>{t('nav.appSettings')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-              )}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
-          {/* Rank badge */}
-          <SidebarMenuItem>
-            <div className="rounded-lg border px-3 py-2 text-xs flex items-center justify-between group-data-[collapsible=icon]:hidden mx-1">
-              <span className={`inline-flex items-center gap-1.5 font-semibold ${rankVisual.className} px-2 py-0.5 rounded-md border`}>
-                <rankVisual.icon className="h-3.5 w-3.5" />
-                {rankName}
-              </span>
-            </div>
-          </SidebarMenuItem>
-
-          {/* User section */}
           <SidebarMenuItem>
             <Popover>
               <PopoverTrigger asChild>
@@ -466,12 +339,11 @@ export function AppSidebar({
                     size="sm"
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {user?.firstName || user?.lastName
-                        ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-                        : user?.email}
+                    <span className="truncate font-semibold">{userName}</span>
+                    <span className="truncate text-xs text-sidebar-foreground/50 flex items-center gap-1">
+                      <RankIcon className={`h-3 w-3 shrink-0 ${rankVisual.className}`} />
+                      {rankName}
                     </span>
-                    <span className="truncate text-xs text-sidebar-foreground/60">{user?.email}</span>
                   </div>
                   <EllipsisVertical className="ml-auto size-4" />
                 </SidebarMenuButton>

@@ -306,9 +306,11 @@ export default function RecurringExpenses() {
                       data={categoryChartData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
+                      innerRadius={60}
                       outerRadius={80}
-                      paddingAngle={2}
+                      paddingAngle={4}
+                      cornerRadius={10}
+                      strokeLinecap="round"
                       dataKey="value"
                     >
                       {categoryChartData.map((entry, index) => (

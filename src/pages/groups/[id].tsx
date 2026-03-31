@@ -148,7 +148,6 @@ export default function GroupDetail() {
   // Sort members: owner first, then admin, then by name
   const sortMembers = (members: GroupMember[]) => {
     return [...members].sort((a, b) => {
-      // Role priority: owner > admin > member
       const rolePriority = { owner: 0, admin: 1, member: 2 }
       const aPriority = rolePriority[a.role] ?? 2
       const bPriority = rolePriority[b.role] ?? 2
@@ -157,7 +156,6 @@ export default function GroupDetail() {
         return aPriority - bPriority
       }
 
-      // Then sort by name
       const aName = `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.trim().toLowerCase()
       const bName = `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.trim().toLowerCase()
       return aName.localeCompare(bName)
@@ -241,7 +239,6 @@ export default function GroupDetail() {
     }).format(amount)
   }
 
-  // Convert amount from one currency to the display currency
   const convertAmount = (amount: number, fromCurrency: string): number => {
     if (fromCurrency === displayCurrency || !exchangeRates) {
       return amount
@@ -253,7 +250,6 @@ export default function GroupDetail() {
     return amount / rate
   }
 
-  // Calculate total amount from all currencies
   const getTotalAmount = (): number => {
     if (!stats?.byCurrency) return 0
     return stats.byCurrency.reduce((sum, curr) => {
@@ -261,18 +257,16 @@ export default function GroupDetail() {
     }, 0)
   }
 
-  // Calculate user's total spent from all currencies
   const getUserTotalSpent = (userByCurrency: { currency: string; totalSpent: number }[]): number => {
     return userByCurrency.reduce((sum, curr) => {
       return sum + convertAmount(curr.totalSpent, curr.currency)
     }, 0)
   }
 
-  // Receipt entry handlers
   const handleAddManually = () => {
     setPrefillData({
       groupId: group.id,
-      currency: group.currency || 'RSD', // Use group's default currency
+      currency: group.currency || 'RSD',
     })
     setIsReceiptModalOpen(true)
     setShowAddDropdown(false)
@@ -288,9 +282,10 @@ export default function GroupDetail() {
 
   return (
     <AppLayout>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center mb-4">
+      {/* Hero header */}
+      <div className="mb-8">
+        {/* Nav bar */}
+        <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
             size="sm"
@@ -300,70 +295,145 @@ export default function GroupDetail() {
             {t('common.back')}
           </Button>
 
-          <div className="flex-1" />
-
-          {isOwner && (
+          <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowArchiveConfirm(true)}
-              disabled={archiveGroup.isPending || unarchiveGroup.isPending}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(id!) })}
+              title={t('groups.detail.refresh')}
             >
-              {archiveGroup.isPending || unarchiveGroup.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : group.isArchived ? (
-                <ArchiveRestore className="h-4 w-4" />
-              ) : (
-                <Archive className="h-4 w-4" />
-              )}
-              <span className="hidden sm:inline">
-                {group.isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
-              </span>
+              <RefreshCw className="h-4 w-4" />
             </Button>
-          )}
-
-          {!isOwner && !group.isArchived && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLeaveConfirm(true)}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('groups.detail.leaveGroup')}</span>
-            </Button>
-          )}
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowArchiveConfirm(true)}
+                disabled={archiveGroup.isPending || unarchiveGroup.isPending}
+              >
+                {archiveGroup.isPending || unarchiveGroup.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : group.isArchived ? (
+                  <ArchiveRestore className="h-4 w-4" />
+                ) : (
+                  <Archive className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {group.isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
+                </span>
+              </Button>
+            )}
+            {!isOwner && !group.isArchived && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLeaveConfirm(true)}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('groups.detail.leaveGroup')}</span>
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Group title + edit */}
-        <div className="flex items-start gap-3">
-          {group.icon && <span className="text-4xl">{group.icon}</span>}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl truncate">
-                {group.name}
-              </h2>
-              {group.isArchived && (
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-muted text-muted-foreground shrink-0">
-                  {t('groups.archive.archivedBadge')}
+        {/* Group identity + stats hero */}
+        <div className="rounded-2xl bg-gradient-to-br from-primary/[0.06] to-primary/[0.02] border border-primary/[0.08] p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+            {/* Group icon + name */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-1">
+                {group.icon && <span className="text-4xl">{group.icon}</span>}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
+                      {group.name}
+                    </h2>
+                    {group.isArchived && (
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground shrink-0">
+                        {t('groups.archive.archivedBadge')}
+                      </span>
+                    )}
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0"
+                        onClick={() => setIsEditModalOpen(true)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                  {group.description && (
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {group.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Member avatars row */}
+              <div className="flex items-center gap-3 mt-4">
+                <div className="flex -space-x-2">
+                  {acceptedMembers.slice(0, 5).map((member) => (
+                    <div key={member.id} className="ring-2 ring-background rounded-full">
+                      <Avatar
+                        firstName={member.user?.firstName}
+                        lastName={member.user?.lastName}
+                        imageUrl={member.user?.profileImageUrl}
+                        size="sm"
+                      />
+                    </div>
+                  ))}
+                  {acceptedMembers.length > 5 && (
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-semibold ring-2 ring-background">
+                      +{acceptedMembers.length - 5}
+                    </div>
+                  )}
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {t('groups.detail.members', { count: acceptedMembers.length })}
                 </span>
-              )}
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0"
-                  onClick={() => setIsEditModalOpen(true)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              )}
+              </div>
             </div>
-            {group.description && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {group.description}
-              </p>
-            )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+
+            {/* Stats summary */}
+            <div className="flex gap-6 sm:gap-8 shrink-0">
+              <div className="text-center sm:text-right">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  {t('groups.detail.totalReceipts')}
+                </p>
+                <p className="text-3xl font-bold tabular-nums">
+                  {statsLoading ? '...' : (stats?.totalReceipts ?? 0)}
+                </p>
+              </div>
+              <div className="text-center sm:text-right">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  {t('groups.detail.totalAmount')}
+                </p>
+                <p className="text-3xl font-bold text-primary tabular-nums">
+                  {statsLoading ? '...' : formatAmount(getTotalAmount())}
+                </p>
+                {stats && stats.byCurrency.length > 1 && (
+                  <div className="flex flex-wrap gap-1 mt-1 justify-center sm:justify-end">
+                    {stats.byCurrency.map((curr, idx) => (
+                      <span
+                        key={idx}
+                        className="text-xs px-1.5 py-0.5 rounded bg-background/80 text-muted-foreground"
+                      >
+                        {formatAmount(curr.totalAmount, curr.currency)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Currency selector + actions */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-primary/[0.08]">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Wallet className="h-4 w-4" />
               <span>{t('groups.detail.displayCurrency')}</span>
               <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
@@ -380,151 +450,83 @@ export default function GroupDetail() {
               </Select>
               {ratesLoading && <Loader2 className="h-3 w-3 animate-spin" />}
             </div>
-          </div>
-        </div>
 
-        {/* Actions - primary row: add/scan (full width on mobile) */}
-        {!group.isArchived && (
-          <div className="flex gap-2 mt-4 content-end justify-end">
-            <div className="relative flex-1 sm:flex-none" ref={dropdownRef}>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => setShowAddDropdown(!showAddDropdown)}
-              >
-                <Plus className="h-4 w-4" />
-                {t('receipts.addManually')}
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </Button>
-              {showAddDropdown && (
-                <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
-                  <button
-                    onClick={handleAddManually}
-                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+            {!group.isArchived && (
+              <div className="flex gap-2">
+                <div className="relative" ref={dropdownRef}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAddDropdown(!showAddDropdown)}
                   >
-                    {t('receipts.addBlank')}
-                  </button>
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('receipts.addManually')}</span>
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                  {showAddDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
+                      <button
+                        onClick={handleAddManually}
+                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                      >
+                        {t('receipts.addBlank')}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Button
-              variant="default"
-              className="flex-1 sm:flex-none"
-              onClick={handleScanQr}
-              disabled={isCreating}
-            >
-              {isCreating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="h-4 w-4" />
-              )}
-              {t('receipts.scanQr')}
-            </Button>
+                <Button
+                  size="sm"
+                  onClick={handleScanQr}
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  {t('receipts.scanQr')}
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Actions - secondary row: refresh */}
-        <div className="flex items-center mt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(id!) })}
-            title={t('groups.detail.refresh')}
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('groups.detail.refresh')}</span>
-          </Button>
         </div>
       </div>
 
+      {/* Per-member breakdown (compact, below hero) */}
+      {stats && stats.perUser.length > 0 && (
+        <div className="flex flex-wrap gap-3 mb-8">
+          {stats.perUser.map((u) => (
+            <div
+              key={u.userId}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-sm"
+            >
+              <span className="font-medium">{u.firstName} {u.lastName}</span>
+              <span className="text-muted-foreground">
+                {formatAmount(getUserTotalSpent(u.byCurrency))}
+              </span>
+              <span className="text-xs text-muted-foreground/70">
+                ({u.receiptsCount})
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left column: Summary and Balances */}
+        {/* Left column: Receipts and Balances */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Summary Card */}
+          {/* Receipts Table */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ReceiptIcon className="h-5 w-5" />
-                {t('groups.tabs.summary')}
+                {t('groups.detail.receipts')}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : stats ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-muted/50">
-                      <p className="text-sm text-muted-foreground">
-                        {t('groups.detail.totalReceipts')}
-                      </p>
-                      <p className="text-2xl font-bold">{stats.totalReceipts}</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-muted/50">
-                      <p className="text-sm text-muted-foreground">
-                        {t('groups.detail.totalAmount')}
-                      </p>
-                      <p className="text-2xl font-bold text-primary">
-                        {formatAmount(getTotalAmount())}
-                      </p>
-                      {/* Show breakdown by currency if multiple */}
-                      {stats.byCurrency.length > 1 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {stats.byCurrency.map((curr, idx) => (
-                            <span
-                              key={idx}
-                              className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
-                            >
-                              {formatAmount(curr.totalAmount, curr.currency)}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {stats.perUser.length > 0 && (
-                    <div className="pt-4 border-t">
-                      {/* <p className="text-sm font-medium text-muted-foreground mb-3">
-                        {t('groups.detail.perMember')}
-                      </p> */}
-                      <div className="space-y-2">
-                        {stats.perUser.map((u) => (
-                          <div
-                            key={u.userId}
-                            className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
-                          >
-                            <span className="font-medium">
-                              {u.firstName} {u.lastName}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {formatAmount(getUserTotalSpent(u.byCurrency))}{' '}
-                              <span className="text-xs">({u.receiptsCount})</span>
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  {t('groups.balances.noExpenses')}
-                </p>
-              )}
+              <GroupReceiptsTable groupId={group.id} isArchived={!!group.isArchived} />
             </CardContent>
           </Card>
-
-          {/* Receipts Table */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <ReceiptIcon className="h-5 w-5" />
-              {t('groups.detail.receipts')}
-            </h3>
-            <GroupReceiptsTable groupId={group.id} isArchived={!!group.isArchived} />
-          </div>
 
           {/* Balances Section */}
           <div>
@@ -536,56 +538,51 @@ export default function GroupDetail() {
           </div>
         </div>
 
-        {/* Right column: Members and Activity */}
+        {/* Right column: Members then Activity */}
         <div className="space-y-6">
-          {/* Activity Feed */}
-          <ActivityFeed groupId={group.id} />
-
           {/* Members Card */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="h-4 w-4" />
                 {t('groups.detail.members', { count: acceptedMembers.length })}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {/* Accepted Members */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {acceptedMembers.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                    className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors -mx-2"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <Avatar
                         firstName={member.user?.firstName}
                         lastName={member.user?.lastName}
                         imageUrl={member.user?.profileImageUrl}
                         size="sm"
                       />
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         {member.role === 'owner' && (
-                          <Crown className="h-4 w-4 text-yellow-500" />
+                          <Crown className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
                         )}
-                        <span className="text-sm">
+                        <span className="text-sm truncate">
                           {member.user?.firstName || member.user?.lastName
                             ? `${member.user?.firstName || ''} ${member.user?.lastName || ''}`.trim()
                             : member.user?.email || t('common.unknown')}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          ({member.role})
                         </span>
                       </div>
                     </div>
                     {isAdmin && !group.isArchived && member.role !== 'owner' && member.userId !== user?.id && (
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100"
                         onClick={() => handleRemoveMemberClick(member.userId)}
                         disabled={removeMember.isPending}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     )}
                   </div>
@@ -594,24 +591,24 @@ export default function GroupDetail() {
 
               {/* Pending Invites */}
               {pendingMembers.length > 0 && (
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">
+                <div className="pt-3 border-t">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
                     {t('groups.detail.pendingInvites', { count: pendingMembers.length })}
-                  </h4>
-                  <div className="space-y-2">
+                  </p>
+                  <div className="space-y-1">
                     {pendingMembers.map((member) => {
                       const isExpired = member.expiresAt && new Date(member.expiresAt) < new Date()
                       return (
                         <div
                           key={member.id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                          className="flex items-center justify-between py-1.5"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-sm text-muted-foreground truncate">
                               {member.invitedEmail || member.user?.email}
                             </span>
                             {isExpired && (
-                              <span className="px-1.5 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-red-100 text-red-700 shrink-0">
                                 {t('groups.detail.inviteExpired')}
                               </span>
                             )}
@@ -619,11 +616,12 @@ export default function GroupDetail() {
                           {isAdmin && !group.isArchived && (
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
                               onClick={() => handleRemoveMemberClick(member.id)}
                               disabled={removeMember.isPending}
                             >
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
                             </Button>
                           )}
                         </div>
@@ -633,41 +631,42 @@ export default function GroupDetail() {
                 </div>
               )}
 
-              {/* Invite Member - hidden when archived */}
+              {/* Invite Member */}
               {isAdmin && !group.isArchived && (
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    {t('groups.detail.inviteMember')}
-                  </h4>
+                <div className="pt-3 border-t">
                   <div className="flex gap-2">
                     <Input
                       type="email"
                       placeholder={t('groups.detail.emailPlaceholder')}
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
-                      className="flex-1"
+                      onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                      className="flex-1 h-9 text-sm"
                     />
                     <Button
+                      size="sm"
                       onClick={handleInvite}
                       disabled={!inviteEmail.trim() || inviteMember.isPending}
                     >
                       {inviteMember.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        t('groups.detail.invite')
+                        <UserPlus className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
                 </div>
               )}
 
-              {/* Invite Link - hidden when archived */}
+              {/* Invite Link */}
               {isAdmin && !group.isArchived && (
                 <InviteLinkCard groupId={group.id} />
               )}
             </CardContent>
           </Card>
+
+          {/* Activity Feed */}
+          <ActivityFeed groupId={group.id} />
         </div>
       </div>
 

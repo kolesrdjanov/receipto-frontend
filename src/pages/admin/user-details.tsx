@@ -316,9 +316,11 @@ export default function AdminUserDetailsPage() {
                           data={analyticsData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={55}
+                          innerRadius={65}
                           outerRadius={85}
-                          paddingAngle={2}
+                          paddingAngle={4}
+                          cornerRadius={10}
+                          strokeLinecap="round"
                           dataKey="value"
                         >
                           {analyticsData.map((entry, index) => (

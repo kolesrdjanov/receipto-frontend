@@ -31,6 +31,7 @@ import {
   Loader2,
   Receipt,
   QrCode,
+  Plus,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -287,7 +288,7 @@ export default function Dashboard() {
   // Build widget content map — each entry matches a widget ID from the registry
   const widgetContent: Record<string, React.ReactNode> = {
     'stats-cards': (
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-1">
             <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{monthName}</CardTitle>
@@ -301,7 +302,7 @@ export default function Dashboard() {
             </button>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold font-display tabular-nums">
+            <p className="text-4xl font-black font-display tabular-nums text-primary">
               {amountsVisible
                 ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
                 : <span className="tracking-wider">••••••</span>
@@ -316,7 +317,7 @@ export default function Dashboard() {
             <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold font-display tabular-nums">
+            <p className="text-3xl font-bold font-display tabular-nums text-primary">
               {amountsVisible
                 ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
                 : <span className="tracking-wider">••••••</span>
@@ -332,25 +333,8 @@ export default function Dashboard() {
               <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold font-display tabular-nums">
+              <p className="text-3xl font-bold font-display tabular-nums">
                 <AnimatedNumber value={totalReceipts} />
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/receipts" className="block">
-          <Card className="h-full hover:bg-muted/30 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between pb-1">
-              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.recentActivity')}</CardTitle>
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm font-medium truncate">
-                {recentReceipts?.[0]?.storeName || '-'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {recentReceipts?.[0] ? formatDate(recentReceipts[0].receiptDate || recentReceipts[0].createdAt) : ''}
               </p>
             </CardContent>
           </Card>
@@ -383,9 +367,11 @@ export default function Dashboard() {
                     data={categoryChartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
+                    innerRadius={60}
                     outerRadius={80}
-                    paddingAngle={2}
+                    paddingAngle={4}
+                    cornerRadius={10}
+                    strokeLinecap="round"
                     dataKey="value"
                   >
                     {categoryChartData.map((entry, index) => (
@@ -688,17 +674,18 @@ export default function Dashboard() {
         </>
       )}
 
-      {/* Safe area for floating QR button on mobile */}
-      <div className="h-20 md:hidden" />
+      {/* Safe area for floating add receipt button on mobile */}
+      <div className="h-24 md:hidden" />
       </div>
       </PageTransition>
 
-      {/* Floating QR Scanner button - mobile only */}
+      {/* Floating Add Receipt button - mobile only */}
       <button
-        className="md:hidden !fixed bottom-6 right-6 z-10 bg-primary text-primary-foreground rounded-full h-14 w-14 shadow-lg flex items-center justify-center active:scale-[0.97] transition-transform"
+        className="md:hidden !fixed bottom-6 left-[15px] right-[15px] z-10 bg-primary text-primary-foreground rounded-xl h-14 shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform font-semibold text-base"
         onClick={openQrScanner}
       >
-        <QrCode className="h-6 w-6" />
+        <QrCode className="h-5 w-5" />
+        {t('receipts.modal.addTitle')}
       </button>
 
       {scannerModals}

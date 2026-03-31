@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -74,75 +73,64 @@ export function InviteLinkCard({ groupId }: InviteLinkCardProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-4">
+      <div className="flex items-center justify-center py-3">
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   return (
-    <div className="pt-4 border-t">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="font-medium text-sm flex items-center gap-2">
-          <Link className="h-4 w-4" />
-          {t('groups.inviteLink.title')}
-        </h4>
+    <div className="pt-3 border-t">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm">
+          <Link className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-medium">{t('groups.inviteLink.title')}</span>
+        </div>
         <Switch
           checked={linkData?.inviteCodeEnabled || false}
           onCheckedChange={handleToggle}
           disabled={updateLink.isPending}
         />
       </div>
-      <p className="text-xs text-muted-foreground mb-3">
-        {t('groups.inviteLink.description')}
-      </p>
 
       {linkData?.inviteCodeEnabled && linkData?.inviteUrl && (
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <Input
-              readOnly
-              value={linkData.inviteUrl}
-              className="text-xs font-mono"
-              onClick={(e) => (e.target as HTMLInputElement).select()}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopy}
-              title={t('groups.inviteLink.copy')}
-            >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 sm:flex-none"
-              onClick={handleShare}
-            >
-              <Share2 className="h-4 w-4" />
-              {t('groups.inviteLink.share')}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowRegenerateConfirm(true)}
-              disabled={generateLink.isPending}
-            >
-              {generateLink.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              {t('groups.inviteLink.regenerate')}
-            </Button>
-          </div>
+        <div className="flex items-center gap-2 mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleCopy}
+          >
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-green-500" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+            {copied ? t('groups.inviteLink.copied') : t('groups.inviteLink.copy')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleShare}
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            {t('groups.inviteLink.share')}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => setShowRegenerateConfirm(true)}
+            disabled={generateLink.isPending}
+            title={t('groups.inviteLink.regenerate')}
+          >
+            {generateLink.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5" />
+            )}
+          </Button>
         </div>
       )}
 
