@@ -157,31 +157,6 @@ export const queryKeys = {
     payments: (id: string) => [...queryKeys.recurringExpenses.detail(id), 'payments'] as const,
   },
 
-  // Analytics (Admin)
-  analytics: {
-    all: ['analytics'] as const,
-    overview: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'overview', filters] as const,
-    chains: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'chains', filters] as const,
-    chainDetail: (name: string, filters?: Record<string, string>) => [...queryKeys.analytics.all, 'chain', name, filters] as const,
-    topProducts: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'products', 'top', filters] as const,
-    productPrices: (id: string, filters?: Record<string, string>) => [...queryKeys.analytics.all, 'products', id, 'prices', filters] as const,
-    walletShare: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'wallet', 'share', filters] as const,
-    priceTrends: (productId: string, filters?: Record<string, string>) => [...queryKeys.analytics.all, 'prices', 'trends', productId, filters] as const,
-    cities: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'geo', 'cities', filters] as const,
-    overviewTrend: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'overview', 'trend', filters] as const,
-    overviewComparison: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'overview', 'comparison', filters] as const,
-    chainTrends: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'chains', 'trends', filters] as const,
-    cpi: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'prices', 'cpi', filters] as const,
-    priceMovers: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'prices', 'movers', filters] as const,
-    userActivity: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'users', 'activity', filters] as const,
-    walletTrend: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'wallet', 'trend', filters] as const,
-    chainSwitching: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'chains', 'switching', filters] as const,
-    geoHeatmap: (filters?: Record<string, string>) => [...queryKeys.analytics.all, 'geo', 'heatmap', filters] as const,
-    cityDetail: (city: string, filters?: Record<string, string>) => [...queryKeys.analytics.all, 'geo', 'cities', city, filters] as const,
-    promos: () => [...queryKeys.analytics.all, 'promos'] as const,
-    promoAnalysis: (id: string) => [...queryKeys.analytics.all, 'promos', id, 'analysis'] as const,
-  },
-
   // Loyalty Cards
   loyaltyCards: {
     all: ['loyaltyCards'] as const,

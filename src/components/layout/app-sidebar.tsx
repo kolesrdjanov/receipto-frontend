@@ -429,17 +429,6 @@ export function AppSidebar({
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={path === '/admin/analytics'}
-                          className={path === '/admin/analytics' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : ''}
-                        >
-                          <Link to="/admin/analytics" onClick={closeMobile}>
-                            <span>{t('nav.analytics')}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
