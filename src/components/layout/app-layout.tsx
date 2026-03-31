@@ -45,7 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <SidebarTrigger className="-ml-1" />
           <Link
             to="/dashboard"
-            className="absolute left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)]"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           >
             <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
           </Link>
