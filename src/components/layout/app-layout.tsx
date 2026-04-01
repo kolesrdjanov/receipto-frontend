@@ -41,22 +41,24 @@ export function AppLayout({ children }: AppLayoutProps) {
       />
       <SidebarInset>
         {/* Mobile header: hamburger | centered logo | user avatar */}
-        <header className="relative flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between px-4 pt-[env(safe-area-inset-top)] border-b md:hidden">
-          <SidebarTrigger className="-ml-1" />
-          <Link
-            to="/dashboard"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          >
-            <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
-          </Link>
-          <Link to="/settings/profile" className="shrink-0">
-            <Avatar
-              firstName={user?.firstName}
-              lastName={user?.lastName}
-              imageUrl={user?.profileImageUrl}
-              size="sm"
-            />
-          </Link>
+        <header className="flex flex-col border-b md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="relative flex h-14 items-center justify-between px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Link
+              to="/dashboard"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            >
+              <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
+            </Link>
+            <Link to="/settings/profile" className="shrink-0">
+              <Avatar
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+                imageUrl={user?.profileImageUrl}
+                size="sm"
+              />
+            </Link>
+          </div>
         </header>
 
         {/* Main content */}
