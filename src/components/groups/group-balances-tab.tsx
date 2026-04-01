@@ -249,11 +249,11 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
       )}
 
       {/* Member Balances */}
-      <Card>
-        <CardHeader>
+      <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
+        <CardHeader className="max-sm:px-0">
           <CardTitle className="text-lg">{t('groups.balances.memberBalances')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-sm:px-0">
           {convertedBalances.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               {t('groups.balances.noExpenses')}
@@ -348,14 +348,14 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
 
       {/* Suggested Settlements */}
       {suggestedSettlements.length > 0 && (
-        <Card>
-          <CardHeader>
+        <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
+          <CardHeader className="max-sm:px-0">
             <CardTitle className="text-lg flex items-center gap-2">
               <Handshake className="h-5 w-5" />
               {t('groups.balances.suggestedSettlements')}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-sm:px-0">
             <div className="space-y-3">
               {suggestedSettlements.map((settlement, index) => {
                 const fromUser = convertedBalances.find((b) => b.userId === settlement.from.id)?.user
@@ -371,20 +371,20 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
                       imageUrl={fromUser?.profileImageUrl}
                       size="sm"
                     />
-                    <span className="font-medium">
+                    <span className="hidden sm:inline font-medium">
                       {getSettlementMemberName(settlement.from)}
                     </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     <Avatar
                       firstName={settlement.to.firstName}
                       lastName={settlement.to.lastName}
                       imageUrl={toUser?.profileImageUrl}
                       size="sm"
                     />
-                    <span className="font-medium">
+                    <span className="hidden sm:inline font-medium">
                       {getSettlementMemberName(settlement.to)}
                     </span>
-                    <span className="font-semibold text-primary ml-2">
+                    <span className="font-semibold text-primary ml-auto sm:ml-2">
                       {formatCurrency(settlement.amount)}
                     </span>
                   </div>

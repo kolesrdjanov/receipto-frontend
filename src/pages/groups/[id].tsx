@@ -283,9 +283,9 @@ export default function GroupDetail() {
   return (
     <AppLayout>
       {/* Hero header */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         {/* Nav bar */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <Button
             variant="ghost"
             size="sm"
@@ -338,15 +338,15 @@ export default function GroupDetail() {
         </div>
 
         {/* Group identity + stats hero */}
-        <div className="rounded-2xl bg-gradient-to-br from-primary/[0.06] to-primary/[0.02] border border-primary/[0.08] p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+        <div className="rounded-2xl bg-gradient-to-br from-primary/[0.06] to-primary/[0.02] border border-primary/[0.08] p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             {/* Group icon + name */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
-                {group.icon && <span className="text-4xl">{group.icon}</span>}
+                {group.icon && <span className="text-3xl sm:text-4xl">{group.icon}</span>}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
+                    <h2 className="text-xl sm:text-3xl font-bold tracking-tight truncate">
                       {group.name}
                     </h2>
                     {group.isArchived && (
@@ -374,7 +374,7 @@ export default function GroupDetail() {
               </div>
 
               {/* Member avatars row */}
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-3 sm:mt-4">
                 <div className="flex -space-x-2">
                   {acceptedMembers.slice(0, 5).map((member) => (
                     <div key={member.id} className="ring-2 ring-background rounded-full">
@@ -400,23 +400,23 @@ export default function GroupDetail() {
 
             {/* Stats summary */}
             <div className="flex gap-6 sm:gap-8 shrink-0">
-              <div className="text-center sm:text-right">
+              <div className="sm:text-right">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalReceipts')}
                 </p>
-                <p className="text-3xl font-bold tabular-nums">
+                <p className="text-2xl sm:text-3xl font-bold tabular-nums">
                   {statsLoading ? '...' : (stats?.totalReceipts ?? 0)}
                 </p>
               </div>
-              <div className="text-center sm:text-right">
+              <div className="sm:text-right">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalAmount')}
                 </p>
-                <p className="text-3xl font-bold text-primary tabular-nums">
+                <p className="text-2xl sm:text-3xl font-bold text-primary tabular-nums">
                   {statsLoading ? '...' : formatAmount(getTotalAmount())}
                 </p>
                 {stats && stats.byCurrency.length > 1 && (
-                  <div className="flex flex-wrap gap-1 mt-1 justify-center sm:justify-end">
+                  <div className="flex flex-wrap gap-1 mt-1 sm:justify-end">
                     {stats.byCurrency.map((curr, idx) => (
                       <span
                         key={idx}
@@ -432,10 +432,10 @@ export default function GroupDetail() {
           </div>
 
           {/* Currency selector + actions */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-primary/[0.08]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-primary/[0.08]">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Wallet className="h-4 w-4" />
-              <span>{t('groups.detail.displayCurrency')}</span>
+              <Wallet className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">{t('groups.detail.displayCurrency')}</span>
               <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
                 <SelectTrigger className="h-7 w-auto min-w-[80px] text-xs">
                   <SelectValue />
@@ -453,14 +453,15 @@ export default function GroupDetail() {
 
             {!group.isArchived && (
               <div className="flex gap-2">
-                <div className="relative" ref={dropdownRef}>
+                <div className="relative flex-1 sm:flex-initial" ref={dropdownRef}>
                   <Button
                     variant="outline"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() => setShowAddDropdown(!showAddDropdown)}
                   >
                     <Plus className="h-4 w-4" />
-                    <span className="hidden sm:inline">{t('receipts.addManually')}</span>
+                    {t('receipts.addManually')}
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                   {showAddDropdown && (
@@ -476,6 +477,7 @@ export default function GroupDetail() {
                 </div>
                 <Button
                   size="sm"
+                  className="flex-1 sm:flex-initial"
                   onClick={handleScanQr}
                   disabled={isCreating}
                 >
@@ -494,7 +496,7 @@ export default function GroupDetail() {
 
       {/* Per-member breakdown (compact, below hero) */}
       {stats && stats.perUser.length > 0 && (
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
           {stats.perUser.map((u) => (
             <div
               key={u.userId}
@@ -512,18 +514,18 @@ export default function GroupDetail() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Left column: Receipts and Balances */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Receipts Table */}
-          <Card>
-            <CardHeader>
+          <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
+            <CardHeader className="max-sm:px-0">
               <CardTitle className="flex items-center gap-2">
                 <ReceiptIcon className="h-5 w-5" />
                 {t('groups.detail.receipts')}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="max-sm:px-0">
               <GroupReceiptsTable groupId={group.id} isArchived={!!group.isArchived} />
             </CardContent>
           </Card>
@@ -539,16 +541,16 @@ export default function GroupDetail() {
         </div>
 
         {/* Right column: Members then Activity */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Members Card */}
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
+            <CardHeader className="pb-3 max-sm:px-0">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Users className="h-4 w-4" />
                 {t('groups.detail.members', { count: acceptedMembers.length })}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 max-sm:px-0">
               {/* Accepted Members */}
               <div className="space-y-1">
                 {acceptedMembers.map((member) => (
