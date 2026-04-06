@@ -81,11 +81,10 @@ export default function AccountSettings() {
     <AppLayout>
       <div className="mb-6 sm:mb-8">
         <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2 flex items-center gap-2">
-          <KeyRound className="h-6 w-6 sm:h-8 sm:w-8" />
           {t('nav.account')}
         </h2>
         <p className="text-sm text-muted-foreground sm:text-base">
-          {t('settings.security.description')}
+          {t('settings.security.accountPageDescription')}
         </p>
       </div>
 

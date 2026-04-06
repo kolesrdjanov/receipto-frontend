@@ -895,6 +895,7 @@
     },
     "security": {
       "title": "Security",
+      "accountPageDescription": "Manage your account security settings",
       "description": "Update your password",
       "currentPassword": "Current Password",
       "newPassword": "New Password",

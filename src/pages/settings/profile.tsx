@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent} from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { CurrencySelect } from '@/components/ui/currency-select'
-import { User as UserIcon, Image as ImageIcon, Trash2, Save, Sparkles, Compass, Crown, MapPin, Wallet } from 'lucide-react'
+import { Image as ImageIcon, Trash2, Save, Sparkles, Compass, Crown, MapPin, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage } from '@/hooks/users/use-me'
@@ -194,7 +194,6 @@ export default function ProfileSettings() {
     <AppLayout>
       <div className="mb-6 sm:mb-8">
         <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2 flex items-center gap-2">
-          <UserIcon className="h-6 w-6 sm:h-8 sm:w-8" />
           {t('settings.profile.title')}
         </h2>
         <p className="text-sm text-muted-foreground sm:text-base">
@@ -204,27 +203,13 @@ export default function ProfileSettings() {
 
       <div className="grid gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserIcon className="h-5 w-5" />
-              {t('settings.profile.title')}
-            </CardTitle>
-            <CardDescription>
-              {t('settings.profile.description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4" key={profileKey}>
+          <CardContent className="space-y-4 pt-8" key={profileKey}>
             {!effectiveUser ? (
               <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
             ) : (
               <>
                 {/* Profile picture */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-0.5">
-                    <Label>{t('settings.profile.picture')}</Label>
-                    <p className="text-sm text-muted-foreground">{t('settings.profile.pictureHelp')}</p>
-                  </div>
-
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <Avatar
                       firstName={effectiveUser.firstName}
@@ -232,38 +217,44 @@ export default function ProfileSettings() {
                       imageUrl={effectiveUser.profileImageUrl}
                       size="2xl"
                     />
+                    <div>
+                      <div className="space-y-0.5 mb-6">
+                        <Label>{t('settings.profile.picture')}</Label>
+                        <p className="text-sm text-muted-foreground">{t('settings.profile.pictureHelp')}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="default"
+                            onClick={handleFileSelect}
+                            disabled={uploadProfileImage.isPending}
+                        >
+                          <ImageIcon className="h-4 w-4" />
+                          {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
+                        </Button>
 
-                    <div className="flex gap-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="default"
-                        onClick={handleFileSelect}
-                        disabled={uploadProfileImage.isPending}
-                      >
-                        <ImageIcon className="h-4 w-4" />
-                        {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="default"
-                        onClick={handleRemoveProfileImage}
-                        disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {t('settings.profile.remove')}
-                      </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="default"
+                            onClick={handleRemoveProfileImage}
+                            disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {t('settings.profile.remove')}
+                        </Button>
+                      </div>
                     </div>
                   </div>
+
                 </div>
 
                 {/* Names */}

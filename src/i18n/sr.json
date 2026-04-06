@@ -883,6 +883,7 @@
     },
     "security": {
       "title": "Bezbednost",
+      "accountPageDescription": "Upravljajte podešavanjima bezbednosti vašeg naloga",
       "description": "Promenite svoju lozinku",
       "currentPassword": "Trenutna lozinka",
       "newPassword": "Nova lozinka",

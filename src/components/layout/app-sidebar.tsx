@@ -41,7 +41,7 @@ import {
   Megaphone,
   Compass,
   Sparkles,
-  Crown,
+  Crown, KeyRound, User
 } from 'lucide-react'
 
 interface AppSidebarProps {
@@ -353,6 +353,20 @@ export function AppSidebar({
                 align="end"
                 className="w-52 p-1"
               >
+                <Link
+                    to={'/settings/profile'}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+                    onClick={() => { closeMobile() }}>
+                  <User className="h-4 w-4 text-muted-foreground"/>
+                  {t('nav.profile')}
+                </Link>
+                <Link
+                    to={'/settings/account'}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+                    onClick={() => { closeMobile() }}>
+                  <KeyRound className="h-4 w-4 text-muted-foreground"/>
+                  {t('nav.account')}
+                </Link>
                 <button
                   className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
                   onClick={() => { onOpenSupportModal(); closeMobile() }}
