@@ -4,28 +4,120 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   ArrowLeft,
   Calendar,
   Check,
-  FolderOpen,
-  MoreVertical,
+  ChevronDown,
+  ChevronUp,
   Pencil,
   Plus,
   Sparkles,
-  Target,
   Trash2,
   TrendingDown,
-  TrendingUp,
 } from 'lucide-react'
-import { useSavingsGoal, useDeleteSavingsGoal, useRemoveContribution, useGoalInsights } from '@/hooks/savings/use-savings'
+import {
+  useSavingsGoal,
+  useDeleteSavingsGoal,
+  useRemoveContribution,
+  useGoalInsights,
+} from '@/hooks/savings/use-savings'
 import { GoalModal } from '@/components/savings/goal-modal'
 import { ContributionModal } from '@/components/savings/contribution-modal'
+import { GoalActions } from '@/components/savings/goal-actions'
+import { CategoryPerformance } from '@/components/savings/category-performance'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn, formatAmount } from '@/lib/utils'
+
+const INITIAL_CONTRIBUTIONS_COUNT = 5
+
+function ProgressRing({
+  progress,
+  color,
+  size = 64,
+}: {
+  progress: number
+  color: string
+  size?: number
+}) {
+  const strokeWidth = 5
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const clamped = Math.min(Math.max(progress, 0), 100)
+  const offset = circumference - (clamped / 100) * circumference
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-primary/10"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-sm font-bold">{clamped}%</span>
+      </div>
+    </div>
+  )
+}
+
+function DetailSkeleton() {
+  return (
+    <AppLayout>
+      <div className="flex items-center justify-between mb-6">
+        <Skeleton className="h-8 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      </div>
+      <Card className="mb-4">
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-lg" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-16 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-2.5 w-full" />
+          <div className="grid grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="space-y-1">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
+    </AppLayout>
+  )
+}
 
 export default function SavingsGoalDetail() {
   const { id } = useParams<{ id: string }>()
@@ -33,45 +125,106 @@ export default function SavingsGoalDetail() {
   const { t } = useTranslation()
 
   const { data: goal, isLoading } = useSavingsGoal(id!)
-  const { data: insights } = useGoalInsights(id!)
+  const { data: insights, isLoading: insightsLoading } = useGoalInsights(id!)
   const deleteGoal = useDeleteSavingsGoal()
   const removeContribution = useRemoveContribution(id!)
 
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [contributionModalOpen, setContributionModalOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [deletingContributionId, setDeletingContributionId] = useState<string | null>(null)
+  const [deletingContributionId, setDeletingContributionId] = useState<
+    string | null
+  >(null)
+  const [showAllContributions, setShowAllContributions] = useState(false)
+
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
 
   if (isLoading) {
-    return (
-      <AppLayout>
-        <div className="text-center py-12 text-muted-foreground">{t('common.loading')}</div>
-      </AppLayout>
-    )
+    return <DetailSkeleton />
   }
 
   if (!goal) {
     return (
       <AppLayout>
-        <div className="text-center py-12 text-muted-foreground">{t('savings.goal.notFound')}</div>
+        <div className="text-center py-12 text-muted-foreground">
+          {t('savings.goal.notFound')}
+        </div>
       </AppLayout>
     )
   }
 
-  const progress = goal.targetAmount > 0
-    ? Math.min(100, Math.round((Number(goal.currentAmount) / Number(goal.targetAmount)) * 100))
-    : 0
+  const progress =
+    goal.targetAmount > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (Number(goal.currentAmount) / Number(goal.targetAmount)) * 100,
+          ),
+        )
+      : 0
+
+  const remaining = Math.max(
+    0,
+    Number(goal.targetAmount) - Number(goal.currentAmount),
+  )
+  const goalColor = goal.color || '#3b82f6'
 
   const deadlineDate = goal.deadline ? new Date(goal.deadline) : null
   const daysLeft = deadlineDate
-    ? Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil(
+        (deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+      )
     : null
 
-  // Projected completion
-  const daysSinceCreated = Math.max(1, Math.ceil((Date.now() - new Date(goal.createdAt).getTime()) / (1000 * 60 * 60 * 24)))
-  const dailyRate = Number(goal.currentAmount) / daysSinceCreated
-  const remaining = Number(goal.targetAmount) - Number(goal.currentAmount)
-  const projectedDays = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : null
+  // Status determination
+  const getStatus = () => {
+    if (goal.isCompleted) {
+      return {
+        label: t('savings.goals.completed'),
+        colorClass:
+          'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+        icon: <Check className="h-3 w-3" />,
+      }
+    }
+    if (!goal.deadline) {
+      return null // No badge for goals without deadlines
+    }
+    if (insights?.pace?.isOnTrack === true) {
+      return {
+        label: t('savings.insights.onTrack'),
+        colorClass:
+          'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+        icon: null,
+      }
+    }
+    if (insights?.pace?.isOnTrack === false) {
+      return {
+        label: t('savings.insights.behind'),
+        colorClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+        icon: <TrendingDown className="h-3 w-3" />,
+      }
+    }
+    return null
+  }
+
+  const status = getStatus()
+
+  // Priority color
+  const priorityColor =
+    goal.priority === 'high'
+      ? 'text-red-600 dark:text-red-400'
+      : goal.priority === 'medium'
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-muted-foreground'
+
+  // Contributions
+  const contributions = goal.contributions ?? []
+  const visibleContributions = showAllContributions
+    ? contributions
+    : contributions.slice(0, INITIAL_CONTRIBUTIONS_COUNT)
+  const hasMore = contributions.length > INITIAL_CONTRIBUTIONS_COUNT
 
   const handleDeleteGoal = async () => {
     try {
@@ -95,41 +248,34 @@ export default function SavingsGoalDetail() {
 
   return (
     <AppLayout>
-      {/* Header */}
+      {/* Navigation header */}
       <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/savings')}>
-            <ArrowLeft className="h-4 w-4" />
+        <button
+          onClick={() => navigate('/savings')}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('savings.title')}
+        </button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditModalOpen(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            {t('common.update')}
           </Button>
-          <div className="flex items-center gap-2 min-w-0">
-            {goal.icon && <span className="text-2xl">{goal.icon}</span>}
-            <h2 className="text-xl font-bold truncate">{goal.name}</h2>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+            onClick={() => setDeleteConfirmOpen(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {t('common.delete')}
+          </Button>
         </div>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-40 p-1">
-            <button
-              onClick={() => setEditModalOpen(true)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-            >
-              <Pencil className="h-4 w-4" />
-              {t('common.update')}
-            </button>
-            <button
-              onClick={() => setDeleteConfirmOpen(true)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive hover:bg-accent"
-            >
-              <Trash2 className="h-4 w-4" />
-              {t('common.delete')}
-            </button>
-          </PopoverContent>
-        </Popover>
       </div>
 
       {/* Completed celebration */}
@@ -151,211 +297,230 @@ export default function SavingsGoalDetail() {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {/* Progress Card */}
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div className="text-center space-y-2">
-              <p className="text-3xl font-bold" style={{ color: goal.color || undefined }}>
-                {progress}%
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {Number(goal.currentAmount).toLocaleString()} / {Number(goal.targetAmount).toLocaleString()} {goal.currency}
-              </p>
+      {/* Compact progress header */}
+      <Card className="mb-4">
+        <CardContent className="pt-6 space-y-4">
+          {/* Top row: icon + name + status + ring */}
+          <div className="flex items-center gap-4">
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl"
+              style={{
+                backgroundColor: `${goalColor}20`,
+                color: goalColor,
+              }}
+            >
+              {goal.icon || '🎯'}
             </div>
-            <Progress value={progress} className="h-3" />
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2 text-sm">
-              {deadlineDate && (
-                <div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {t('savings.goal.deadline')}
-                  </p>
-                  <p className={cn(
-                    'font-medium',
-                    daysLeft !== null && daysLeft < 0 && 'text-red-500',
-                    daysLeft !== null && daysLeft <= 30 && daysLeft >= 0 && 'text-amber-500',
-                  )}>
-                    {daysLeft !== null && daysLeft < 0
-                      ? t('savings.goal.overdue')
-                      : daysLeft !== null
-                        ? t('savings.goal.daysLeft', { count: daysLeft })
-                        : deadlineDate.toLocaleDateString()
-                    }
-                  </p>
-                </div>
-              )}
-
-              {projectedDays !== null && !goal.isCompleted && (
-                <div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Target className="h-3 w-3" />
-                    {t('savings.goal.projectedCompletion')}
-                  </p>
-                  <p className="font-medium">
-                    {t('savings.goal.projectedDays', { count: projectedDays })}
-                  </p>
-                </div>
-              )}
-
-              {goal.category && (
-                <div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <FolderOpen className="h-3 w-3" />
-                    {t('savings.goal.linkedCategory')}
-                  </p>
-                  <p className="font-medium">
-                    {goal.category.icon && <span className="mr-1">{goal.category.icon}</span>}
-                    {goal.category.name}
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Category Insights */}
-        {insights?.categoryInsights && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                {t('savings.insights.title')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">{t('savings.insights.spentThisMonth')}</p>
-                  <p className="text-lg font-semibold">
-                    {Math.round(insights.categoryInsights.spentThisMonth).toLocaleString()} {insights.categoryInsights.budgetCurrency}
-                  </p>
-                  <Progress
-                    value={Math.min(100, (insights.categoryInsights.spentThisMonth / insights.categoryInsights.budget) * 100)}
-                    className="h-1.5"
-                  />
-                  <p className="text-[10px] text-muted-foreground">
-                    / {Math.round(insights.categoryInsights.budget).toLocaleString()} {insights.categoryInsights.budgetCurrency}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">{t('savings.insights.potentialSavings')}</p>
-                  <p className={cn(
-                    'text-lg font-semibold',
-                    insights.categoryInsights.potentialSavings > 0
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-muted-foreground'
-                  )}>
-                    {insights.categoryInsights.potentialSavings > 0 ? '+' : ''}
-                    {Math.round(insights.categoryInsights.potentialSavings).toLocaleString()} {insights.categoryInsights.budgetCurrency}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">{t('savings.insights.monthlyPaceNeeded')}</p>
-                  <p className="text-lg font-semibold">
-                    {insights.pace.requiredMonthly !== null
-                      ? `${Math.round(insights.pace.requiredMonthly).toLocaleString()} ${goal.currency}`
-                      : t('savings.insights.noDeadline')}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">{t('savings.insights.status')}</p>
-                  {insights.pace.isOnTrack === null ? (
-                    <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                      {t('savings.insights.noDeadline')}
-                    </span>
-                  ) : insights.pace.isOnTrack ? (
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600 dark:text-green-400">
-                      <Check className="h-3.5 w-3.5" />
-                      {t('savings.insights.onTrack')}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 dark:text-amber-400">
-                      <TrendingDown className="h-3.5 w-3.5" />
-                      {t('savings.insights.behind')}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Auto vs manual breakdown */}
-              {(insights.autoSavingsTotal > 0 || insights.manualTotal > 0) && (
-                <div className="flex items-center gap-4 mt-4 pt-4 border-t text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-amber-500" />
-                    {t('savings.insights.autoSavingsTotal')}: {Math.round(insights.autoSavingsTotal).toLocaleString()} {goal.currency}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Plus className="h-3 w-3" />
-                    {t('savings.insights.manualTotal')}: {Math.round(insights.manualTotal).toLocaleString()} {goal.currency}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* No budget hint */}
-        {goal.category && !insights?.categoryInsights && insights && (
-          <Card className="border-dashed">
-            <CardContent className="py-4 text-center text-sm text-muted-foreground">
-              {t('savings.insights.noBudget', { category: goal.category.name })}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Contributions */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{t('savings.contributions.title')}</CardTitle>
-              <Button size="sm" onClick={() => setContributionModalOpen(true)}>
-                <Plus className="h-4 w-4" />
-                {t('savings.contributions.add')}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {!goal.contributions?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t('savings.contributions.empty')}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {goal.contributions.map((c) => (
-                  <div
-                    key={c.id}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold truncate">{goal.name}</h2>
+                {status && (
+                  <span
                     className={cn(
-                      'flex items-center justify-between py-2 border-b last:border-0',
-                      c.source === 'auto' && 'bg-amber-500/5 -mx-2 px-2 rounded',
+                      'inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0',
+                      status.colorClass,
                     )}
                   >
-                    <div className="flex items-start gap-2 min-w-0">
-                      {c.source === 'auto' ? (
-                        <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                      ) : (
-                        <Plus className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    {status.icon}
+                    {status.label}
+                  </span>
+                )}
+              </div>
+              {deadlineDate && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                  <Calendar className="h-3 w-3" />
+                  {deadlineDate.toLocaleDateString()}
+                  {daysLeft !== null && (
+                    <span
+                      className={cn(
+                        'ml-1',
+                        daysLeft < 0 && 'text-red-500',
+                        daysLeft >= 0 && daysLeft <= 30 && 'text-amber-500',
                       )}
-                      <div className="min-w-0">
+                    >
+                      {daysLeft < 0
+                        ? `(${t('savings.goal.overdue')})`
+                        : `(${t('savings.goal.daysLeft', { count: daysLeft })})`}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+            <ProgressRing progress={progress} color={goalColor} />
+          </div>
+
+          {/* Amount bar */}
+          <div className="space-y-1.5">
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="font-medium">
+                {formatAmount(Math.round(Number(goal.currentAmount)))}{' '}
+                {goal.currency}{' '}
+                <span className="text-muted-foreground font-normal">
+                  {t('savings.goalDetail.saved')}
+                </span>
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {formatAmount(Math.round(remaining))} {goal.currency}{' '}
+                {t('savings.goalDetail.remaining')}
+              </span>
+            </div>
+            <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-primary/10">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${Math.min(progress, 100)}%`,
+                  backgroundColor: goalColor,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Quick stats row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t">
+            <div>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                {t('savings.goalDetail.monthlyRate')}
+              </p>
+              <p className="text-sm font-medium mt-0.5">
+                {insights?.pace?.currentMonthly != null
+                  ? `${formatAmount(Math.round(insights.pace.currentMonthly))} ${goal.currency}`
+                  : '\u2014'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                {t('savings.goalDetail.requiredRate')}
+              </p>
+              <p className="text-sm font-medium mt-0.5">
+                {insights?.pace?.requiredMonthly != null
+                  ? `${formatAmount(Math.round(insights.pace.requiredMonthly))} ${goal.currency}`
+                  : '\u2014'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                {t('savings.goalDetail.projected')}
+              </p>
+              <p className="text-sm font-medium mt-0.5">
+                {insights?.pace?.monthsToTarget != null
+                  ? t('savings.goalDetail.monthsCount', {
+                      count: insights.pace.monthsToTarget,
+                    })
+                  : '\u2014'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                {t('savings.goalModal.priority')}
+              </p>
+              <p className={cn('text-sm font-medium mt-0.5', priorityColor)}>
+                {t(`savings.priority.${goal.priority}`)}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Two-column actionable section */}
+      <div
+        className={cn(
+          'grid gap-4 mb-4',
+          goal.categoryId ? 'lg:grid-cols-2' : 'lg:grid-cols-1',
+        )}
+      >
+        <GoalActions goalId={goal.id} year={year} month={month} />
+        {goal.categoryId && (
+          <CategoryPerformance
+            insights={insights}
+            goalCurrency={goal.currency}
+            isLoading={insightsLoading}
+          />
+        )}
+      </div>
+
+      {/* No budget hint for linked categories without budget */}
+      {goal.category && !insights?.categoryInsights && insights && (
+        <Card className="border-dashed mb-4">
+          <CardContent className="py-4 text-center text-sm text-muted-foreground">
+            {t('savings.insights.noBudget', {
+              category: goal.category.name,
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Contributions section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              {t('savings.contributions.title')}
+              {contributions.length > 0 && (
+                <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                  {contributions.length}
+                </span>
+              )}
+            </CardTitle>
+            <Button
+              size="sm"
+              onClick={() => setContributionModalOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              {t('savings.contributions.add')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {contributions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              {t('savings.contributions.empty')}
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {visibleContributions.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between py-2.5 border-b last:border-0"
+                >
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    {/* Dot indicator */}
+                    <div
+                      className={cn(
+                        'mt-1.5 h-2 w-2 rounded-full shrink-0',
+                        c.source === 'auto'
+                          ? 'bg-green-500'
+                          : 'bg-blue-500',
+                      )}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">
-                          +{Number(c.amount).toLocaleString()} {c.currency}
+                          +{formatAmount(Number(c.amount))} {c.currency}
                         </p>
-                        {c.source === 'auto' && goal.category ? (
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            {t('savings.goal.autoContribution', { category: goal.category.name })}
-                          </p>
-                        ) : c.note ? (
-                          <p className="text-xs text-muted-foreground truncate">{c.note}</p>
-                        ) : null}
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(c.createdAt).toLocaleDateString()}
-                        </p>
+                        {c.source === 'auto' && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-green-600 dark:text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            {t('savings.goalDetail.auto')}
+                          </span>
+                        )}
                       </div>
+                      {c.source === 'auto' && goal.category ? (
+                        <p className="text-xs text-muted-foreground">
+                          {t('savings.goal.autoContribution', {
+                            category: goal.category.name,
+                          })}
+                        </p>
+                      ) : c.note ? (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {c.note}
+                        </p>
+                      ) : null}
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
+                  </div>
+                  {c.source === 'manual' && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -364,13 +529,35 @@ export default function SavingsGoalDetail() {
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Show all toggle */}
+              {hasMore && (
+                <button
+                  onClick={() => setShowAllContributions((prev) => !prev)}
+                  className="flex items-center gap-1 w-full justify-center text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+                >
+                  {showAllContributions ? (
+                    <>
+                      <ChevronUp className="h-3 w-3" />
+                      {t('savings.goalDetail.showLess')}
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-3 w-3" />
+                      {t('savings.goalDetail.showAll', {
+                        count: contributions.length,
+                      })}
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modals */}
       <GoalModal
@@ -401,7 +588,10 @@ export default function SavingsGoalDetail() {
         onOpenChange={(open) => !open && setDeletingContributionId(null)}
         title={t('savings.contributions.deleteConfirmTitle')}
         description={t('savings.contributions.deleteConfirmDescription')}
-        onConfirm={() => deletingContributionId && handleDeleteContribution(deletingContributionId)}
+        onConfirm={() =>
+          deletingContributionId &&
+          handleDeleteContribution(deletingContributionId)
+        }
         variant="destructive"
       />
     </AppLayout>

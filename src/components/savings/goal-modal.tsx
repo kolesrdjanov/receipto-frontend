@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
@@ -26,16 +26,8 @@ import { CurrencySelect } from '@/components/ui/currency-select'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useCreateSavingsGoal, useUpdateSavingsGoal, type SavingsGoal } from '@/hooks/savings/use-savings'
 import { useSettingsStore } from '@/store/settings'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { toast } from 'sonner'
-
-const mediaQuery = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)') : null
-function useIsMobile() {
-  return useSyncExternalStore(
-    (cb) => { mediaQuery?.addEventListener('change', cb); return () => mediaQuery?.removeEventListener('change', cb) },
-    () => mediaQuery?.matches ?? false,
-    () => false,
-  )
-}
 
 interface GoalModalProps {
   open: boolean
