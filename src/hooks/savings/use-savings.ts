@@ -146,7 +146,7 @@ export function useCreateSavingsGoal() {
     mutationFn: (data: CreateSavingsGoalData) =>
       api.post<SavingsGoal>('/savings/goals', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
     },
   })
 }
@@ -156,8 +156,9 @@ export function useUpdateSavingsGoal() {
   return useMutation({
     mutationFn: ({ id, ...data }: UpdateSavingsGoalData & { id: string }) =>
       api.patch<SavingsGoal>(`/savings/goals/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(variables.id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
     },
   })
 }
@@ -167,7 +168,7 @@ export function useDeleteSavingsGoal() {
   return useMutation({
     mutationFn: (id: string) => api.delete(`/savings/goals/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
     },
   })
 }
@@ -180,7 +181,6 @@ export function useAddContribution(goalId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(goalId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
@@ -193,7 +193,6 @@ export function useRemoveContribution(goalId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(goalId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }

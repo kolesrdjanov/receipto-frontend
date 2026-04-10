@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 import { useSettingsStore } from '@/store/settings'
@@ -62,39 +62,6 @@ export interface SavingsIntelligenceActionsResponse {
   actions: SavingsIntelligenceAction[]
 }
 
-export interface SavingsScenarioRequest {
-  reductionPercent: number
-  horizonMonths?: number
-  categoryIds?: string[]
-}
-
-export interface SavingsScenarioResponse {
-  currency: string
-  reductionPercent: number
-  horizonMonths: number
-  baselineMonthlySpent: number
-  scenarioMonthlySpent: number
-  monthlyDelta: number
-  projectedHorizonSavings: number
-  income: { amount: number; currency: string } | null
-  baselineMonthlySaved: number | null
-  scenarioMonthlySaved: number | null
-  selectedCategories: Array<{
-    id: string
-    name: string
-    monthlySpend: number
-  }>
-  goalForecasts: Array<{
-    goalId: string
-    goalName: string
-    goalCurrency: string
-    baselineMonthsToGoal: number | null
-    scenarioMonthsToGoal: number | null
-    timeSavedMonths: number | null
-    additionalContributionPerMonth: number
-  }>
-}
-
 const fetchIntelligenceOverview = (year: number, month: number): Promise<SavingsIntelligenceOverview> =>
   api.get(`/savings/intelligence/overview?year=${year}&month=${month}`)
 
@@ -117,9 +84,3 @@ export function useSavingsIntelligenceActions(year: number, month: number) {
   })
 }
 
-export function useSimulateSavingsScenario() {
-  return useMutation({
-    mutationFn: (data: SavingsScenarioRequest) =>
-      api.post<SavingsScenarioResponse>('/savings/intelligence/scenario', data),
-  })
-}
