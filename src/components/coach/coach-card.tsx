@@ -20,8 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat('sr-RS', {
+function formatAmount(amount: number, currency: string, locale: string = 'sr-RS'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -92,7 +92,8 @@ function InsightItem({ insight }: { insight: Insight }) {
 }
 
 export function CoachCard({ displayCurrency }: CoachCardProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language === 'sr' ? 'sr-RS' : 'en-US'
   const { currency: preferredCurrency } = useSettingsStore()
   const targetCurrency = displayCurrency || preferredCurrency || 'RSD'
   const { data: exchangeRates } = useExchangeRates(targetCurrency)
@@ -150,9 +151,8 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
         const rate = exchangeRates?.[currency]
         if (rate && rate !== 0) {
           total += amount / rate
-        } else {
-          total += amount
         }
+        // Skip amounts with no exchange rate — adding unconverted amounts is misleading
       }
     }
     return total
@@ -168,7 +168,9 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
   const convertedWeeklyChangePercent = lastWeekConverted > 0
     ? Math.round(((thisWeekConverted - lastWeekConverted) / lastWeekConverted) * 1000) / 10
-    : 0
+    : thisWeekConverted > 0
+      ? 100
+      : 0
 
   const topCategoryConverted = summary?.topCategory?.byCurrency
     ? convertBreakdownToTotal(summary.topCategory.byCurrency)
@@ -197,7 +199,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
         return {
           ...insight,
           message: t('coach.topCategoryMessage', {
-            amount: formatAmount(converted, targetCurrency),
+            amount: formatAmount(converted, targetCurrency, locale),
             category: details.categoryName,
           }),
         }
@@ -272,10 +274,10 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
                 )}
               </div>
               <p className="text-xl font-bold">
-                {formatAmount(thisWeekConverted, targetCurrency)}
+                {formatAmount(thisWeekConverted, targetCurrency, locale)}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                {t('coach.vsLastWeek')}: {formatAmount(lastWeekConverted, targetCurrency)}
+                {t('coach.vsLastWeek')}: {formatAmount(lastWeekConverted, targetCurrency, locale)}
               </p>
             </div>
 
@@ -284,7 +286,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
               <div className="p-3 rounded-lg bg-muted/40 space-y-1">
                 <span className="text-xs text-muted-foreground font-medium">{t('coach.topSpending')}</span>
                 <p className="text-xl font-bold">
-                  {formatAmount(topCategoryConverted ?? summary.topCategory.amount, targetCurrency)}
+                  {formatAmount(topCategoryConverted ?? summary.topCategory.amount, targetCurrency, locale)}
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
                   {summary.topCategory.icon} {summary.topCategory.name}
