@@ -1373,14 +1373,16 @@
   "savings": {
     "title": "Savings",
     "subtitle": "Set goals and track your savings progress",
-    "howItWorks": {
-      "toggleLabel": "Show savings explanation",
-      "visible": "Visible",
-      "hidden": "Hidden",
-      "title": "How savings works",
-      "line1": "Set your monthly income and track spending from receipts to see your real savings pace.",
-      "line2": "Receipto analyzes budget leakage, goal pace, and price opportunities to surface where money is being lost.",
-      "line3": "Savings Copilot then suggests top actions and runs what-if simulations so you can test impact before changing habits."
+    "health": {
+      "good": "Good financial health",
+      "fair": "Fair financial health",
+      "needsAttention": "Needs attention",
+      "savingsRate": "savings rate",
+      "savingsRateText": "{{rate}}% savings rate",
+      "savedThisMonth": "saved this month",
+      "goalsOnTrack": "{{on}} of {{total}} on track",
+      "behindPaceTip": "Needs {{amount}} {{currency}}/month to stay on track",
+      "onTrackTip": "On pace to reach the target on time"
     },
     "snapshot": {
       "title": "Monthly Overview",
@@ -1494,7 +1496,6 @@
       "autoSavingsTotal": "Auto-saved",
       "manualTotal": "Manual contributions"
     },
-    "viewReports": "View Reports",
     "reports": {
       "title": "Monthly Reports",
       "subtitle": "Review your financial performance month by month",
@@ -1513,30 +1514,6 @@
       "thisMonth": "this month",
       "aiSummary": "AI Summary",
       "aiTips": "Tips"
-    },
-    "copilot": {
-      "title": "Savings Copilot",
-      "subtitle": "AI-assisted savings plan for {{month}}",
-      "sourceAi": "AI ranked",
-      "sourceRule": "Rule based",
-      "healthScore": "Health score",
-      "projectedSavings": "Projected savings",
-      "potential": "Monthly potential",
-      "leakage": "Budget leakage",
-      "actionsTitle": "Top actions",
-      "impact": "Impact",
-      "noActions": "No high-impact actions right now. Keep tracking receipts for stronger recommendations.",
-      "scenarioTitle": "What-if simulator",
-      "reductionPercent": "Spending cut (%)",
-      "horizonMonths": "Horizon (months)",
-      "runScenario": "Run scenario",
-      "runningScenario": "Running...",
-      "scenarioError": "Scenario simulation failed. Try again.",
-      "monthlySaved": "Monthly savings gain",
-      "horizonSaved": "Horizon gain",
-      "newMonthlySpent": "New monthly spend",
-      "goalsAcceleration": "Goal acceleration",
-      "monthsFaster": "{{count}} months faster"
     }
   },
   "recurring": {

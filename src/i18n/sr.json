@@ -1360,14 +1360,16 @@
   "savings": {
     "title": "Štednja",
     "subtitle": "Postavite ciljeve i pratite napredak štednje",
-    "howItWorks": {
-      "toggleLabel": "Prikaži objašnjenje štednje",
-      "visible": "Prikazano",
-      "hidden": "Skriveno",
-      "title": "Kako štednja funkcioniše",
-      "line1": "Postavite mesečna primanja i pratite potrošnju sa računa da vidite stvarni tempo štednje.",
-      "line2": "Receipto analizira curenje budžeta, tempo ciljeva i prilike za niže cene da pokaže gde gubite novac.",
-      "line3": "Savings Copilot zatim predlaže top akcije i pokreće what-if simulacije da testirate efekat pre promene navika."
+    "health": {
+      "good": "Dobro finansijsko zdravlje",
+      "fair": "Umereno finansijsko zdravlje",
+      "needsAttention": "Potrebna pažnja",
+      "savingsRate": "stopa štednje",
+      "savingsRateText": "{{rate}}% stopa štednje",
+      "savedThisMonth": "ušteđeno ovog meseca",
+      "goalsOnTrack": "{{on}} od {{total}} na pravom putu",
+      "behindPaceTip": "Potrebno {{amount}} {{currency}}/mesečno da ostanete na pravom putu",
+      "onTrackTip": "Na tempu da dosegnete cilj na vreme"
     },
     "snapshot": {
       "title": "Mesečni pregled",
@@ -1484,7 +1486,6 @@
       "autoSavingsTotal": "Automatski ušteđeno",
       "manualTotal": "Ručne uplate"
     },
-    "viewReports": "Pogledaj izveštaje",
     "reports": {
       "title": "Mesečni izveštaji",
       "subtitle": "Pregledajte svoje finansijske rezultate mesec po mesec",
@@ -1503,30 +1504,6 @@
       "thisMonth": "ovog meseca",
       "aiSummary": "AI rezime",
       "aiTips": "Saveti"
-    },
-    "copilot": {
-      "title": "Copilot za štednju",
-      "subtitle": "AI plan štednje za {{month}}",
-      "sourceAi": "AI rangirano",
-      "sourceRule": "Pravila",
-      "healthScore": "Skor zdravlja",
-      "projectedSavings": "Projektovana štednja",
-      "potential": "Mesečni potencijal",
-      "leakage": "Curenje budžeta",
-      "actionsTitle": "Top akcije",
-      "impact": "Efekat",
-      "noActions": "Trenutno nema akcija sa velikim efektom. Nastavite sa unosom računa za bolje preporuke.",
-      "scenarioTitle": "Šta-ako simulator",
-      "reductionPercent": "Smanjenje potrošnje (%)",
-      "horizonMonths": "Horizont (meseci)",
-      "runScenario": "Pokreni simulaciju",
-      "runningScenario": "Pokrećem...",
-      "scenarioError": "Simulacija nije uspela. Pokušajte ponovo.",
-      "monthlySaved": "Dodatna mesečna štednja",
-      "horizonSaved": "Ukupno za horizont",
-      "newMonthlySpent": "Nova mesečna potrošnja",
-      "goalsAcceleration": "Ubrzanje ciljeva",
-      "monthsFaster": "{{count}} meseci brže"
     }
   },
   "recurring": {
