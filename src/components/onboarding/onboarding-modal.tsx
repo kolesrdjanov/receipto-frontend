@@ -14,8 +14,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
+  Check,
+  Globe,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSettingsStore, type Language } from '@/store/settings'
 
 interface OnboardingModalProps {
   open: boolean
@@ -24,7 +27,9 @@ interface OnboardingModalProps {
 
 export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const { t } = useTranslation()
-  const [step, setStep] = useState(1)
+  const language = useSettingsStore((s) => s.language)
+  const setLanguage = useSettingsStore((s) => s.setLanguage)
+  const [step, setStep] = useState(0)
 
   const steps = [
     {
@@ -59,16 +64,16 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     },
   ] as const
 
-  const totalSteps = steps.length
+  const totalSteps = steps.length + 1 // +1 for language step
 
   const handleNext = () => {
-    if (step < totalSteps) {
+    if (step < totalSteps - 1) {
       setStep(step + 1)
     }
   }
 
   const handlePrev = () => {
-    if (step > 1) {
+    if (step > 0) {
       setStep(step - 1)
     }
   }
@@ -76,15 +81,112 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
   const handleComplete = () => {
     localStorage.setItem('receipto-onboarding-completed', 'true')
     onOpenChange(false)
-    setStep(1)
+    setStep(0)
   }
 
   const handleSkip = () => {
     localStorage.setItem('receipto-onboarding-completed', 'true')
     onOpenChange(false)
-    setStep(1)
+    setStep(0)
   }
 
+  const handleLanguageSelect = (lang: Language) => {
+    setLanguage(lang)
+  }
+
+  // Step indicator dots (shared between all steps)
+  const stepDots = (
+    <div className="flex items-center gap-1.5 mb-6">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <div
+          key={index}
+          className={cn(
+            'h-1.5 rounded-full transition-all duration-300',
+            index === step
+              ? 'w-6 bg-primary'
+              : index < step
+                ? 'w-1.5 bg-primary/60'
+                : 'w-1.5 bg-muted'
+          )}
+        />
+      ))}
+    </div>
+  )
+
+  // Language selection step (step 0)
+  if (step === 0) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center text-center px-2 py-4">
+            {stepDots}
+
+            {/* Globe icon */}
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-primary/10">
+              <Globe className="w-8 h-8 text-primary" />
+            </div>
+
+            {/* Bilingual title — always shows both languages */}
+            <h2 className="text-xl font-semibold mb-1">Choose Your Language</h2>
+            <p className="text-sm text-muted-foreground mb-6">Izaberite jezik</p>
+
+            {/* Language cards */}
+            <div className="grid grid-cols-2 gap-3 w-full mb-6">
+              <button
+                onClick={() => handleLanguageSelect('en')}
+                className={cn(
+                  'flex flex-col items-center gap-1 rounded-xl border-2 p-4 transition-all',
+                  language === 'en'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border hover:border-primary/50'
+                )}
+              >
+                <span className="text-lg font-semibold">English</span>
+                <span className="text-xs text-muted-foreground">Engleski</span>
+                {language === 'en' && (
+                  <Check className="w-4 h-4 text-primary mt-1" />
+                )}
+              </button>
+
+              <button
+                onClick={() => handleLanguageSelect('sr')}
+                className={cn(
+                  'flex flex-col items-center gap-1 rounded-xl border-2 p-4 transition-all',
+                  language === 'sr'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border hover:border-primary/50'
+                )}
+              >
+                <span className="text-lg font-semibold">Srpski</span>
+                <span className="text-xs text-muted-foreground">Serbian</span>
+                {language === 'sr' && (
+                  <Check className="w-4 h-4 text-primary mt-1" />
+                )}
+              </button>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between w-full gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSkip}
+                className="text-muted-foreground"
+              >
+                {t('onboarding.skip')}
+              </Button>
+              <Button onClick={handleNext} className="gap-1">
+                {t('common.next')}
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Regular steps (step 1-5, index into steps array with step-1)
   const currentStep = steps[step - 1]
   const Icon = currentStep.icon
 
@@ -92,22 +194,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <div className="flex flex-col items-center text-center px-2 py-4">
-          {/* Step indicator */}
-          <div className="flex items-center gap-1.5 mb-6">
-            {steps.map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'h-1.5 rounded-full transition-all duration-300',
-                  index + 1 === step
-                    ? 'w-6 bg-primary'
-                    : index + 1 < step
-                      ? 'w-1.5 bg-primary/60'
-                      : 'w-1.5 bg-muted'
-                )}
-              />
-            ))}
-          </div>
+          {stepDots}
 
           {/* Icon */}
           <div
@@ -141,28 +228,17 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
 
           {/* Navigation */}
           <div className="flex items-center justify-between w-full gap-3">
-            {step > 1 ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePrev}
-                className="gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                {t('common.back')}
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSkip}
-                className="text-muted-foreground"
-              >
-                {t('onboarding.skip')}
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrev}
+              className="gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              {t('common.back')}
+            </Button>
 
-            {step < totalSteps ? (
+            {step < totalSteps - 1 ? (
               <Button onClick={handleNext} className="gap-1">
                 {t('common.next')}
                 <ChevronRight className="w-4 h-4" />

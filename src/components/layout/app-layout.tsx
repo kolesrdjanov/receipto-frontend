@@ -10,6 +10,7 @@ import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
 import { RateAppModal } from '@/components/rating/rate-app-modal'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -43,7 +44,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Mobile header: hamburger | centered logo | user avatar */}
         <header className="flex flex-col border-b md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
           <div className="relative flex h-14 items-center justify-between px-4">
-            <SidebarTrigger className="-ml-1" />
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <LanguageSwitcher />
+            </div>
             <Link
               to="/dashboard"
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"

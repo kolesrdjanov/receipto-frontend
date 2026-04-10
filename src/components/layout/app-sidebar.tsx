@@ -6,6 +6,7 @@ import { useLogout } from '@/hooks/auth/use-logout'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 import { Avatar } from '@/components/ui/avatar'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import {
   Sidebar,
@@ -17,10 +18,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   LayoutDashboard,
   Receipt,
@@ -41,8 +46,10 @@ import {
   Megaphone,
   Compass,
   Sparkles,
-  Crown, KeyRound, User
+  ChevronRight,
+  Crown, KeyRound, User, Globe
 } from 'lucide-react'
+import { useSettingsStore } from '@/store/settings'
 
 interface AppSidebarProps {
   onOpenSupportModal: () => void
@@ -67,7 +74,9 @@ export function AppSidebar({
   const isAdmin = useIsAdmin()
   const logout = useLogout()
   const { data: featureFlags } = useFeatureFlags()
-  const { setOpenMobile } = useSidebar()
+  const { setOpenMobile, state } = useSidebar()
+  const language = useSettingsStore((s) => s.language)
+  const setLanguage = useSettingsStore((s) => s.setLanguage)
 
   const closeMobile = () => setOpenMobile(false)
 
@@ -127,6 +136,18 @@ export function AppSidebar({
                 )}
               </Link>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem className="hidden md:flex">
+            {state === 'collapsed' ? (
+              <SidebarMenuButton tooltip={language === 'en' ? 'Prebaci na srpski' : 'Switch to English'} onClick={() => setLanguage(language === 'en' ? 'sr' : 'en')}>
+                <Globe />
+                <span>{language === 'en' ? 'English' : 'Srpski'}</span>
+              </SidebarMenuButton>
+            ) : (
+              <div className="flex items-center justify-center px-2 py-1">
+                <LanguageSwitcher />
+              </div>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -305,19 +326,65 @@ export function AppSidebar({
             </SidebarMenuItem>
 
             {isAdmin && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={path.startsWith('/admin')}
-                  tooltip={t('nav.admin')}
-                  className={path.startsWith('/admin') ? activeClass : ''}
-                >
-                  <Link to="/admin/users" onClick={closeMobile}>
-                    <SlidersHorizontal />
-                    <span>{t('nav.admin')}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <Collapsible defaultOpen={path.startsWith('/admin')} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip={t('nav.admin')}
+                      isActive={path.startsWith('/admin')}
+                      className={path.startsWith('/admin') ? activeClass : ''}
+                    >
+                      <SlidersHorizontal />
+                      <span>{t('nav.admin')}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={path === '/admin/users' || path.startsWith('/admin/users/')}
+                        >
+                          <Link to="/admin/users" onClick={closeMobile}>
+                            <span>{t('nav.users')}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={path === '/admin/settings'}
+                        >
+                          <Link to="/admin/settings" onClick={closeMobile}>
+                            <span>{t('nav.appSettings')}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={path === '/admin/ratings'}
+                        >
+                          <Link to="/admin/ratings" onClick={closeMobile}>
+                            <span>{t('nav.ratings')}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={path === '/admin/announcements'}
+                        >
+                          <Link to="/admin/announcements" onClick={closeMobile}>
+                            <span>{t('nav.announcements')}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             )}
           </SidebarMenu>
         </SidebarGroup>

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Heart, QrCode, PieChart, Shield } from 'lucide-react'
 import { Logo } from '@/components/ui/logo'
 import { PageTransition } from '@/components/ui/animated'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -19,15 +20,17 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row">
       {/* Mobile branded header */}
-      <div className="lg:hidden border-b px-6 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="lg:hidden border-b px-6 py-4 pt-[max(1rem,env(safe-area-inset-top))] flex items-center justify-between">
         <Logo size="sm" />
+        <LanguageSwitcher syncBackend={false} />
       </div>
 
       {/* Form side */}
       <div className="flex-1 flex flex-col min-h-0">
         {/* Desktop logo */}
-        <header className="hidden lg:block p-8">
+        <header className="hidden lg:flex items-center justify-between p-8">
           <Logo size="md" />
+          <LanguageSwitcher syncBackend={false} />
         </header>
 
         {/* Centered form content */}
