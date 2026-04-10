@@ -100,15 +100,20 @@ export function HealthCard() {
   if (!overview?.monthlyIncome && !intelligence?.income) {
     return (
       <div className="rounded-xl border border-white/5 bg-gradient-to-br from-blue-950 to-indigo-950 p-6 text-center space-y-3">
+        <Settings className="h-8 w-8 mx-auto text-blue-300/50" />
         <p className="text-sm text-blue-200/70">
-          {t('savings.snapshot.noIncome', 'Set your monthly income in Settings to see your savings rate.')}
+          {t('savings.snapshot.noIncome', 'Set your monthly income in Settings to see your savings rate and health score.')}
         </p>
-        <Link to="/settings">
-          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+        <Button
+          asChild
+          size="sm"
+          className="bg-white/10 text-white hover:bg-white/20 border-0"
+        >
+          <Link to="/settings">
             <Settings className="h-4 w-4" />
             {t('savings.snapshot.goToSettings', 'Go to Settings')}
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     )
   }
