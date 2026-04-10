@@ -109,7 +109,7 @@ export function HealthCard() {
           size="sm"
           className="bg-white/10 text-white hover:bg-white/20 border-0"
         >
-          <Link to="/settings">
+          <Link to="/settings/profile">
             <Settings className="h-4 w-4" />
             {t('savings.snapshot.goToSettings', 'Go to Settings')}
           </Link>
