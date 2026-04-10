@@ -31,7 +31,6 @@ const VerifyEmail = lazy(() => import('./pages/auth/verify-email'))
 const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const SavingsGoalDetail = lazy(() => import('./pages/savings/goals/[id]'))
-const SavingsReports = lazy(() => import('./pages/savings/reports'))
 const JoinGroup = lazy(() => import('./pages/groups/join'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
@@ -172,16 +171,6 @@ export const routes: RouteObject[] = [
       <ProtectedRoute>
         <FeatureRoute feature="savings">
           <Savings />
-        </FeatureRoute>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/savings/reports',
-    element: (
-      <ProtectedRoute>
-        <FeatureRoute feature="savings">
-          <SavingsReports />
         </FeatureRoute>
       </ProtectedRoute>
     ),

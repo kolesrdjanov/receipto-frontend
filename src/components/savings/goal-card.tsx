@@ -1,110 +1,147 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Calendar, Check, Sparkles, Target } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Calendar, Check, Lightbulb } from 'lucide-react'
+import { cn, formatAmount } from '@/lib/utils'
 import type { SavingsGoal } from '@/hooks/savings/use-savings'
 
+interface IntelligenceTip {
+  icon: string
+  text: string
+}
+
 interface GoalCardProps {
-  goal: SavingsGoal & { potentialSavings?: number | null; categoryBudget?: number | null }
+  goal: SavingsGoal & {
+    progressPercent?: number
+    potentialSavings?: number | null
+    categoryBudget?: number | null
+  }
+  intelligenceTip?: IntelligenceTip | null
+  isOnTrack?: boolean | null
 }
 
-const priorityColors: Record<string, string> = {
-  high: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-  medium: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-  low: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-}
-
-export function GoalCard({ goal }: GoalCardProps) {
+export function GoalCard({ goal, intelligenceTip, isOnTrack }: GoalCardProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const progress = goal.targetAmount > 0
-    ? Math.min(100, Math.round((Number(goal.currentAmount) / Number(goal.targetAmount)) * 100))
-    : 0
+  const progress =
+    goal.progressPercent ??
+    (goal.targetAmount > 0
+      ? Math.min(100, Math.round((Number(goal.currentAmount) / Number(goal.targetAmount)) * 100))
+      : 0)
 
   const deadlineDate = goal.deadline ? new Date(goal.deadline) : null
-  const daysLeft = deadlineDate
-    ? Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    : null
+  const goalColor = goal.color || '#3b82f6'
+
+  // Determine status: completed, on track, or behind
+  const statusOnTrack = isOnTrack ?? true
+  const statusLabel = goal.isCompleted
+    ? t('savings.goals.completed', 'Completed')
+    : statusOnTrack
+      ? t('savings.insights.onTrack', 'On track')
+      : t('savings.insights.behind', 'Behind')
+  const statusColorClass = goal.isCompleted
+    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+    : statusOnTrack
+      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+      : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+
+  // Progress bar color
+  const barColor = goal.isCompleted
+    ? 'bg-emerald-500'
+    : statusOnTrack
+      ? 'bg-emerald-500'
+      : 'bg-amber-500'
 
   return (
     <Card
-      className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
+      className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30 overflow-hidden"
       onClick={() => navigate(`/savings/goals/${goal.id}`)}
     >
       <CardContent className="p-4 space-y-3">
-        {/* Header */}
+        {/* Header: icon + name + status badge */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {goal.icon && (
-              <span className="text-xl shrink-0">{goal.icon}</span>
-            )}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Icon with color-tinted background */}
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg"
+              style={{
+                backgroundColor: `${goalColor}20`,
+                color: goalColor,
+              }}
+            >
+              {goal.icon || '🎯'}
+            </div>
             <div className="min-w-0">
               <h3 className="font-medium text-sm truncate">{goal.name}</h3>
-              {goal.category && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {goal.category.icon && <span className="mr-1">{goal.category.icon}</span>}
-                  {goal.category.name}
-                </p>
-              )}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {goal.category && (
+                  <span className="truncate">
+                    {goal.category.icon && <span className="mr-0.5">{goal.category.icon}</span>}
+                    {goal.category.name}
+                  </span>
+                )}
+                {goal.category && deadlineDate && (
+                  <span className="text-muted-foreground/50">·</span>
+                )}
+                {deadlineDate && (
+                  <span className="flex items-center gap-0.5 shrink-0">
+                    <Calendar className="h-3 w-3" />
+                    {deadlineDate.toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Status badge */}
           <div className="flex items-center gap-1.5 shrink-0">
             {goal.isCompleted && (
-              <div className="rounded-full bg-green-500/10 p-1">
-                <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+              <div className="rounded-full bg-emerald-500/15 p-1">
+                <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
               </div>
             )}
-            <span className={cn(
-              'text-[10px] font-medium px-1.5 py-0.5 rounded border',
-              priorityColors[goal.priority] || priorityColors.medium
-            )}>
-              {t(`savings.priority.${goal.priority}`)}
+            <span
+              className={cn(
+                'text-[10px] font-medium px-2 py-0.5 rounded-full',
+                statusColorClass
+              )}
+            >
+              {statusLabel}
             </span>
           </div>
         </div>
 
-        {/* Progress */}
+        {/* Amount + progress */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{progress}%</span>
+          <div className="flex items-baseline justify-between text-xs">
             <span className="font-medium">
-              {Number(goal.currentAmount).toLocaleString()} / {Number(goal.targetAmount).toLocaleString()} {goal.currency}
+              {formatAmount(Math.round(Number(goal.currentAmount)))} / {formatAmount(Math.round(Number(goal.targetAmount)))} {goal.currency}
             </span>
+            <span className="text-muted-foreground">{progress}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
-          {goal.potentialSavings != null && goal.potentialSavings > 0 && (
-            <p className="text-[10px] text-green-600 dark:text-green-400 flex items-center gap-0.5">
-              <Sparkles className="h-2.5 w-2.5" />
-              ~{Math.round(goal.potentialSavings).toLocaleString()} {goal.currency} {t('savings.insights.potentialSavings').toLowerCase()}
-            </p>
-          )}
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/10">
+            <div
+              className={cn('h-full rounded-full transition-all duration-500', barColor)}
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          {deadlineDate && (
-            <span className={cn(
-              'flex items-center gap-1',
-              daysLeft !== null && daysLeft < 0 && 'text-red-500',
-              daysLeft !== null && daysLeft <= 30 && daysLeft >= 0 && 'text-amber-500',
-            )}>
-              <Calendar className="h-3 w-3" />
-              {daysLeft !== null && daysLeft < 0
-                ? t('savings.goal.overdue')
-                : deadlineDate.toLocaleDateString()
-              }
-            </span>
-          )}
-          {!deadlineDate && (
-            <span className="flex items-center gap-1">
-              <Target className="h-3 w-3" />
-              {t('savings.goal.noDeadline')}
-            </span>
-          )}
-        </div>
+        {/* Inline intelligence tip */}
+        {intelligenceTip && (
+          <div
+            className={cn(
+              'flex items-start gap-2 rounded-lg px-3 py-2 text-xs',
+              statusOnTrack
+                ? 'bg-emerald-500/5 border border-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                : 'bg-amber-500/5 border border-amber-500/15 text-amber-700 dark:text-amber-400'
+            )}
+          >
+            <Lightbulb className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <span className="line-clamp-2">{intelligenceTip.text}</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

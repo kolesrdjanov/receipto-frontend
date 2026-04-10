@@ -1,12 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  ArrowLeft,
   FileText,
   TrendingUp,
   TrendingDown,
@@ -17,22 +14,15 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { useReportList, useReport, useGenerateReportNow } from '@/hooks/savings/use-reports'
-import { SavingsCopilot } from '@/components/savings/savings-copilot'
+import { formatAmount } from '@/lib/utils'
 
-const MONTH_NAMES_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const MONTH_NAMES_SR = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar']
-
-function formatAmount(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.round(amount))
+function getMonthName(month: number, language: string): string {
+  const date = new Date(2000, month - 1, 1)
+  return date.toLocaleString(language === 'sr' ? 'sr-Latn' : 'en-US', { month: 'long' })
 }
 
-export default function Reports() {
+export function ReportsTab() {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
-  const monthNames = i18n.language === 'sr' ? MONTH_NAMES_SR : MONTH_NAMES_EN
   const now = new Date()
 
   const { data: reportList, isLoading: listLoading } = useReportList()
@@ -44,66 +34,79 @@ export default function Reports() {
   // Auto-select first available report
   const effectiveYear = selectedYear ?? reportList?.[0]?.year ?? null
   const effectiveMonth = selectedMonth ?? reportList?.[0]?.month ?? null
-  const copilotYear = effectiveYear ?? now.getFullYear()
-  const copilotMonth = effectiveMonth ?? now.getMonth() + 1
 
   const { data: report, isLoading: reportLoading } = useReport(effectiveYear, effectiveMonth)
 
   const data = report?.data
 
   const handleGenerateNow = () => {
+    const y = effectiveYear ?? now.getFullYear()
+    const m = effectiveMonth ?? now.getMonth() + 1
     generateReport.mutate(
-      { year: copilotYear, month: copilotMonth },
+      { year: y, month: m },
       {
         onSuccess: () => {
-          setSelectedYear(copilotYear)
-          setSelectedMonth(copilotMonth)
-          toast.success(t('savings.reports.generated'))
+          setSelectedYear(y)
+          setSelectedMonth(m)
+          toast.success(t('savings.reports.generated', 'Report generated'))
         },
         onError: () => {
-          toast.error(t('common.error'))
+          toast.error(t('common.error', 'Something went wrong'))
         },
       },
     )
   }
 
-  return (
-    <AppLayout>
-      <div className="mb-6 sm:mb-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-2 -ml-2"
-          onClick={() => navigate('/savings')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          {t('savings.title')}
-        </Button>
-        <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2 flex items-center gap-2">
-          <FileText className="h-6 w-6 sm:h-8 sm:w-8" />
-          {t('savings.reports.title')}
-        </h2>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          {t('savings.reports.subtitle')}
+  if (listLoading || reportLoading) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        {t('common.loading', 'Loading...')}
+      </div>
+    )
+  }
+
+  if (!reportList?.length && !effectiveYear) {
+    return (
+      <div className="text-center py-16 space-y-3">
+        <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
+        <p className="text-muted-foreground">
+          {t('savings.reports.empty', 'Reports are generated on the 1st of each month. Check back soon!')}
         </p>
-        <div className="mt-3">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleGenerateNow}
-            disabled={generateReport.isPending}
-          >
-            <RefreshCw className={`h-4 w-4 ${generateReport.isPending ? 'animate-spin' : ''}`} />
-            {generateReport.isPending
-              ? t('savings.reports.generating')
-              : t('savings.reports.generateNow')}
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleGenerateNow}
+          disabled={generateReport.isPending}
+        >
+          <RefreshCw className={`h-4 w-4 ${generateReport.isPending ? 'animate-spin' : ''}`} />
+          {generateReport.isPending
+            ? t('savings.reports.generating', 'Generating...')
+            : t('savings.reports.generateNow', 'Generate now')}
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Generate button */}
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleGenerateNow}
+          disabled={generateReport.isPending}
+        >
+          <RefreshCw className={`h-4 w-4 ${generateReport.isPending ? 'animate-spin' : ''}`} />
+          {generateReport.isPending
+            ? t('savings.reports.generating', 'Generating...')
+            : t('savings.reports.generateNow', 'Generate now')}
+        </Button>
       </div>
 
       {/* Month selector */}
       {reportList && reportList.length > 0 && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2">
           {reportList.map((item) => {
             const isSelected = item.year === effectiveYear && item.month === effectiveMonth
             return (
@@ -118,59 +121,65 @@ export default function Reports() {
                 }}
               >
                 <Calendar className="h-3.5 w-3.5 mr-1.5" />
-                {monthNames[item.month - 1]} {item.year}
+                {getMonthName(item.month, i18n.language)} {item.year}
               </Button>
             )
           })}
         </div>
       )}
 
-      {listLoading || reportLoading ? (
-        <div className="text-center py-12 text-muted-foreground">{t('common.loading')}</div>
-      ) : !reportList?.length && !effectiveYear ? (
-        <div className="space-y-4">
-          <div className="text-center py-16 space-y-3">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-            <p className="text-muted-foreground">{t('savings.reports.empty')}</p>
-          </div>
-          <SavingsCopilot year={copilotYear} month={copilotMonth} />
-        </div>
-      ) : data ? (
-        <div className="space-y-4">
-          <SavingsCopilot year={copilotYear} month={copilotMonth} />
-
+      {data && (
+        <>
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground uppercase mb-1">{t('savings.reports.income')}</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">
+                  {t('savings.reports.income', 'Income')}
+                </p>
                 <p className="text-lg font-bold">
-                  {data.income ? `${formatAmount(data.income.amount)} ${data.income.currency}` : t('savings.reports.noIncome')}
+                  {data.income
+                    ? `${formatAmount(Math.round(data.income.amount))} ${data.income.currency}`
+                    : t('savings.reports.noIncome', 'Not set')}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground uppercase mb-1">{t('savings.reports.spent')}</p>
+                <p className="text-xs text-muted-foreground uppercase mb-1">
+                  {t('savings.reports.spent', 'Spent')}
+                </p>
                 <p className="text-lg font-bold">
                   {data.totalSpent.length > 0
-                    ? data.totalSpent.map((s) => `${formatAmount(s.amount)} ${s.currency}`).join(' + ')
+                    ? data.totalSpent
+                        .map((s) => `${formatAmount(Math.round(s.amount))} ${s.currency}`)
+                        .join(' + ')
                     : '0'}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground uppercase mb-1">{t('savings.reports.saved')}</p>
-                <p className={`text-lg font-bold ${(data.savedAmount ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {data.savedAmount !== null ? `${formatAmount(data.savedAmount)} ${data.income?.currency || ''}` : '-'}
+                <p className="text-xs text-muted-foreground uppercase mb-1">
+                  {t('savings.reports.saved', 'Saved')}
+                </p>
+                <p
+                  className={`text-lg font-bold ${(data.savedAmount ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
+                  {data.savedAmount !== null
+                    ? `${formatAmount(Math.round(data.savedAmount))} ${data.income?.currency || ''}`
+                    : '-'}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground uppercase mb-1">{t('savings.reports.rate')}</p>
-                <p className={`text-lg font-bold ${(data.savingsRate ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <p className="text-xs text-muted-foreground uppercase mb-1">
+                  {t('savings.reports.rate', 'Savings Rate')}
+                </p>
+                <p
+                  className={`text-lg font-bold ${(data.savingsRate ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {data.savingsRate !== null ? `${data.savingsRate}%` : '-'}
                 </p>
               </CardContent>
@@ -178,29 +187,33 @@ export default function Reports() {
           </div>
 
           {/* Comparison chip */}
-          {data.comparison?.spendingChange !== null && data.comparison?.spendingChange !== undefined && (
-            <div className="flex justify-center">
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
-                data.comparison.spendingChange > 0
-                  ? 'bg-red-500/10 text-red-500'
-                  : 'bg-green-500/10 text-green-500'
-              }`}>
-                {data.comparison.spendingChange > 0 ? (
-                  <TrendingUp className="h-3.5 w-3.5" />
-                ) : (
-                  <TrendingDown className="h-3.5 w-3.5" />
-                )}
-                {data.comparison.spendingChange > 0 ? '+' : ''}{data.comparison.spendingChange}% {t('savings.reports.vsLastMonth')}
+          {data.comparison?.spendingChange !== null &&
+            data.comparison?.spendingChange !== undefined && (
+              <div className="flex justify-center">
+                <div
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
+                    data.comparison.spendingChange > 0
+                      ? 'bg-red-500/10 text-red-500'
+                      : 'bg-green-500/10 text-green-500'
+                  }`}
+                >
+                  {data.comparison.spendingChange > 0 ? (
+                    <TrendingUp className="h-3.5 w-3.5" />
+                  ) : (
+                    <TrendingDown className="h-3.5 w-3.5" />
+                  )}
+                  {data.comparison.spendingChange > 0 ? '+' : ''}
+                  {data.comparison.spendingChange}% {t('savings.reports.vsLastMonth', 'vs last month')}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Top categories */}
           {data.topCategories.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground uppercase">
-                  {t('savings.reports.topCategories')}
+                  {t('savings.reports.topCategories', 'Top Categories')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -210,7 +223,7 @@ export default function Reports() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-medium truncate">{cat.name}</span>
                         <span className="text-sm text-muted-foreground ml-2">
-                          {formatAmount(cat.amount)} {cat.currency}
+                          {formatAmount(Math.round(cat.amount))} {cat.currency}
                         </span>
                       </div>
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -220,7 +233,9 @@ export default function Reports() {
                         />
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground w-8 text-right">{cat.percentage}%</span>
+                    <span className="text-xs text-muted-foreground w-8 text-right">
+                      {cat.percentage}%
+                    </span>
                   </div>
                 ))}
               </CardContent>
@@ -233,7 +248,7 @@ export default function Reports() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground uppercase flex items-center gap-1.5">
                   <Target className="h-4 w-4" />
-                  {t('savings.reports.goalsProgress')}
+                  {t('savings.reports.goalsProgress', 'Savings Goals')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -242,20 +257,26 @@ export default function Reports() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium">{goal.name}</span>
                       <span className="text-xs text-muted-foreground">
-                        {formatAmount(goal.currentAmount)}/{formatAmount(goal.targetAmount)} {goal.currency}
+                        {formatAmount(Math.round(goal.currentAmount))}/
+                        {formatAmount(Math.round(goal.targetAmount))} {goal.currency}
                       </span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
-                          goal.isCompleted ? 'bg-green-500' : goal.progressPercent >= 75 ? 'bg-blue-500' : 'bg-muted-foreground'
+                          goal.isCompleted
+                            ? 'bg-green-500'
+                            : goal.progressPercent >= 75
+                              ? 'bg-blue-500'
+                              : 'bg-muted-foreground'
                         }`}
                         style={{ width: `${Math.min(goal.progressPercent, 100)}%` }}
                       />
                     </div>
                     {goal.contributionsThisMonth > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        +{formatAmount(goal.contributionsThisMonth)} {goal.currency} {t('savings.reports.thisMonth')}
+                        +{formatAmount(Math.round(goal.contributionsThisMonth))} {goal.currency}{' '}
+                        {t('savings.reports.thisMonth', 'this month')}
                       </p>
                     )}
                   </div>
@@ -270,7 +291,7 @@ export default function Reports() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-1.5">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  {t('savings.reports.aiSummary')}
+                  {t('savings.reports.aiSummary', 'AI Summary')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -285,14 +306,17 @@ export default function Reports() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-1.5">
                   <Lightbulb className="h-4 w-4 text-yellow-500" />
-                  {t('savings.reports.aiTips')}
+                  {t('savings.reports.aiTips', 'Tips')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {report.aiTips.map((tip, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span className="text-primary mb-1">•</span>
+                    <li
+                      key={i}
+                      className="text-sm text-muted-foreground flex items-center gap-2"
+                    >
+                      <span className="text-primary mb-1">·</span>
                       {tip}
                     </li>
                   ))}
@@ -300,8 +324,8 @@ export default function Reports() {
               </CardContent>
             </Card>
           )}
-        </div>
-      ) : null}
-    </AppLayout>
+        </>
+      )}
+    </div>
   )
 }
