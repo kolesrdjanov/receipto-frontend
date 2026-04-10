@@ -9,70 +9,65 @@ import {
   Target,
   Sparkles,
   Lightbulb,
-  Calendar,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
-import { useReportList, useReport } from '@/hooks/savings/use-reports'
+import { useReport } from '@/hooks/savings/use-reports'
 import { formatAmount } from '@/lib/utils'
-
-function getMonthName(month: number, language: string): string {
-  const date = new Date(2000, month - 1, 1)
-  return date.toLocaleString(language === 'sr' ? 'sr-Latn' : 'en-US', { month: 'long' })
-}
 
 export function ReportsTab() {
   const { t, i18n } = useTranslation()
   const now = new Date()
 
-  const { isLoading: listLoading } = useReportList()
-
-  // Build last 12 months as selectable options
-  const availableMonths = (() => {
-    const months: { year: number; month: number }[] = []
-    const current = new Date(now.getFullYear(), now.getMonth(), 1)
-    for (let i = 0; i < 12; i++) {
-      months.push({ year: current.getFullYear(), month: current.getMonth() + 1 })
-      current.setMonth(current.getMonth() - 1)
-    }
-    return months
-  })()
-
-  const [selectedYear, setSelectedYear] = useState(availableMonths[0].year)
-  const [selectedMonth, setSelectedMonth] = useState(availableMonths[0].month)
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
 
   const { data: report, isLoading: reportLoading } = useReport(selectedYear, selectedMonth)
 
   const data = report?.data
 
-  if (listLoading) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        {t('common.loading', 'Loading...')}
-      </div>
-    )
+  const monthName = new Date(selectedYear, selectedMonth - 1, 1)
+    .toLocaleString(i18n.language === 'sr' ? 'sr-Latn' : 'en-US', { month: 'long', year: 'numeric' })
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12)
+      setSelectedYear(selectedYear - 1)
+    } else {
+      setSelectedMonth(selectedMonth - 1)
+    }
   }
+
+  const handleNextMonth = () => {
+    const isCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth() + 1
+    if (isCurrentMonth) return
+    if (selectedMonth === 12) {
+      setSelectedMonth(1)
+      setSelectedYear(selectedYear + 1)
+    } else {
+      setSelectedMonth(selectedMonth + 1)
+    }
+  }
+
+  const isCurrentMonth = selectedYear === now.getFullYear() && selectedMonth === now.getMonth() + 1
 
   return (
     <div className="space-y-4">
-      {/* Month selector */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {availableMonths.map((item) => {
-          const isSelected = item.year === selectedYear && item.month === selectedMonth
-          return (
-            <Button
-              key={`${item.year}-${item.month}`}
-              variant={isSelected ? 'default' : 'outline'}
-              size="sm"
-              className="whitespace-nowrap"
-              onClick={() => {
-                setSelectedYear(item.year)
-                setSelectedMonth(item.month)
-              }}
-            >
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />
-              {getMonthName(item.month, i18n.language)} {item.year}
-            </Button>
-          )
-        })}
+      {/* Month selector — chevron nav matching dashboard pattern */}
+      <div className="flex items-center justify-center gap-1 p-1 rounded-lg bg-muted/50">
+        <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8 hover:bg-background">
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm font-medium min-w-[140px] text-center capitalize">{monthName}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleNextMonth}
+          className="h-8 w-8 hover:bg-background"
+          disabled={isCurrentMonth}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Loading state for selected report */}
