@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Bot,
+  RefreshCw,
 } from 'lucide-react'
 import { useCoach, type Insight } from '@/hooks/coach/use-coach'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
@@ -95,7 +96,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
   const { currency: preferredCurrency } = useSettingsStore()
   const targetCurrency = displayCurrency || preferredCurrency || 'RSD'
   const { data: exchangeRates } = useExchangeRates(targetCurrency)
-  const { data, isLoading, error } = useCoach()
+  const { data, isLoading, error, refetch } = useCoach()
 
   if (isLoading) {
     return (
@@ -116,7 +117,26 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
   }
 
   if (error || !data) {
-    return null
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="p-2 rounded-full bg-muted mb-3">
+            <Bot className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium">{t('coach.errorTitle')}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('coach.errorDescription')}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => refetch()}
+          >
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            {t('coach.retry')}
+          </Button>
+        </CardContent>
+      </Card>
+    )
   }
 
   const { greeting, insights, summary, tip } = data

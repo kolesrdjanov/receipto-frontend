@@ -1015,6 +1015,8 @@
       "subtitle": "View and manage all registered users",
       "createUser": "Create User",
       "totalUsers": "Total Users: {{count}}",
+      "activeUsers": "Active: {{count}}",
+      "statsDescription": "Total Users includes all accounts ever created. Active reflects users who have verified their email and logged in within the last 90 days.",
       "noUsers": "No users found",
       "loadError": "Error loading users: {{message}}",
       "searchPlaceholder": "Search users by name or email...",
@@ -1273,7 +1275,10 @@
     "noInsights": "No new insights right now. Keep tracking your expenses!",
     "topCategoryMessage": "You spent {{amount}} on {{category}} this week.",
     "spendingUpMessage": "Your spending is up {{percent}}% compared to last week.",
-    "spendingDownMessage": "Your spending is down {{percent}}% compared to last week."
+    "spendingDownMessage": "Your spending is down {{percent}}% compared to last week.",
+    "errorTitle": "Couldn't load insights",
+    "errorDescription": "Something went wrong loading your financial insights.",
+    "retry": "Try again"
   },
   "items": {
     "title": "Price Tracker",

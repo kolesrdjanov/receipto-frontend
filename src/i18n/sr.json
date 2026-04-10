@@ -1002,6 +1002,8 @@
       "subtitle": "Pregled i upravljanje svim registrovanim korisnicima",
       "createUser": "Kreiraj korisnika",
       "totalUsers": "Ukupno korisnika: {{count}}",
+      "activeUsers": "Aktivnih: {{count}}",
+      "statsDescription": "Ukupno korisnika uključuje sve ikada kreirane naloge. Aktivni prikazuje korisnike koji su verifikovali email i prijavili se u poslednjih 90 dana.",
       "noUsers": "Nema korisnika",
       "loadError": "Greška pri učitavanju korisnika: {{message}}",
       "searchPlaceholder": "Pretraži korisnike po imenu ili email-u...",
@@ -1260,7 +1262,10 @@
     "noInsights": "Nema novih uvida. Nastavi sa praćenjem troškova!",
     "topCategoryMessage": "Potrošio/la si {{amount}} na {{category}} ove nedelje.",
     "spendingUpMessage": "Tvoja potrošnja je porasla {{percent}}% u odnosu na prošlu nedelju.",
-    "spendingDownMessage": "Tvoja potrošnja je pala {{percent}}% u odnosu na prošlu nedelju."
+    "spendingDownMessage": "Tvoja potrošnja je pala {{percent}}% u odnosu na prošlu nedelju.",
+    "errorTitle": "Nije moguće učitati uvide",
+    "errorDescription": "Došlo je do greške prilikom učitavanja finansijskih uvida.",
+    "retry": "Pokušaj ponovo"
   },
   "items": {
     "title": "Praćenje cena",
