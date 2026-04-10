@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,9 +10,8 @@ import {
   Sparkles,
   Lightbulb,
   Calendar,
-  RefreshCw,
 } from 'lucide-react'
-import { useReportList, useReport, useGenerateReportNow } from '@/hooks/savings/use-reports'
+import { useReportList, useReport } from '@/hooks/savings/use-reports'
 import { formatAmount } from '@/lib/utils'
 
 function getMonthName(month: number, language: string): string {
@@ -25,39 +23,27 @@ export function ReportsTab() {
   const { t, i18n } = useTranslation()
   const now = new Date()
 
-  const { data: reportList, isLoading: listLoading } = useReportList()
-  const generateReport = useGenerateReportNow()
+  const { isLoading: listLoading } = useReportList()
 
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
+  // Build last 12 months as selectable options
+  const availableMonths = (() => {
+    const months: { year: number; month: number }[] = []
+    const current = new Date(now.getFullYear(), now.getMonth(), 1)
+    for (let i = 0; i < 12; i++) {
+      months.push({ year: current.getFullYear(), month: current.getMonth() + 1 })
+      current.setMonth(current.getMonth() - 1)
+    }
+    return months
+  })()
 
-  // Auto-select first available report
-  const effectiveYear = selectedYear ?? reportList?.[0]?.year ?? null
-  const effectiveMonth = selectedMonth ?? reportList?.[0]?.month ?? null
+  const [selectedYear, setSelectedYear] = useState(availableMonths[0].year)
+  const [selectedMonth, setSelectedMonth] = useState(availableMonths[0].month)
 
-  const { data: report, isLoading: reportLoading } = useReport(effectiveYear, effectiveMonth)
+  const { data: report, isLoading: reportLoading } = useReport(selectedYear, selectedMonth)
 
   const data = report?.data
 
-  const handleGenerateNow = () => {
-    const y = effectiveYear ?? now.getFullYear()
-    const m = effectiveMonth ?? now.getMonth() + 1
-    generateReport.mutate(
-      { year: y, month: m },
-      {
-        onSuccess: () => {
-          setSelectedYear(y)
-          setSelectedMonth(m)
-          toast.success(t('savings.reports.generated', 'Report generated'))
-        },
-        onError: () => {
-          toast.error(t('common.error', 'Something went wrong'))
-        },
-      },
-    )
-  }
-
-  if (listLoading || reportLoading) {
+  if (listLoading) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         {t('common.loading', 'Loading...')}
@@ -65,66 +51,47 @@ export function ReportsTab() {
     )
   }
 
-  if (!reportList?.length && !effectiveYear) {
-    return (
-      <div className="text-center py-16 space-y-3">
-        <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-        <p className="text-muted-foreground">
-          {t('savings.reports.empty', 'Reports are generated on the 1st of each month. Check back soon!')}
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleGenerateNow}
-          disabled={generateReport.isPending}
-        >
-          <RefreshCw className={`h-4 w-4 ${generateReport.isPending ? 'animate-spin' : ''}`} />
-          {generateReport.isPending
-            ? t('savings.reports.generating', 'Generating...')
-            : t('savings.reports.generateNow', 'Generate now')}
-        </Button>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
-      {/* Generate button */}
-      <div className="flex justify-end">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleGenerateNow}
-          disabled={generateReport.isPending}
-        >
-          <RefreshCw className={`h-4 w-4 ${generateReport.isPending ? 'animate-spin' : ''}`} />
-          {generateReport.isPending
-            ? t('savings.reports.generating', 'Generating...')
-            : t('savings.reports.generateNow', 'Generate now')}
-        </Button>
+      {/* Month selector */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {availableMonths.map((item) => {
+          const isSelected = item.year === selectedYear && item.month === selectedMonth
+          return (
+            <Button
+              key={`${item.year}-${item.month}`}
+              variant={isSelected ? 'default' : 'outline'}
+              size="sm"
+              className="whitespace-nowrap"
+              onClick={() => {
+                setSelectedYear(item.year)
+                setSelectedMonth(item.month)
+              }}
+            >
+              <Calendar className="h-3.5 w-3.5 mr-1.5" />
+              {getMonthName(item.month, i18n.language)} {item.year}
+            </Button>
+          )
+        })}
       </div>
 
-      {/* Month selector */}
-      {reportList && reportList.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {reportList.map((item) => {
-            const isSelected = item.year === effectiveYear && item.month === effectiveMonth
-            return (
-              <Button
-                key={`${item.year}-${item.month}`}
-                variant={isSelected ? 'default' : 'outline'}
-                size="sm"
-                className="whitespace-nowrap"
-                onClick={() => {
-                  setSelectedYear(item.year)
-                  setSelectedMonth(item.month)
-                }}
-              >
-                <Calendar className="h-3.5 w-3.5 mr-1.5" />
-                {getMonthName(item.month, i18n.language)} {item.year}
-              </Button>
-            )
-          })}
+      {/* Loading state for selected report */}
+      {reportLoading && (
+        <div className="text-center py-12 text-muted-foreground">
+          {t('savings.reports.generating', 'Generating...')}
+        </div>
+      )}
+
+      {/* No report for this month yet */}
+      {!reportLoading && !data && (
+        <div className="text-center py-12 space-y-3">
+          <FileText className="h-10 w-10 mx-auto text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            {t('savings.reports.noReport', 'No report for this month yet')}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t('savings.reports.autoGenerate', 'Reports are generated automatically when you select a month. Try refreshing.')}
+          </p>
         </div>
       )}
 
