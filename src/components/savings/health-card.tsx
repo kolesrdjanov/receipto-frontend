@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatAmount } from '@/lib/utils'
 import { useSavingsIntelligenceOverview } from '@/hooks/savings/use-savings-intelligence'
 import { useSavingsOverview } from '@/hooks/savings/use-savings'
+import { useMe } from '@/hooks/users/use-me'
 
 function HealthScoreRing({ score, size = 96 }: { score: number; size?: number }) {
   const strokeWidth = 6
@@ -85,19 +86,20 @@ export function HealthCard() {
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
+  const { data: me, isLoading: meLoading } = useMe()
   const { data: intelligence, isLoading: intelligenceLoading } =
     useSavingsIntelligenceOverview(year, month)
   const { data: overview, isLoading: overviewLoading } =
     useSavingsOverview(year, month)
 
-  const isLoading = intelligenceLoading || overviewLoading
+  const isLoading = intelligenceLoading || overviewLoading || meLoading
 
   if (isLoading) {
     return <HealthCardSkeleton />
   }
 
   // No income set — prompt to set it
-  if (!overview?.monthlyIncome && !intelligence?.income) {
+  if (!me?.monthlyIncome) {
     return (
       <div className="rounded-xl border border-white/5 bg-gradient-to-br from-blue-950 to-indigo-950 p-6 text-center space-y-3">
         <Settings className="h-8 w-8 mx-auto text-blue-300/50" />

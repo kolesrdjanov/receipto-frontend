@@ -146,7 +146,7 @@ export function useCreateSavingsGoal() {
     mutationFn: (data: CreateSavingsGoalData) =>
       api.post<SavingsGoal>('/savings/goals', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
@@ -156,9 +156,8 @@ export function useUpdateSavingsGoal() {
   return useMutation({
     mutationFn: ({ id, ...data }: UpdateSavingsGoalData & { id: string }) =>
       api.patch<SavingsGoal>(`/savings/goals/${id}`, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(variables.id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
@@ -168,7 +167,7 @@ export function useDeleteSavingsGoal() {
   return useMutation({
     mutationFn: (id: string) => api.delete(`/savings/goals/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
@@ -179,8 +178,7 @@ export function useAddContribution(goalId: string) {
     mutationFn: (data: CreateContributionData) =>
       api.post<SavingsContribution>(`/savings/goals/${goalId}/contributions`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(goalId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
@@ -191,8 +189,7 @@ export function useRemoveContribution(goalId: string) {
     mutationFn: (contributionId: string) =>
       api.delete(`/savings/goals/${goalId}/contributions/${contributionId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goalDetail(goalId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.savings.goals() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.savings.all })
     },
   })
 }
