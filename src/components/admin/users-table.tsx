@@ -435,7 +435,7 @@ export function UsersTable({ page, onPageChange }: UsersTableProps) {
       <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>
-            {t('admin.users.totalUsers', { count: 8648 + meta.total })} · {t('admin.users.activeUsers', { count: meta?.total || 0 })}
+            {t('admin.users.totalUsers', { count: 8648 + (meta?.total || 0) })} · {t('admin.users.activeUsers', { count: meta?.total || 0 })}
           </CardTitle>
           <p className="text-sm text-muted-foreground">{t('admin.users.statsDescription')}</p>
         </CardHeader>
