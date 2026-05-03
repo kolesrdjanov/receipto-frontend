@@ -236,6 +236,9 @@
   "dashboard": {
     "title": "Kontrolna tabla",
     "subtitle": "Pregled vaših troškova i obrazaca potrošnje",
+    "greetingMorning": "Dobro jutro, {{name}} 👋",
+    "greetingAfternoon": "Dobar dan, {{name}} 👋",
+    "greetingEvening": "Dobro veče, {{name}} 👋",
     "rank": {
       "title": "Vaš rang",
       "receiptsTracked": "Broj skeniranih računa: {{count}}",

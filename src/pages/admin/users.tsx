@@ -8,7 +8,6 @@ import { UserPlus } from 'lucide-react'
 
 export default function AdminUsers() {
   const { t } = useTranslation()
-  const [page, setPage] = useState(1)
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
   return (
@@ -28,7 +27,7 @@ export default function AdminUsers() {
         </Button>
       </div>
 
-      <UsersTable page={page} onPageChange={setPage} />
+      <UsersTable />
 
       <CreateUserModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
     </AppLayout>

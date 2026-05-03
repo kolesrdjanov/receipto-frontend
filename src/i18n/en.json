@@ -236,6 +236,9 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Overview of your expenses and spending patterns",
+    "greetingMorning": "Good Morning, {{name}} 👋",
+    "greetingAfternoon": "Good Afternoon, {{name}} 👋",
+    "greetingEvening": "Good Evening, {{name}} 👋",
     "rank": {
       "title": "Your Rank",
       "receiptsTracked": "Receipts tracked: {{count}}",

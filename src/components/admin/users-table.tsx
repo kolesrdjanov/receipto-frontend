@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -28,25 +28,41 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
 import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus, Filter } from 'lucide-react'
 
-interface UsersTableProps {
-  page: number
-  onPageChange: (page: number) => void
+const STORAGE_KEY = 'admin-users-table'
+
+function readStoredState() {
+  try {
+    const s = sessionStorage.getItem(STORAGE_KEY)
+    return s ? JSON.parse(s) : null
+  } catch { return null }
 }
 
-export function UsersTable({ page, onPageChange }: UsersTableProps) {
+export function UsersTable() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<SortField>('createdAt')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('DESC')
-  const [showFilters, setShowFilters] = useState(false)
-  const [minReceipts, setMinReceipts] = useState('')
-  const [maxReceipts, setMaxReceipts] = useState('')
-  const [minWarranties, setMinWarranties] = useState('')
-  const [maxWarranties, setMaxWarranties] = useState('')
-  const [joinedFrom, setJoinedFrom] = useState('')
-  const [joinedTo, setJoinedTo] = useState('')
-  const [googleAuthFilter, setGoogleAuthFilter] = useState<'all' | 'yes' | 'no'>('all')
+  const stored = useMemo(readStoredState, [])
+  const [page, setPage] = useState<number>(stored?.page ?? 1)
+  const [search, setSearch] = useState(stored?.search ?? '')
+  const [sortBy, setSortBy] = useState<SortField>(stored?.sortBy ?? 'createdAt')
+  const [sortOrder, setSortOrder] = useState<SortOrder>(stored?.sortOrder ?? 'DESC')
+  const [showFilters, setShowFilters] = useState(stored?.showFilters ?? false)
+  const [minReceipts, setMinReceipts] = useState(stored?.minReceipts ?? '')
+  const [maxReceipts, setMaxReceipts] = useState(stored?.maxReceipts ?? '')
+  const [minWarranties, setMinWarranties] = useState(stored?.minWarranties ?? '')
+  const [maxWarranties, setMaxWarranties] = useState(stored?.maxWarranties ?? '')
+  const [joinedFrom, setJoinedFrom] = useState(stored?.joinedFrom ?? '')
+  const [joinedTo, setJoinedTo] = useState(stored?.joinedTo ?? '')
+  const [googleAuthFilter, setGoogleAuthFilter] = useState<'all' | 'yes' | 'no'>(stored?.googleAuthFilter ?? 'all')
+
+  const onPageChange = useCallback((p: number) => setPage(p), [])
+
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+      page, search, sortBy, sortOrder, showFilters,
+      minReceipts, maxReceipts, minWarranties, maxWarranties,
+      joinedFrom, joinedTo, googleAuthFilter,
+    }))
+  }, [page, search, sortBy, sortOrder, showFilters, minReceipts, maxReceipts, minWarranties, maxWarranties, joinedFrom, joinedTo, googleAuthFilter])
   const debouncedSearch = useDebouncedValue(search, 500)
   const debouncedMinReceipts = useDebouncedValue(minReceipts, 500)
   const debouncedMaxReceipts = useDebouncedValue(maxReceipts, 500)

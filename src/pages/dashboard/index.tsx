@@ -605,7 +605,13 @@ export default function Dashboard() {
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-1 md:text-3xl font-display">{t('dashboard.title')}</h2>
+            <h2 className="text-2xl font-bold tracking-tight mb-1 md:text-3xl font-display">{
+              (() => {
+                const hour = new Date().getHours()
+                const key = hour < 12 ? 'greetingMorning' : hour < 18 ? 'greetingAfternoon' : 'greetingEvening'
+                return t(`dashboard.${key}`, { name: me?.firstName })
+              })()
+            }</h2>
             <p className="text-sm text-muted-foreground md:text-base">
               {t('dashboard.subtitle')}
             </p>
