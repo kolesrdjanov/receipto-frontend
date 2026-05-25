@@ -1,8 +1,16 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { DatePicker } from '@/components/ui/date-picker'
+import { Input } from '@/components/ui/input'
+import { Pagination } from '@/components/ui/pagination'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -11,22 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Pagination } from '@/components/ui/pagination'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { DatePicker } from '@/components/ui/date-picker'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { Loader2, Trash2, Search, X, Eye, ArrowUpDown, ArrowUp, ArrowDown, Check, Minus, Filter } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Check, Eye, Filter, Loader2, Minus, Search, Trash2, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const STORAGE_KEY = 'admin-users-table'
 
@@ -353,7 +353,7 @@ export function UsersTable() {
         {/* Total users count for mobile */}
         {meta && (
           <div className="text-sm font-medium text-muted-foreground">
-            {t('admin.users.totalUsers', { count: 8648 + meta.total })} · {t('admin.users.activeUsers', { count: meta.total })}
+            {t('admin.users.activeUsers', { count: meta.total })}
             <p className="text-xs font-normal mt-1">{t('admin.users.statsDescription')}</p>
           </div>
         )}
@@ -451,7 +451,7 @@ export function UsersTable() {
       <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>
-            {t('admin.users.totalUsers', { count: 8648 + (meta?.total || 0) })} · {t('admin.users.activeUsers', { count: meta?.total || 0 })}
+            {t('admin.users.activeUsers', { count: meta?.total || 0 })}
           </CardTitle>
           <p className="text-sm text-muted-foreground">{t('admin.users.statsDescription')}</p>
         </CardHeader>
