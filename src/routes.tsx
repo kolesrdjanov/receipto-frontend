@@ -14,7 +14,6 @@ import Groups from './pages/groups'
 import Warranties from './pages/warranties'
 import Settings from './pages/settings'
 import Items from './pages/items'
-import Savings from './pages/savings'
 import RecurringExpenses from './pages/recurring-expenses'
 import LoyaltyCards from './pages/loyalty-cards'
 import AppSettings from './pages/settings/app'
@@ -30,7 +29,6 @@ const CheckEmail = lazy(() => import('./pages/auth/check-email'))
 const VerifyEmail = lazy(() => import('./pages/auth/verify-email'))
 const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
-const SavingsGoalDetail = lazy(() => import('./pages/savings/goals/[id]'))
 const JoinGroup = lazy(() => import('./pages/groups/join'))
 const GroupDetail = lazy(() => import('./pages/groups/[id]'))
 const AdminUsers = lazy(() => import('./pages/admin/users'))
@@ -46,7 +44,6 @@ export function prefetchLazyRoutes() {
     import('./pages/items/[id]')
     import('./pages/groups/[id]')
     import('./pages/templates')
-    import('./pages/savings/goals/[id]')
   })
 }
 
@@ -161,26 +158,6 @@ export const routes: RouteObject[] = [
       <ProtectedRoute>
         <FeatureRoute feature="recurringExpenses">
           <RecurringExpenses />
-        </FeatureRoute>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/savings',
-    element: (
-      <ProtectedRoute>
-        <FeatureRoute feature="savings">
-          <Savings />
-        </FeatureRoute>
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/savings/goals/:id',
-    element: (
-      <ProtectedRoute>
-        <FeatureRoute feature="savings">
-          <SavingsGoalDetail />
         </FeatureRoute>
       </ProtectedRoute>
     ),

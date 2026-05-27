@@ -34,7 +34,6 @@ import {
   TrendingUp,
   Users,
   Shield,
-  PiggyBank,
   CreditCard,
   Settings,
   SlidersHorizontal,
@@ -267,22 +266,6 @@ export function AppSidebar({
                   <Link to="/warranties" onClick={closeMobile}>
                     <Shield />
                     <span>{t('nav.warranties')}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
-
-            {isFeatureEnabled('savings') && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={path === '/savings' || path.startsWith('/savings/')}
-                  tooltip={t('nav.savings')}
-                  className={path === '/savings' || path.startsWith('/savings/') ? activeClass : ''}
-                >
-                  <Link to="/savings" onClick={closeMobile}>
-                    <PiggyBank />
-                    <span>{t('nav.savings')}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

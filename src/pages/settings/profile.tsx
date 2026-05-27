@@ -14,13 +14,11 @@ import { useMe, useUpdateMe, useUploadProfileImage } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { normalizeRank, getNextRank, getProgressToNextRank, type ReceiptRank } from '@/lib/rank'
-import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 
 export default function ProfileSettings() {
   const { t } = useTranslation()
   const authUser = useAuthStore((s) => s.user)
   const { data: me } = useMe(true)
-  const { data: featureFlags } = useFeatureFlags()
   const updateMe = useUpdateMe()
   const uploadProfileImage = useUploadProfileImage()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -327,7 +325,6 @@ export default function ProfileSettings() {
                 </div>
 
                 {/* Income */}
-                {(featureFlags?.savings ?? false) && (
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2">
                     <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -361,7 +358,6 @@ export default function ProfileSettings() {
                     </div>
                   </div>
                 </div>
-                )}
 
                 {/* Rank */}
                 <div className={cn('rounded-lg border p-4 space-y-3 mt-10', rankConfig.cardClassName)}>

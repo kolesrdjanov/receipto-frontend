@@ -75,7 +75,6 @@
     "categories": "Kategorije",
     "groups": "Grupni troškovi",
     "warranties": "Garancije",
-    "savings": "Štednja",
     "priceTracker": "Praćenje cena",
     "settings": "Podešavanja",
     "logout": "Odjava",
@@ -581,7 +580,7 @@
       "color": "Boja",
       "icon": "Ikona",
       "description": "Opis",
-        "monthlyBudget": "Mesečni budžet",
+      "monthlyBudget": "Mesečni budžet",
       "actions": "Akcije"
     },
     "modal": {
@@ -815,7 +814,7 @@
       "title": "Valuta",
       "description": "Podesite željenu valutu za prikaz iznosa",
       "label": "Valuta za prikaz",
-      "help": "Iznosi na kontrolnoj tabli i izveštajima biće konvertovani u ovu valutu"
+      "help": "Iznosi na kontrolnoj tabli biće konvertovani u ovu valutu"
     },
     "language": {
       "title": "Jezik",
@@ -860,7 +859,7 @@
         "city": "Grad"
       },
       "income": "Mesečna primanja",
-      "incomeDescription": "Koristi se za izračunavanje stope štednje na stranici Štednja.",
+      "incomeDescription": "Koristi se da coach izračuna vašu mesečnu stopu štednje.",
       "incomeAmount": "Mesečna primanja",
       "incomeCurrency": "Valuta primanja",
       "rank": {
@@ -1188,8 +1187,6 @@
       "aiCategorizationDescription": "Koristi AI kao podrazumevani metod za automatsku kategorizaciju računa. Kada je isključeno, koristi se standardno podudaranje.",
       "aiItems": "AI Inteligencija artikala",
       "aiItemsDescription": "Koristi AI za normalizaciju naziva prodavnica, obogaćivanje proizvoda i uvide u kupovinu.",
-      "aiSavings": "AI Copilot za štednju",
-      "aiSavingsDescription": "Koristi AI za rangiranje akcija štednje i personalizovane preporuke za štednju.",
       "updated": "Podešavanja su uspešno ažurirana",
       "featureFlags": "Funkcionalnosti",
       "featureFlagsDescription": "Uključite ili isključite funkcionalnosti za sve korisnike.",
@@ -1197,8 +1194,6 @@
       "featureWarrantiesDescription": "Omogućite korisnicima praćenje garancija proizvoda i datuma isteka.",
       "featureItemPricing": "Praćenje cena",
       "featureItemPricingDescription": "Omogućite korisnicima praćenje cena proizvoda u različitim prodavnicama.",
-      "featureSavings": "Štednja",
-      "featureSavingsDescription": "Omogućite korisnicima postavljanje ciljeva štednje i praćenje uplata.",
       "featureRecurringExpenses": "Ponavljajući troškovi",
       "featureRecurringExpensesDescription": "Omogućite korisnicima upravljanje ponavljajućim računima i pretplatama.",
       "featureLoyaltyCards": "Kartice lojalnosti",
@@ -1358,155 +1353,6 @@
       "createNew": "Kreiraj kao novi proizvod",
       "success": "Proizvodi uspešno spojeni",
       "error": "Greška pri spajanju proizvoda"
-    }
-  },
-  "savings": {
-    "title": "Štednja",
-    "subtitle": "Postavite ciljeve i pratite napredak štednje",
-    "health": {
-      "good": "Dobro finansijsko zdravlje",
-      "fair": "Umereno finansijsko zdravlje",
-      "needsAttention": "Potrebna pažnja",
-      "savingsRate": "stopa štednje",
-      "savingsRateText": "{{rate}}% stopa štednje",
-      "savedThisMonth": "ušteđeno ovog meseca",
-      "goalsOnTrack": "{{on}} od {{total}} na pravom putu",
-      "behindPaceTip": "Potrebno {{amount}} {{currency}}/mesečno da ostanete na pravom putu",
-      "onTrackTip": "Na tempu da dosegnete cilj na vreme"
-    },
-    "snapshot": {
-      "title": "Mesečni pregled",
-      "income": "Primanja",
-      "spent": "Potrošeno",
-      "saved": "Ušteđeno",
-      "rate": "Stopa štednje",
-      "noIncome": "Postavite mesečna primanja u Podešavanjima da biste videli stopu štednje.",
-      "goToSettings": "Idi na Podešavanja"
-    },
-    "goals": {
-      "title": "Vaši ciljevi",
-      "addGoal": "Dodaj cilj",
-      "empty": "Nemate ciljeve štednje. Kreirajte jedan da počnete!",
-      "completed": "Završeni",
-      "active": "Aktivni"
-    },
-    "goal": {
-      "noDeadline": "Bez roka",
-      "overdue": "Istekao rok",
-      "daysLeft": "Još {{count}} dana",
-      "deadline": "Rok",
-      "projectedCompletion": "Procena",
-      "projectedDays": "~{{count}} dana",
-      "linkedCategory": "Kategorija",
-      "notFound": "Cilj nije pronađen",
-      "completedTitle": "Cilj ostvaren!",
-      "completedMessage": "Čestitamo na dostizanju cilja štednje!",
-      "created": "Cilj je uspešno kreiran",
-      "updated": "Cilj je uspešno ažuriran",
-      "deleted": "Cilj je uspešno obrisan",
-      "deleteConfirmTitle": "Obriši cilj",
-      "deleteConfirmDescription": "Da li ste sigurni da želite da obrišete ovaj cilj? Sve uplate će biti izgubljene. Ova akcija se ne može poništiti.",
-      "autoContribution": "Automatska ušteda iz {{category}}"
-    },
-    "goalDetail": {
-      "saved": "ušteđeno",
-      "remaining": "preostalo",
-      "monthlyRate": "Mesečna stopa",
-      "requiredRate": "Potrebna stopa",
-      "projected": "Procena",
-      "monthsCount_one": "{{count}} mesec",
-      "monthsCount_few": "{{count}} meseca",
-      "monthsCount_other": "{{count}} meseci",
-      "reachFaster": "Dosegnite cilj brže",
-      "noSuggestions": "Trenutno nema predloga. Nastavite sa praćenjem za bolje uvide.",
-      "mo": "mes",
-      "reachFasterBy_one": "Dosegnite cilj {{count}} mesec brže",
-      "reachFasterBy_few": "Dosegnite cilj {{count}} meseca brže",
-      "reachFasterBy_other": "Dosegnite cilj {{count}} meseci brže",
-      "poweredByAi": "Pokreće AI",
-      "ruleBased": "Na osnovu pravila",
-      "updatedDaily": "Ažurira se dnevno",
-      "linkedCategory": "Povezana kategorija",
-      "budgetSpent": "Budžet vs potrošeno",
-      "underspendPotential": "Potencijal nedovoljne potrošnje",
-      "autoSavingsActive": "Automatska štednja je aktivna za ovu kategoriju",
-      "auto": "Auto",
-      "showAll_one": "Prikaži svih {{count}} uplatu",
-      "showAll_few": "Prikaži svih {{count}} uplate",
-      "showAll_other": "Prikaži svih {{count}} uplata",
-      "showLess": "Prikaži manje"
-    },
-    "goalModal": {
-      "createTitle": "Kreiraj cilj",
-      "editTitle": "Izmeni cilj",
-      "createDescription": "Postavite novi cilj štednje.",
-      "editDescription": "Ažurirajte detalje cilja štednje.",
-      "name": "Naziv cilja",
-      "namePlaceholder": "npr. Fond za odmor",
-      "targetAmount": "Ciljni iznos",
-      "currency": "Valuta",
-      "deadline": "Rok",
-      "priority": "Prioritet",
-      "category": "Povezana kategorija",
-      "noCategory": "Nijedna",
-      "icon": "Ikona",
-      "color": "Boja",
-      "create": "Kreiraj cilj"
-    },
-    "priority": {
-      "high": "Visok",
-      "medium": "Srednji",
-      "low": "Nizak"
-    },
-    "contributions": {
-      "title": "Uplate",
-      "add": "Dodaj",
-      "empty": "Nema uplata. Počnite da štedite za svoj cilj!",
-      "added": "Uplata dodana",
-      "removed": "Uplata uklonjena",
-      "deleteConfirmTitle": "Obriši uplatu",
-      "deleteConfirmDescription": "Da li ste sigurni da želite da uklonite ovu uplatu? Napredak cilja će biti ponovo izračunat."
-    },
-    "contributionModal": {
-      "title": "Dodaj uplatu",
-      "description": "Zabeležite uplatu štednje za ovaj cilj.",
-      "amount": "Iznos",
-      "note": "Napomena",
-      "notePlaceholder": "Opciona napomena...",
-      "add": "Dodaj uplatu"
-    },
-    "insights": {
-      "title": "Uvid u kategoriju",
-      "spentThisMonth": "Potrošeno ovog meseca",
-      "potentialSavings": "Potencijalna ušteda",
-      "monthlyPaceNeeded": "Potreban mesečni tempo",
-      "status": "Status",
-      "onTrack": "Na pravom putu",
-      "behind": "Kašnjenje",
-      "noDeadline": "Nema postavljenog roka",
-      "noBudget": "Postavite budžet za {{category}} da omogućite automatsku štednju",
-      "autoSaved": "Automatska ušteda",
-      "autoSavingsTotal": "Automatski ušteđeno",
-      "manualTotal": "Ručne uplate"
-    },
-    "reports": {
-      "title": "Mesečni izveštaji",
-      "subtitle": "Pregledajte svoje finansijske rezultate mesec po mesec",
-      "empty": "Izveštaji se generišu svakog 1. u mesecu. Proverite uskoro!",
-      "generateNow": "Generiši odmah",
-      "generating": "Generišem...",
-      "generated": "Izveštaj je generisan",
-      "income": "Prihod",
-      "spent": "Potrošeno",
-      "saved": "Ušteđeno",
-      "rate": "Stopa štednje",
-      "noIncome": "Nije postavljeno",
-      "topCategories": "Najveće kategorije",
-      "goalsProgress": "Ciljevi štednje",
-      "vsLastMonth": "u odnosu na prošli mesec",
-      "thisMonth": "ovog meseca",
-      "aiSummary": "AI rezime",
-      "aiTips": "Saveti"
     }
   },
   "recurring": {

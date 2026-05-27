@@ -5,7 +5,6 @@ import { queryKeys } from '@/lib/query-keys'
 export interface FeatureFlags {
   warranties: boolean
   itemPricing: boolean
-  savings: boolean
   recurringExpenses: boolean
   loyaltyCards: boolean
 }
