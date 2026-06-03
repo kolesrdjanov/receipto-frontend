@@ -4,15 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Mail, Lock, CircleAlert, MailWarning } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
-import {
-  CardHead,
-  GlassField,
-  PasswordField,
-  AuthAlert,
-  AuthDivider,
-  AuthCheckbox,
-  GradientButton,
-} from '@/components/auth/glass'
+import { CardHead } from '@/components/auth/glass'
+import { Field, PasswordField, Alert, Divider, Checkbox, GradientButton } from '@/components/glass/glass'
 import { useSignIn } from '@/hooks/auth/use-sign-in'
 
 export default function SignIn() {
@@ -30,7 +23,7 @@ export default function SignIn() {
 
         {error &&
           (emailNotVerified ? (
-            <AuthAlert kind="warn" icon={MailWarning}>
+            <Alert kind="warn" icon={MailWarning}>
               {error}{' '}
               <button
                 type="button"
@@ -39,21 +32,21 @@ export default function SignIn() {
               >
                 {t('auth.signIn.resendVerification')}
               </button>
-            </AuthAlert>
+            </Alert>
           ) : (
-            <AuthAlert kind="err" icon={CircleAlert} className="mb-0">
+            <Alert kind="err" icon={CircleAlert} className="mb-0">
               {error}
-            </AuthAlert>
+            </Alert>
           ))}
 
         <div className="mt-4">
           <GoogleSignInButton onError={setError} />
         </div>
 
-        <AuthDivider label={t('auth.orContinueWith')} />
+        <Divider label={t('auth.orContinueWith')} />
 
         <div className="flex flex-col gap-3">
-          <GlassField
+          <Field
             label={t('auth.signIn.email')}
             icon={Mail}
             id="email"
@@ -82,7 +75,7 @@ export default function SignIn() {
 
         <div className="mt-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <AuthCheckbox id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+            <Checkbox id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
             <label htmlFor="remember" className="cursor-pointer text-[13px] font-medium text-muted-foreground">
               {t('auth.signIn.rememberMe')}
             </label>

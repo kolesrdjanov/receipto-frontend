@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Heart, QrCode, PieChart, ShieldCheck, TrendingDown, ShoppingCart } from 'lucide-react'
 import { Logo } from '@/components/ui/logo'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
-import { BrandWash } from '@/components/auth/glass'
+import { BrandWash } from '@/components/glass/glass'
 import { cn } from '@/lib/utils'
 
 interface AuthLayoutProps {

@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Mail, MailCheck, CircleCheck, Link2Off, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
-import { GlassField, AuthBadge, AuthAlert, SecondaryButton, BackLink } from '@/components/auth/glass'
+import { BackLink } from '@/components/auth/glass'
+import { Field, Badge, Alert, SecondaryButton } from '@/components/glass/glass'
 import { api } from '@/lib/api'
 
 export default function VerifyEmail() {
@@ -78,7 +79,7 @@ export default function VerifyEmail() {
     return (
       <AuthLayout>
         <div className="text-center">
-          <AuthBadge icon={CircleCheck} kind="ok" />
+          <Badge icon={CircleCheck} kind="ok" />
           <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
             {t('auth.verifyEmail.success')}
           </h1>
@@ -94,7 +95,7 @@ export default function VerifyEmail() {
   return (
     <AuthLayout>
       <div className="text-center">
-        <AuthBadge icon={Link2Off} kind="danger" />
+        <Badge icon={Link2Off} kind="danger" />
         <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
           {t('auth.verifyEmail.failed')}
         </h1>
@@ -106,7 +107,7 @@ export default function VerifyEmail() {
           {t('auth.verifyEmail.resendDescription')}
         </p>
 
-        <GlassField
+        <Field
           label={t('auth.signIn.email')}
           icon={Mail}
           id="email"
@@ -120,9 +121,9 @@ export default function VerifyEmail() {
         />
 
         {resent && (
-          <AuthAlert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
+          <Alert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
             {t('auth.checkEmail.resent')}
-          </AuthAlert>
+          </Alert>
         )}
 
         <SecondaryButton type="submit" disabled={isResending || !email} className="mt-[18px]">

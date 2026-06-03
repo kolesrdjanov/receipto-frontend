@@ -3,16 +3,16 @@ import { useTranslation } from 'react-i18next'
 import { Mail, Lock, LockKeyhole, User, CircleAlert } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import { CardHead } from '@/components/auth/glass'
 import {
-  CardHead,
-  GlassField,
+  Field,
   PasswordField,
   PasswordStrengthMeter,
-  AuthAlert,
-  AuthDivider,
-  AuthCheckbox,
+  Alert,
+  Divider,
+  Checkbox,
   GradientButton,
-} from '@/components/auth/glass'
+} from '@/components/glass/glass'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
@@ -26,20 +26,20 @@ export default function SignUp() {
         <CardHead logo title={t('auth.signUp.title')} subtitle={t('auth.signUp.subtitle')} />
 
         {apiError && (
-          <AuthAlert kind="err" icon={CircleAlert} className="mb-0">
+          <Alert kind="err" icon={CircleAlert} className="mb-0">
             {apiError}
-          </AuthAlert>
+          </Alert>
         )}
 
         <div className="mt-4">
           <GoogleSignInButton onError={setApiError} />
         </div>
 
-        <AuthDivider label={t('auth.orContinueWith')} />
+        <Divider label={t('auth.orContinueWith')} />
 
         <div className="flex flex-col gap-3">
           <div className="flex gap-3">
-            <GlassField
+            <Field
               label={t('auth.signUp.firstName')}
               icon={User}
               id="firstName"
@@ -52,7 +52,7 @@ export default function SignUp() {
               error={errors.firstName}
               data-testid="signup-firstname-input"
             />
-            <GlassField
+            <Field
               label={t('auth.signUp.lastName')}
               id="lastName"
               name="lastName"
@@ -66,7 +66,7 @@ export default function SignUp() {
             />
           </div>
 
-          <GlassField
+          <Field
             label={t('auth.signUp.email')}
             icon={Mail}
             id="email"
@@ -113,7 +113,7 @@ export default function SignUp() {
 
         <div className="mt-4">
           <div className="flex items-start gap-2.5">
-            <AuthCheckbox
+            <Checkbox
               id="terms"
               name="terms"
               checked={formData.terms}

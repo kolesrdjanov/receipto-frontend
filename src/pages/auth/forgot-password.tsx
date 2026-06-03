@@ -1,14 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Mail, KeyRound, CircleAlert, CircleCheck, RotateCcw } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
-import {
-  CardHead,
-  GlassField,
-  AuthAlert,
-  GradientButton,
-  SecondaryButton,
-  BackLink,
-} from '@/components/auth/glass'
+import { CardHead, BackLink } from '@/components/auth/glass'
+import { Field, Alert, GradientButton, SecondaryButton } from '@/components/glass/glass'
 import { useForgotPassword } from '@/hooks/auth/use-forgot-password'
 
 export default function ForgotPassword() {
@@ -21,9 +15,9 @@ export default function ForgotPassword() {
 
       {success ? (
         <div className="flex flex-col">
-          <AuthAlert kind="ok" icon={CircleCheck} className="mb-4">
+          <Alert kind="ok" icon={CircleCheck} className="mb-4">
             {t('auth.forgotPassword.successMessage')}
-          </AuthAlert>
+          </Alert>
           <form onSubmit={handleSubmit}>
             <SecondaryButton type="submit" disabled={isLoading}>
               <RotateCcw className="size-4" />
@@ -37,12 +31,12 @@ export default function ForgotPassword() {
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
           {error && (
-            <AuthAlert kind="err" icon={CircleAlert}>
+            <Alert kind="err" icon={CircleAlert}>
               {error}
-            </AuthAlert>
+            </Alert>
           )}
 
-          <GlassField
+          <Field
             label={t('auth.forgotPassword.email')}
             icon={Mail}
             id="email"

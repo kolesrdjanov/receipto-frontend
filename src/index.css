@@ -60,6 +60,25 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* glass design-system additions */
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info-foreground: var(--info-foreground);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-hairline-soft: var(--hairline-soft);
+  --color-fg-faint: var(--fg-faint);
+  --color-primary-soft: var(--primary-soft);
+  --shadow-glass-1: var(--sh-1);
+  --shadow-glass-2: var(--sh-2);
+  --shadow-glass-3: var(--sh-3);
+  --shadow-glass-4: var(--sh-4);
 }
 
 :root {
@@ -96,6 +115,28 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* glass — semantic colors (additive; --destructive serves as danger) */
+  --success: oklch(0.65 0.16 155);
+  --success-soft: oklch(0.95 0.05 155);
+  --warning: oklch(0.75 0.16 75);
+  --warning-soft: oklch(0.96 0.05 80);
+  --info: oklch(0.65 0.13 230);
+  --info-soft: oklch(0.95 0.04 230);
+  /* readable text on the *-soft backgrounds (alerts/badges) */
+  --success-foreground: oklch(0.45 0.12 155);
+  --warning-foreground: oklch(0.45 0.1 75);
+  --info-foreground: oklch(0.45 0.1 230);
+  /* glass — depth tiers shadcn lacks */
+  --bg-subtle: oklch(0.965 0.003 250);
+  --hairline-soft: oklch(0.95 0.004 250);
+  --fg-faint: oklch(0.7 0.008 260);
+  --primary-soft: oklch(from var(--primary) 0.95 0.04 h);
+  /* glass — shadow scale */
+  --sh-1: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 0 oklch(0 0 0 / 0.02);
+  --sh-2: 0 4px 12px oklch(0 0 0 / 0.06), 0 2px 4px oklch(0 0 0 / 0.04);
+  --sh-3: 0 10px 28px oklch(0 0 0 / 0.1), 0 4px 8px oklch(0 0 0 / 0.05);
+  --sh-4: 0 24px 56px oklch(0 0 0 / 0.16), 0 8px 16px oklch(0 0 0 / 0.06);
 }
 
 .dark {
@@ -131,6 +172,28 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* glass — semantic colors (dark) */
+  --success: oklch(0.78 0.15 155);
+  --success-soft: oklch(0.28 0.06 155);
+  --warning: oklch(0.8 0.16 75);
+  --warning-soft: oklch(0.3 0.06 75);
+  --info: oklch(0.75 0.14 230);
+  --info-soft: oklch(0.28 0.06 230);
+  /* readable text on the *-soft backgrounds (dark) */
+  --success-foreground: oklch(0.84 0.1 155);
+  --warning-foreground: oklch(0.84 0.1 75);
+  --info-foreground: oklch(0.84 0.08 230);
+  /* glass — depth tiers (dark) */
+  --bg-subtle: oklch(0.235 0.012 260);
+  --hairline-soft: oklch(1 0 0 / 0.06);
+  --fg-faint: oklch(0.5 0.012 260);
+  --primary-soft: oklch(from var(--primary) 0.3 0.06 h);
+  /* glass — shadow scale (dark, heavier) */
+  --sh-1: 0 1px 2px oklch(0 0 0 / 0.3);
+  --sh-2: 0 4px 12px oklch(0 0 0 / 0.4), 0 2px 4px oklch(0 0 0 / 0.2);
+  --sh-3: 0 10px 28px oklch(0 0 0 / 0.5);
+  --sh-4: 0 24px 56px oklch(0 0 0 / 0.6);
 }
 
 /* ============================================
@@ -435,6 +498,22 @@ body {
 .dark .receipt-paper .receipt-separator {
   border-top-color: oklch(1 1 1 / 15%);
 }
+
+/* ============================================
+   GLASS TYPE SCALE
+   Semantic type set (from the design foundations).
+   Use these for headings/labels across the redesign.
+   ============================================ */
+.t-display { font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; }
+.t-h1 { font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.022em; }
+.t-h2 { font-size: 24px; line-height: 1.2; font-weight: 700; letter-spacing: -0.018em; }
+.t-h3 { font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; }
+.t-title { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+.t-body { font-size: 15px; line-height: 1.45; font-weight: 400; }
+.t-body-strong { font-size: 15px; line-height: 1.45; font-weight: 600; }
+.t-sm { font-size: 13px; line-height: 1.4; font-weight: 500; }
+.t-xs { font-size: 11px; line-height: 1.3; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.t-num { font-variant-numeric: tabular-nums; }
 
 /* ============================================
    AUTH REDESIGN — "GLASS"

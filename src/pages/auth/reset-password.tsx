@@ -2,15 +2,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Lock, LockKeyhole, Link2Off, CircleCheck, CircleAlert, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
-import {
-  CardHead,
-  PasswordField,
-  PasswordStrengthMeter,
-  AuthAlert,
-  AuthBadge,
-  GradientButton,
-  BackLink,
-} from '@/components/auth/glass'
+import { CardHead, BackLink } from '@/components/auth/glass'
+import { PasswordField, PasswordStrengthMeter, Alert, Badge, GradientButton } from '@/components/glass/glass'
 import { useResetPassword } from '@/hooks/auth/use-reset-password'
 
 export default function ResetPassword() {
@@ -43,7 +36,7 @@ export default function ResetPassword() {
     return (
       <AuthLayout>
         <div className="text-center">
-          <AuthBadge icon={CircleCheck} kind="ok" />
+          <Badge icon={CircleCheck} kind="ok" />
           <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
             {t('auth.resetPassword.successMessage')}
           </h1>
@@ -62,9 +55,9 @@ export default function ResetPassword() {
 
       <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
         {apiError && (
-          <AuthAlert kind="err" icon={CircleAlert}>
+          <Alert kind="err" icon={CircleAlert}>
             {apiError}
-          </AuthAlert>
+          </Alert>
         )}
 
         <div className="flex flex-col gap-3">

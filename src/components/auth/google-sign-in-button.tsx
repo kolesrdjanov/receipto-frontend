@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useGoogleAuth } from '@/hooks/auth/use-google-auth'
-import { GoogleGIcon } from '@/components/auth/glass'
+import { GoogleGIcon } from '@/components/glass/glass'
 
 interface GoogleSignInButtonProps {
   onError?: (error: string) => void

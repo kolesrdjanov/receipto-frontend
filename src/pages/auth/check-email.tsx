@@ -3,7 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MailCheck, RotateCcw, CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
-import { AuthBadge, AuthAlert, EmailChip, SecondaryButton, BackLink } from '@/components/auth/glass'
+import { EmailChip, BackLink } from '@/components/auth/glass'
+import { Badge, Alert, SecondaryButton } from '@/components/glass/glass'
 import { api } from '@/lib/api'
 
 const RESEND_COOLDOWN = 60
@@ -49,7 +50,7 @@ export default function CheckEmail() {
   return (
     <AuthLayout>
       <div className="text-center">
-        <AuthBadge icon={MailCheck} />
+        <Badge icon={MailCheck} />
         <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
           {t('auth.checkEmail.title')}
         </h1>
@@ -61,15 +62,15 @@ export default function CheckEmail() {
         </p>
 
         {error && (
-          <AuthAlert kind="err" icon={CircleAlert} className="mb-0 mt-4 text-left">
+          <Alert kind="err" icon={CircleAlert} className="mb-0 mt-4 text-left">
             {error}
-          </AuthAlert>
+          </Alert>
         )}
 
         {resent && (
-          <AuthAlert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
+          <Alert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
             {t('auth.checkEmail.resent')}
-          </AuthAlert>
+          </Alert>
         )}
 
         {email && (
