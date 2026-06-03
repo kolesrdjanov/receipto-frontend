@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, MailCheck, CircleCheck, Link2Off, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
+import { GlassField, AuthBadge, AuthAlert, SecondaryButton, BackLink } from '@/components/auth/glass'
 import { api } from '@/lib/api'
 
 export default function VerifyEmail() {
@@ -34,7 +31,6 @@ export default function VerifyEmail() {
       try {
         await api.post('/auth/verify-email', { token }, { requiresAuth: false })
         setStatus('success')
-        // Redirect to sign-in after 2 seconds
         setTimeout(() => navigate('/sign-in', { replace: true }), 2000)
       } catch (err) {
         setStatus('error')
@@ -55,86 +51,98 @@ export default function VerifyEmail() {
       await api.post('/auth/resend-verification', { email }, { requiresAuth: false })
       setResent(true)
     } catch {
-      // Silent — same response regardless
+      // Silent — same response regardless (prevents email enumeration)
       setResent(true)
     } finally {
       setIsResending(false)
     }
   }
 
+  if (status === 'verifying') {
+    return (
+      <AuthLayout>
+        <div className="text-center">
+          <div className="mx-auto mb-[18px] grid size-[60px] place-items-center rounded-[18px] bg-[var(--primary-soft)] text-primary shadow-sm">
+            <Loader2 className="size-[26px] animate-spin" />
+          </div>
+          <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
+            {t('auth.verifyEmail.title')}
+          </h1>
+          <p className="mt-1.5 text-[15px] text-muted-foreground">{t('auth.verifyEmail.verifying')}</p>
+        </div>
+      </AuthLayout>
+    )
+  }
+
+  if (status === 'success') {
+    return (
+      <AuthLayout>
+        <div className="text-center">
+          <AuthBadge icon={CircleCheck} kind="ok" />
+          <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
+            {t('auth.verifyEmail.success')}
+          </h1>
+          <div className="mt-3 flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            <span className="text-[15px]">{t('auth.verifyEmail.redirecting')}</span>
+          </div>
+        </div>
+      </AuthLayout>
+    )
+  }
+
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md border-0 shadow-none">
-        <CardHeader className="space-y-1 text-center">
-          {status === 'verifying' && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              </div>
-              <CardTitle className="text-2xl font-bold">{t('auth.verifyEmail.title')}</CardTitle>
-              <CardDescription>{t('auth.verifyEmail.verifying')}</CardDescription>
-            </>
-          )}
+      <div className="text-center">
+        <AuthBadge icon={Link2Off} kind="danger" />
+        <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
+          {t('auth.verifyEmail.failed')}
+        </h1>
+        <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{errorMessage}</p>
+      </div>
 
-          {status === 'success' && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-                <CheckCircle className="h-8 w-8 text-green-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold">{t('auth.verifyEmail.success')}</CardTitle>
-              <CardDescription>{t('auth.verifyEmail.redirecting')}</CardDescription>
-            </>
-          )}
+      <form onSubmit={handleResend} className="mt-5 flex flex-col" noValidate>
+        <p className="mb-3 text-center text-[13px] font-medium text-muted-foreground">
+          {t('auth.verifyEmail.resendDescription')}
+        </p>
 
-          {status === 'error' && (
-            <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-                <XCircle className="h-8 w-8 text-destructive" />
-              </div>
-              <CardTitle className="text-2xl font-bold">{t('auth.verifyEmail.failed')}</CardTitle>
-              <CardDescription>{errorMessage}</CardDescription>
-            </>
-          )}
-        </CardHeader>
+        <GlassField
+          label={t('auth.signIn.email')}
+          icon={Mail}
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder={t('auth.signIn.emailPlaceholder')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isResending}
+        />
 
-        {status === 'error' && (
-          <CardContent className="space-y-4">
-            <form onSubmit={handleResend} className="space-y-3">
-              <p className="text-sm text-muted-foreground text-center">
-                {t('auth.verifyEmail.resendDescription')}
-              </p>
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.signIn.email')}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t('auth.signIn.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isResending}
-                  className="bg-background/50"
-                />
-              </div>
-
-              {resent && (
-                <div className="p-3 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm text-center">
-                  {t('auth.checkEmail.resent')}
-                </div>
-              )}
-
-              <Button type="submit" variant="outline" className="w-full" disabled={isResending || !email}>
-                {isResending ? t('auth.checkEmail.resending') : t('auth.verifyEmail.resendLink')}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-muted-foreground">
-              <Link to="/sign-in" className="font-medium text-primary hover:underline">
-                {t('auth.checkEmail.backToSignIn')}
-              </Link>
-            </p>
-          </CardContent>
+        {resent && (
+          <AuthAlert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
+            {t('auth.checkEmail.resent')}
+          </AuthAlert>
         )}
-      </Card>
+
+        <SecondaryButton type="submit" disabled={isResending || !email} className="mt-[18px]">
+          {isResending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              {t('auth.checkEmail.resending')}
+            </>
+          ) : (
+            <>
+              <MailCheck className="size-4" />
+              {t('auth.verifyEmail.resendLink')}
+            </>
+          )}
+        </SecondaryButton>
+
+        <div className="mt-5 text-center">
+          <BackLink>{t('auth.checkEmail.backToSignIn')}</BackLink>
+        </div>
+      </form>
     </AuthLayout>
   )
 }

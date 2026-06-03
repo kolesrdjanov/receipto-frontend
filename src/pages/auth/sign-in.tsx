@@ -1,109 +1,118 @@
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, Lock, CircleAlert, MailWarning } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import {
+  CardHead,
+  GlassField,
+  PasswordField,
+  AuthAlert,
+  AuthDivider,
+  AuthCheckbox,
+  GradientButton,
+} from '@/components/auth/glass'
 import { useSignIn } from '@/hooks/auth/use-sign-in'
 
 export default function SignIn() {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const { email, setEmail, password, setPassword, error, setError, isLoading, emailNotVerified, handleSubmit } = useSignIn()
+  const { email, setEmail, password, setPassword, error, setError, isLoading, emailNotVerified, handleSubmit } =
+    useSignIn()
+  const [rememberMe, setRememberMe] = useState(true)
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md border-0 shadow-none" data-testid="signin-card">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold" data-testid="signin-title">{t('auth.signIn.title')}</CardTitle>
-          <CardDescription data-testid="signin-subtitle">
-            {t('auth.signIn.subtitle')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4" data-testid="signin-form" noValidate>
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm" data-testid="signin-error">
-                {error}
-                {emailNotVerified && (
-                  <button
-                    type="button"
-                    className="mt-1.5 block w-full text-center font-medium text-primary hover:underline"
-                    onClick={() => navigate('/check-email', { state: { email } })}
-                  >
-                    {t('auth.signIn.resendVerification')}
-                  </button>
-                )}
-              </div>
-            )}
+      <form onSubmit={handleSubmit} className="flex flex-col" data-testid="signin-form" noValidate>
+        <CardHead logo title={t('auth.signIn.title')} subtitle={t('auth.signIn.subtitle')} />
 
-            <GoogleSignInButton onError={setError} />
+        {error &&
+          (emailNotVerified ? (
+            <AuthAlert kind="warn" icon={MailWarning}>
+              {error}{' '}
+              <button
+                type="button"
+                className="font-bold underline underline-offset-2"
+                onClick={() => navigate('/check-email', { state: { email } })}
+              >
+                {t('auth.signIn.resendVerification')}
+              </button>
+            </AuthAlert>
+          ) : (
+            <AuthAlert kind="err" icon={CircleAlert} className="mb-0">
+              {error}
+            </AuthAlert>
+          ))}
 
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  {t('auth.orContinueWith')}
-                </span>
-              </div>
-            </div>
+        <div className="mt-4">
+          <GoogleSignInButton onError={setError} />
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.signIn.email')}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder={t('auth.signIn.emailPlaceholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                required
-                className="bg-background/50"
-                data-testid="signin-email-input"
-              />
-            </div>
+        <AuthDivider label={t('auth.orContinueWith')} />
 
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">{t('auth.signIn.password')}</Label>
-                <Link to="/forgot-password" className="ml-auto text-sm underline-offset-4 hover:underline" data-testid="signin-forgot-password-link">
-                  {t('auth.signIn.forgotPassword')}
-                </Link>
-              </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                required
-                className="bg-background/50"
-                data-testid="signin-password-input"
-              />
-            </div>
+        <div className="flex flex-col gap-3">
+          <GlassField
+            label={t('auth.signIn.email')}
+            icon={Mail}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder={t('auth.signIn.emailPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
+            data-testid="signin-email-input"
+          />
+          <PasswordField
+            label={t('auth.signIn.password')}
+            icon={Lock}
+            id="password"
+            name="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+            invalid={!!error && !emailNotVerified}
+            data-testid="signin-password-input"
+          />
+        </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading} data-testid="signin-submit-button">
-              {isLoading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
-            </Button>
+        <div className="mt-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <AuthCheckbox id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+            <label htmlFor="remember" className="cursor-pointer text-[13px] font-medium text-muted-foreground">
+              {t('auth.signIn.rememberMe')}
+            </label>
+          </div>
+          <Link
+            to="/forgot-password"
+            className="text-[13px] font-semibold text-muted-foreground hover:underline"
+            data-testid="signin-forgot-password-link"
+          >
+            {t('auth.signIn.forgotPassword')}
+          </Link>
+        </div>
 
-            <p className="text-center text-sm text-muted-foreground">
-              {t('auth.signIn.noAccount')}{' '}
-              <Link to="/sign-up" state={location.state} className="font-medium text-primary hover:underline" data-testid="signin-signup-link">
-                {t('auth.signIn.signUp')}
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+        <GradientButton
+          type="submit"
+          loading={isLoading}
+          loadingText={t('auth.signIn.submitting')}
+          className="mt-5"
+          data-testid="signin-submit-button"
+        >
+          {t('auth.signIn.submit')}
+        </GradientButton>
+
+        <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
+          {t('auth.signIn.noAccount')}{' '}
+          <Link to="/sign-up" state={location.state} className="font-semibold text-primary hover:underline" data-testid="signin-signup-link">
+            {t('auth.signIn.signUp')}
+          </Link>
+        </p>
+      </form>
     </AuthLayout>
   )
 }

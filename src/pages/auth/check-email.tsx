@@ -1,11 +1,18 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Mail, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { MailCheck, RotateCcw, CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
+import { AuthBadge, AuthAlert, EmailChip, SecondaryButton, BackLink } from '@/components/auth/glass'
 import { api } from '@/lib/api'
+
+const RESEND_COOLDOWN = 60
+
+function formatMMSS(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
 
 export default function CheckEmail() {
   const { t } = useTranslation()
@@ -14,9 +21,16 @@ export default function CheckEmail() {
   const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
   const [error, setError] = useState('')
+  const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const id = window.setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000)
+    return () => window.clearInterval(id)
+  }, [cooldown])
 
   const handleResend = async () => {
-    if (!email || isResending) return
+    if (!email || isResending || cooldown > 0) return
     setIsResending(true)
     setError('')
     setResent(false)
@@ -24,6 +38,7 @@ export default function CheckEmail() {
     try {
       await api.post('/auth/resend-verification', { email }, { requiresAuth: false })
       setResent(true)
+      setCooldown(RESEND_COOLDOWN)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.checkEmail.resendFailed'))
     } finally {
@@ -33,61 +48,57 @@ export default function CheckEmail() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md border-0 shadow-none">
-        <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <Mail className="h-8 w-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold">{t('auth.checkEmail.title')}</CardTitle>
-          <CardDescription>
-            {t('auth.checkEmail.subtitle')}
-          </CardDescription>
-          {email && (
-            <p className="text-sm font-medium text-foreground">{email}</p>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-center text-sm text-muted-foreground">
-            {t('auth.checkEmail.instruction')}
-          </p>
+      <div className="text-center">
+        <AuthBadge icon={MailCheck} />
+        <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
+          {t('auth.checkEmail.title')}
+        </h1>
+        <p className="mt-1.5 text-[15px] text-muted-foreground">{t('auth.checkEmail.subtitle')}</p>
+        {email && <EmailChip email={email} />}
 
-          {error && (
-            <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm text-center">
-              {error}
-            </div>
-          )}
+        <p className="mt-4 text-[13px] font-medium leading-relaxed text-muted-foreground">
+          {t('auth.checkEmail.instruction')}
+        </p>
 
-          {resent && (
-            <div className="p-3 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm text-center">
-              {t('auth.checkEmail.resent')}
-            </div>
-          )}
+        {error && (
+          <AuthAlert kind="err" icon={CircleAlert} className="mb-0 mt-4 text-left">
+            {error}
+          </AuthAlert>
+        )}
 
-          {email && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleResend}
-              disabled={isResending || resent}
-            >
-              {isResending ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  {t('auth.checkEmail.resending')}
-                </>
-              ) : (
-                t('auth.checkEmail.resend')
-              )}
-            </Button>
-          )}
+        {resent && (
+          <AuthAlert kind="ok" icon={CircleCheck} className="mb-0 mt-4 text-left">
+            {t('auth.checkEmail.resent')}
+          </AuthAlert>
+        )}
 
-          <p className="text-center text-sm text-muted-foreground">
-            <Link to="/sign-in" className="font-medium text-primary hover:underline">
-              {t('auth.checkEmail.backToSignIn')}
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+        {email && (
+          <SecondaryButton
+            type="button"
+            onClick={handleResend}
+            disabled={isResending || cooldown > 0}
+            className="mt-[22px]"
+          >
+            {isResending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                {t('auth.checkEmail.resending')}
+              </>
+            ) : cooldown > 0 ? (
+              t('auth.checkEmail.resendCooldown', { time: formatMMSS(cooldown) })
+            ) : (
+              <>
+                <RotateCcw className="size-4" />
+                {t('auth.checkEmail.resend')}
+              </>
+            )}
+          </SecondaryButton>
+        )}
+
+        <div className="mt-5">
+          <BackLink>{t('auth.checkEmail.backToSignIn')}</BackLink>
+        </div>
+      </div>
     </AuthLayout>
   )
 }

@@ -1,10 +1,14 @@
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, KeyRound, CircleAlert, CircleCheck, RotateCcw } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
+import {
+  CardHead,
+  GlassField,
+  AuthAlert,
+  GradientButton,
+  SecondaryButton,
+  BackLink,
+} from '@/components/auth/glass'
 import { useForgotPassword } from '@/hooks/auth/use-forgot-password'
 
 export default function ForgotPassword() {
@@ -13,63 +17,58 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md border-0 shadow-none">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.forgotPassword.title')}</CardTitle>
-          <CardDescription>
-            {t('auth.forgotPassword.subtitle')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm text-center">
-                {t('auth.forgotPassword.successMessage')}
-              </div>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link to="/sign-in" className="font-medium text-primary hover:underline">
-                  {t('auth.forgotPassword.backToSignIn')}
-                </Link>
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                  {error}
-                </div>
-              )}
+      <CardHead badge={KeyRound} title={t('auth.forgotPassword.title')} subtitle={t('auth.forgotPassword.subtitle')} />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.forgotPassword.email')}</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder={t('auth.forgotPassword.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  required
-                  className="bg-background/50"
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t('auth.forgotPassword.submitting') : t('auth.forgotPassword.submit')}
-              </Button>
-
-              <p className="text-center text-sm text-muted-foreground">
-                {t('auth.forgotPassword.rememberPassword')}{' '}
-                <Link to="/sign-in" className="font-medium text-primary hover:underline">
-                  {t('auth.forgotPassword.signIn')}
-                </Link>
-              </p>
-            </form>
+      {success ? (
+        <div className="flex flex-col">
+          <AuthAlert kind="ok" icon={CircleCheck} className="mb-4">
+            {t('auth.forgotPassword.successMessage')}
+          </AuthAlert>
+          <form onSubmit={handleSubmit}>
+            <SecondaryButton type="submit" disabled={isLoading}>
+              <RotateCcw className="size-4" />
+              {t('auth.forgotPassword.resend')}
+            </SecondaryButton>
+          </form>
+          <div className="mt-5 text-center">
+            <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
+          {error && (
+            <AuthAlert kind="err" icon={CircleAlert}>
+              {error}
+            </AuthAlert>
           )}
-        </CardContent>
-      </Card>
+
+          <GlassField
+            label={t('auth.forgotPassword.email')}
+            icon={Mail}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder={t('auth.forgotPassword.emailPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
+          />
+
+          <GradientButton
+            type="submit"
+            loading={isLoading}
+            loadingText={t('auth.forgotPassword.submitting')}
+            className="mt-[18px]"
+          >
+            {t('auth.forgotPassword.submit')}
+          </GradientButton>
+
+          <div className="mt-5 text-center">
+            <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>
+          </div>
+        </form>
+      )}
     </AuthLayout>
   )
 }

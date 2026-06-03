@@ -1,198 +1,175 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, Lock, LockKeyhole, User, CircleAlert } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import {
+  CardHead,
+  GlassField,
+  PasswordField,
+  PasswordStrengthMeter,
+  AuthAlert,
+  AuthDivider,
+  AuthCheckbox,
+  GradientButton,
+} from '@/components/auth/glass'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
   const { t } = useTranslation()
   const location = useLocation()
   const { formData, errors, apiError, setApiError, isLoading, handleChange, handleSubmit } = useSignUp()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   return (
-    <AuthLayout>
-      <Card className="w-full max-w-md border-0 shadow-none" data-testid="signup-card">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold" data-testid="signup-title">{t('auth.signUp.title')}</CardTitle>
-          <CardDescription data-testid="signup-subtitle">
-            {t('auth.signUp.subtitle')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form" noValidate>
-            {apiError && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm" data-testid="signup-error">
-                {apiError}
-              </div>
-            )}
+    <AuthLayout cardClassName="max-w-[440px]">
+      <form onSubmit={handleSubmit} className="flex flex-col" data-testid="signup-form" noValidate>
+        <CardHead logo title={t('auth.signUp.title')} subtitle={t('auth.signUp.subtitle')} />
 
-            <GoogleSignInButton onError={setApiError} />
+        {apiError && (
+          <AuthAlert kind="err" icon={CircleAlert} className="mb-0">
+            {apiError}
+          </AuthAlert>
+        )}
 
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  {t('auth.orContinueWith')}
-                </span>
-              </div>
-            </div>
+        <div className="mt-4">
+          <GoogleSignInButton onError={setApiError} />
+        </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">{t('auth.signUp.firstName')}</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  autoComplete="given-name"
-                  placeholder={t('auth.signUp.firstNamePlaceholder')}
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-background/50"
-                  data-testid="signup-firstname-input"
-                />
-                {errors.firstName && <p className="text-xs text-destructive" data-testid="signup-firstname-error">{errors.firstName}</p>}
-              </div>
+        <AuthDivider label={t('auth.orContinueWith')} />
 
-              <div className="space-y-2">
-                <Label htmlFor="lastName">{t('auth.signUp.lastName')}</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  autoComplete="family-name"
-                  placeholder={t('auth.signUp.lastNamePlaceholder')}
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-background/50"
-                  data-testid="signup-lastname-input"
-                />
-                {errors.lastName && <p className="text-xs text-destructive" data-testid="signup-lastname-error">{errors.lastName}</p>}
-              </div>
-            </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <GlassField
+              label={t('auth.signUp.firstName')}
+              icon={User}
+              id="firstName"
+              name="firstName"
+              autoComplete="given-name"
+              placeholder={t('auth.signUp.firstNamePlaceholder')}
+              value={formData.firstName}
+              onChange={handleChange}
+              disabled={isLoading}
+              error={errors.firstName}
+              data-testid="signup-firstname-input"
+            />
+            <GlassField
+              label={t('auth.signUp.lastName')}
+              id="lastName"
+              name="lastName"
+              autoComplete="family-name"
+              placeholder={t('auth.signUp.lastNamePlaceholder')}
+              value={formData.lastName}
+              onChange={handleChange}
+              disabled={isLoading}
+              error={errors.lastName}
+              data-testid="signup-lastname-input"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.signUp.email')}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder={t('auth.signUp.emailPlaceholder')}
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="bg-background/50"
-                data-testid="signup-email-input"
-              />
-              {errors.email && <p className="text-xs text-destructive" data-testid="signup-email-error">{errors.email}</p>}
-            </div>
+          <GlassField
+            label={t('auth.signUp.email')}
+            icon={Mail}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder={t('auth.signUp.emailPlaceholder')}
+            value={formData.email}
+            onChange={handleChange}
+            disabled={isLoading}
+            error={errors.email}
+            data-testid="signup-email-input"
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.signUp.password')}</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-background/50 pr-10"
-                  data-testid="signup-password-input"
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-xs text-destructive" data-testid="signup-password-error">{errors.password}</p>}
-            </div>
+          <div>
+            <PasswordField
+              label={t('auth.signUp.password')}
+              icon={Lock}
+              id="password"
+              name="password"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={isLoading}
+              error={errors.password}
+              data-testid="signup-password-input"
+            />
+            <PasswordStrengthMeter value={formData.password} />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('auth.signUp.confirmPassword')}</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-background/50 pr-10"
-                  data-testid="signup-confirm-password-input"
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-xs text-destructive" data-testid="signup-confirm-password-error">{errors.confirmPassword}</p>
-              )}
-            </div>
+          <PasswordField
+            label={t('auth.signUp.confirmPassword')}
+            icon={LockKeyhole}
+            id="confirmPassword"
+            name="confirmPassword"
+            autoComplete="new-password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            disabled={isLoading}
+            error={errors.confirmPassword}
+            data-testid="signup-confirm-password-input"
+          />
+        </div>
 
-            <div className="space-y-2">
-              <div className="flex items-start space-x-2 pt-2">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={formData.terms}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="h-4 w-4 rounded border-input mt-0.5"
-                  data-testid="signup-terms-checkbox"
-                />
-                <Label htmlFor="terms" className="font-normal cursor-pointer text-sm leading-tight">
-                  {t('auth.signUp.agreeToTerms')}{' '}
-                  <a href="https://receipto.io/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline" data-testid="signup-terms-link">
-                    {t('auth.signUp.termsOfService')}
-                  </a>{' '}
-                  {t('auth.signUp.and')}{' '}
-                  <a href="https://receipto.io/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline" data-testid="signup-privacy-link">
-                    {t('auth.signUp.privacyPolicy')}
-                  </a>
-                </Label>
-              </div>
-              {errors.terms && <p className="text-xs text-destructive" data-testid="signup-terms-error">{errors.terms}</p>}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading} data-testid="signup-submit-button">
-              {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
-            </Button>
-
-            <p className="text-center text-sm text-muted-foreground">
-              {t('auth.signUp.hasAccount')}{' '}
-              <Link to="/sign-in" state={location.state} className="font-medium text-primary hover:underline" data-testid="signup-signin-link">
-                {t('auth.signUp.signIn')}
-              </Link>
+        <div className="mt-4">
+          <div className="flex items-start gap-2.5">
+            <AuthCheckbox
+              id="terms"
+              name="terms"
+              checked={formData.terms}
+              onChange={handleChange}
+              disabled={isLoading}
+              className="mt-0.5"
+              data-testid="signup-terms-checkbox"
+            />
+            <span className="text-[13px] font-medium leading-relaxed text-muted-foreground">
+              {t('auth.signUp.agreeToTerms')}{' '}
+              <a
+                href="https://receipto.io/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline"
+                data-testid="signup-terms-link"
+              >
+                {t('auth.signUp.termsOfService')}
+              </a>{' '}
+              {t('auth.signUp.and')}{' '}
+              <a
+                href="https://receipto.io/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline"
+                data-testid="signup-privacy-link"
+              >
+                {t('auth.signUp.privacyPolicy')}
+              </a>
+            </span>
+          </div>
+          {errors.terms && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive" data-testid="signup-terms-error">
+              <CircleAlert className="size-3.5 shrink-0" />
+              {errors.terms}
             </p>
-          </form>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+
+        <GradientButton
+          type="submit"
+          loading={isLoading}
+          loadingText={t('auth.signUp.submitting')}
+          className="mt-4"
+          data-testid="signup-submit-button"
+        >
+          {t('auth.signUp.submit')}
+        </GradientButton>
+
+        <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
+          {t('auth.signUp.hasAccount')}{' '}
+          <Link to="/sign-in" state={location.state} className="font-semibold text-primary hover:underline" data-testid="signup-signin-link">
+            {t('auth.signUp.signIn')}
+          </Link>
+        </p>
+      </form>
     </AuthLayout>
   )
 }

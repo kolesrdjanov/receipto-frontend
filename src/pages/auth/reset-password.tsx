@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Lock, LockKeyhole, Link2Off, CircleCheck, CircleAlert, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
+import {
+  CardHead,
+  PasswordField,
+  PasswordStrengthMeter,
+  AuthAlert,
+  AuthBadge,
+  GradientButton,
+  BackLink,
+} from '@/components/auth/glass'
 import { useResetPassword } from '@/hooks/auth/use-reset-password'
 
 export default function ResetPassword() {
@@ -14,104 +20,100 @@ export default function ResetPassword() {
   if (!token) {
     return (
       <AuthLayout>
-        <Card className="w-full max-w-md border-0 shadow-none">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">{t('auth.resetPassword.invalidLink')}</CardTitle>
-            <CardDescription>
-              {t('auth.resetPassword.invalidLinkMessage')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/forgot-password">
-              <Button className="w-full">
-                {t('auth.resetPassword.requestNewLink')}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <CardHead
+          badge={Link2Off}
+          badgeKind="danger"
+          title={t('auth.resetPassword.invalidLink')}
+          subtitle={t('auth.resetPassword.invalidLinkMessage')}
+        />
+        <Link
+          to="/forgot-password"
+          className="btn-brand inline-flex h-[52px] w-full items-center justify-center rounded-full text-base font-semibold text-white"
+        >
+          {t('auth.resetPassword.requestNewLink')}
+        </Link>
+        <div className="mt-5 text-center">
+          <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>
+        </div>
+      </AuthLayout>
+    )
+  }
+
+  if (success) {
+    return (
+      <AuthLayout>
+        <div className="text-center">
+          <AuthBadge icon={CircleCheck} kind="ok" />
+          <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">
+            {t('auth.resetPassword.successMessage')}
+          </h1>
+          <div className="mt-3 flex items-center justify-center gap-2 text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            <span className="text-[15px]">{t('auth.resetPassword.redirecting')}</span>
+          </div>
+        </div>
       </AuthLayout>
     )
   }
 
   return (
     <AuthLayout>
-      <Card className="w-full max-w-md bg-card border-border shadow-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.resetPassword.title')}</CardTitle>
-          <CardDescription>
-            {t('auth.resetPassword.subtitle')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-sm text-center">
-                {t('auth.resetPassword.successMessage')}
-              </div>
-              <p className="text-center text-sm text-muted-foreground">
-                {t('auth.resetPassword.redirecting')}
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {apiError && (
-                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                  {apiError}
-                </div>
-              )}
+      <CardHead badge={LockKeyhole} title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')} />
 
-              <div className="space-y-2">
-                <Label htmlFor="password">{t('auth.resetPassword.password')}</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder={t('auth.resetPassword.passwordPlaceholder')}
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  required
-                  className="bg-background/50"
-                />
-                {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password}</p>
-                )}
-              </div>
+      <form onSubmit={handleSubmit} className="flex flex-col" noValidate>
+        {apiError && (
+          <AuthAlert kind="err" icon={CircleAlert}>
+            {apiError}
+          </AuthAlert>
+        )}
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t('auth.resetPassword.confirmPassword')}</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  required
-                  className="bg-background/50"
-                />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-                )}
-              </div>
+        <div className="flex flex-col gap-3">
+          <div>
+            <PasswordField
+              label={t('auth.resetPassword.password')}
+              icon={Lock}
+              id="password"
+              name="password"
+              autoComplete="new-password"
+              placeholder={t('auth.resetPassword.passwordPlaceholder')}
+              value={formData.password}
+              onChange={handleChange}
+              disabled={isLoading}
+              error={errors.password}
+            />
+            <PasswordStrengthMeter value={formData.password} />
+          </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit')}
-              </Button>
+          <PasswordField
+            label={t('auth.resetPassword.confirmPassword')}
+            icon={LockKeyhole}
+            id="confirmPassword"
+            name="confirmPassword"
+            autoComplete="new-password"
+            placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            disabled={isLoading}
+            error={errors.confirmPassword}
+          />
+        </div>
 
-              <p className="text-center text-sm text-muted-foreground">
-                {t('auth.resetPassword.rememberPassword')}{' '}
-                <Link to="/sign-in" className="font-medium text-primary hover:underline">
-                  {t('auth.resetPassword.signIn')}
-                </Link>
-              </p>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+        <GradientButton
+          type="submit"
+          loading={isLoading}
+          loadingText={t('auth.resetPassword.submitting')}
+          className="mt-5"
+        >
+          {t('auth.resetPassword.submit')}
+        </GradientButton>
+
+        <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
+          {t('auth.resetPassword.rememberPassword')}{' '}
+          <Link to="/sign-in" className="font-semibold text-primary hover:underline">
+            {t('auth.resetPassword.signIn')}
+          </Link>
+        </p>
+      </form>
     </AuthLayout>
   )
 }

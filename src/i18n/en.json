@@ -134,6 +134,14 @@
     "orContinueWith": "or",
     "continueWithGoogle": "Continue with Google",
     "googleSignInFailed": "Google sign-in was cancelled or failed. Please try again.",
+    "passwordStrength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "signIn": {
       "title": "Welcome back",
       "subtitle": "Sign in to your account to continue",
@@ -176,6 +184,7 @@
       "submit": "Send reset link",
       "submitting": "Sending...",
       "successMessage": "Password reset link sent! Check your email inbox.",
+      "resend": "Resend link",
       "backToSignIn": "Back to sign in",
       "rememberPassword": "Remember your password?",
       "signIn": "Sign in"
@@ -219,6 +228,7 @@
       "resending": "Resending...",
       "resent": "Verification email sent! Check your inbox.",
       "resendFailed": "Failed to resend. Please try again.",
+      "resendCooldown": "Resend in {{time}}",
       "backToSignIn": "Back to sign in"
     },
     "verifyEmail": {

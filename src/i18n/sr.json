@@ -134,6 +134,14 @@
     "orContinueWith": "ili",
     "continueWithGoogle": "Nastavi sa Google nalogom",
     "googleSignInFailed": "Google prijava je otkazana ili nije uspela. Pokušajte ponovo.",
+    "passwordStrength": {
+      "weak": "Slaba",
+      "fair": "Osrednja",
+      "good": "Dobra",
+      "strong": "Jaka"
+    },
+    "showPassword": "Prikaži lozinku",
+    "hidePassword": "Sakrij lozinku",
     "signIn": {
       "title": "Dobrodošli nazad",
       "subtitle": "Prijavite se na svoj nalog da nastavite",
@@ -176,6 +184,7 @@
       "submit": "Pošalji link",
       "submitting": "Slanje...",
       "successMessage": "Link za resetovanje lozinke je poslat! Proverite vaš email.",
+      "resend": "Pošaljite ponovo",
       "backToSignIn": "Nazad na prijavu",
       "rememberPassword": "Sećate se lozinke?",
       "signIn": "Prijavite se"
@@ -219,6 +228,7 @@
       "resending": "Slanje...",
       "resent": "Verifikacioni email je poslat! Proverite inbox.",
       "resendFailed": "Slanje nije uspelo. Pokušajte ponovo.",
+      "resendCooldown": "Pošaljite ponovo za {{time}}",
       "backToSignIn": "Nazad na prijavu"
     },
     "verifyEmail": {
