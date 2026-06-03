@@ -42,6 +42,10 @@ const STEPS: StepDef[] = [
 const TOTAL_STEPS = STEPS.length + 1 // + language step
 const SHEET_EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1]
 
+// Shared nav-button geometry/type (handoff `.btn`): ghost Back/Skip and the
+// gradient Next/Get-Started match in size/weight/shape — only the fill differs.
+const NAV_BTN = 'h-11 gap-2 rounded-full px-[18px] text-[15px] font-semibold'
+
 /** Desktop = centered glass dialog; mobile = bottom sheet. */
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(
@@ -144,7 +148,7 @@ function GradientPill({ children, onClick }: { children: ReactNode; onClick: () 
     <button
       type="button"
       onClick={onClick}
-      className="btn-brand inline-flex h-11 items-center gap-1.5 rounded-full px-5 text-[15px] font-semibold"
+      className={cn('btn-brand inline-flex items-center justify-center', NAV_BTN)}
     >
       {children}
     </button>
@@ -183,11 +187,19 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
       )}
       <div className="mt-6 flex w-full items-center justify-between gap-3">
         {step === 0 ? (
-          <Button variant="ghost" size="sm" onClick={complete} className="text-muted-foreground">
+          <Button
+            variant="ghost"
+            onClick={complete}
+            className={cn(NAV_BTN, 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground')}
+          >
             {t('onboarding.skip')}
           </Button>
         ) : (
-          <Button variant="ghost" size="sm" onClick={handlePrev} className="gap-1">
+          <Button
+            variant="ghost"
+            onClick={handlePrev}
+            className={cn(NAV_BTN, 'text-foreground hover:bg-bg-subtle')}
+          >
             <ChevronLeft className="size-4" />
             {t('common.back')}
           </Button>
