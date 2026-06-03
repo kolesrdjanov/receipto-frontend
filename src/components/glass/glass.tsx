@@ -323,3 +323,26 @@ export function Divider({ label }: { label: string }) {
     </div>
   )
 }
+
+/* ------------------------------------------------------------------ */
+/* Accent-tinted icon tile (soft brand tint; reusable across screens)  */
+/* ------------------------------------------------------------------ */
+export type IconTileAccent = 'emerald' | 'cyan' | 'violet' | 'pink' | 'info' | 'primary'
+
+export function IconTile({
+  icon: Icon,
+  accent,
+  size = 34,
+  className,
+}: {
+  icon: LucideIcon
+  accent: IconTileAccent
+  size?: number
+  className?: string
+}) {
+  return (
+    <div className={cn('grid size-[72px] place-items-center rounded-3xl', `icon-tile-${accent}`, className)}>
+      <Icon style={{ width: size, height: size }} strokeWidth={2} />
+    </div>
+  )
+}

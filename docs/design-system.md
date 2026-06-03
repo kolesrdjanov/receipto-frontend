@@ -26,6 +26,10 @@ All tokens have light (`:root`) and dark (`.dark`) values and are registered in
 `.bg-brand-gradient` and `BrandWash`. **Do not** use the gradient for anything else —
 that restraint is what makes the system feel calm/Apple-like.
 
+`--brand-pink` is an extra brand hue (no dark variant, like the others — tints
+recompute L/C). It is **not** part of the gradient; it only feeds the `.icon-tile-pink`
+accent tile.
+
 ### Semantic colors (alerts, badges, strength meter)
 | Token | Utility | Use |
 |---|---|---|
@@ -53,9 +57,11 @@ colliding with Tailwind's `rounded-r-*` (right-side) utilities:
 The glass card uses a literal `28px` inside `.glass-card`.
 
 ### Accent lock
-`.auth-emerald` pins `--primary`/`--ring`/`--primary-soft` to brand emerald for the
-auth subtree only. Everywhere else the user's `.accent-*` choice applies. Use the same
-pattern if another brand-locked surface is ever needed.
+`.auth-emerald` (and `.onboarding-emerald`, which shares the same rule) pin
+`--primary`/`--ring`/`--primary-soft` to brand emerald for that subtree only.
+Everywhere else the user's `.accent-*` choice applies. Use the same pattern (add a
+selector to that shared rule) for any other brand-locked surface — onboarding is the
+second one.
 
 ## Type scale (`.t-*`)
 
@@ -68,8 +74,12 @@ headings/labels instead of ad-hoc `text-2xl font-bold`.
 
 - `.glass-card` — frosted floating surface (real `backdrop-filter` + opaque fallback;
   dark gets a top highlight).
-- `.btn-brand` — brand-gradient primary CTA (used by `GradientButton`).
+- `.btn-brand` — brand-gradient primary CTA (used by `GradientButton`; also applied to a
+  plain auto-width pill for the onboarding nav CTA).
 - `.bg-brand-gradient` — soft gradient fill (progress bars, blobs).
+- `.icon-tile-{emerald,cyan,violet,pink,info,primary}` — soft accent-tinted square
+  backgrounds (light + dark), consumed by the `IconTile` primitive. Tints recompute
+  L/C from the brand/semantic token via `oklch(from …)`.
 
 ## Primitives (`src/components/glass/glass.tsx`)
 
@@ -88,6 +98,7 @@ Generic, reusable across the app:
 | `Divider` | "or" divider with hairline rules |
 | `BrandWash` | decorative blurred brand blobs |
 | `GoogleGIcon` | official 4-color Google "G" |
+| `IconTile` | 72×72 accent-tinted square; props `icon`, `accent` (`emerald`/`cyan`/`violet`/`pink`/`info`/`primary`), `size` (default 34); pairs with the `.icon-tile-*` classes |
 
 Auth-specific helpers live in `src/components/auth/glass.tsx`: `CardHead`, `EmailChip`,
 `BackLink`.
@@ -104,3 +115,7 @@ needs it is migrated. Keep this list current.
 Shared app chrome (`app-layout`: sidebar + mobile nav + header) → dashboard → then
 module by module. Each is its own cycle. Spec/plan templates live under
 `docs/superpowers/`.
+
+**Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
+Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` + the
+`.onboarding-emerald` lock).

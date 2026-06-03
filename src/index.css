@@ -527,18 +527,23 @@ body {
   --brand-emerald: oklch(0.72 0.15 165);
   --brand-cyan: oklch(0.74 0.13 205);
   --brand-violet: oklch(0.66 0.2 295);
+  /* Like the other brand stops, no dark variant: the .icon-tile-* tints
+     recompute L/C via oklch(from …) and only carry the hue. */
+  --brand-pink: oklch(0.7 0.2 350);
 }
 
 /* Auth surface locks --primary to brand emerald regardless of the
    user's chosen .accent-* (applied on <html>). Nearest-ancestor
    custom property wins, so this class on the auth wrapper overrides it. */
-.auth-emerald {
+.auth-emerald,
+.onboarding-emerald {
   --primary: oklch(0.55 0.16 165);
   --primary-foreground: oklch(0.99 0 0);
   --primary-soft: oklch(0.95 0.04 165);
   --ring: oklch(0.55 0.16 165);
 }
-.dark .auth-emerald {
+.dark .auth-emerald,
+.dark .onboarding-emerald {
   --primary: oklch(0.78 0.15 165);
   --primary-foreground: oklch(0.16 0.02 260);
   --primary-soft: oklch(0.3 0.06 165);
@@ -592,4 +597,22 @@ body {
     var(--brand-violet) 100%
   );
 }
+
+/* ============================================
+   ACCENT-TINTED ICON TILE
+   Soft brand-tinted square. Consumed by the IconTile
+   primitive (onboarding now; dashboard later).
+   ============================================ */
+.icon-tile-emerald { background: oklch(from var(--brand-emerald) 0.94 0.05 h); color: oklch(from var(--brand-emerald) 0.45 c h); }
+.icon-tile-cyan    { background: oklch(from var(--brand-cyan) 0.94 0.05 h);    color: oklch(from var(--brand-cyan) 0.42 c h); }
+.icon-tile-violet  { background: oklch(from var(--brand-violet) 0.94 0.05 h);  color: oklch(from var(--brand-violet) 0.48 c h); }
+.icon-tile-pink    { background: oklch(from var(--brand-pink) 0.94 0.05 h);    color: oklch(from var(--brand-pink) 0.48 c h); }
+.icon-tile-info    { background: var(--info-soft);                             color: oklch(from var(--info) 0.45 c h); }
+.icon-tile-primary { background: var(--primary-soft);                          color: var(--primary); }
+.dark .icon-tile-emerald { background: oklch(from var(--brand-emerald) 0.3 0.06 h); color: oklch(from var(--brand-emerald) 0.82 0.1 h); }
+.dark .icon-tile-cyan    { background: oklch(from var(--brand-cyan) 0.3 0.06 h);    color: oklch(from var(--brand-cyan) 0.82 0.1 h); }
+.dark .icon-tile-violet  { background: oklch(from var(--brand-violet) 0.3 0.06 h);  color: oklch(from var(--brand-violet) 0.84 0.1 h); }
+.dark .icon-tile-pink    { background: oklch(from var(--brand-pink) 0.3 0.06 h);    color: oklch(from var(--brand-pink) 0.84 0.1 h); }
+.dark .icon-tile-info    { background: oklch(from var(--info) 0.3 0.06 h);          color: oklch(from var(--info) 0.84 0.08 h); }
+.dark .icon-tile-primary { color: oklch(from var(--primary) calc(l + 0.06) c h); }
 
