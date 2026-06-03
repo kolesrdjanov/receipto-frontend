@@ -301,7 +301,7 @@ export default function Dashboard() {
             </button>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-black font-display tabular-nums text-primary">
+            <p className="text-4xl font-black font-display text-primary">
               {amountsVisible
                 ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
                 : <span className="tracking-wider">••••••</span>
@@ -316,7 +316,7 @@ export default function Dashboard() {
             <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold font-display tabular-nums text-primary">
+            <p className="text-3xl font-bold font-display text-primary">
               {amountsVisible
                 ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
                 : <span className="tracking-wider">••••••</span>
@@ -332,7 +332,7 @@ export default function Dashboard() {
               <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold font-display tabular-nums">
+              <p className="text-3xl font-bold font-display">
                 <AnimatedNumber value={totalReceipts} />
               </p>
             </CardContent>
@@ -571,7 +571,7 @@ export default function Dashboard() {
                     <p className="text-sm font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</p>
                     <p className="text-xs text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
                   </div>
-                  <span className="text-sm font-medium tabular-nums shrink-0 ml-4">
+                  <span className="text-sm font-medium shrink-0 ml-4">
                     {new Intl.NumberFormat('sr-RS', {
                       style: 'currency',
                       currency: receipt.currency || 'RSD',

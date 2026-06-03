@@ -404,7 +404,7 @@ export default function GroupDetail() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalReceipts')}
                 </p>
-                <p className="text-2xl sm:text-3xl font-bold tabular-nums">
+                <p className="text-2xl sm:text-3xl font-bold">
                   {statsLoading ? '...' : (stats?.totalReceipts ?? 0)}
                 </p>
               </div>
@@ -412,7 +412,7 @@ export default function GroupDetail() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalAmount')}
                 </p>
-                <p className="text-2xl sm:text-3xl font-bold text-primary tabular-nums">
+                <p className="text-2xl sm:text-3xl font-bold text-primary">
                   {statsLoading ? '...' : formatAmount(getTotalAmount())}
                 </p>
                 {stats && stats.byCurrency.length > 1 && (
