@@ -715,7 +715,7 @@
       "reassignSuccess": "Računi uspešno preraspoređeni",
       "reassignError": "Greška pri preraspoređivanju računa"
     },
-    "add": "Dodaj",
+    "add": "Dodaj kategoriju",
     "mobileSubtitle": "Organizujte svoje račune",
     "desktopSubtitle": "Organizujte račune po kategorijama i postavite opcioni mesečni budžet za svaku.",
     "allCategories": "Sve kategorije",

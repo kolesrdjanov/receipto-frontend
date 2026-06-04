@@ -661,7 +661,7 @@
   "categories": {
     "title": "Categories",
     "subtitle": "Organize your receipts by category",
-    "addCategory": "Add category",
+    "addCategory": "Add Category",
     "noCategories": "No categories yet",
     "noCategoriesText": "Create your first category to get started",
     "categoriesCount": "Categories ({{count}})",
@@ -715,7 +715,7 @@
       "saveButton": "Save changes",
       "deleteCategory": "Delete category"
     },
-    "add": "Add",
+    "add": "Add Category",
     "mobileSubtitle": "Organize your receipts",
     "desktopSubtitle": "Organize your receipts by category, and set an optional monthly budget for each.",
     "allCategories": "All categories",
