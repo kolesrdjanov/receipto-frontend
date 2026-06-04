@@ -42,13 +42,15 @@ export function WarrantyGalleryModal({
 
   const [index, setIndex] = useState(() => clampIndex(initialIndex))
 
-  useEffect(() => {
-    if (!open) return
-    setIndex((prev) => {
-      const next = clampIndex(initialIndex)
-      return prev === next ? prev : next
-    })
-  }, [open, initialIndex, clampIndex])
+  // Re-sync to the requested index whenever the gallery (re)opens or the target changes.
+  // Done during render per React's "adjust state when a prop changes" guidance, which
+  // avoids the cascading render of a setState-in-effect.
+  const syncKey = `${open}:${initialIndex}`
+  const [lastSyncKey, setLastSyncKey] = useState(syncKey)
+  if (syncKey !== lastSyncKey) {
+    setLastSyncKey(syncKey)
+    if (open) setIndex(clampIndex(initialIndex))
+  }
 
   const current = safeImages[index]
   // Detect PDFs by checking URL extension OR Cloudinary raw resource type path
