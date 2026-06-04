@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useRef, useEffect } from 'react'
+import { useState, lazy, Suspense, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,10 @@ const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-view
 import { FilterRail } from '@/components/receipts/filter-rail'
 import { FilterSheet } from '@/components/receipts/filter-sheet'
 import { QuickChips } from '@/components/receipts/quick-chips'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { AddMenu, AddSheet, ImportExportSheet } from '@/components/receipts/add-menu'
+import { ImportGuideDialog } from '@/components/receipts/import-guide-dialog'
+import { useFabStore } from '@/store/fab'
 import {
   useReceipts,
   useReceipt,
@@ -45,7 +49,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
-import { Camera, Plus, Loader2, SlidersHorizontal, Trash2, ChevronDown, Archive, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
+import { Camera, Loader2, SlidersHorizontal, Trash2, X, Tag, QrCode } from 'lucide-react'
 import { toast } from 'sonner'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
@@ -85,9 +89,11 @@ export default function Receipts() {
   const [page, setPage] = useState(1)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
-  const [showAddDropdown, setShowAddDropdown] = useState(false)
-  const [showScanDropdown, setShowScanDropdown] = useState(false)
-  const [showImportExportDropdown, setShowImportExportDropdown] = useState(false)
+  const [addSheetOpen, setAddSheetOpen] = useState(false)
+  const [importExportSheetOpen, setImportExportSheetOpen] = useState(false)
+  const setFab = useFabStore((s) => s.setFab)
+  const clearFab = useFabStore((s) => s.clearFab)
+  const openAddSheet = useCallback(() => setAddSheetOpen(true), [])
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -95,9 +101,6 @@ export default function Receipts() {
   // Sort is fixed to the backend default here; the sort toggle returns in Chunk 4's "…" menu.
   const sortBy: 'receiptDate' | 'createdAt' = 'receiptDate'
   const sortOrder: 'ASC' | 'DESC' = 'DESC'
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const scanDropdownRef = useRef<HTMLDivElement>(null)
-  const importExportDropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
   const isMobile = useIsMobile(768)
@@ -109,7 +112,7 @@ export default function Receipts() {
   const totalAmounts = (isMobile ? inf.data?.pages[0]?.totalAmounts : response?.totalAmounts) ?? []
   const loading = isMobile ? inf.isLoading : isLoading
   const filtersActive = hasActiveFilters(debouncedFilters)
-  const { openQrScanner, openPfrEntry, openGalleryScanner, scannerModals, isCreating, isGalleryProcessing } = useReceiptScanner()
+  const { openQrScanner, openGalleryScanner, scannerModals, isCreating, isGalleryProcessing } = useReceiptScanner()
   const deleteReceipt = useDeleteReceipt()
   const exportReceipts = useExportReceipts()
   const importReceipts = useImportReceipts()
@@ -137,27 +140,11 @@ export default function Receipts() {
     setPage(1)
   }, [searchParams])
 
-  // Close dropdowns when clicking outside
+  // Take over the global mobile FAB so it opens the Add action sheet on this route.
   useEffect(() => {
-    const anyOpen = showAddDropdown || showScanDropdown || showImportExportDropdown
-    if (!anyOpen) return
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
-      if (showAddDropdown && dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setShowAddDropdown(false)
-      }
-      if (showScanDropdown && scanDropdownRef.current && !scanDropdownRef.current.contains(target)) {
-        setShowScanDropdown(false)
-      }
-      if (showImportExportDropdown && importExportDropdownRef.current && !importExportDropdownRef.current.contains(target)) {
-        setShowImportExportDropdown(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showAddDropdown, showScanDropdown, showImportExportDropdown])
+    setFab(openAddSheet)
+    return () => clearFab()
+  }, [setFab, clearFab, openAddSheet])
 
   const handleFiltersChange = (newFilters: ReceiptsFilters) => {
     setFilters(newFilters)
@@ -178,12 +165,10 @@ export default function Receipts() {
     setModalMode('create')
     setPrefillData(null)
     setIsModalOpen(true)
-    setShowAddDropdown(false)
   }
 
   const handleAddFromTemplate = () => {
     setTemplateSelectorOpen(true)
-    setShowAddDropdown(false)
   }
 
   const handleTemplateSelect = (template: any) => {
@@ -202,11 +187,6 @@ export default function Receipts() {
     setSelectedReceipt(receipt)
     setModalMode('edit')
     setIsModalOpen(true)
-  }
-
-  const handlePfrEntry = () => {
-    openPfrEntry()
-    setShowAddDropdown(false)
   }
 
   const handleDeleteReceipt = (receipt: Receipt) => {
@@ -343,130 +323,47 @@ export default function Receipts() {
   return (
     <AppLayout>
       <PageTransition>
-      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2" data-testid="receipts-title">{t('receipts.title')}</h2>
-          <p className="text-sm text-muted-foreground sm:text-base" data-testid="receipts-subtitle">
+      {/* Desktop sticky toolbar (breaks out of page padding to sit flush) */}
+      <PageToolbar
+        className="md:-mx-8 md:-mt-8 md:mb-6"
+        title={t('receipts.title')}
+        subtitle={
+          <>
             {t('receipts.subtitle')}{' '}
             <Link to="/templates" className="text-primary hover:underline" data-testid="receipts-manage-templates-link">
               {t('receipts.manageTemplates')}
             </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-4 lg:gap-2">
-          <div className="order-1 lg:order-2 flex gap-4 lg:gap-2 w-full lg:w-auto">
-            {/* Scan dropdown */}
-            <div className="relative flex-1 sm:flex-none" ref={scanDropdownRef}>
-              <Button
-                variant="default"
-                onClick={() => setShowScanDropdown(!showScanDropdown)}
-                disabled={isCreating || isGalleryProcessing}
-                className="w-full sm:w-auto"
-                data-testid="receipts-scan-dropdown-button"
-              >
-                {(isCreating || isGalleryProcessing) ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Camera className="h-4 w-4" />
-                )}
-                <span>{t('receipts.scanQr')}</span>
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </Button>
-              {showScanDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-52 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
-                  <button
-                    onClick={() => { openQrScanner(); setShowScanDropdown(false) }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                    data-testid="receipts-scan-camera-button"
-                  >
-                    <Camera className="h-4 w-4 text-muted-foreground" />
-                    {t('receipts.scanCamera')}
-                  </button>
-                  <button
-                    onClick={() => { openGalleryScanner(); setShowScanDropdown(false) }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                    data-testid="receipts-scan-gallery-button"
-                  >
-                    <Image className="h-4 w-4 text-muted-foreground" />
-                    {t('receipts.scanGallery')}
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* Add Manually dropdown */}
-            <div className="relative flex-1 sm:flex-none" ref={dropdownRef}>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddDropdown(!showAddDropdown)}
-                className="w-full sm:w-auto"
-                data-testid="receipts-add-dropdown-button"
-              >
-                <Plus className="h-4 w-4" />
-                <span>{t('receipts.addManually')}</span>
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </Button>
-              {showAddDropdown && (
-                <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95" data-testid="receipts-add-dropdown">
-                  <button
-                    onClick={handleAddManually}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                    data-testid="receipts-add-blank-button"
-                  >
-                    <Plus className="h-4 w-4 text-muted-foreground" />
-                    {t('receipts.addBlank')}
-                  </button>
-                  <button
-                    onClick={handleAddFromTemplate}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                    data-testid="receipts-add-from-template-button"
-                  >
-                    <Archive className="h-4 w-4 text-muted-foreground" />
-                    {t('receipts.addFromTemplate')}
-                  </button>
-                  <button
-                    onClick={handlePfrEntry}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                    data-testid="receipts-add-pfr-button"
-                  >
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                    {t('receipts.addViaPfr')}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Import/Export dropdown */}
-          <div className="relative order-3 lg:order-3 flex-1 sm:flex-none" ref={importExportDropdownRef}>
-            <Button
-              variant="outline"
-              onClick={() => setShowImportExportDropdown(!showImportExportDropdown)}
-              className="w-full sm:w-auto"
+          </>
+        }
+        actions={
+          <>
+            <AddMenu
+              onAddBlank={handleAddManually}
+              onAddFromTemplate={handleAddFromTemplate}
+              onImport={() => setImportDialogOpen(true)}
+              onExport={handleExport}
+            />
+            <button
+              type="button"
+              onClick={openQrScanner}
+              disabled={isCreating || isGalleryProcessing}
+              className="btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white disabled:opacity-60"
+              data-testid="receipts-scan-button"
             >
-              <Download className="h-4 w-4" />
-              <span>{t('receipts.importExport')}</span>
-              <ChevronDown className="h-4 w-4 ml-1" />
-            </Button>
-            {showImportExportDropdown && (
-              <div className="absolute left-0 mt-2 w-full sm:w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
-                <button
-                  onClick={() => { handleExport(); setShowImportExportDropdown(false) }}
-                  disabled={exportReceipts.isPending}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {exportReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : <Download className="h-4 w-4 text-muted-foreground" />}
-                  {t('receipts.export.button')}
-                </button>
-                <button
-                  onClick={() => { setImportDialogOpen(true); setShowImportExportDropdown(false) }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
-                >
-                  <Upload className="h-4 w-4 text-muted-foreground" />
-                  {t('receipts.import.button')}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+              {(isCreating || isGalleryProcessing) ? <Loader2 className="size-4 animate-spin" /> : <QrCode className="size-4" />}
+              {t('receipts.scanQr')}
+            </button>
+          </>
+        }
+      />
+
+      {/* Mobile interim title (replaced by the frosted header in Chunk 4b) */}
+      <div className="mb-4 md:hidden" data-testid="receipts-title">
+        <h1 className="t-h1 text-[28px]">{t('receipts.title')}</h1>
+        <p className="t-sm mt-1 text-muted-foreground" data-testid="receipts-subtitle">
+          {t('receipts.subtitle')}{' '}
+          <Link to="/templates" className="text-primary hover:underline">{t('receipts.manageTemplates')}</Link>
+        </p>
       </div>
 
       {/* Mobile quick-filter row (full frosted header lands in Chunk 4) */}
@@ -636,61 +533,20 @@ export default function Receipts() {
         )}
       </Suspense>
 
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t('receipts.import.guide.title')}</DialogTitle>
-            <DialogDescription>
-              {t('receipts.import.guide.description')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">{t('receipts.import.guide.columns')}</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnStoreName')}
-                </li>
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnTotalAmount')}
-                </li>
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnCurrency')}
-                </li>
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnReceiptDate')}
-                </li>
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnReceiptNumber')}
-                </li>
-                <li className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                  {t('receipts.import.guide.columnCategoryName')}
-                </li>
-              </ul>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('receipts.import.guide.dateFormats')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button variant="outline" onClick={handleDownloadTemplate}>
-                <Download className="h-4 w-4" />
-                {t('receipts.import.guide.downloadTemplate')}
-              </Button>
-              <Button onClick={handleSelectImportFile} disabled={importReceipts.isPending}>
-                {importReceipts.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                {t('receipts.import.guide.selectFile')}
-              </Button>
-            </div>
-          </div>
-          <input
-            ref={importInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleImportFile}
-            className="hidden"
-          />
-        </DialogContent>
-      </Dialog>
+      <ImportGuideDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onDownloadTemplate={handleDownloadTemplate}
+        onSelectFile={handleSelectImportFile}
+        importing={importReceipts.isPending}
+      />
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        onChange={handleImportFile}
+        className="hidden"
+      />
 
       <ConfirmDialog
         open={deleteConfirmOpen}
@@ -761,6 +617,22 @@ export default function Receipts() {
         categories={categories}
         onFiltersChange={handleFiltersChange}
         resultCount={meta?.total ?? 0}
+      />
+
+      <AddSheet
+        open={addSheetOpen}
+        onOpenChange={setAddSheetOpen}
+        onScanQr={openQrScanner}
+        onScanGallery={openGalleryScanner}
+        onAddManually={handleAddManually}
+        onAddFromTemplate={handleAddFromTemplate}
+        onImportExport={() => setImportExportSheetOpen(true)}
+      />
+      <ImportExportSheet
+        open={importExportSheetOpen}
+        onOpenChange={setImportExportSheetOpen}
+        onImport={() => setImportDialogOpen(true)}
+        onExport={handleExport}
       />
       </PageTransition>
     </AppLayout>
