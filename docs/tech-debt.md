@@ -8,15 +8,15 @@ the bottom; don't renumber existing ones.
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
-| TD-1 | Standardize all forms on React Hook Form + Zod | High | 🟡 In progress (Phase 1+2 done) |
+| TD-1 | Standardize all forms on React Hook Form + Zod | High | 🟡 In progress (forms + validation msgs done; plain-useState forms + guardrail remain) |
 | TD-2 | Migrate remaining empty states to the Glass design system | Medium | ✅ Done |
 | TD-3 | Avatar fallback should be the brand gradient, not solid `bg-primary` | Medium | ✅ Done |
-| TD-4 | Finish the Glass migration for the orphaned screens (groups, price-tracker, templates, admin) | Medium | 🟡 In progress (de-violation sweep done) |
+| TD-4 | Finish the Glass migration for the orphaned screens (groups, price-tracker, templates, admin) | Medium | 🟡 In progress (de-violation sweep + Templates done; groups/price-tracker remain) |
 | TD-5 | Centralize money & date formatting (+ fix the Serbian-date i18n bug) | High | ✅ Done |
 | TD-6 | Unify icon, loading, and confirmation vocabulary | Medium | 🟡 In progress (icons + confirm done) |
 | TD-7 | Extract shared list/empty/action primitives into `components/glass/` | Medium | 🟡 In progress (EmptyState + AddButton done) |
 | TD-8 | Close API hook-layer gaps (net-new endpoints that skipped the hooks layer) | Low | ✅ Done |
-| TD-9 | Standardize modal footers on the `GlassDialog` `actions` API | Medium | 🟡 In progress (recurring modal = reference) |
+| TD-9 | Standardize modal footers on the `GlassDialog` `actions` API | Medium | 🟡 In progress (7 modals on actions; categories/loyalty + confirm-dialog remain) |
 
 ## Progress log — 2026-06-05 execution pass
 
@@ -65,6 +65,29 @@ the forms and any restyled screens need a manual QA pass before merge.
 > **Audit pass 2026-06-04** added TD-4–TD-8 and appended "Audit update" corrections to TD-1/TD-2/TD-3
 > from a full consistency review of the post-redesign frontend (component reuse, design-system adherence,
 > empty states, icon/UI consistency, forms, and API calling).
+
+## Progress log — 2026-06-05 (session 2: cross-feature primitives, i18n, Templates, TD-9 footers)
+
+A second pass (running parallel to an active TD-7b/c primitives effort on the same branch) landed seven
+build-gated commits. Each was verified with `npm run build` (exit 0); **no runtime/visual QA was possible.**
+
+- **TD-7a ✅** (`8eec0f3`) — promoted `Amount`/`CatTile`/`CatName`/`SelectCheck` into
+  `components/glass/primitives.tsx`; repointed recurring's 3 cross-feature imports off
+  `receipts/primitives`. The cross-feature import smell is gone; receipts keeps its domain `StatusBadge`
+  (re-exporting the moved primitives). (`StatusPill`/`ActionList` extraction = the parallel TD-7b/c effort.)
+- **TD-1 tail ✅** (`04647da`) — keyed the last hardcoded validation messages under a shared
+  `common.validation.*` namespace (EN+SR parity): contact-support (factory now takes `t`), receipt-modal,
+  mark-paid, loyalty-card, use-sign-in, recurring-expense. `announcement-modal` `linkText` left a bare
+  `.max` (no error UI). **Remaining:** plain-`useState` forms (settings/profile, rate-app, verify-email
+  resend), the Phase-3 ESLint guardrail, and the 4-copy password-rule consolidation.
+- **TD-4 Templates ✅** (`931c855`) — `template-modal` raw `Dialog` → `GlassDialog` + `actions`. (Table
+  already used the shared `EmptyState`; heading already `.t-h1`.) Groups + price-tracker remain.
+- **TD-9 — 7 modals migrated** to `actions={{…}}`: warranty-modal (`4fe31dc`); recurring mark-paid +
+  payment-history (`109a037`); receipts receipt-modal + assign-category-dialog + qr-scanner (`5667abe`);
+  rate-app-modal + account danger-zone (`1f432f0`). **Left on `footer`** (non-standard co-equal/single
+  action layouts, per the escape hatch): warranty-import-dialog, receipts import-guide-dialog,
+  template-selector-modal. **Remaining:** category-modal, category-delete-modal, loyalty-card-modal, and
+  `confirm-dialog.tsx` (do last — highest blast radius).
 
 ---
 
