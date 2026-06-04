@@ -20,7 +20,7 @@ the bottom; don't renumber existing ones.
 | TD-10 | Templates page: replace the shadcn table with the Glass list-card pattern | Medium | 🔴 Not started |
 | TD-11 | Expenses "Load more" jumps to bottom on mobile — preserve scroll position | Medium | 🔴 Not started |
 | TD-12 | Desktop sidebar nav items don't match `design_handoff_navigation` | Medium | 🔴 Not started |
-| TD-13 | "+ Add {Entity}" label convention for every create button | Low | 🟡 In progress (categories done) |
+| TD-13 | "+ Add {Entity}" label convention for every create button | Low | 🟡 In progress (categories/loyalty/recurring done; groups/savings remain) |
 | TD-14 | Consolidate the 8+ hand-rolled progress bars into one shared component | Medium | 🔴 Not started |
 | TD-15 | Mobile drawer/modal buttons: one consistent full-width look | Medium | 🟡 In progress (GlassDialog modals via TD-9) |
 
