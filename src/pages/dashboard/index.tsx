@@ -70,21 +70,14 @@ import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } f
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
-// Static color map — avoids DOM thrashing from getComputedStyle + temp elements
-const ACCENT_HEX_MAP: Record<string, { light: string; dark: string }> = {
-  zinc:   { light: '#3f3f46', dark: '#e4e4e7' },
-  blue:   { light: '#3b82f6', dark: '#60a5fa' },
-  green:  { light: '#22c55e', dark: '#4ade80' },
-  purple: { light: '#8b5cf6', dark: '#a78bfa' },
-  orange: { light: '#f59e0b', dark: '#fbbf24' },
-  rose:   { light: '#f43f5e', dark: '#fb7185' },
-}
+// The chart series color is the brand --primary (emerald), which is locked app-wide since the
+// accent picker was retired. Hex equivalents of oklch(0.55 0.16 165) / oklch(0.78 0.15 165) —
+// passed to recharts as a fill/stroke value (recharts can't resolve the CSS var via attribute).
+const PRIMARY_HEX = { light: '#008d59', dark: '#37d59f' }
 
 function usePrimaryColor() {
-  const { accentColor } = useSettingsStore()
   const isDark = document.documentElement.classList.contains('dark')
-  const colors = ACCENT_HEX_MAP[accentColor] || ACCENT_HEX_MAP.zinc
-  return isDark ? colors.dark : colors.light
+  return isDark ? PRIMARY_HEX.dark : PRIMARY_HEX.light
 }
 
 /** Currency selector + month stepper — shared by the desktop toolbar and the mobile header. */
