@@ -1404,8 +1404,8 @@
     }
   },
   "support": {
-    "contactSupport": "Contact Support",
-    "title": "Contact Support",
+    "contactSupport": "Support",
+    "title": "Support",
     "description": "Need help? Have a suggestion? Found a bug? Let us know!",
     "subject": "Subject",
     "subjectPlaceholder": "Brief description of your issue",

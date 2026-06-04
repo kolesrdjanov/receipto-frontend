@@ -168,11 +168,7 @@ export function CategoryRow({ category, wide, onEdit, onDelete, onOpenActions }:
           <div className="mt-0.5 truncate text-[13px] font-medium text-muted-foreground">
             {category.description}
           </div>
-        ) : (
-          <div className="mt-0.5 truncate text-[13px] font-medium italic text-fg-faint">
-            {t('categories.noDescription')}
-          </div>
-        )}
+        ) : null}
         {category.monthlyBudget ? (
           <BudgetLine amount={category.monthlyBudget} currency={category.budgetCurrency || 'RSD'} />
         ) : null}

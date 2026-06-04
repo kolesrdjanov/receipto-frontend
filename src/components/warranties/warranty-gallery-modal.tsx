@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X, ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -116,89 +111,97 @@ export function WarrantyGalleryModal({
   const topBtn =
     'grid size-[38px] place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:opacity-40'
 
+  // Full-bleed dark lightbox: raw Radix Dialog (no shadcn DialogContent) so there's no
+  // default padding/rounded surface and no built-in close button — the only close is ours.
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-dvh w-dvw max-w-none rounded-none border-0 bg-black p-0 overflow-hidden">
-        <div className="relative h-full w-full bg-black">
-          <DialogHeader className="absolute top-0 left-0 right-0 z-10 flex-row items-center justify-between space-y-0 p-4">
-            <DialogTitle className="truncate pr-8 text-base font-semibold text-white sm:text-lg">
-              {title}
-            </DialogTitle>
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={handleOpenNewTab} disabled={!current} title="Open" className={topBtn}>
-                <ExternalLink className="size-[18px]" />
-              </button>
-              <button type="button" onClick={handleDownload} disabled={!current} title="Download" className={topBtn}>
-                <Download className="size-[18px]" />
-              </button>
-              <button type="button" onClick={() => onOpenChange(false)} title="Close" className={topBtn}>
-                <X className="size-[18px]" />
-              </button>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed inset-0 z-50 h-dvh w-dvw overflow-hidden bg-black p-0 outline-none"
+        >
+          <div className="relative h-full w-full bg-black">
+            <div className="absolute left-0 right-0 top-0 z-10 flex flex-row items-center justify-between p-4">
+              <DialogPrimitive.Title className="truncate pr-8 text-base font-semibold text-white sm:text-lg">
+                {title}
+              </DialogPrimitive.Title>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={handleOpenNewTab} disabled={!current} title="Open" className={topBtn}>
+                  <ExternalLink className="size-[18px]" />
+                </button>
+                <button type="button" onClick={handleDownload} disabled={!current} title="Download" className={topBtn}>
+                  <Download className="size-[18px]" />
+                </button>
+                <button type="button" onClick={() => onOpenChange(false)} title="Close" className={topBtn}>
+                  <X className="size-[18px]" />
+                </button>
+              </div>
             </div>
-          </DialogHeader>
 
-          {/* Main content */}
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            {current ? (
-              isPdf ? (
-                <iframe src={pdfViewerUrl} title={`${title} ${index + 1}`} className="h-full w-full border-0" />
+            {/* Main content */}
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+              {current ? (
+                isPdf ? (
+                  <iframe src={pdfViewerUrl} title={`${title} ${index + 1}`} className="h-full w-full border-0" />
+                ) : (
+                  <img src={currentDeliverUrl} alt={`${title} ${index + 1}`} className="max-h-dvh max-w-dvw object-contain" />
+                )
               ) : (
-                <img src={currentDeliverUrl} alt={`${title} ${index + 1}`} className="max-h-dvh max-w-dvw object-contain" />
-              )
-            ) : (
-              <div className="text-white/70">No files</div>
+                <div className="text-white/70">No files</div>
+              )}
+            </div>
+
+            {/* Nav */}
+            {safeImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  title="Previous"
+                  className="absolute left-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                >
+                  <ChevronLeft className="size-6" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  title="Next"
+                  className="absolute right-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                >
+                  <ChevronRight className="size-6" />
+                </button>
+              </>
+            )}
+
+            {/* Bottom: thumbnail dots + counter */}
+            {safeImages.length > 1 && (
+              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2.5 p-4">
+                <div className="flex items-center gap-2">
+                  {safeImages.map((url, i) => (
+                    <button
+                      key={url + i}
+                      type="button"
+                      onClick={() => setIndex(i)}
+                      aria-label={`${i + 1}`}
+                      className={cn(
+                        'grid size-[42px] place-items-center rounded-lg transition-colors',
+                        i === index ? 'border-2 border-white bg-white/15 text-white' : 'bg-white/10 text-white/55 hover:bg-white/20',
+                      )}
+                    >
+                      {isPdfUrl(url) ? <FileText className="size-4" /> : <ImageIcon className="size-4" />}
+                    </button>
+                  ))}
+                </div>
+                <div className="text-sm text-white/80">
+                  {index + 1} / {safeImages.length}
+                </div>
+              </div>
             )}
           </div>
-
-          {/* Nav */}
-          {safeImages.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={goPrev}
-                title="Previous"
-                className="absolute left-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-              >
-                <ChevronLeft className="size-6" />
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                title="Next"
-                className="absolute right-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-              >
-                <ChevronRight className="size-6" />
-              </button>
-            </>
-          )}
-
-          {/* Bottom: thumbnail dots + counter */}
-          {safeImages.length > 1 && (
-            <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2.5 p-4">
-              <div className="flex items-center gap-2">
-                {safeImages.map((url, i) => (
-                  <button
-                    key={url + i}
-                    type="button"
-                    onClick={() => setIndex(i)}
-                    aria-label={`${i + 1}`}
-                    className={cn(
-                      'grid size-[42px] place-items-center rounded-lg transition-colors',
-                      i === index ? 'border-2 border-white bg-white/15 text-white' : 'bg-white/10 text-white/55 hover:bg-white/20',
-                    )}
-                  >
-                    {isPdfUrl(url) ? <FileText className="size-4" /> : <ImageIcon className="size-4" />}
-                  </button>
-                ))}
-              </div>
-              <div className="text-sm text-white/80">
-                {index + 1} / {safeImages.length}
-              </div>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
-

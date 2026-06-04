@@ -132,12 +132,12 @@ export function DatePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <div className="flex items-center justify-between gap-2 px-3 pt-3">
+        <div className="grid grid-cols-2 gap-2 px-3 pt-3">
           <Select
             value={getMonth(month).toString()}
             onValueChange={handleMonthChange}
           >
-            <SelectTrigger className="h-8 w-[110px]">
+            <SelectTrigger className="h-8 w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -152,7 +152,7 @@ export function DatePicker({
             value={getYear(month).toString()}
             onValueChange={handleYearChange}
           >
-            <SelectTrigger className="h-8 w-[80px]">
+            <SelectTrigger className="h-8 w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -1403,8 +1403,8 @@
     }
   },
   "support": {
-    "contactSupport": "Kontaktirajte podršku",
-    "title": "Kontaktirajte podršku",
+    "contactSupport": "Podrška",
+    "title": "Podrška",
     "description": "Trebate pomoć? Imate predlog? Pronašli ste grešku? Javite nam!",
     "subject": "Naslov",
     "subjectPlaceholder": "Kratak opis vašeg problema",
