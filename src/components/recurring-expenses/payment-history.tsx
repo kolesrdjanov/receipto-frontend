@@ -30,13 +30,13 @@ export function PaymentHistoryModal({ open, onOpenChange, expense }: PaymentHist
       title={t('recurring.payments.title')}
       description={expense.name}
       desktopWidth={480}
-      footer={
-        <div className="flex justify-end">
+      actions={{
+        secondary: (
           <Button type="button" variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>
             {t('common.close')}
           </Button>
-        </div>
-      }
+        ),
+      }}
     >
       {isLoading ? (
         <div className="flex items-center justify-center py-10">

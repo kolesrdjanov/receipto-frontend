@@ -110,28 +110,30 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
       title={t('recurring.markPaid.title')}
       description={t('recurring.markPaid.recordPaymentFor', { name: expense.name })}
       desktopWidth={460}
-      footer={
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 rounded-xl sm:flex-none"
-            onClick={handleClose}
-            disabled={markAsPaid.isPending}
-          >
-            {t('common.cancel')}
-          </Button>
+      actions={{
+        primary: (
           <Button
             type="submit"
             form={FORM_ID}
-            className="flex-1 rounded-xl sm:ml-auto sm:flex-none"
+            className="rounded-xl"
             disabled={isSubmitting || markAsPaid.isPending}
           >
             <Check className="size-4" />
             {markAsPaid.isPending ? t('recurring.markPaid.paying') : t('recurring.markPaid.confirm')}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={handleClose}
+            disabled={markAsPaid.isPending}
+          >
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {/* Bill summary chip */}
