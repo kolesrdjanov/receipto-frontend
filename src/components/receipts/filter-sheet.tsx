@@ -75,8 +75,7 @@ export function FilterSheet({ open, onOpenChange, filters, categories, onFilters
             <DialogPrimitive.Content asChild forceMount aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()}>
               <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center">
                 <motion.div
-                  className="glass-card pointer-events-auto flex max-h-[88vh] w-full flex-col px-0 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))]"
-                  style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
+                  className="pointer-events-auto flex max-h-[88vh] w-full flex-col rounded-t-[28px] border-t border-border bg-card px-0 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]"
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
