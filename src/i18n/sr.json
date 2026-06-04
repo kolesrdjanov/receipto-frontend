@@ -603,7 +603,7 @@
   "categories": {
     "title": "Kategorije",
     "subtitle": "Organizujte svoje račune po kategorijama",
-    "addCategory": "Nova kategorija",
+    "addCategory": "Dodaj kategoriju",
     "noCategories": "Nema kategorija",
     "noCategoriesText": "Kreirajte prvu kategoriju da biste počeli",
     "categoriesCount": "Kategorije ({{count}})",
@@ -618,7 +618,7 @@
       "actions": "Akcije"
     },
     "modal": {
-      "createTitle": "Kreiraj kategoriju",
+      "createTitle": "Nova kategorija",
       "editTitle": "Izmeni kategoriju",
       "createDescription": "Dodajte novu kategoriju za organizaciju računa.",
       "editDescription": "Ažurirajte detalje kategorije ili je obrišite.",
@@ -632,7 +632,6 @@
       "iconSearchPlaceholder": "Pretraži emoji...",
       "description": "Opis",
       "descriptionPlaceholder": "Opcioni opis za ovu kategoriju",
-      "deleteConfirm": "Da li ste sigurni da želite da obrišete ovu kategoriju?",
       "createSuccess": "Kategorija uspešno kreirana",
       "updateSuccess": "Kategorija uspešno ažurirana",
       "deleteSuccess": "Kategorija uspešno obrisana",
@@ -641,7 +640,58 @@
       "deleteError": "Greška pri brisanju kategorije",
       "monthlyBudget": "Mesečni budžet",
       "monthlyBudgetPlaceholder": "npr. 50000",
-      "monthlyBudgetHelp": "Postavite mesečni limit potrošnje za ovu kategoriju (opciono)"
+      "monthlyBudgetHelp": "Postavite mesečni limit potrošnje za ovu kategoriju (opciono)",
+      "preview": "Pregled",
+      "previewNamePlaceholder": "Naziv kategorije",
+      "noBudget": "Bez budžeta",
+      "iconChoose": "Izaberite emoji",
+      "iconChange": "Dodirnite za promenu emoji-ja",
+      "chooseIcon": "Izaberite ikonu",
+      "budgetHelpEdit": "Valuta je zaključana pri izmeni kako postojeći budžeti ne bi nečujno promenili razmeru.",
+      "createButton": "Kreiraj kategoriju",
+      "saveButton": "Sačuvaj izmene",
+      "deleteCategory": "Obriši kategoriju",
+      "deleteTitle": "Obriši kategoriju",
+      "uncategorized": "Bez kategorije",
+      "reassigning": "Preraspoređivanje...",
+      "reassignSuccess": "Računi uspešno preraspoređeni",
+      "reassignError": "Greška pri preraspoređivanju računa"
+    },
+    "add": "Dodaj",
+    "mobileSubtitle": "Organizujte svoje račune",
+    "desktopSubtitle": "Organizujte račune po kategorijama i postavite opcioni mesečni budžet za svaku.",
+    "allCategories": "Sve kategorije",
+    "totalCount": "ukupno {{count}}",
+    "footerHint": "Dodirnite kategoriju za izmenu · dodirnite ⋮ za više opcija",
+    "noDescription": "Bez opisa",
+    "perMonth": "/ mesec",
+    "summary": {
+      "monthlyBudget": "Mesečni budžet",
+      "categoriesLabel": "Kategorije",
+      "budgetedNoBudget": "Sa budžetom · bez budžeta",
+      "categoriesPill": "kategorija",
+      "budgetedPill": "sa budžetom"
+    },
+    "empty": {
+      "title": "Još nema kategorija",
+      "description": "Kreirajte kategorije da organizujete račune i pratite potrošnju po tipu.",
+      "cta": "Dodajte prvu kategoriju"
+    },
+    "actions": {
+      "edit": "Izmeni kategoriju",
+      "delete": "Obriši"
+    },
+    "reassign": {
+      "title": "Obrisati „{{name}}“?",
+      "subtitle": "{{count}} računa koristi ovu kategoriju",
+      "receiptsCount": "{{count}} računa",
+      "bannerRest": " je označeno sa „{{name}}“. Prerasporedite ih pre brisanja — ili ih ostavite bez kategorije.",
+      "setAllTo": "Postavi sve na",
+      "confirm": "Prerasporedi i obriši"
+    },
+    "simpleDelete": {
+      "title": "Obrisati „{{name}}“?",
+      "description": "Ovu kategoriju ne koristi nijedan račun. Ova radnja se ne može poništiti."
     }
   },
   "groups": {

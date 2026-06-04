@@ -29,7 +29,7 @@ export function BrandWash({ className }: { className?: string }) {
 /* Glass floating-label field                                          */
 /* ------------------------------------------------------------------ */
 interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string
+  label: React.ReactNode
   icon?: LucideIcon
   error?: string
   /** Red border without a helper message (e.g. a top-of-form API error). */
