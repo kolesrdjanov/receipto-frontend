@@ -117,8 +117,9 @@ These are **not** ported yet — add each (here + in `index.css`/`components/gla
 the first screen that needs it is migrated. Keep this list current.
 
 **Ported:** sheet/modal (`GlassDialog`), list rows + status badges
-(`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), segmented control
-(inline in the Recurring add/edit form), skeleton + empty state (inline per screen).
+(`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), card grid + coverage
+bar + derived emoji tile (`warranties/primitives.tsx`), segmented control (inline in the
+Recurring add/edit form), skeleton + empty state (inline per screen).
 
 ## Migration order (indicative)
 
@@ -130,4 +131,6 @@ module by module. Each is its own cycle. Spec/plan templates live under
 Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` + the
 `.onboarding-emerald` lock), expenses/receipts (chrome + day-grouped feed + list
 primitives + glass shared comps), recurring expenses (flat urgency-sorted list, status
-scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`).
+scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`), warranties
+(coverage-bar-hero cards, urgency status language, derived emoji tiles, zod-validated
+`GlassDialog` form, restyled gallery lightbox).
