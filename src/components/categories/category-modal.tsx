@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { SmilePlus, Lock, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,7 +24,7 @@ import {
 } from '@/hooks/categories/use-categories'
 import { useSettingsStore } from '@/store/settings'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 
 const FORM_ID = 'category-form'
 
@@ -35,16 +37,26 @@ interface CategoryModalProps {
   onRequestDelete?: (category: Category) => void
 }
 
-type CategoryFormData = CreateCategoryInput
+const createCategorySchema = (t: (k: string, o?: any) => string) =>
+  z.object({
+    name: z.string().min(1, t('categories.modal.nameRequired')),
+    color: z.string().optional(),
+    icon: z.string().optional(),
+    description: z.string().optional(),
+    monthlyBudget: z.preprocess(
+      (v) => (v === '' || v === null || (typeof v === 'number' && Number.isNaN(v)) ? undefined : v),
+      z.coerce.number().min(0).optional(),
+    ),
+  })
+
+type CategorySchema = ReturnType<typeof createCategorySchema>
+type CategoryFormInput = z.input<CategorySchema>
+type CategoryFormData = z.output<CategorySchema>
 
 const fieldShell =
   'flex h-[50px] items-center gap-2.5 rounded-[14px] border border-border bg-muted/60 px-3.5 transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/15'
 const inputCls =
   'min-w-0 flex-1 border-0 bg-transparent text-[15px] font-medium text-foreground outline-none placeholder:font-normal placeholder:text-fg-faint'
-
-function fmtBudget(amount: number, currency: string) {
-  return `${Math.round(amount).toLocaleString('sr-RS')} ${currency}`
-}
 
 export function CategoryModal({ open, onOpenChange, category, mode, onRequestDelete }: CategoryModalProps) {
   const { t } = useTranslation()
@@ -52,6 +64,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
   const { currency: preferredCurrency } = useSettingsStore()
   const [emojiOpen, setEmojiOpen] = useState(false)
 
+  const schema = useMemo(() => createCategorySchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -59,7 +72,8 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<CategoryFormData>({
+  } = useForm<CategoryFormInput, unknown, CategoryFormData>({
+    resolver: zodResolver(schema),
     defaultValues: { name: '', color: DEFAULT_CATEGORY_COLOR, icon: '', description: '', monthlyBudget: undefined },
   })
 
@@ -69,7 +83,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
   const colorValue = watch('color')
   const iconValue = watch('icon')
   const nameValue = watch('name')
-  const budgetValue = watch('monthlyBudget')
+  const budgetValue = Number(watch('monthlyBudget')) || 0
 
   const lockedCurrency = mode === 'edit' ? category?.budgetCurrency : undefined
   const displayCurrency = lockedCurrency || preferredCurrency || 'RSD'
@@ -95,7 +109,13 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
   }
 
   const onSubmit = async (data: CategoryFormData) => {
-    const submitData: CreateCategoryInput = { ...data }
+    const submitData: CreateCategoryInput = {
+      name: data.name,
+      color: data.color,
+      icon: data.icon,
+      description: data.description,
+      monthlyBudget: data.monthlyBudget,
+    }
     if (submitData.monthlyBudget && submitData.monthlyBudget > 0) {
       submitData.budgetCurrency =
         mode === 'create' || !category?.budgetCurrency ? preferredCurrency : category.budgetCurrency
@@ -229,7 +249,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
                 </div>
                 {budgetValue && budgetValue > 0 ? (
                   <div className="mt-0.5 text-[12px] tabular-nums text-muted-foreground">
-                    {fmtBudget(budgetValue, displayCurrency)} {t('categories.perMonth')}
+                    {formatMoney(budgetValue, displayCurrency)} {t('categories.perMonth')}
                   </div>
                 ) : (
                   <div className="mt-0.5 text-[12px] text-fg-faint">{t('categories.modal.noBudget')}</div>
@@ -244,7 +264,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
             placeholder={t('categories.modal.namePlaceholder')}
             error={errors.name?.message}
             data-testid="category-name-input"
-            {...register('name', { required: t('categories.modal.nameRequired') })}
+            {...register('name')}
           />
 
           {/* Color */}
@@ -303,7 +323,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
                   placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
                   className={cn(inputCls, 'tabular-nums')}
                   data-testid="category-budget-input"
-                  {...register('monthlyBudget', { valueAsNumber: true })}
+                  {...register('monthlyBudget')}
                 />
               </div>
               <div
