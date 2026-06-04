@@ -259,7 +259,6 @@ export function CardActionList({
         <Pencil className={iconCls} />
         {t('warranties.actions.edit')}
       </button>
-      <div className="my-1 h-px bg-hairline-soft" />
       <button type="button" className={cn(item, 'text-destructive hover:bg-destructive/10')} onClick={onDelete}>
         <Trash2 className="size-[18px] shrink-0" />
         {t('warranties.actions.delete')}

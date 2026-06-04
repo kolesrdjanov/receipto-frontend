@@ -74,7 +74,6 @@ export function RowKebab({ receipt: r, onView, onEdit, onDelete }: RowKebabProps
           </div>
         )}
         <KebabItem icon={Pencil} label={t('common.edit')} onClick={run(onEdit)} disabled={locked} title={lockReason} />
-        <div className="mx-2 my-1 h-px bg-hairline-soft" />
         <KebabItem icon={Trash2} label={t('common.delete')} onClick={run(onDelete)} disabled={locked} danger title={lockReason} />
       </PopoverContent>
     </Popover>

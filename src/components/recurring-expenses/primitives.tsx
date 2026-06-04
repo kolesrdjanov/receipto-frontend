@@ -108,7 +108,6 @@ export function RowActionList({
         {expense.isPaused ? <Play className={iconCls} /> : <Pause className={iconCls} />}
         {expense.isPaused ? t('recurring.actions.resume') : t('recurring.actions.pause')}
       </button>
-      <div className="my-1 h-px bg-hairline-soft" />
       <button
         type="button"
         className={cn(item, 'text-destructive hover:bg-destructive/10')}
