@@ -1,14 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Card, CardContent} from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
+import { SettingsCard, RankCard, SaveBar } from '@/components/settings/primitives'
+import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
 import { CurrencySelect } from '@/components/ui/currency-select'
-import { Image as ImageIcon, Trash2, Save, Sparkles, Compass, Crown, MapPin, Wallet } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Image as ImageIcon, Trash2, MapPin, Wallet, Mail } from 'lucide-react'
 import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage } from '@/hooks/users/use-me'
 import { toast } from 'sonner'
@@ -30,54 +29,20 @@ export default function ProfileSettings() {
   const rankConfig = useMemo(() => {
     const nextRank = getNextRank(receiptRank)
     const progress = getProgressToNextRank(receiptRank, receiptCount)
-
-    const common = {
-      progress,
-      nextRankName: nextRank ? t(nextRank.nameKey) : t('settings.profile.rank.maxRank'),
-      receiptsToNextRank: nextRank ? Math.max(nextRank.minReceipts - receiptCount, 0) : 0,
-    }
+    const receiptsToNextRank = nextRank ? Math.max(nextRank.minReceipts - receiptCount, 0) : 0
+    const nextRankName = nextRank ? t(nextRank.nameKey) : t('settings.profile.rank.maxRank')
+    const common = { progress, nextRankName, receiptsToNextRank }
 
     if (receiptRank === 'status_a') {
-      return {
-        name: t('settings.profile.rank.names.statusA'),
-        description: t('settings.profile.rank.descriptions.statusA'),
-        icon: Crown,
-        iconClassName: 'text-amber-400',
-        cardClassName: 'border-amber-400/30 bg-amber-500/10',
-        ...common,
-      }
+      return { name: t('settings.profile.rank.names.statusA'), description: t('settings.profile.rank.descriptions.statusA'), ...common }
     }
-
     if (receiptRank === 'status_b') {
-      return {
-        name: t('settings.profile.rank.names.statusB'),
-        description: t('settings.profile.rank.descriptions.statusB', { remaining: common.receiptsToNextRank }),
-        icon: Sparkles,
-        iconClassName: 'text-blue-400',
-        cardClassName: 'border-blue-400/30 bg-blue-500/10',
-        ...common,
-      }
+      return { name: t('settings.profile.rank.names.statusB'), description: t('settings.profile.rank.descriptions.statusB', { remaining: receiptsToNextRank }), ...common }
     }
-
     if (receiptRank === 'status_c') {
-      return {
-        name: t('settings.profile.rank.names.statusC'),
-        description: t('settings.profile.rank.descriptions.statusC', { remaining: common.receiptsToNextRank }),
-        icon: Compass,
-        iconClassName: 'text-emerald-400',
-        cardClassName: 'border-emerald-400/30 bg-emerald-500/10',
-        ...common,
-      }
+      return { name: t('settings.profile.rank.names.statusC'), description: t('settings.profile.rank.descriptions.statusC', { remaining: receiptsToNextRank }), ...common }
     }
-
-    return {
-      name: t('settings.profile.rank.names.noStatus'),
-      description: t('settings.profile.rank.descriptions.noStatus', { remaining: common.receiptsToNextRank }),
-      icon: Compass,
-      iconClassName: 'text-muted-foreground',
-      cardClassName: 'border-border bg-muted/20',
-      ...common,
-    }
+    return { name: t('settings.profile.rank.names.noStatus'), description: t('settings.profile.rank.descriptions.noStatus', { remaining: receiptsToNextRank }), ...common }
   }, [receiptCount, receiptRank, t])
 
   const initial = useMemo(
@@ -109,6 +74,9 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     if (me) {
+      // Sync server-loaded profile fields (street/zip/income — not present on the
+      // cached authUser) into the editable draft once the /users/me query resolves.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft((prev) => ({
         ...prev,
         street: me.street ?? '',
@@ -190,220 +158,177 @@ export default function ProfileSettings() {
 
   return (
     <AppLayout>
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2 flex items-center gap-2">
-          {t('settings.profile.title')}
-        </h2>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          {t('settings.profile.description')}
-        </p>
-      </div>
+      <PageTransition>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('settings.profile.title')}
+          subtitle={t('settings.profile.description')}
+        />
 
-      <div className="grid gap-6">
-        <Card>
-          <CardContent className="space-y-4 pt-8" key={profileKey}>
-            {!effectiveUser ? (
+        {/* Mobile header */}
+        <div className="mb-5 md:hidden">
+          <h1 className="t-h1 text-[28px]">{t('settings.profile.title')}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('settings.profile.description')}</p>
+        </div>
+
+        <div className="mx-auto max-w-3xl space-y-5" key={profileKey}>
+          {!effectiveUser ? (
+            <SettingsCard>
               <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-            ) : (
-              <>
-                {/* Profile picture */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <Avatar
-                      firstName={effectiveUser.firstName}
-                      lastName={effectiveUser.lastName}
-                      imageUrl={effectiveUser.profileImageUrl}
-                      size="2xl"
-                    />
-                    <div>
-                      <div className="space-y-0.5 mb-6">
-                        <Label>{t('settings.profile.picture')}</Label>
-                        <p className="text-sm text-muted-foreground">{t('settings.profile.pictureHelp')}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
-                            onChange={handleFileChange}
-                            className="hidden"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="default"
-                            onClick={handleFileSelect}
-                            disabled={uploadProfileImage.isPending}
-                        >
-                          <ImageIcon className="h-4 w-4" />
-                          {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="destructive"
-                            size="default"
-                            onClick={handleRemoveProfileImage}
-                            disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          {t('settings.profile.remove')}
-                        </Button>
-                      </div>
+            </SettingsCard>
+          ) : (
+            <>
+              {/* Identity */}
+              <SettingsCard>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Avatar
+                    firstName={effectiveUser.firstName}
+                    lastName={effectiveUser.lastName}
+                    imageUrl={effectiveUser.profileImageUrl}
+                    size="2xl"
+                  />
+                  <div className="min-w-0">
+                    <div className="space-y-0.5">
+                      <span className="text-sm font-semibold">{t('settings.profile.picture')}</span>
+                      <p className="text-[13px] text-muted-foreground">{t('settings.profile.pictureHelp')}</p>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/heic"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-10"
+                        onClick={handleFileSelect}
+                        disabled={uploadProfileImage.isPending}
+                      >
+                        <ImageIcon className="size-4" />
+                        {uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-10 text-destructive hover:text-destructive"
+                        onClick={handleRemoveProfileImage}
+                        disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
+                      >
+                        <Trash2 className="size-4" />
+                        {t('settings.profile.remove')}
+                      </Button>
                     </div>
                   </div>
-
                 </div>
 
-                {/* Names */}
+                <div className="my-5 h-px bg-hairline-soft" />
+
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">{t('settings.profile.firstName')}</Label>
-                    <Input
-                      id="firstName"
-                      value={draft.firstName}
-                      onChange={(e) => setDraft((p) => ({ ...p, firstName: e.target.value }))}
-                      autoComplete="given-name"
+                  <Field
+                    label={t('settings.profile.firstName')}
+                    id="firstName"
+                    value={draft.firstName}
+                    onChange={(e) => setDraft((p) => ({ ...p, firstName: e.target.value }))}
+                    autoComplete="given-name"
+                  />
+                  <Field
+                    label={t('settings.profile.lastName')}
+                    id="lastName"
+                    value={draft.lastName}
+                    onChange={(e) => setDraft((p) => ({ ...p, lastName: e.target.value }))}
+                    autoComplete="family-name"
+                  />
+                </div>
+                <div className="mt-4">
+                  <Field
+                    label={t('settings.profile.email')}
+                    id="email"
+                    icon={Mail}
+                    value={effectiveUser.email}
+                    disabled
+                    containerClassName="opacity-70"
+                  />
+                </div>
+              </SettingsCard>
+
+              {/* Address */}
+              <SettingsCard icon={MapPin} title={t('settings.profile.address.title')} desc={t('settings.profile.address.description')}>
+                <Field
+                  label={t('settings.profile.address.street')}
+                  id="street"
+                  value={draft.street}
+                  onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))}
+                  autoComplete="street-address"
+                />
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label={t('settings.profile.address.zipCode')}
+                    id="zipCode"
+                    value={draft.zipCode}
+                    onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))}
+                    autoComplete="postal-code"
+                  />
+                  <Field
+                    label={t('settings.profile.address.city')}
+                    id="city"
+                    value={draft.city}
+                    onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))}
+                    autoComplete="address-level2"
+                  />
+                </div>
+              </SettingsCard>
+
+              {/* Monthly income */}
+              <SettingsCard icon={Wallet} title={t('settings.profile.income')} desc={t('settings.profile.incomeDescription')}>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field
+                    label={t('settings.profile.incomeAmount')}
+                    id="monthlyIncome"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={draft.monthlyIncome}
+                    onChange={(e) => setDraft((p) => ({ ...p, monthlyIncome: e.target.value }))}
+                    placeholder="0.00"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <label htmlFor="incomeCurrency" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+                      {t('settings.profile.incomeCurrency')}
+                    </label>
+                    <CurrencySelect
+                      id="incomeCurrency"
+                      value={draft.incomeCurrency}
+                      onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))}
+                      placeholder={t('settings.profile.incomeCurrency')}
+                      variant="full"
+                      triggerClassName="h-[50px] w-full rounded-[14px]"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">{t('settings.profile.lastName')}</Label>
-                    <Input
-                      id="lastName"
-                      value={draft.lastName}
-                      onChange={(e) => setDraft((p) => ({ ...p, lastName: e.target.value }))}
-                      autoComplete="family-name"
-                    />
-                  </div>
                 </div>
+              </SettingsCard>
 
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('settings.profile.email')}</Label>
-                  <Input id="email" value={effectiveUser.email} disabled />
-                </div>
+              {/* Rank */}
+              <RankCard
+                count={receiptCount}
+                rank={receiptRank}
+                name={rankConfig.name}
+                description={rankConfig.description}
+                progress={rankConfig.progress}
+                nextRankName={rankConfig.nextRankName}
+                receiptsToNextRank={rankConfig.receiptsToNextRank}
+              />
 
-                {/* Address */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-base font-medium">{t('settings.profile.address.title')}</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.profile.address.description')}
-                  </p>
-                  <div className="space-y-2">
-                    <Label htmlFor="street">{t('settings.profile.address.street')}</Label>
-                    <Input
-                      id="street"
-                      value={draft.street}
-                      onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))}
-                      autoComplete="street-address"
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="zipCode">{t('settings.profile.address.zipCode')}</Label>
-                      <Input
-                        id="zipCode"
-                        value={draft.zipCode}
-                        onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))}
-                        autoComplete="postal-code"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">{t('settings.profile.address.city')}</Label>
-                      <Input
-                        id="city"
-                        value={draft.city}
-                        onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))}
-                        autoComplete="address-level2"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Income */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Wallet className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-base font-medium">{t('settings.profile.income')}</Label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.profile.incomeDescription')}
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="monthlyIncome">{t('settings.profile.incomeAmount')}</Label>
-                      <Input
-                        id="monthlyIncome"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={draft.monthlyIncome}
-                        onChange={(e) => setDraft((p) => ({ ...p, monthlyIncome: e.target.value }))}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="incomeCurrency">{t('settings.profile.incomeCurrency')}</Label>
-                      <CurrencySelect
-                        id="incomeCurrency"
-                        value={draft.incomeCurrency}
-                        onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))}
-                        placeholder={t('settings.profile.incomeCurrency')}
-                        variant="full"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Rank */}
-                <div className={cn('rounded-lg border p-4 space-y-3 mt-10', rankConfig.cardClassName)}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <Label>{t('settings.profile.rank.title')}</Label>
-                      <p className="text-base font-semibold mt-1">{rankConfig.name}</p>
-                    </div>
-                    <rankConfig.icon className={cn('h-5 w-5 mt-0.5', rankConfig.iconClassName)} />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.profile.rank.receiptsTracked', { count: receiptCount })}
-                  </p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{t('settings.profile.rank.progress')}</span>
-                      <span>{Math.round(rankConfig.progress)}%</span>
-                    </div>
-                    <Progress value={rankConfig.progress} className="h-2" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {rankConfig.receiptsToNextRank > 0
-                      ? t('settings.profile.rank.nextTarget', {
-                          count: rankConfig.receiptsToNextRank,
-                          rank: rankConfig.nextRankName,
-                        })
-                      : t('settings.profile.rank.topTier')}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{rankConfig.description}</p>
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={handleSaveProfile}
-                    disabled={!isDirty || updateMe.isPending}
-                  >
-                    <Save className="h-4 w-4" />
-                    {updateMe.isPending ? t('common.saving') : t('common.save')}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              {/* Save */}
+              <SaveBar dirty={isDirty} saving={updateMe.isPending} onSave={handleSaveProfile} />
+            </>
+          )}
+        </div>
+      </PageTransition>
     </AppLayout>
   )
 }
