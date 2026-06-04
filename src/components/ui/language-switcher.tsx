@@ -1,10 +1,17 @@
-import { Globe } from 'lucide-react'
+import { Globe, ChevronDown } from 'lucide-react'
 import { useSettingsStore, type Language } from '@/store/settings'
 import { useUpdateMe } from '@/hooks/users/use-me'
 import { cn } from '@/lib/utils'
 
 interface LanguageSwitcherProps {
+  /** Globe-only icon button (collapsed sidebar rail). */
   compact?: boolean
+  /** Single toggle pill: globe + current language + chevron. */
+  pill?: boolean
+  /** Stretch the pill to fill its container (sidebar header). */
+  fullWidth?: boolean
+  /** Show the short code (EN/SR) instead of the full name (tight mobile header). */
+  abbreviated?: boolean
   syncBackend?: boolean
   className?: string
 }
@@ -14,7 +21,14 @@ const languages: { value: Language; label: string }[] = [
   { value: 'sr', label: 'SR' },
 ]
 
-export function LanguageSwitcher({ compact, syncBackend = true, className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  compact,
+  pill,
+  fullWidth,
+  abbreviated,
+  syncBackend = true,
+  className,
+}: LanguageSwitcherProps) {
   const language = useSettingsStore((s) => s.language)
   const setLanguage = useSettingsStore((s) => s.setLanguage)
   const updateMe = useUpdateMe()
@@ -43,6 +57,27 @@ export function LanguageSwitcher({ compact, syncBackend = true, className }: Lan
         title={language === 'en' ? 'Prebaci na srpski' : 'Switch to English'}
       >
         <Globe className="size-4" />
+      </button>
+    )
+  }
+
+  if (pill) {
+    const label = abbreviated
+      ? language === 'en' ? 'EN' : 'SR'
+      : language === 'en' ? 'English' : 'Srpski'
+    return (
+      <button
+        onClick={handleToggle}
+        className={cn(
+          'flex h-[34px] items-center gap-1.5 rounded-full border border-hairline-soft bg-bg-subtle px-3 text-[13px] font-semibold text-fg-2 transition-colors hover:bg-hairline-soft',
+          fullWidth && 'w-full',
+          className,
+        )}
+        aria-label={language === 'en' ? 'Prebaci na srpski' : 'Switch to English'}
+      >
+        <Globe className="size-3.5 shrink-0" />
+        <span className={cn('truncate', fullWidth && 'flex-1 text-left')}>{label}</span>
+        <ChevronDown className="size-3.5 shrink-0 text-fg-faint" />
       </button>
     )
   }

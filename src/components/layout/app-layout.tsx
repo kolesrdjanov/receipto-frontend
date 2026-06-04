@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import { useSettingsStore } from '@/store/settings'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { Avatar } from '@/components/ui/avatar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
+import { FabActionSheet } from '@/components/layout/fab-action-sheet'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
@@ -30,6 +31,7 @@ export function AppLayout({ children, hideMobileHeader = false }: AppLayoutProps
   )
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false)
   const [isAnnouncementsOpen, setIsAnnouncementsOpen] = useState(false)
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
   const { hasAnnouncements } = useAnnouncementIndicator()
 
   return (
@@ -44,17 +46,19 @@ export function AppLayout({ children, hideMobileHeader = false }: AppLayoutProps
         hasAnnouncements={hasAnnouncements}
       />
       <SidebarInset>
-        {/* Mobile header: hamburger | centered logo | user avatar */}
+        {/* Mobile header — edge-to-edge frosted: language | centered logo | avatar.
+            No hamburger; the bottom-bar "More" tab is the single mobile-nav entry. */}
         {!hideMobileHeader && (
-          <header className="flex flex-col border-b md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <header
+            className="sticky top-0 z-20 border-b border-hairline-soft bg-background/82 [backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)] md:hidden"
+            style={{ paddingTop: 'env(safe-area-inset-top)' }}
+          >
             <div className="relative flex h-14 items-center justify-between px-4">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="-ml-1" />
-                <LanguageSwitcher />
-              </div>
+              <LanguageSwitcher pill abbreviated className="h-8" />
               <Link
                 to="/dashboard"
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                aria-label={t('common.appName')}
               >
                 <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
               </Link>
@@ -76,7 +80,7 @@ export function AppLayout({ children, hideMobileHeader = false }: AppLayoutProps
         </main>
 
         {/* Global mobile bottom navigation (hidden on desktop) */}
-        <MobileTabBar />
+        <MobileTabBar onOpenAddSheet={() => setIsAddSheetOpen(true)} />
       </SidebarInset>
 
       {/* Modals */}
@@ -99,6 +103,7 @@ export function AppLayout({ children, hideMobileHeader = false }: AppLayoutProps
         open={isAnnouncementsOpen}
         onOpenChange={setIsAnnouncementsOpen}
       />
+      <FabActionSheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen} />
     </SidebarProvider>
   )
 }

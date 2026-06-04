@@ -1,4 +1,9 @@
 {
+  "fab": {
+    "title": "Dodaj trošak",
+    "scanHint": "Skenirajte fiskalni QR ili barkod",
+    "manualHint": "Unesite trošak ručno"
+  },
   "common": {
     "appName": "Receipto",
     "loading": "Učitavanje...",

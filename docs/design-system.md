@@ -107,24 +107,48 @@ Auth-specific helpers live in `src/components/auth/glass.tsx`: `CardHead`, `Emai
 overlay shell: a centered frosted modal on desktop (≥ md) and a Framer-Motion slide-up
 bottom sheet on mobile, composing Radix Dialog primitives (scrim/focus-trap/Esc) +
 `useReducedMotion`. Layout is header / scrollable body / pinned footer. The shared
-`ConfirmDialog` and all Recurring overlays compose from it. Use it for any new
-mobile-sheet/desktop-modal surface instead of re-deriving the pattern.
+`ConfirmDialog`, all Recurring overlays, the **announcements panel**, and the **mobile FAB
+Add/Scan sheet** compose from it. Use it for any new mobile-sheet/desktop-modal surface
+instead of re-deriving the pattern.
+
+## App navigation shell (`src/components/layout/`)
+
+The chrome that wraps every page, restyled to Glass and composed from the shadcn
+`Sidebar` primitive — **don't re-derive nav chrome per screen**:
+
+- `app-sidebar.tsx` — desktop sidebar (280px expanded / 76px icon-rail) + mobile drawer
+  (same component, rendered in the shadcn mobile `Sheet`). Data-driven `MONEY` / `WALLET`
+  nav arrays; active state = `bg-primary-soft text-primary` (accent-aware; sidebar is
+  gradient-free). Footer is a profile **popover** on desktop and an inline block in the
+  mobile drawer (`isMobile` branch). Holds the `ThemeSegmented` Light/Dark/System control.
+- `mobile-tab-bar.tsx` — Home · Expenses · gradient FAB · Warranties · More; the Warranties
+  slot falls back through the Wallet group when flag-gated off; the FAB defers to a
+  page-registered `useFabStore` action, else opens `FabActionSheet`.
+- `fab-action-sheet.tsx` — global "Add expense" `GlassDialog` (Scan / Add manually →
+  `/receipts?action=scan|add`, consumed by the Receipts page).
+- `app-layout.tsx` — edge-to-edge frosted mobile header (language · centered logo · avatar;
+  no hamburger) + content frame + tab bar + shared modals.
+- The sidebar/mobile-header language toggle is `LanguageSwitcher` with the `pill`
+  variant (`fullWidth` in the sidebar, `abbreviated` in the mobile header).
+
+> Sidebar widths live on the shadcn primitive (`ui/sidebar.tsx`):
+> `SIDEBAR_WIDTH=17.5rem`, `SIDEBAR_WIDTH_ICON=4.75rem`, `SIDEBAR_WIDTH_MOBILE=min(88vw,21rem)`.
 
 ## Deferred (port on first use)
 
-The handoff's `foundations.css` also defines: switch, pill, tab-bar, side-nav, avatar.
-These are **not** ported yet — add each (here + in `index.css`/`components/glass`) when
-the first screen that needs it is migrated. Keep this list current.
+The handoff's `foundations.css` also defines: switch, pill. These are **not** ported yet —
+add each (here + in `index.css`/`components/glass`) when the first screen that needs it is
+migrated. Keep this list current.
 
 **Ported:** sheet/modal (`GlassDialog`), list rows + status badges
 (`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), card grid + coverage
-bar + derived emoji tile (`warranties/primitives.tsx`), segmented control (inline in the
-Recurring add/edit form), skeleton + empty state (inline per screen).
+bar + derived emoji tile (`warranties/primitives.tsx`), segmented control (Recurring add/edit
+form + the shell `ThemeSegmented`), tab-bar + side-nav + avatar (the navigation shell),
+skeleton + empty state (inline per screen).
 
 ## Migration order (indicative)
 
-Shared app chrome (`app-layout`: sidebar + mobile nav + header) → dashboard → then
-module by module. Each is its own cycle. Spec/plan templates live under
+dashboard → then module by module. Each is its own cycle. Spec/plan templates live under
 `docs/superpowers/`.
 
 **Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
@@ -133,4 +157,7 @@ Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` 
 primitives + glass shared comps), recurring expenses (flat urgency-sorted list, status
 scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`), warranties
 (coverage-bar-hero cards, urgency status language, derived emoji tiles, zod-validated
-`GlassDialog` form, restyled gallery lightbox).
+`GlassDialog` form, restyled gallery lightbox), loyalty cards (wallet-card grid),
+**navigation shell** (`app-layout`: sidebar + mobile drawer + frosted mobile header + tab
+bar/FAB + profile popover w/ theme toggle + announcements modal) — the shared chrome every
+page adopts.

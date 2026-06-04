@@ -1,4 +1,9 @@
 {
+  "fab": {
+    "title": "Add expense",
+    "scanHint": "Scan a fiscal QR or barcode",
+    "manualHint": "Enter an expense by hand"
+  },
   "common": {
     "appName": "Receipto",
     "loading": "Loading...",
