@@ -23,7 +23,7 @@ function AppRoutes() {
 }
 
 function ThemeInitializer() {
-  const { theme, accentColor } = useSettingsStore()
+  const { theme } = useSettingsStore()
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -36,9 +36,10 @@ function ThemeInitializer() {
       root.classList.add(theme)
     }
 
+    // Accent retired — app is locked to brand emerald (index.css). Strip any
+    // stale accent class persisted from before the lock; add none.
     root.classList.remove('accent-zinc', 'accent-blue', 'accent-green', 'accent-purple', 'accent-orange', 'accent-rose')
-    root.classList.add(`accent-${accentColor}`)
-  }, [theme, accentColor])
+  }, [theme])
 
   return null
 }

@@ -79,12 +79,12 @@ function applyTheme(theme: Theme) {
   }
 }
 
-function applyAccentColor(color: AccentColor) {
+function applyAccentColor(_color: AccentColor) {
+  // Accent retired — the app is locked to brand emerald (see index.css).
+  // Strip any accent class persisted from before the lock; add none.
   const root = window.document.documentElement
 
   root.classList.remove('accent-zinc', 'accent-blue', 'accent-green', 'accent-purple', 'accent-orange', 'accent-rose')
-
-  root.classList.add(`accent-${color}`)
 }
 
 if (typeof window !== 'undefined') {
