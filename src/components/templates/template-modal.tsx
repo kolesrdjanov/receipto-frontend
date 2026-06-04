@@ -3,14 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +24,8 @@ import { useCategories } from '@/hooks/categories/use-categories'
 import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { useSettingsStore } from '@/store/settings'
 import { toast } from 'sonner'
+
+const FORM_ID = 'template-form'
 
 interface TemplateModalProps {
   open: boolean
@@ -130,113 +125,104 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
     reset()
   }
 
+  const pending = isSubmitting || createTemplate.isPending || updateTemplate.isPending
+  const primaryLabel = pending
+    ? mode === 'create'
+      ? t('common.creating')
+      : t('common.updating')
+    : mode === 'create'
+      ? t('common.create')
+      : t('common.update')
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? t('templates.modal.createTitle') : t('templates.modal.editTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'create'
-              ? t('templates.modal.createDescription')
-              : t('templates.modal.editDescription')}
-          </DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={(v) => (v ? onOpenChange(true) : handleClose())}
+      title={mode === 'create' ? t('templates.modal.createTitle') : t('templates.modal.editTitle')}
+      description={mode === 'create' ? t('templates.modal.createDescription') : t('templates.modal.editDescription')}
+      desktopWidth={500}
+      actions={{
+        primary: (
+          <Button type="submit" form={FORM_ID} disabled={pending}>
+            {primaryLabel}
+          </Button>
+        ),
+        secondary: (
+          <Button type="button" variant="outline" onClick={handleClose} disabled={pending}>
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">
+            {t('templates.modal.name')} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            {...register('name')}
+            placeholder={t('templates.modal.namePlaceholder')}
+          />
+          {errors.name && (
+            <p className="text-sm text-destructive">{errors.name.message}</p>
+          )}
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              {t('templates.modal.name')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              {...register('name')}
-              placeholder={t('templates.modal.namePlaceholder')}
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="storeName">
+            {t('templates.modal.storeName')} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="storeName"
+            {...register('storeName')}
+            placeholder={t('templates.modal.storeNamePlaceholder')}
+          />
+          {errors.storeName && (
+            <p className="text-sm text-destructive">{errors.storeName.message}</p>
+          )}
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="storeName">
-              {t('templates.modal.storeName')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="storeName"
-              {...register('storeName')}
-              placeholder={t('templates.modal.storeNamePlaceholder')}
-            />
-            {errors.storeName && (
-              <p className="text-sm text-destructive">{errors.storeName.message}</p>
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="currency">{t('templates.modal.currency')}</Label>
+          <Select
+            value={currency || preferredCurrency}
+            onValueChange={(value) => setValue('currency', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('templates.modal.selectCurrency')} />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies?.map((curr) => (
+                <SelectItem key={curr.code} value={curr.code}>
+                  {curr.symbol} {curr.code} - {curr.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="currency">{t('templates.modal.currency')}</Label>
-            <Select
-              value={currency || preferredCurrency}
-              onValueChange={(value) => setValue('currency', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('templates.modal.selectCurrency')} />
-              </SelectTrigger>
-              <SelectContent>
-                {currencies?.map((curr) => (
-                  <SelectItem key={curr.code} value={curr.code}>
-                    {curr.symbol} {curr.code} - {curr.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categoryId">{t('templates.modal.category')}</Label>
-            <Select
-              value={categoryId || 'none'}
-              onValueChange={(value) => setValue('categoryId', value === 'none' ? undefined : value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('templates.modal.selectCategory')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{t('templates.modal.noCategory')}</SelectItem>
-                {categories?.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.icon && <span className="mr-2">{cat.icon}</span>}
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || createTemplate.isPending || updateTemplate.isPending}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || createTemplate.isPending || updateTemplate.isPending}
-            >
-              {isSubmitting || createTemplate.isPending || updateTemplate.isPending
-                ? mode === 'create'
-                  ? t('common.creating')
-                  : t('common.updating')
-                : mode === 'create'
-                ? t('common.create')
-                : t('common.update')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-2">
+          <Label htmlFor="categoryId">{t('templates.modal.category')}</Label>
+          <Select
+            value={categoryId || 'none'}
+            onValueChange={(value) => setValue('categoryId', value === 'none' ? undefined : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('templates.modal.selectCategory')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t('templates.modal.noCategory')}</SelectItem>
+              {categories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.icon && <span className="mr-2">{cat.icon}</span>}
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </form>
+    </GlassDialog>
   )
 }
