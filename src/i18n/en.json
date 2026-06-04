@@ -36,6 +36,7 @@
     "required": "This field is required",
     "pickDate": "Pick a date",
     "next": "Next",
+    "previous": "Previous",
     "back": "Back",
     "me": "(Me)",
     "pagination": {
@@ -275,6 +276,13 @@
     "greetingMorning": "Good Morning, {{name}} 👋",
     "greetingAfternoon": "Good Afternoon, {{name}} 👋",
     "greetingEvening": "Good Evening, {{name}} 👋",
+    "greetingSubtitle": "Here's your spending for {{month}}.",
+    "greetingSubtitleEmpty": "Scan your first receipt to bring this dashboard to life.",
+    "mobileGetStarted": "Let's get started.",
+    "empty": {
+      "title": "No receipts yet",
+      "description": "Scan a fiscal QR code or add a receipt manually to start tracking your spending."
+    },
     "rank": {
       "title": "Your Rank",
       "receiptsTracked": "Receipts tracked: {{count}}",
@@ -291,6 +299,7 @@
     "currency": "Currency",
     "totalReceipts": "Total Receipts",
     "totalSpent": "Total Spent",
+    "total": "Total",
     "hideAmounts": "Hide amounts",
     "showAmounts": "Show amounts",
     "thisMonth": "This Month",

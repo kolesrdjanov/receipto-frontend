@@ -36,6 +36,7 @@
     "required": "Ovo polje je obavezno",
     "pickDate": "Izaberite datum",
     "next": "Sledeće",
+    "previous": "Prethodno",
     "back": "Nazad",
     "me": "(Ja)",
     "pagination": {
@@ -275,6 +276,13 @@
     "greetingMorning": "Dobro jutro, {{name}} 👋",
     "greetingAfternoon": "Dobar dan, {{name}} 👋",
     "greetingEvening": "Dobro veče, {{name}} 👋",
+    "greetingSubtitle": "Evo vaše potrošnje za {{month}}.",
+    "greetingSubtitleEmpty": "Skenirajte prvi račun da oživite ovu kontrolnu tablu.",
+    "mobileGetStarted": "Hajde da počnemo.",
+    "empty": {
+      "title": "Još nema računa",
+      "description": "Skenirajte fiskalni QR kod ili ručno dodajte račun da počnete praćenje potrošnje."
+    },
     "rank": {
       "title": "Vaš rang",
       "receiptsTracked": "Broj skeniranih računa: {{count}}",
@@ -291,6 +299,7 @@
     "currency": "Valuta",
     "totalReceipts": "Ukupno računa",
     "totalSpent": "Ukupno potrošeno",
+    "total": "Ukupno",
     "hideAmounts": "Sakrij iznose",
     "showAmounts": "Prikaži iznose",
     "thisMonth": "Ovaj mesec",

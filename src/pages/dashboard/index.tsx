@@ -1,16 +1,24 @@
-import {useState, useMemo, useCallback} from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Button } from '@/components/ui/button'
-import { CurrencySelect } from '@/components/ui/currency-select'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition, AnimatedNumber } from '@/components/ui/animated'
+import { CurrencySelect } from '@/components/ui/currency-select'
+import { Button } from '@/components/ui/button'
 import { CategoryBudgetProgress } from '@/components/dashboard/category-budget-progress'
 import { MonthlyForecast } from '@/components/dashboard/monthly-forecast'
 import { WidgetRenderer } from '@/components/dashboard/widget-renderer'
 import { CoachCard } from '@/components/coach/coach-card'
 import { UpcomingRecurring } from '@/components/dashboard/upcoming-recurring'
+import {
+  WidgetCard,
+  WidgetHead,
+  WidgetEmpty,
+  StatTile,
+  HiddenDots,
+  Shimmer,
+} from '@/components/dashboard/primitives'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
 import { useMe } from '@/hooks/users/use-me'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
@@ -26,9 +34,7 @@ import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
 import { useDashboardStore } from '@/store/dashboard'
 import { cn } from '@/lib/utils'
-import { PageTransition, AnimatedNumber } from '@/components/ui/animated'
 import {
-  Loader2,
   Receipt,
   QrCode,
   Clock,
@@ -56,12 +62,11 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
 } from 'recharts'
 import { format, getDaysInMonth } from 'date-fns'
 import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
-
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
@@ -80,6 +85,55 @@ function usePrimaryColor() {
   const isDark = document.documentElement.classList.contains('dark')
   const colors = ACCENT_HEX_MAP[accentColor] || ACCENT_HEX_MAP.zinc
   return isDark ? colors.dark : colors.light
+}
+
+/** Currency selector + month stepper — shared by the desktop toolbar and the mobile header. */
+function DashboardControls({
+  displayCurrency,
+  onCurrencyChange,
+  monthLabel,
+  onPrev,
+  onNext,
+}: {
+  displayCurrency: string
+  onCurrencyChange: (c: string) => void
+  monthLabel: string
+  onPrev: () => void
+  onNext: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex items-center gap-2">
+      <div className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-card pl-2.5 pr-1">
+        <Coins className="size-4 shrink-0 text-muted-foreground" />
+        <CurrencySelect
+          value={displayCurrency}
+          onValueChange={onCurrencyChange}
+          placeholder={t('dashboard.currency')}
+          triggerClassName="h-7 border-0 bg-transparent px-1 text-[13px] font-medium shadow-none focus:ring-0 focus:ring-offset-0"
+        />
+      </div>
+      <div className="inline-flex h-9 items-center rounded-full border border-border bg-card px-1">
+        <button
+          type="button"
+          onClick={onPrev}
+          aria-label={t('common.previous')}
+          className="grid size-7 place-items-center rounded-full text-fg-2 transition-colors hover:bg-bg-subtle"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <span className="min-w-[92px] text-center text-[13px] font-semibold tabular-nums">{monthLabel}</span>
+        <button
+          type="button"
+          onClick={onNext}
+          aria-label={t('common.next')}
+          className="grid size-7 place-items-center rounded-full text-fg-2 transition-colors hover:bg-bg-subtle"
+        >
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function Dashboard() {
@@ -160,6 +214,7 @@ export default function Dashboard() {
   const totalReceipts = aggStats?.totalReceipts ?? 0
   const totalAmount = convertBreakdownToTotal(aggStats?.byCurrency)
   const recentReceipts = aggStats?.recentReceipts ?? []
+  const isEmpty = !isLoading && totalReceipts === 0
   const rankReceiptCount = me?.receiptCount ?? totalReceipts
   const rankCode = normalizeRank(me?.receiptRank as ReceiptRank | undefined, rankReceiptCount)
   const nextRank = getNextRank(rankCode)
@@ -174,12 +229,13 @@ export default function Dashboard() {
         : t('settings.profile.rank.names.noStatus')
 
   const rankVisual = rankCode === 'status_a'
-    ? { icon: Crown, iconClassName: 'text-amber-400', cardClassName: 'border-amber-400/30 bg-amber-500/10' }
+    ? { icon: Crown, iconClass: 'text-warning-foreground', card: 'border-warning-soft bg-warning-soft/40', bar: 'bg-warning' }
     : rankCode === 'status_b'
-      ? { icon: Sparkles, iconClassName: 'text-blue-400', cardClassName: 'border-blue-400/30 bg-blue-500/10' }
+      ? { icon: Sparkles, iconClass: 'text-info-foreground', card: 'border-info-soft bg-info-soft/40', bar: 'bg-info' }
       : rankCode === 'status_c'
-        ? { icon: Compass, iconClassName: 'text-emerald-400', cardClassName: 'border-emerald-400/30 bg-emerald-500/10' }
-        : { icon: Compass, iconClassName: 'text-muted-foreground', cardClassName: 'border-border bg-muted/20' }
+        ? { icon: Compass, iconClass: 'text-success-foreground', card: 'border-success-soft bg-success-soft/40', bar: 'bg-success' }
+        : { icon: Compass, iconClass: 'text-muted-foreground', card: 'border-border bg-card', bar: 'bg-muted-foreground' }
+  const RankIcon = rankVisual.icon
 
   const rankDescription = rankCode === 'status_a'
     ? t('dashboard.rank.details.statusA')
@@ -233,6 +289,8 @@ export default function Dashboard() {
   }, [aggCategoryStats, exchangeRates])
 
   const totalMonthAmount = categoryChartData.reduce((sum, c) => sum + c.value, 0)
+  const dailyHasData = dailyChartData.some((d) => d.totalAmount > 0)
+  const monthlyHasData = monthlyChartData.some((m) => m.totalAmount > 0)
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -241,33 +299,28 @@ export default function Dashboard() {
 
       if (isPieChart) {
         return (
-          <div className="bg-popover border border-border rounded-lg shadow-md p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <div
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: data.color }}
-              />
-              <span className="font-semibold text-sm">{data.icon} {data.name}</span>
+          <div className="rounded-xl border border-border bg-popover p-3 shadow-glass-2">
+            <div className="mb-1 flex items-center gap-2">
+              <div className="size-3 shrink-0 rounded-full" style={{ backgroundColor: data.color }} />
+              <span className="text-sm font-semibold">{data.icon} {data.name}</span>
             </div>
-            <p className="text-sm font-medium">{formatAmount(data.value)}</p>
+            <p className="text-sm font-medium tabular-nums">{formatAmount(data.value)}</p>
           </div>
         )
       }
 
-      const displayLabel = data?.date
-        ? format(new Date(data.date), 'd MMM yyyy')
-        : label
+      const displayLabel = data?.date ? format(new Date(data.date), 'd MMM yyyy') : label
 
       return (
-        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
-          <p className="font-semibold text-sm mb-1">{displayLabel}</p>
+        <div className="rounded-xl border border-border bg-popover p-3 shadow-glass-2">
+          <p className="mb-1 text-sm font-semibold">{displayLabel}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
+            <p key={index} style={{ color: entry.color }} className="text-sm font-medium tabular-nums">
               {formatAmount(entry.value)}
             </p>
           ))}
           {data?.date && (
-            <p className="text-xs text-muted-foreground mt-1">{t('dashboard.clickToViewReceipts')}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t('dashboard.clickToViewReceipts')}</p>
           )}
         </div>
       )
@@ -284,83 +337,53 @@ export default function Dashboard() {
     }).format(amount)
   }, [displayCurrency])
 
+  const maskedValue = (value: number) =>
+    amountsVisible ? <AnimatedNumber value={value} formatFn={formatAmountRaw} /> : <HiddenDots />
+
   // Build widget content map — each entry matches a widget ID from the registry
   const widgetContent: Record<string, React.ReactNode> = {
     'stats-cards': (
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{monthName}</CardTitle>
-            <button
-              type="button"
-              onClick={toggleAmountsVisible}
-              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label={amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
-            >
-              {amountsVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-            </button>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-black font-display text-primary">
-              {amountsVisible
-                ? <AnimatedNumber value={totalMonthAmount} formatFn={formatAmountRaw} />
-                : <span className="tracking-wider">••••••</span>
-              }
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.totalSpent')}</CardTitle>
-            <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold font-display text-primary">
-              {amountsVisible
-                ? <AnimatedNumber value={totalAmount} formatFn={formatAmountRaw} />
-                : <span className="tracking-wider">••••••</span>
-              }
-            </p>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <StatTile
+          className="col-span-2 sm:col-span-1"
+          label={monthName}
+          primary
+          big
+          eye
+          hidden={!amountsVisible}
+          onToggleHidden={toggleAmountsVisible}
+          value={maskedValue(totalMonthAmount)}
+        />
+        <StatTile
+          label={t('dashboard.totalSpent')}
+          primary
+          eye
+          hidden={!amountsVisible}
+          onToggleHidden={toggleAmountsVisible}
+          value={maskedValue(totalAmount)}
+        />
         <Link to="/receipts" className="block">
-          <Card className="h-full hover:bg-muted/30 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between pb-1">
-              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('dashboard.totalReceipts')}</CardTitle>
-              <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold font-display">
-                <AnimatedNumber value={totalReceipts} />
-              </p>
-            </CardContent>
-          </Card>
+          <StatTile
+            className="h-full transition-colors hover:bg-bg-subtle"
+            label={t('dashboard.totalReceipts')}
+            icon={Receipt}
+            value={<AnimatedNumber value={totalReceipts} />}
+          />
         </Link>
       </div>
     ),
 
     'category-pie-chart': (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
-            {t('dashboard.spendingByCategory')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {aggCategoryLoading ? (
-            <div className="flex items-center justify-center h-[250px]">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : categoryChartData.length === 0 ? (
-            <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-              {t('dashboard.noDataThisMonth')}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <ResponsiveContainer width="100%" height={200}>
+      <WidgetCard>
+        <WidgetHead icon={PieChartIcon} title={t('dashboard.spendingByCategory')} />
+        {aggCategoryLoading ? (
+          <Shimmer className="h-[200px] rounded-xl" />
+        ) : categoryChartData.length === 0 ? (
+          <WidgetEmpty tall>{t('dashboard.noDataThisMonth')}</WidgetEmpty>
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative h-[180px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={categoryChartData}
@@ -374,62 +397,55 @@ export default function Dashboard() {
                     dataKey="value"
                   >
                     {categoryChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-col gap-1 text-sm w-full">
-                {categoryChartData.slice(0, 5).map((c) => (
-                  <div key={c.name} className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: c.color }}
-                    />
-                    <span className="truncate max-w-[100px]">
-                      {c.icon} {c.name}
-                    </span>
-                    <span className="text-muted-foreground ml-auto">{formatAmount(c.value)}</span>
-                  </div>
-                ))}
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="t-xs text-fg-faint">{t('dashboard.total')}</span>
+                <span className="text-[17px] font-extrabold tabular-nums">{formatAmount(totalMonthAmount)}</span>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <ul className="flex w-full flex-col gap-1.5 text-[13px]">
+              {categoryChartData.slice(0, 5).map((c) => (
+                <li key={c.name} className="flex items-center gap-2">
+                  <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+                  <span className="truncate">{c.icon} {c.name}</span>
+                  <span className="ml-auto tabular-nums text-muted-foreground">{formatAmount(c.value)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </WidgetCard>
     ),
 
     'daily-bar-chart': (
-      <Card className="flex flex-col">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            {t('dashboard.dailySpending')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 min-h-0">
-          {aggDailyLoading ? (
-            <div className="flex items-center justify-center h-full min-h-[200px]">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : (
+      <WidgetCard>
+        <WidgetHead
+          icon={BarChart3}
+          title={t('dashboard.dailySpending')}
+          trailing={<span className="t-sm text-muted-foreground">{monthName}</span>}
+        />
+        {aggDailyLoading ? (
+          <Shimmer className="h-[200px] flex-1 rounded-xl" />
+        ) : !dailyHasData ? (
+          <WidgetEmpty tall>{t('dashboard.noDataThisMonth')}</WidgetEmpty>
+        ) : (
+          <div className="min-h-0 flex-1">
             <ResponsiveContainer width="100%" height="100%" minHeight={200}>
               <BarChart data={dailyChartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fontSize: 10 }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-hairline-soft" vertical={false} />
+                <XAxis dataKey="day" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
                 <YAxis
                   tick={{ fontSize: 10 }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-subtle)' }} />
                 <Bar
                   dataKey="totalAmount"
                   name="Amount"
@@ -438,16 +454,14 @@ export default function Dashboard() {
                   cursor="pointer"
                   onClick={(data: any) => {
                     const date = data?.payload?.date || data?.date
-                    if (date) {
-                      navigate(`/receipts?startDate=${date}&endDate=${date}`)
-                    }
+                    if (date) navigate(`/receipts?startDate=${date}&endDate=${date}`)
                   }}
                 />
               </BarChart>
             </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </WidgetCard>
     ),
 
     'budget-tracker': (
@@ -461,43 +475,44 @@ export default function Dashboard() {
     ),
 
     'monthly-trend': (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            {t('dashboard.monthlyTrend', { year: selectedYear })}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {aggMonthlyLoading ? (
-            <div className="flex items-center justify-center h-[200px]">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={monthlyChartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                <YAxis
-                  tick={{ fontSize: 10 }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="totalAmount"
-                  name="Amount"
-                  stroke={primaryColor}
-                  strokeWidth={2}
-                  dot={{ fill: primaryColor }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+      <WidgetCard>
+        <WidgetHead icon={TrendingUp} title={t('dashboard.monthlyTrend', { year: selectedYear })} />
+        {aggMonthlyLoading ? (
+          <Shimmer className="h-[200px] rounded-xl" />
+        ) : !monthlyHasData ? (
+          <WidgetEmpty tall>{t('dashboard.noDataThisMonth')}</WidgetEmpty>
+        ) : (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={monthlyChartData}>
+              <defs>
+                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={primaryColor} stopOpacity={0.26} />
+                  <stop offset="100%" stopColor={primaryColor} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-hairline-soft" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis
+                tick={{ fontSize: 10 }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--hairline)' }} />
+              <Area
+                type="monotone"
+                dataKey="totalAmount"
+                name="Amount"
+                stroke={primaryColor}
+                strokeWidth={2.5}
+                fill="url(#trendFill)"
+                dot={{ fill: primaryColor, r: 2.6, strokeWidth: 0 }}
+                activeDot={{ r: 4 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </WidgetCard>
     ),
 
     'monthly-forecast': (
@@ -511,82 +526,81 @@ export default function Dashboard() {
       />
     ),
 
-    'coach-card': (
-      <CoachCard displayCurrency={displayCurrency} />
-    ),
+    'coach-card': <CoachCard displayCurrency={displayCurrency} />,
 
     'rank-card': (
-      <Card className={cn(rankVisual.cardClassName)}>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between gap-3 text-base">
-            <span>{t('dashboard.rank.title')}</span>
-            <span className="inline-flex items-center gap-2">
-              <rankVisual.icon className={cn('h-4 w-4', rankVisual.iconClassName)} />
-              <span className="font-semibold">{rankName}</span>
+      // Plain surface (not WidgetCard) so the per-tier tint is the only background utility.
+      <section className={cn('flex h-full flex-col rounded-2xl border p-5 shadow-glass-1', rankVisual.card)}>
+        <WidgetHead
+          icon={RankIcon}
+          iconTone="muted"
+          title={t('dashboard.rank.title')}
+          trailing={
+            <span className={cn('inline-flex items-center gap-1.5 text-[13.5px] font-semibold', rankVisual.iconClass)}>
+              <RankIcon className="size-4" />
+              {rankName}
             </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
+          }
+        />
+        <div className="space-y-3">
+          <p className="text-[13px] text-muted-foreground">
             {t('dashboard.rank.receiptsTracked', { count: rankReceiptCount })}
           </p>
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center justify-between text-[12px] text-muted-foreground">
               <span>{t('dashboard.rank.progress')}</span>
-              <span>{Math.round(rankProgress)}%</span>
+              <span className="tabular-nums">{Math.round(rankProgress)}%</span>
             </div>
-            <Progress value={rankProgress} className="h-2" />
+            <div className="h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
+              <div
+                className={cn('h-full rounded-full transition-all', rankVisual.bar)}
+                style={{ width: `${rankProgress}%` }}
+              />
+            </div>
+            <p className="text-[13px] text-muted-foreground">
+              {nextRank
+                ? t('dashboard.rank.nextTarget', {
+                    count: Math.max(nextRank.minReceipts - rankReceiptCount, 0),
+                    rank: t(nextRank.nameKey),
+                  })
+                : t('dashboard.rank.topTier')}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {nextRank
-              ? t('dashboard.rank.nextTarget', {
-                  count: Math.max(nextRank.minReceipts - rankReceiptCount, 0),
-                  rank: t(nextRank.nameKey),
-                })
-              : t('dashboard.rank.topTier')}
-          </p>
-          <p className="text-sm">{rankDescription}</p>
-        </CardContent>
-      </Card>
+          <p className="text-[13px]">{rankDescription}</p>
+        </div>
+      </section>
     ),
 
     'recent-activity': (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            {t('dashboard.recentActivity')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentReceipts && recentReceipts.length > 0 ? (
-            <div className="divide-y divide-border">
-              {recentReceipts.slice(0, 5).map((receipt) => (
-                <Link
-                  key={receipt.id}
-                  to="/receipts"
-                  className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-muted/30 -mx-1 px-1 rounded transition-colors"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{receipt.storeName || t('dashboard.unknownStore')}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
-                  </div>
-                  <span className="text-sm font-medium shrink-0 ml-4">
-                    {new Intl.NumberFormat('sr-RS', {
-                      style: 'currency',
-                      currency: receipt.currency || 'RSD',
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(Number(receipt.totalAmount) || 0)}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t('dashboard.noRecentActivity')}</p>
-          )}
-        </CardContent>
-      </Card>
+      <WidgetCard>
+        <WidgetHead icon={Clock} title={t('dashboard.recentActivity')} />
+        {recentReceipts && recentReceipts.length > 0 ? (
+          <div className="divide-y divide-hairline-soft">
+            {recentReceipts.slice(0, 5).map((receipt) => (
+              <Link
+                key={receipt.id}
+                to="/receipts"
+                className="-mx-1.5 flex items-center justify-between rounded-lg px-1.5 py-2.5 transition-colors first:pt-0 last:pb-0 hover:bg-bg-subtle"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-[13.5px] font-medium">{receipt.storeName || t('dashboard.unknownStore')}</p>
+                  <p className="text-[12px] text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
+                </div>
+                <span className="ml-4 shrink-0 text-[13.5px] font-medium tabular-nums">
+                  {new Intl.NumberFormat('sr-RS', {
+                    style: 'currency',
+                    currency: receipt.currency || 'RSD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(Number(receipt.totalAmount) || 0)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <WidgetEmpty>{t('dashboard.noRecentActivity')}</WidgetEmpty>
+        )}
+      </WidgetCard>
     ),
   }
 
@@ -597,103 +611,146 @@ export default function Dashboard() {
     )
   }
 
+  const controls = (
+    <DashboardControls
+      displayCurrency={displayCurrency}
+      onCurrencyChange={setDisplayCurrency}
+      monthLabel={monthName}
+      onPrev={handlePrevMonth}
+      onNext={handleNextMonth}
+    />
+  )
+
+  // Greeting (emoji-free per the Glass system; the shared i18n value still carries 👋).
+  const greeting = (() => {
+    const hour = new Date().getHours()
+    const key = hour < 12 ? 'greetingMorning' : hour < 18 ? 'greetingAfternoon' : 'greetingEvening'
+    return t(`dashboard.${key}`, { name: me?.firstName }).replace('👋', '').trim()
+  })()
+  const greetingSub = isEmpty
+    ? t('dashboard.greetingSubtitleEmpty')
+    : t('dashboard.greetingSubtitle', { month: monthName })
+
+  const amountsPill = (
+    <button
+      type="button"
+      onClick={toggleAmountsVisible}
+      className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3.5 text-[13px] font-medium text-fg-2 transition-colors hover:bg-bg-subtle"
+    >
+      {amountsVisible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+      {amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
+    </button>
+  )
+
+  const emptyHero = isEmpty && (
+    <div className="mb-4 flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-glass-1 sm:gap-5">
+      <span className="icon-tile-primary grid size-[52px] shrink-0 place-items-center rounded-[16px]">
+        <QrCode className="size-6" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3 className="t-title">{t('dashboard.empty.title')}</h3>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">{t('dashboard.empty.description')}</p>
+      </div>
+      <button
+        type="button"
+        onClick={openQrScanner}
+        className="btn-brand inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
+      >
+        <QrCode className="size-[18px]" />
+        <span className="hidden sm:inline">{t('receipts.scanReceipt')}</span>
+      </button>
+    </div>
+  )
+
   return (
     <AppLayout>
       <PageTransition>
-      <div>
-      <AnnouncementBanner />
-      <div className="mb-4 md:mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-1 md:text-3xl font-display">{
-              (() => {
-                const hour = new Date().getHours()
-                const key = hour < 12 ? 'greetingMorning' : hour < 18 ? 'greetingAfternoon' : 'greetingEvening'
-                return t(`dashboard.${key}`, { name: me?.firstName })
-              })()
-            }</h2>
-            <p className="text-sm text-muted-foreground md:text-base">
-              {t('dashboard.subtitle')}
-            </p>
-          </div>
-        </div>
-      </div>
+        {/* Desktop sticky toolbar (breaks out of the page padding to sit flush) */}
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('dashboard.title')}
+          subtitle={t('dashboard.subtitle')}
+          actions={controls}
+        />
 
-      {/* Edit Mode Toolbar */}
-      {isEditMode && (
-        <div className="mb-4 flex items-center justify-between gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
-          <p className="text-sm text-muted-foreground">
-            {t('dashboard.widgets.editHint')}
-          </p>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { resetToDefault() }}
-              className="gap-1.5"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              {t('dashboard.widgets.resetToDefault')}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setEditMode(false)}
-            >
-              {t('dashboard.widgets.done')}
-            </Button>
-          </div>
-        </div>
-      )}
+        <AnnouncementBanner />
 
-      {/* Stats Cards */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : (
-        <>
-          {/* Section Title + Controls */}
-          <h3 className="text-lg font-semibold mb-3">{t('dashboard.spendingAnalysis')}</h3>
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/50">
-              <Coins className="h-4 w-4 text-muted-foreground ml-2 shrink-0" />
-              <CurrencySelect
-                value={displayCurrency}
-                onValueChange={setDisplayCurrency}
-                placeholder={t('dashboard.currency')}
-                triggerClassName="w-full border-0 bg-transparent focus:ring-0 focus:ring-offset-0"
-              />
+        {/* Mobile page header — greeting + amounts toggle + controls */}
+        <div className="mb-5 md:hidden">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-[22px] font-extrabold tracking-[-0.02em]">{greeting}</h1>
+              <p className="t-sm mt-0.5 text-muted-foreground">
+                {isEmpty ? t('dashboard.mobileGetStarted') : monthName}
+              </p>
             </div>
-            <div className="flex items-center justify-center gap-1 p-1 rounded-lg bg-muted/50">
-              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8 hover:bg-background">
-                <ChevronLeft className="h-4 w-4" />
+            <button
+              type="button"
+              onClick={toggleAmountsVisible}
+              aria-label={amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
+              className="grid size-9 shrink-0 place-items-center rounded-full border border-border bg-card text-fg-2 transition-colors hover:bg-bg-subtle"
+            >
+              {amountsVisible ? <Eye className="size-[18px]" /> : <EyeOff className="size-[18px]" />}
+            </button>
+          </div>
+          <div className="mt-3">{controls}</div>
+        </div>
+
+        {/* Desktop greeting row */}
+        <div className="mb-4 hidden items-center justify-between gap-4 md:flex">
+          <div className="min-w-0">
+            <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">{greeting}</h2>
+            <p className="t-sm mt-0.5 text-muted-foreground">{greetingSub}</p>
+          </div>
+          {amountsPill}
+        </div>
+
+        {/* Edit mode toolbar */}
+        {isEditMode && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary-soft/50 p-3">
+            <p className="text-[13px] text-muted-foreground">{t('dashboard.widgets.editHint')}</p>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => resetToDefault()} className="gap-1.5">
+                <RotateCcw className="size-3.5" />
+                {t('dashboard.widgets.resetToDefault')}
               </Button>
-              <span className="text-sm font-medium min-w-[80px] text-center">{monthName}</span>
-              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8 hover:bg-background">
-                <ChevronRight className="h-4 w-4" />
+              <Button size="sm" onClick={() => setEditMode(false)}>
+                {t('dashboard.widgets.done')}
               </Button>
             </div>
           </div>
+        )}
 
-          <WidgetRenderer widgetContent={widgetContent} />
-        </>
-      )}
-
-      {/* Safe area for floating add receipt button on mobile */}
-      <div className="h-24 md:hidden" />
-      </div>
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            {emptyHero}
+            <WidgetRenderer widgetContent={widgetContent} />
+          </>
+        )}
       </PageTransition>
-
-      {/* Floating Add Receipt button - mobile only */}
-      <button
-        className="md:hidden !fixed bottom-6 left-[15px] right-[15px] z-10 bg-primary text-primary-foreground rounded-xl h-14 shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform font-semibold text-base"
-        onClick={openQrScanner}
-      >
-        <QrCode className="h-5 w-5" />
-        {t('receipts.modal.addTitle')}
-      </button>
 
       {scannerModals}
     </AppLayout>
+  )
+}
+
+/** Shimmer grid that holds the populated layout's shape so it doesn't jump on load. */
+function DashboardSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <div className="col-span-full grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Shimmer key={i} className={cn('h-[92px] rounded-2xl', i === 0 && 'col-span-2 sm:col-span-1')} />
+        ))}
+      </div>
+      <Shimmer className="col-span-full h-[280px] rounded-2xl lg:col-span-8" />
+      <Shimmer className="col-span-full h-[280px] rounded-2xl lg:col-span-4" />
+      <Shimmer className="col-span-full h-[260px] rounded-2xl lg:col-span-8" />
+      <Shimmer className="col-span-full h-[260px] rounded-2xl lg:col-span-4" />
+      <Shimmer className="col-span-full h-[320px] rounded-2xl lg:col-span-6" />
+      <Shimmer className="col-span-full h-[320px] rounded-2xl lg:col-span-6" />
+    </div>
   )
 }

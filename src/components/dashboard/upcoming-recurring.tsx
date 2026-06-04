@@ -1,20 +1,34 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { CalendarClock, CreditCard, CheckCircle2, ArrowRight } from 'lucide-react'
+import { WidgetCard, WidgetHead, WidgetEmpty, Shimmer } from './primitives'
 import { MarkPaidModal } from '@/components/recurring-expenses/mark-paid-modal'
 import {
   useUpcomingExpenses,
   type UpcomingExpense,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
-import { CalendarClock, CreditCard, Loader2, CheckCircle2, ArrowRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface UpcomingRecurringProps {
   displayCurrency: string
   exchangeRates?: Record<string, number> | null
 }
+
+const VARIANT = {
+  overdue: {
+    row: 'border-destructive-soft bg-destructive-soft/40',
+    badge: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
+  },
+  dueSoon: {
+    row: 'border-warning-soft bg-warning-soft/40',
+    badge: 'bg-warning-soft text-warning-foreground',
+  },
+  upcoming: {
+    row: 'border-hairline-soft',
+    badge: 'bg-bg-subtle text-muted-foreground',
+  },
+} as const
 
 export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRecurringProps) {
   const { t } = useTranslation()
@@ -50,96 +64,95 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <WidgetCard>
+        <WidgetHead icon={CalendarClock} iconTone="primary" title={t('recurring.dashboard.title')} />
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Shimmer key={i} className="h-12 rounded-xl" />
+          ))}
+        </div>
+      </WidgetCard>
     )
   }
 
-  const totalItems = (upcoming?.overdue?.length ?? 0) + (upcoming?.dueSoon?.length ?? 0) + (upcoming?.upcoming?.length ?? 0)
+  const totalItems =
+    (upcoming?.overdue?.length ?? 0) + (upcoming?.dueSoon?.length ?? 0) + (upcoming?.upcoming?.length ?? 0)
 
   if (totalItems === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            {t('recurring.dashboard.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+      <WidgetCard>
+        <WidgetHead icon={CalendarClock} iconTone="primary" title={t('recurring.dashboard.title')} />
+        <WidgetEmpty tall>
+          <span className="inline-flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-success" />
             {t('recurring.dashboard.allCaughtUp')}
-          </div>
-          <Link to="/recurring" className="inline-flex items-center gap-1 text-sm text-primary mt-3 hover:underline">
+          </span>
+          <Link
+            to="/recurring"
+            className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-primary hover:underline"
+          >
             {t('recurring.dashboard.manageExpenses')}
-            <ArrowRight className="h-3 w-3" />
+            <ArrowRight className="size-3" />
           </Link>
-        </CardContent>
-      </Card>
+        </WidgetEmpty>
+      </WidgetCard>
     )
   }
 
-  // Calculate total upcoming in display currency
+  // Total upcoming in display currency
   const allItems = [...(upcoming?.overdue ?? []), ...(upcoming?.dueSoon ?? []), ...(upcoming?.upcoming ?? [])]
   const totalUpcoming = allItems.reduce((sum, item) => sum + convertAmount(item.amount, item.currency), 0)
 
-  const renderItems = (items: UpcomingExpense[], variant: 'overdue' | 'dueSoon' | 'upcoming') => {
+  const renderGroup = (items: UpcomingExpense[], variant: keyof typeof VARIANT) => {
     if (items.length === 0) return null
-
-    const variantStyles = {
-      overdue: 'border-red-200 bg-red-50/50 dark:border-red-900/50 dark:bg-red-950/20',
-      dueSoon: 'border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20',
-      upcoming: '',
-    }
-
     const labelKey = {
       overdue: 'recurring.dashboard.overdue',
       dueSoon: 'recurring.dashboard.dueSoon',
       upcoming: 'recurring.dashboard.upcoming',
-    }
+    }[variant]
 
     return (
       <div className="space-y-1.5">
-        <Badge
-          variant={variant === 'overdue' ? 'destructive' : variant === 'dueSoon' ? 'secondary' : 'outline'}
-          className="text-xs"
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+            VARIANT[variant].badge,
+          )}
         >
-          {t(labelKey[variant])} ({items.length})
-        </Badge>
+          {t(labelKey)} ({items.length})
+        </span>
         {items.slice(0, 3).map((item, idx) => (
           <div
             key={`${item.id}-${item.dueDate}-${idx}`}
-            className={`flex items-center justify-between gap-2 p-2 rounded-lg border ${variantStyles[variant]}`}
+            className={cn('flex items-center gap-2.5 rounded-xl border p-2', VARIANT[variant].row)}
           >
-            <div className="flex items-center gap-2 min-w-0">
-              {item.category?.icon && <span className="text-sm shrink-0">{item.category.icon}</span>}
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">{formatDueDate(item.dueDate)}</p>
-              </div>
+            <span className="grid size-9 shrink-0 place-items-center rounded-[11px] bg-bg-subtle text-fg-2">
+              {item.category?.icon ? (
+                <span className="text-sm">{item.category.icon}</span>
+              ) : (
+                <CreditCard className="size-4" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13.5px] font-medium">{item.name}</p>
+              <p className="text-[12px] text-muted-foreground">{formatDueDate(item.dueDate)}</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-sm font-semibold">
-                {formatAmount(convertAmount(item.amount, item.currency))}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handlePay(item)}
-                title={t('recurring.actions.pay')}
-              >
-                <CreditCard className="h-3.5 w-3.5 text-primary" />
-              </Button>
-            </div>
+            <span className="shrink-0 text-[13.5px] font-semibold tabular-nums">
+              {formatAmount(convertAmount(item.amount, item.currency))}
+            </span>
+            <button
+              type="button"
+              onClick={() => handlePay(item)}
+              title={t('recurring.actions.pay')}
+              aria-label={t('recurring.actions.pay')}
+              className="grid size-8 shrink-0 place-items-center rounded-lg text-primary transition-colors hover:bg-bg-subtle"
+            >
+              <CreditCard className="size-[15px]" />
+            </button>
           </div>
         ))}
         {items.length > 3 && (
-          <p className="text-xs text-muted-foreground pl-2">
+          <p className="pl-1 text-[12px] text-muted-foreground">
             +{items.length - 3} {t('recurring.dashboard.more')}
           </p>
         )}
@@ -148,34 +161,28 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-base">
-          <span className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            {t('recurring.dashboard.title')}
-          </span>
-          <span className="text-sm font-normal text-muted-foreground">
-            {formatAmount(totalUpcoming)}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {renderItems(upcoming?.overdue ?? [], 'overdue')}
-        {renderItems(upcoming?.dueSoon ?? [], 'dueSoon')}
-        {renderItems(upcoming?.upcoming ?? [], 'upcoming')}
-
-        <Link to="/recurring" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
-          {t('recurring.dashboard.viewAll')}
-          <ArrowRight className="h-3 w-3" />
-        </Link>
-      </CardContent>
-
-      <MarkPaidModal
-        open={markPaidOpen}
-        onOpenChange={setMarkPaidOpen}
-        expense={expenseToPay}
+    <WidgetCard>
+      <WidgetHead
+        icon={CalendarClock}
+        iconTone="primary"
+        title={t('recurring.dashboard.title')}
+        trailing={<span className="text-[13.5px] font-semibold tabular-nums">{formatAmount(totalUpcoming)}</span>}
       />
-    </Card>
+      <div className="space-y-3">
+        {renderGroup(upcoming?.overdue ?? [], 'overdue')}
+        {renderGroup(upcoming?.dueSoon ?? [], 'dueSoon')}
+        {renderGroup(upcoming?.upcoming ?? [], 'upcoming')}
+
+        <Link
+          to="/recurring"
+          className="inline-flex items-center gap-1 text-[13px] font-medium text-primary hover:underline"
+        >
+          {t('recurring.dashboard.viewAll')}
+          <ArrowRight className="size-3" />
+        </Link>
+      </div>
+
+      <MarkPaidModal open={markPaidOpen} onOpenChange={setMarkPaidOpen} expense={expenseToPay} />
+    </WidgetCard>
   )
 }

@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getDaysInMonth } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowUpRight, ArrowDownRight, Calculator } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Calculator } from 'lucide-react'
+import { WidgetCard, WidgetHead, WidgetEmpty, TrendPill } from './primitives'
 import { type CurrencyBreakdown, type DailyStatsByCurrency, type MonthlyStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 
 interface MonthlyForecastProps {
@@ -91,90 +90,61 @@ export function MonthlyForecast({
     }
   }, [dailyStats, monthlyStats, selectedYear, selectedMonth, exchangeRates, displayCurrency])
 
-  if (!forecast) {
+  if (!forecast || forecast.spentSoFar === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Calculator className="h-4 w-4 text-primary" />
-            {t('dashboard.forecast.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-            {t('dashboard.noDataThisMonth')}
-          </div>
-        </CardContent>
-      </Card>
+      <WidgetCard>
+        <WidgetHead icon={Calculator} iconTone="primary" title={t('dashboard.forecast.title')} />
+        <WidgetEmpty tall>{t('dashboard.noDataThisMonth')}</WidgetEmpty>
+      </WidgetCard>
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Calculator className="h-4 w-4 text-primary" />
-          {t('dashboard.forecast.title')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Projected total */}
-        <div>
-          <span className="text-xs text-muted-foreground font-medium">
-            {forecast.isCurrentMonth
-              ? t('dashboard.forecast.projectedTotal')
-              : t('dashboard.forecast.monthTotal')}
-          </span>
-          <div className="flex items-baseline gap-2 mt-0.5">
-            <p className="text-2xl font-bold">{formatAmount(forecast.projected)}</p>
-            {forecast.vsLastMonth !== 0 && (
-              <div
-                className={cn(
-                  'flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full',
-                  forecast.vsLastMonth > 0
-                    ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10'
-                    : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
-                )}
-              >
-                {forecast.vsLastMonth > 0 ? (
-                  <ArrowUpRight className="h-3 w-3" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3" />
-                )}
-                {Math.abs(forecast.vsLastMonth)}%
-              </div>
-            )}
+    <WidgetCard>
+      <WidgetHead icon={Calculator} iconTone="primary" title={t('dashboard.forecast.title')} />
+
+      {/* Projected total */}
+      <div>
+        <span className="t-xs text-muted-foreground">
+          {forecast.isCurrentMonth
+            ? t('dashboard.forecast.projectedTotal')
+            : t('dashboard.forecast.monthTotal')}
+        </span>
+        <div className="mt-1 flex items-center gap-2">
+          <p className="text-[26px] font-extrabold leading-none tracking-[-0.02em] tabular-nums">
+            {formatAmount(forecast.projected)}
+          </p>
+          <TrendPill value={forecast.vsLastMonth} />
+        </div>
+      </div>
+
+      {/* Spent so far (only for current month) */}
+      {forecast.isCurrentMonth && (
+        <div className="mt-4 space-y-2 rounded-xl bg-bg-subtle p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.spentSoFar')}</span>
+            <span className="text-[13px] font-semibold tabular-nums">{formatAmount(forecast.spentSoFar)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.dailyAvg')}</span>
+            <span className="text-[13px] font-semibold tabular-nums">{formatAmount(forecast.dailyAvg)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.daysProgress')}</span>
+            <span className="text-[13px] font-semibold tabular-nums">
+              {forecast.daysSoFar}/{forecast.totalDaysInMonth}
+            </span>
           </div>
         </div>
+      )}
 
-        {/* Spent so far (only for current month) */}
-        {forecast.isCurrentMonth && (
-          <div className="p-2.5 rounded-lg bg-muted/40 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{t('dashboard.forecast.spentSoFar')}</span>
-              <span className="text-sm font-semibold">{formatAmount(forecast.spentSoFar)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{t('dashboard.forecast.dailyAvg')}</span>
-              <span className="text-sm font-semibold">{formatAmount(forecast.dailyAvg)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{t('dashboard.forecast.daysProgress')}</span>
-              <span className="text-sm font-semibold">
-                {forecast.daysSoFar}/{forecast.totalDaysInMonth}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Last month comparison */}
-        {forecast.lastMonthTotal > 0 && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
-            <span>{t('dashboard.forecast.lastMonth')}</span>
-            <span className="font-medium">{formatAmount(forecast.lastMonthTotal)}</span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Last month comparison */}
+      {forecast.lastMonthTotal > 0 && (
+        <div className="mt-auto flex items-center justify-between border-t border-hairline-soft pt-3 text-[13px] text-muted-foreground">
+          <span>{t('dashboard.forecast.lastMonth')}</span>
+          <span className="font-medium tabular-nums">{formatAmount(forecast.lastMonthTotal)}</span>
+        </div>
+      )}
+    </WidgetCard>
   )
 }

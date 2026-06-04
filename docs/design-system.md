@@ -151,11 +151,12 @@ migrated. Keep this list current.
 (`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), card grid + coverage
 bar + derived emoji tile (`warranties/primitives.tsx`), segmented control (Recurring add/edit
 form + the shell `ThemeSegmented`), tab-bar + side-nav + avatar (the navigation shell),
+widget card + head + empty/stat tiles + trend pill (`dashboard/primitives.tsx`),
 skeleton + empty state (inline per screen).
 
 ## Migration order (indicative)
 
-dashboard → then module by module. Each is its own cycle. Spec/plan templates live under
+Foundation → screen by screen. Each is its own cycle. Spec/plan templates live under
 `docs/superpowers/`.
 
 **Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
@@ -178,4 +179,11 @@ page adopts, **settings & account** (App settings / Profile / Account / Rate mod
 `components/settings/primitives.tsx`: `SettingsCard`/`SettingRow`/`AccentRetired`/`NotifList`/
 `RankCard` tier crest/`SaveBar`/`StarPicker`; labeled `ThemeSegmented`; auth-style password
 card + strength meter; responsive danger zone [desktop inline / mobile `GlassDialog` sheet];
-rate modal on `GlassDialog`; **accent picker retired → emerald locked app-wide**).
+rate modal on `GlassDialog`; **accent picker retired → emerald locked app-wide**),
+**dashboard** (the home grid — sticky `PageToolbar` owns currency + month controls; greeting
++ amounts eye pill head the content; restyled widget cards via `dashboard/primitives.tsx`
+[`WidgetCard`/`WidgetHead`/`WidgetEmpty`/`StatTile`/`TrendPill`/`Shimmer`]; recharts donut
+[centered total] / day bars / monthly-trend area-gradient; per-tier-tinted rank card; honest
+empty-hero + per-widget empty voices; shimmer skeleton grid. `WidgetRenderer` drag/customize
+plumbing preserved — registry defaults re-laid-out to the 6-col spec, Recent Activity
+de-prioritized [hidden by default]).

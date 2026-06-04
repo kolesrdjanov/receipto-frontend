@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useCategories } from '@/hooks/categories/use-categories'
 import { Target, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { WidgetCard, WidgetHead, WidgetEmpty } from './primitives'
+import { useCategories } from '@/hooks/categories/use-categories'
 import { cn } from '@/lib/utils'
 import { type CategoryStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 
 interface CategoryBudgetProgressProps {
   aggCategoryStats: CategoryStatsByCurrency[] | undefined
   exchangeRates: Record<string, number> | undefined
-  displayCurrency: string
+  /** Accepted for a consistent widget signature; spending is shown in each budget's own currency. */
+  displayCurrency?: string
   selectedYear: number
   selectedMonth: number
 }
@@ -17,7 +18,6 @@ interface CategoryBudgetProgressProps {
 export function CategoryBudgetProgress({
   aggCategoryStats,
   exchangeRates,
-  displayCurrency: _displayCurrency,
   selectedYear,
   selectedMonth,
 }: CategoryBudgetProgressProps) {
@@ -58,98 +58,86 @@ export function CategoryBudgetProgress({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Target className="h-4 w-4 text-primary" />
-          {t('dashboard.budgetProgress.title')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {categoriesWithBudget.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
-            <Target className="h-8 w-8 mb-2 opacity-50" />
-            <p className="text-sm">{t('dashboard.budgetProgress.noCategoriesWithBudget')}</p>
-            <p className="text-xs mt-1">{t('dashboard.budgetProgress.setBudgetHint')}</p>
-          </div>
-        ) : (
-          <div
-            className={cn(
-              'space-y-3',
-              categoriesWithBudget.length > 4 && 'max-h-[21.5rem] overflow-y-auto pr-1',
-            )}
-          >
-            {categoriesWithBudget.map((category) => {
-              const budgetCurrency = category.budgetCurrency!
-              const budgetAmount = category.monthlyBudget!
-              const spentAmount = getConvertedSpending(category.name, budgetCurrency)
-              const percentage = budgetAmount > 0 ? (spentAmount / budgetAmount) * 100 : 0
-              const isOver = percentage >= 100
-              const isWarning = percentage >= 80 && percentage < 100
+    <WidgetCard>
+      <WidgetHead icon={Target} iconTone="primary" title={t('dashboard.budgetProgress.title')} />
 
-              const progressColor = isOver
-                ? 'bg-red-500'
-                : isWarning
-                  ? 'bg-amber-500'
-                  : 'bg-emerald-500'
+      {categoriesWithBudget.length === 0 ? (
+        <WidgetEmpty
+          tall
+          icon={Target}
+          hint={t('dashboard.budgetProgress.setBudgetHint')}
+        >
+          {t('dashboard.budgetProgress.noCategoriesWithBudget')}
+        </WidgetEmpty>
+      ) : (
+        <div
+          className={cn(
+            'space-y-3',
+            categoriesWithBudget.length > 4 && 'max-h-[21.5rem] overflow-y-auto pr-1',
+          )}
+        >
+          {categoriesWithBudget.map((category) => {
+            const budgetCurrency = category.budgetCurrency!
+            const budgetAmount = category.monthlyBudget!
+            const spentAmount = getConvertedSpending(category.name, budgetCurrency)
+            const percentage = budgetAmount > 0 ? (spentAmount / budgetAmount) * 100 : 0
+            const isOver = percentage >= 100
+            const isWarning = percentage >= 80 && percentage < 100
 
-              const textColor = isOver
-                ? 'text-red-500'
-                : isWarning
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-emerald-600 dark:text-emerald-400'
+            const barColor = isOver ? 'bg-destructive' : isWarning ? 'bg-warning' : 'bg-success'
+            const textColor = isOver
+              ? 'text-destructive'
+              : isWarning
+                ? 'text-warning-foreground'
+                : 'text-success-foreground'
 
-              return (
-                <div
-                  key={category.id}
-                  className="group cursor-pointer rounded-lg p-2.5 -mx-1 hover:bg-muted/40 transition-colors"
-                  onClick={() => {
-                    const startDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`
-                    const lastDay = new Date(selectedYear, selectedMonth, 0).getDate()
-                    const endDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
-                    navigate(`/receipts?startDate=${startDate}&endDate=${endDate}&categoryId=${category.id}`)
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {category.icon && <span className="text-sm">{category.icon}</span>}
-                      <span className="text-sm font-medium truncate">{category.name}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {isOver ? (
-                        <XCircle className="h-3.5 w-3.5 text-red-500" />
-                      ) : isWarning ? (
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                      ) : (
-                        <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
-                      )}
-                      <span className={cn('text-xs font-semibold', textColor)}>
-                        {percentage.toFixed(0)}%
-                      </span>
-                    </div>
+            return (
+              <button
+                type="button"
+                key={category.id}
+                className="-mx-1.5 block w-full rounded-xl px-1.5 py-2 text-left transition-colors hover:bg-bg-subtle"
+                onClick={() => {
+                  const startDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`
+                  const lastDay = new Date(selectedYear, selectedMonth, 0).getDate()
+                  const endDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+                  navigate(`/receipts?startDate=${startDate}&endDate=${endDate}&categoryId=${category.id}`)
+                }}
+              >
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {category.icon && <span className="text-sm">{category.icon}</span>}
+                    <span className="truncate text-[13.5px] font-medium">{category.name}</span>
                   </div>
-
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className={cn('h-full rounded-full transition-all', progressColor)}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-
-                  <div className="flex justify-between mt-1">
-                    <span className="text-[11px] text-muted-foreground">
-                      {formatAmount(spentAmount, budgetCurrency)}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      {formatAmount(budgetAmount, budgetCurrency)}
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {isOver ? (
+                      <XCircle className="size-3.5 text-destructive" />
+                    ) : isWarning ? (
+                      <AlertTriangle className="size-3.5 text-warning-foreground" />
+                    ) : (
+                      <CheckCircle className="size-3.5 text-success-foreground" />
+                    )}
+                    <span className={cn('text-xs font-semibold tabular-nums', textColor)}>
+                      {percentage.toFixed(0)}%
                     </span>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+                <div className="relative h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
+                  <div
+                    className={cn('h-full rounded-full transition-all', barColor)}
+                    style={{ width: `${Math.min(percentage, 100)}%` }}
+                  />
+                </div>
+
+                <div className="mt-1 flex justify-between text-[11px] text-muted-foreground tabular-nums">
+                  <span>{formatAmount(spentAmount, budgetCurrency)}</span>
+                  <span>{formatAmount(budgetAmount, budgetCurrency)}</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </WidgetCard>
   )
 }

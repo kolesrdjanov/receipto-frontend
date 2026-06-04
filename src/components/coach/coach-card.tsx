@@ -8,16 +8,13 @@ import {
   Lightbulb,
   Sparkles,
   ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Bot,
   RefreshCw,
 } from 'lucide-react'
 import { useCoach, type Insight } from '@/hooks/coach/use-coach'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { WidgetCard, WidgetHead, WidgetEmpty, TrendPill, Shimmer } from '@/components/dashboard/primitives'
 import { cn } from '@/lib/utils'
 
 function formatAmount(amount: number, currency: string, locale: string = 'sr-RS'): string {
@@ -34,7 +31,7 @@ interface CoachCardProps {
 }
 
 function InsightIcon({ insight }: { insight: Insight }) {
-  const iconProps = { className: 'h-4 w-4 shrink-0' }
+  const iconProps = { className: 'size-4 shrink-0' }
 
   switch (insight.type) {
     case 'spending_increase':
@@ -53,39 +50,39 @@ function InsightIcon({ insight }: { insight: Insight }) {
   }
 }
 
+const TONE_STYLES: Record<Insight['tone'], string> = {
+  positive: 'bg-success-soft text-success-foreground',
+  neutral: 'bg-primary-soft text-primary',
+  warning: 'bg-warning-soft text-warning-foreground',
+  celebration: 'bg-brand-violet-soft text-brand-violet-foreground',
+}
+
 function InsightItem({ insight }: { insight: Insight }) {
   const navigate = useNavigate()
-
-  const toneStyles = {
-    positive: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
-    neutral: 'bg-primary/10 text-primary border-primary/20',
-    warning: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
-    celebration: 'bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/20',
-  }
 
   return (
     <div
       className={cn(
-        'flex items-start gap-3 px-3 py-2.5 rounded-lg border text-sm transition-all duration-200',
-        toneStyles[insight.tone]
+        'flex items-start gap-3 rounded-xl px-3 py-2.5 text-[13px]',
+        TONE_STYLES[insight.tone],
       )}
     >
       <div className="mt-0.5">
         <InsightIcon insight={insight} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium">{insight.title}</p>
-        <p className="text-xs opacity-75 mt-0.5">{insight.message}</p>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{insight.title}</p>
+        <p className="mt-0.5 text-[12px] opacity-80">{insight.message}</p>
       </div>
       {insight.actionRoute && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 shrink-0"
+        <button
+          type="button"
           onClick={() => navigate(insight.actionRoute!)}
+          className="-m-1 shrink-0 rounded-md p-1 transition-opacity hover:opacity-70"
+          aria-label={insight.title}
         >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+          <ChevronRight className="size-4" />
+        </button>
       )}
     </div>
   )
@@ -101,42 +98,37 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="h-5 w-32 bg-muted animate-pulse rounded" />
-          <div className="h-4 w-48 bg-muted animate-pulse rounded mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="h-20 bg-muted animate-pulse rounded-lg" />
+      <WidgetCard>
+        <WidgetHead icon={Bot} iconTone="primary" title={t('coach.title')} />
+        <div className="space-y-3">
+          <Shimmer className="h-4 w-2/3" />
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="h-14 bg-muted animate-pulse rounded-lg" />
-            <div className="h-14 bg-muted animate-pulse rounded-lg" />
+            <Shimmer className="h-16 rounded-xl" />
+            <Shimmer className="h-16 rounded-xl" />
           </div>
-        </CardContent>
-      </Card>
+          <Shimmer className="h-12 rounded-xl" />
+        </div>
+      </WidgetCard>
     )
   }
 
   if (error || !data) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="p-2 rounded-full bg-muted mb-3">
-            <Bot className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <p className="text-sm font-medium">{t('coach.errorTitle')}</p>
-          <p className="text-xs text-muted-foreground mt-1">{t('coach.errorDescription')}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3"
+      <WidgetCard>
+        <WidgetHead icon={Bot} iconTone="primary" title={t('coach.title')} />
+        <WidgetEmpty tall>
+          <span className="font-medium text-foreground">{t('coach.errorTitle')}</span>
+          <span>{t('coach.errorDescription')}</span>
+          <button
+            type="button"
             onClick={() => refetch()}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-bg-subtle"
           >
-            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            <RefreshCw className="size-3.5" />
             {t('coach.retry')}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </WidgetEmpty>
+      </WidgetCard>
     )
   }
 
@@ -227,53 +219,33 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
     })
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <Bot className="h-4 w-4 text-primary" />
-            </div>
-            <CardTitle className="text-base font-semibold">
-              {t('coach.title')}
-            </CardTitle>
-          </div>
-          {summary && summary.receiptsThisWeek > 0 && (
-            <span className="text-xs text-muted-foreground">
+    <WidgetCard>
+      <WidgetHead
+        icon={Bot}
+        iconTone="primary"
+        title={t('coach.title')}
+        trailing={
+          summary && summary.receiptsThisWeek > 0 ? (
+            <span className="text-[12px] text-muted-foreground">
               {t('coach.receiptsThisWeek', { count: summary.receiptsThisWeek })}
             </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">{greeting}</p>
-      </CardHeader>
+          ) : undefined
+        }
+      />
 
-      <CardContent className="space-y-4">
-        {/* Weekly Summary — two-column layout */}
+      {greeting && <p className="-mt-2 mb-4 text-[13px] text-muted-foreground">{greeting}</p>}
+
+      <div className="space-y-4">
+        {/* Weekly summary — two-column */}
         {summary && (
           <div className="grid gap-3 sm:grid-cols-2">
-            {/* This week spending */}
-            <div className="p-3 rounded-lg bg-muted/40 space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">{t('coach.thisWeek')}</span>
-                {convertedWeeklyChangePercent !== 0 && (
-                  <div
-                    className={cn(
-                      'flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full',
-                      convertedWeeklyChangePercent > 0
-                        ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10'
-                        : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
-                    )}
-                  >
-                    {convertedWeeklyChangePercent > 0 ? (
-                      <ArrowUpRight className="h-3 w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-3 w-3" />
-                    )}
-                    {Math.abs(convertedWeeklyChangePercent)}%
-                  </div>
-                )}
+            {/* This week */}
+            <div className="space-y-1 rounded-xl bg-bg-subtle p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="t-xs text-muted-foreground">{t('coach.thisWeek')}</span>
+                <TrendPill value={convertedWeeklyChangePercent} />
               </div>
-              <p className="text-xl font-bold">
+              <p className="text-[20px] font-extrabold leading-tight tabular-nums">
                 {formatAmount(thisWeekConverted, targetCurrency, locale)}
               </p>
               <p className="text-[11px] text-muted-foreground">
@@ -283,29 +255,27 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
 
             {/* Top category */}
             {summary.topCategory ? (
-              <div className="p-3 rounded-lg bg-muted/40 space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">{t('coach.topSpending')}</span>
-                <p className="text-xl font-bold">
+              <div className="space-y-1 rounded-xl bg-bg-subtle p-3">
+                <span className="t-xs text-muted-foreground">{t('coach.topSpending')}</span>
+                <p className="text-[20px] font-extrabold leading-tight tabular-nums">
                   {formatAmount(topCategoryConverted ?? summary.topCategory.amount, targetCurrency, locale)}
                 </p>
-                <p className="text-[11px] text-muted-foreground truncate">
+                <p className="truncate text-[11px] text-muted-foreground">
                   {summary.topCategory.icon} {summary.topCategory.name}
                 </p>
               </div>
             ) : (
-              <div className="p-3 rounded-lg bg-muted/40 flex items-center justify-center">
-                <p className="text-xs text-muted-foreground">{t('coach.noInsights')}</p>
+              <div className="grid place-items-center rounded-xl bg-bg-subtle p-3">
+                <p className="text-[12px] text-muted-foreground">{t('coach.noInsights')}</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Insights — show all (up to 5) */}
+        {/* Insights */}
         {convertedInsights.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {t('coach.insightsTitle')}
-            </h4>
+            <h4 className="t-xs text-muted-foreground">{t('coach.insightsTitle')}</h4>
             <div className="space-y-2">
               {convertedInsights.map((insight: Insight) => (
                 <InsightItem key={insight.id} insight={insight} />
@@ -314,23 +284,21 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
           </div>
         )}
 
-        {/* Tip — always show when available */}
+        {/* Tip */}
         {tip && (
-          <div className="-mt-2 flex items-start gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-sm">
-            <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-xl bg-warning-soft/60 px-3 py-2.5 text-[13px]">
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-warning" />
             <div>
-              <p className="font-medium text-foreground">{tip.title}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{tip.message}</p>
+              <p className="font-semibold text-foreground">{tip.title}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{tip.message}</p>
             </div>
           </div>
         )}
 
         {convertedInsights.length === 0 && !tip && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            {t('coach.noInsights')}
-          </p>
+          <p className="py-4 text-center text-[13px] text-muted-foreground">{t('coach.noInsights')}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </WidgetCard>
   )
 }
