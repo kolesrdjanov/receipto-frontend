@@ -58,12 +58,15 @@ colliding with Tailwind's `rounded-r-*` (right-side) utilities:
 `r-4`=`rounded-2xl` (18, badges) · `r-5`=`rounded-3xl` (22) · `r-pill`=`rounded-full`.
 The glass card uses a literal `28px` inside `.glass-card`.
 
-### Accent lock
-`.auth-emerald` (and `.onboarding-emerald`, which shares the same rule) pin
-`--primary`/`--ring`/`--primary-soft` to brand emerald for that subtree only.
-Everywhere else the user's `.accent-*` choice applies. Use the same pattern (add a
-selector to that shared rule) for any other brand-locked surface — onboarding is the
-second one.
+### Accent lock — now app-wide (accent picker retired)
+The 6-swatch accent picker was **retired** in the settings redesign: base `:root`/`.dark`
+`--primary` (+ `--ring`) point directly at brand emerald, `--primary-soft` auto-derives via
+`oklch(from var(--primary) …)`, the six `.accent-*` blocks were removed from `index.css`, and
+`applyAccentColor()` in `store/settings.ts` (+ the `ThemeInitializer` in `App.tsx`) only strip
+stale `accent-*` classes — they add none. So the whole app renders emerald; the accent-aware
+sidebar active state (`bg-primary-soft text-primary`) simply reads emerald now. `.auth-emerald`
+/ `.onboarding-emerald` remain (redundant but harmless). The `accentColor` store field + setter +
+type are kept (dead for theming) for safe migration — sweep later with product sign-off.
 
 ## Type scale (`.t-*`)
 
@@ -122,7 +125,9 @@ The chrome that wraps every page, restyled to Glass and composed from the shadcn
   (same component, rendered in the shadcn mobile `Sheet`). Data-driven `MONEY` / `WALLET`
   nav arrays; active state = `bg-primary-soft text-primary` (accent-aware; sidebar is
   gradient-free). Footer is a profile **popover** on desktop and an inline block in the
-  mobile drawer (`isMobile` branch). Holds the `ThemeSegmented` Light/Dark/System control.
+  mobile drawer (`isMobile` branch). Holds the `ThemeSegmented` Light/Dark/System control
+  (now a shared component at `components/layout/theme-segmented.tsx` — icon-only here, `labeled`
+  on the App settings row).
 - `mobile-tab-bar.tsx` — Home · Expenses · gradient FAB · Warranties · More; the Warranties
   slot falls back through the Wallet group when flag-gated off; the FAB defers to a
   page-registered `useFabStore` action, else opens `FabActionSheet`.
@@ -169,4 +174,8 @@ scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`), w
 `GlassDialog` form, restyled gallery lightbox), loyalty cards (wallet-card grid),
 **navigation shell** (`app-layout`: sidebar + mobile drawer + frosted mobile header + tab
 bar/FAB + profile popover w/ theme toggle + announcements modal) — the shared chrome every
-page adopts.
+page adopts, **settings & account** (App settings / Profile / Account / Rate modal — shared
+`components/settings/primitives.tsx`: `SettingsCard`/`SettingRow`/`AccentRetired`/`NotifList`/
+`RankCard` tier crest/`SaveBar`/`StarPicker`; labeled `ThemeSegmented`; auth-style password
+card + strength meter; responsive danger zone [desktop inline / mobile `GlassDialog` sheet];
+rate modal on `GlassDialog`; **accent picker retired → emerald locked app-wide**).
