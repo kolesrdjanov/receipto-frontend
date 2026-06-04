@@ -343,6 +343,15 @@
     "scanCamera": "Scan QR Code",
     "scanGallery": "From Gallery",
     "importExport": "Import / Export",
+    "importCsv": "Import CSV",
+    "exportCsv": "Export CSV",
+    "addSheetTitle": "Add an expense",
+    "addSheetSubtitle": "Scan, type it in, or import from a file.",
+    "scanQrHint": "Point at the fiscal receipt QR",
+    "scanGalleryHint": "Pick a photo of the QR code",
+    "addManuallyHint": "Enter a blank receipt",
+    "addFromTemplateHint": "Prefill from a saved store",
+    "importExportHint": "Import or export a CSV file",
     "gallery": {
       "noQrFound": "No QR code found in this image. Try a clearer photo.",
       "invalidImage": "Could not read this image. Please try another file.",
@@ -1004,6 +1013,33 @@
     "addWarranty": "Add Warranty",
     "noWarranties": "No warranties yet",
     "noWarrantiesText": "Add your first warranty to start tracking expiration dates",
+    "mobileSubtitle": "Track your product warranties",
+    "desktopSubtitle": "Track and manage your product warranties — never miss an expiry window.",
+    "tracked": "Tracked",
+    "warrantiesLabel": "warranties",
+    "warrantyCount": "{{count}} warranties",
+    "sortedByExpiry": "sorted by expiry",
+    "noFilesAttached": "No files attached",
+    "filesCount": "{{count}} files",
+    "tapHint": "Tap a card to edit · tap a file to view",
+    "countActive": "active",
+    "countExpiring": "expiring",
+    "countExpired": "expired",
+    "remaining": {
+      "daysLeft": "{{count}} days left",
+      "monthsLeft": "{{count}} mo left",
+      "yearsLeft": "{{count}} yr left",
+      "yearsMonthsLeft": "{{years}} yr {{months}} mo left",
+      "expiredDaysAgo": "Expired {{count}} days ago",
+      "expiredMonthsAgo": "Expired {{count}} mo ago",
+      "expiredYearsAgo": "Expired {{count}} yr ago",
+      "expiresToday": "Expires today"
+    },
+    "actions": {
+      "viewFiles": "View files",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
     "tabs": {
       "all": "All",
       "active": "Active",
@@ -1051,7 +1087,15 @@
       "imageSlots": "Add up to 3 files (images or PDFs)",
       "heicNotice": "HEIC images cannot be previewed but will be converted after upload.",
       "heicPlaceholder": "HEIC Image",
-      "pdfPlaceholder": "PDF Document"
+      "pdfPlaceholder": "PDF Document",
+      "expiryHint": "Warranty expires {{date}}",
+      "addUpToFiles": "Add up to 3 files",
+      "filesHint": "Images or PDFs · receipt, invoice, warranty card",
+      "errors": {
+        "productNameRequired": "Product name is required",
+        "purchaseDateRequired": "Purchase date is required",
+        "durationInvalid": "Enter a valid number of months"
+      }
     },
     "export": {
       "button": "Export",

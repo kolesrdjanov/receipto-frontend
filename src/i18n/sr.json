@@ -343,6 +343,15 @@
     "scanCamera": "Skeniraj QR kod",
     "scanGallery": "Iz galerije",
     "importExport": "Uvoz / Izvoz",
+    "importCsv": "Uvezi CSV",
+    "exportCsv": "Izvezi CSV",
+    "addSheetTitle": "Dodaj trošak",
+    "addSheetSubtitle": "Skenirajte, unesite ručno ili uvezite iz fajla.",
+    "scanQrHint": "Usmerite na QR kôd fiskalnog računa",
+    "scanGalleryHint": "Izaberite fotografiju QR koda",
+    "addManuallyHint": "Unesite prazan račun",
+    "addFromTemplateHint": "Popunite iz sačuvane prodavnice",
+    "importExportHint": "Uvezite ili izvezite CSV fajl",
     "gallery": {
       "noQrFound": "QR kod nije pronađen na ovoj slici. Probajte sa jasnijom fotografijom.",
       "invalidImage": "Nije moguće pročitati ovu sliku. Pokušajte sa drugom datotekom.",
@@ -1004,6 +1013,33 @@
     "addWarranty": "Dodaj garanciju",
     "noWarranties": "Nema garancija",
     "noWarrantiesText": "Dodajte prvu garanciju da biste pratili datume isteka",
+    "mobileSubtitle": "Pratite garancije svojih proizvoda",
+    "desktopSubtitle": "Pratite i upravljajte garancijama — nikada ne propustite istek.",
+    "tracked": "Praćeno",
+    "warrantiesLabel": "garancija",
+    "warrantyCount": "{{count}} garancija",
+    "sortedByExpiry": "sortirano po isteku",
+    "noFilesAttached": "Nema priloženih fajlova",
+    "filesCount": "{{count}} fajlova",
+    "tapHint": "Dodirnite karticu za izmenu · dodirnite fajl za pregled",
+    "countActive": "aktivnih",
+    "countExpiring": "ističe",
+    "countExpired": "isteklo",
+    "remaining": {
+      "daysLeft": "još {{count}} dana",
+      "monthsLeft": "još {{count}} mes",
+      "yearsLeft": "još {{count}} god",
+      "yearsMonthsLeft": "još {{years}} god {{months}} mes",
+      "expiredDaysAgo": "Isteklo pre {{count}} dana",
+      "expiredMonthsAgo": "Isteklo pre {{count}} mes",
+      "expiredYearsAgo": "Isteklo pre {{count}} god",
+      "expiresToday": "Ističe danas"
+    },
+    "actions": {
+      "viewFiles": "Pregled fajlova",
+      "edit": "Izmeni",
+      "delete": "Obriši"
+    },
     "tabs": {
       "all": "Sve",
       "active": "Aktivne",
@@ -1051,7 +1087,15 @@
       "imageSlots": "Dodajte do 3 fajla (slike ili PDF)",
       "heicNotice": "HEIC slike ne mogu biti prikazane ali će biti konvertovane nakon uploada.",
       "heicPlaceholder": "HEIC slika",
-      "pdfPlaceholder": "PDF dokument"
+      "pdfPlaceholder": "PDF dokument",
+      "expiryHint": "Garancija ističe {{date}}",
+      "addUpToFiles": "Dodajte do 3 fajla",
+      "filesHint": "Slike ili PDF · račun, faktura, garantni list",
+      "errors": {
+        "productNameRequired": "Naziv proizvoda je obavezan",
+        "purchaseDateRequired": "Datum kupovine je obavezan",
+        "durationInvalid": "Unesite ispravan broj meseci"
+      }
     },
     "export": {
       "button": "Izvezi",
