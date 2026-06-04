@@ -11,8 +11,6 @@ import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { StatusBadge } from '@/components/warranties/primitives'
 import { formatDate } from '@/lib/date-utils'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
 import {
   useCreateWarranty,
   useUpdateWarranty,
@@ -59,7 +57,6 @@ type WarrantyForm = z.output<WarrantySchema>
 
 export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDelete }: WarrantyModalProps) {
   const { t } = useTranslation()
-  const isMobile = useIsMobile(768)
 
   const [removeFileIndices, setRemoveFileIndices] = useState<number[]>([])
   const [localImages, setLocalImages] = useState<File[]>([])
@@ -241,37 +238,6 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
       ? t('common.create')
       : t('common.update')
 
-  const footer = isMobile ? (
-    <div className="flex flex-col gap-2">
-      <Button type="submit" form={FORM_ID} disabled={pending} className="w-full">
-        {submitLabel}
-      </Button>
-      <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending} className="w-full">
-        {t('common.cancel')}
-      </Button>
-      {mode === 'edit' && (
-        <Button type="button" variant="ghost" onClick={requestDelete} disabled={pending} className="w-full text-destructive hover:text-destructive">
-          <Trash2 className="size-4" />
-          {t('common.delete')}
-        </Button>
-      )}
-    </div>
-  ) : (
-    <div className="flex items-center gap-2">
-      {mode === 'edit' && (
-        <Button type="button" variant="destructive" onClick={requestDelete} disabled={pending} className="mr-auto">
-          <Trash2 className="size-4" />
-          {t('common.delete')}
-        </Button>
-      )}
-      <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending} className={cn(mode !== 'edit' && 'ml-auto')}>
-        {t('common.cancel')}
-      </Button>
-      <Button type="submit" form={FORM_ID} disabled={pending}>
-        {submitLabel}
-      </Button>
-    </div>
-  )
 
   return (
     <GlassDialog
@@ -280,7 +246,31 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
       title={mode === 'create' ? t('warranties.modal.createTitle') : t('warranties.modal.editTitle')}
       description={mode === 'create' ? t('warranties.modal.createDescription') : t('warranties.modal.editDescription')}
       desktopWidth={520}
-      footer={footer}
+      actions={{
+        primary: (
+          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
+            {submitLabel}
+          </Button>
+        ),
+        secondary: (
+          <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)} disabled={pending}>
+            {t('common.cancel')}
+          </Button>
+        ),
+        destructive:
+          mode === 'edit' ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={requestDelete}
+              disabled={pending}
+            >
+              <Trash2 className="size-4" />
+              {t('common.delete')}
+            </Button>
+          ) : undefined,
+      }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Field
