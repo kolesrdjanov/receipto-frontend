@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Amount, CatTile, CatName } from '@/components/receipts/primitives'
+import { Amount, CatTile, CatName } from '@/components/glass/primitives'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { relativeDueLabel, type RecurringStatus, type RecurringRowData } from '@/components/recurring-expenses/status'
 import type { RecurringExpense } from '@/hooks/recurring-expenses/use-recurring-expenses'

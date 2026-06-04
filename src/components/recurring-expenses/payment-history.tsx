@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { Amount } from '@/components/receipts/primitives'
+import { Amount } from '@/components/glass/primitives'
 import {
   usePaymentHistory,
   type RecurringExpense,
