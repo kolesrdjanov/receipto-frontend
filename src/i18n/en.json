@@ -364,6 +364,10 @@
     "addManuallyHint": "Enter a blank receipt",
     "addFromTemplateHint": "Prefill from a saved store",
     "importExportHint": "Import or export a CSV file",
+    "selectExpenses": "Select expenses",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortLabel": "Sort · {{value}}",
     "gallery": {
       "noQrFound": "No QR code found in this image. Try a clearer photo.",
       "invalidImage": "Could not read this image. Please try another file.",

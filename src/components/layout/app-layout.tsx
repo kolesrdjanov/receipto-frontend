@@ -15,9 +15,11 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
 interface AppLayoutProps {
   children: React.ReactNode
+  /** Hide the global mobile <header> (a page provides its own frosted header). */
+  hideMobileHeader?: boolean
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, hideMobileHeader = false }: AppLayoutProps) {
   const { t } = useTranslation()
   const { user } = useAuthStore()
   const { sidebarCollapsed, setSidebarCollapsed } = useSettingsStore()
@@ -43,28 +45,30 @@ export function AppLayout({ children }: AppLayoutProps) {
       />
       <SidebarInset>
         {/* Mobile header: hamburger | centered logo | user avatar */}
-        <header className="flex flex-col border-b md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-          <div className="relative flex h-14 items-center justify-between px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ml-1" />
-              <LanguageSwitcher />
+        {!hideMobileHeader && (
+          <header className="flex flex-col border-b md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+            <div className="relative flex h-14 items-center justify-between px-4">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="-ml-1" />
+                <LanguageSwitcher />
+              </div>
+              <Link
+                to="/dashboard"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              >
+                <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
+              </Link>
+              <Link to="/settings/profile" className="shrink-0">
+                <Avatar
+                  firstName={user?.firstName}
+                  lastName={user?.lastName}
+                  imageUrl={user?.profileImageUrl}
+                  size="sm"
+                />
+              </Link>
             </div>
-            <Link
-              to="/dashboard"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              <img src="/logo-text.svg" alt={t('common.appName')} className="h-5 w-auto" />
-            </Link>
-            <Link to="/settings/profile" className="shrink-0">
-              <Avatar
-                firstName={user?.firstName}
-                lastName={user?.lastName}
-                imageUrl={user?.profileImageUrl}
-                size="sm"
-              />
-            </Link>
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* Main content */}
         <main className="container mx-auto px-4 py-6 pb-28 md:px-8 md:py-8 md:pb-8">

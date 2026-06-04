@@ -25,7 +25,6 @@ const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-
 const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
 import { FilterRail } from '@/components/receipts/filter-rail'
 import { FilterSheet } from '@/components/receipts/filter-sheet'
-import { QuickChips } from '@/components/receipts/quick-chips'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { AddMenu, AddSheet, ImportExportSheet } from '@/components/receipts/add-menu'
 import { ImportGuideDialog } from '@/components/receipts/import-guide-dialog'
@@ -48,8 +47,9 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
+import { ExpensesMobileHeader } from '@/components/receipts/expenses-mobile-header'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
-import { Camera, Loader2, SlidersHorizontal, Trash2, X, Tag, QrCode } from 'lucide-react'
+import { Camera, Loader2, Trash2, X, Tag, QrCode } from 'lucide-react'
 import { toast } from 'sonner'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
@@ -98,9 +98,10 @@ export default function Receipts() {
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerReceiptId, setViewerReceiptId] = useState<string | null>(null)
-  // Sort is fixed to the backend default here; the sort toggle returns in Chunk 4's "…" menu.
+  // Sort: order toggles between Newest (receiptDate DESC) and Oldest (ASC) via the mobile "…" menu.
   const sortBy: 'receiptDate' | 'createdAt' = 'receiptDate'
-  const sortOrder: 'ASC' | 'DESC' = 'DESC'
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
+  const toggleSort = () => { setSortOrder((o) => (o === 'DESC' ? 'ASC' : 'DESC')); setPage(1) }
 
   const debouncedFilters = useDebouncedValue(filters, 400)
   const isMobile = useIsMobile(768)
@@ -321,7 +322,7 @@ export default function Receipts() {
 
 
   return (
-    <AppLayout>
+    <AppLayout hideMobileHeader>
       <PageTransition>
       {/* Desktop sticky toolbar (breaks out of page padding to sit flush) */}
       <PageToolbar
@@ -357,29 +358,21 @@ export default function Receipts() {
         }
       />
 
-      {/* Mobile interim title (replaced by the frosted header in Chunk 4b) */}
-      <div className="mb-4 md:hidden" data-testid="receipts-title">
-        <h1 className="t-h1 text-[28px]">{t('receipts.title')}</h1>
-        <p className="t-sm mt-1 text-muted-foreground" data-testid="receipts-subtitle">
-          {t('receipts.subtitle')}{' '}
-          <Link to="/templates" className="text-primary hover:underline">{t('receipts.manageTemplates')}</Link>
-        </p>
-      </div>
-
-      {/* Mobile quick-filter row (full frosted header lands in Chunk 4) */}
-      <div className="mb-3 flex items-center gap-2 md:hidden">
-        <div className="min-w-0 flex-1">
-          <QuickChips filters={filters} categories={categories} onFiltersChange={handleFiltersChange} />
-        </div>
-        <button
-          type="button"
-          onClick={() => setFilterSheetOpen(true)}
-          aria-label={t('receipts.filtersButton')}
-          className="grid size-[42px] shrink-0 place-items-center rounded-[14px] border border-border bg-card text-fg-2 shadow-glass-1 transition-colors hover:bg-bg-subtle hover:text-foreground"
-        >
-          <SlidersHorizontal className="size-[18px]" />
-        </button>
-      </div>
+      {/* Mobile frosted page header (replaces the global mobile header on this route) */}
+      <ExpensesMobileHeader
+        totalAmounts={totalAmounts}
+        count={meta?.total ?? 0}
+        hasReceipts={!loading && receipts.length > 0}
+        filters={filters}
+        categories={categories}
+        onFiltersChange={handleFiltersChange}
+        onOpenFilters={() => setFilterSheetOpen(true)}
+        selectMode={selectMode}
+        onToggleSelectMode={() => { setSelectMode((v) => !v); setSelectedIds(new Set()) }}
+        sortOrder={sortOrder}
+        onToggleSort={toggleSort}
+        onImportExport={() => setImportExportSheetOpen(true)}
+      />
 
       <div className="md:flex md:items-start md:gap-6">
         <FilterRail
@@ -390,7 +383,7 @@ export default function Receipts() {
         />
 
         <div className="min-w-0 flex-1">
-          {totalAmounts.length > 0 && !loading && receipts.length > 0 && (
+          {!isMobile && totalAmounts.length > 0 && !loading && receipts.length > 0 && (
             <ExpensesSummary
               totalAmounts={totalAmounts}
               total={meta?.total ?? 0}

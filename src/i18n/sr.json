@@ -364,6 +364,10 @@
     "addManuallyHint": "Unesite prazan račun",
     "addFromTemplateHint": "Popunite iz sačuvane prodavnice",
     "importExportHint": "Uvezite ili izvezite CSV fajl",
+    "selectExpenses": "Izaberi troškove",
+    "sortNewest": "Najnovije prvo",
+    "sortOldest": "Najstarije prvo",
+    "sortLabel": "Sortiraj · {{value}}",
     "gallery": {
       "noQrFound": "QR kod nije pronađen na ovoj slici. Probajte sa jasnijom fotografijom.",
       "invalidImage": "Nije moguće pročitati ovu sliku. Pokušajte sa drugom datotekom.",
