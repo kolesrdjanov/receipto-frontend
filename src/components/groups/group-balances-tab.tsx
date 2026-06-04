@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar } from '@/components/ui/avatar'
 import { useGroupBalances, type MemberBalance } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
-import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight, Handshake, CheckCircle } from 'lucide-react'
+import { formatMoney } from '@/lib/utils'
+import { EmptyState } from '@/components/glass/empty-state'
+import { Loader2, TrendingUp, TrendingDown, Minus, ArrowRight, Handshake, CheckCircle2, Users } from 'lucide-react'
 
 interface ExchangeRates {
   [currency: string]: number
@@ -179,14 +181,8 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
     return settlements
   }, [convertedBalances])
 
-  const formatCurrency = (amount: number, currency?: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || displayCurrency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number, currency?: string) =>
+    formatMoney(amount, currency || displayCurrency || 'RSD')
 
   const getMemberName = (user: { firstName?: string; lastName?: string; email: string }) => {
     if (user.firstName && user.lastName) {
@@ -224,22 +220,22 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
           <CardContent className="py-4">
             {Math.abs(myBalance.balance) <= 1.0 ? (
               <div className="flex items-center gap-3 text-center justify-center">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-600">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+                <span className="font-medium text-success-foreground">
                   {t('groups.balances.allSettled')}
                 </span>
               </div>
             ) : myBalance.balance < -1.0 ? (
               <div className="flex items-center gap-3 text-center justify-center">
-                <TrendingDown className="h-5 w-5 text-red-600" />
-                <span className="font-semibold text-red-600">
+                <TrendingDown className="h-5 w-5 text-destructive" />
+                <span className="font-semibold text-destructive">
                   {t('groups.balances.youOwe', { amount: formatCurrency(Math.abs(myBalance.balance)) })}
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-3 text-center justify-center">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                <span className="font-semibold text-green-600">
+                <TrendingUp className="h-5 w-5 text-success" />
+                <span className="font-semibold text-success-foreground">
                   {t('groups.balances.youAreOwed', { amount: formatCurrency(myBalance.balance) })}
                 </span>
               </div>
@@ -251,13 +247,16 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
       {/* Member Balances */}
       <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
         <CardHeader className="max-sm:px-0">
-          <CardTitle className="text-lg">{t('groups.balances.memberBalances')}</CardTitle>
+          <CardTitle className="t-title">{t('groups.balances.memberBalances')}</CardTitle>
         </CardHeader>
         <CardContent className="max-sm:px-0">
           {convertedBalances.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('groups.balances.noExpenses')}
-            </p>
+            <EmptyState
+              compact
+              className="border-0 bg-transparent shadow-none"
+              icon={Users}
+              title={t('groups.balances.noExpenses')}
+            />
           ) : (
             <div className="space-y-4">
               {convertedBalances.map((balance) => {
@@ -315,16 +314,16 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
                     <div className="flex items-center gap-2 shrink-0">
                       {isOwed && (
                         <>
-                          <TrendingUp className="h-4 w-4 text-green-600" />
-                          <span className="font-semibold text-green-600 whitespace-nowrap">
+                          <TrendingUp className="h-4 w-4 text-success" />
+                          <span className="font-semibold text-success-foreground whitespace-nowrap">
                             +{formatCurrency(balance.balance)}
                           </span>
                         </>
                       )}
                       {owes && (
                         <>
-                          <TrendingDown className="h-4 w-4 text-red-600" />
-                          <span className="font-semibold text-red-600 whitespace-nowrap">
+                          <TrendingDown className="h-4 w-4 text-destructive" />
+                          <span className="font-semibold text-destructive whitespace-nowrap">
                             {formatCurrency(balance.balance)}
                           </span>
                         </>
@@ -350,7 +349,7 @@ export function GroupBalancesTab({ groupId, displayCurrency, exchangeRates }: Gr
       {suggestedSettlements.length > 0 && (
         <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
           <CardHeader className="max-sm:px-0">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="t-title flex items-center gap-2">
               <Handshake className="h-5 w-5" />
               {t('groups.balances.suggestedSettlements')}
             </CardTitle>

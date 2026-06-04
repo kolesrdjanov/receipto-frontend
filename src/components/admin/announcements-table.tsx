@@ -20,6 +20,7 @@ import {
   type AdminAnnouncement,
 } from '@/hooks/announcements/use-announcements'
 import { formatDateTime } from '@/lib/date-utils'
+import { EmptyState } from '@/components/glass/empty-state'
 import {
   Loader2,
   Pencil,
@@ -30,6 +31,7 @@ import {
   CheckCircle2,
   Info,
   ExternalLink,
+  Megaphone,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -42,9 +44,9 @@ function TypeBadge({ type }: { type: AdminAnnouncement['type'] }) {
   const { t } = useTranslation()
 
   const styles = {
-    alert: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    success: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-    info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    alert: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
+    success: 'bg-success-soft text-success-foreground',
+    info: 'bg-info-soft text-info-foreground',
   }
 
   const icons = {
@@ -124,13 +126,7 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
 
       {/* Empty */}
       {!isLoading && !error && announcements.length === 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">
-              {t('admin.announcements.noAnnouncements')}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <EmptyState compact icon={Megaphone} title={t('admin.announcements.noAnnouncements')} />
       )}
 
       {/* Mobile Card View */}
@@ -177,8 +173,8 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
                       disabled={updateAnnouncement.isPending}
                       className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
                         a.isActive
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                          ? 'bg-success-soft text-success-foreground'
+                          : 'bg-warning-soft text-warning-foreground'
                       }`}
                     >
                       {a.isActive ? (
@@ -264,8 +260,8 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
                         disabled={updateAnnouncement.isPending}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
                           a.isActive
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                            : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                            ? 'bg-success-soft text-success-foreground'
+                            : 'bg-warning-soft text-warning-foreground'
                         }`}
                       >
                         {a.isActive ? (

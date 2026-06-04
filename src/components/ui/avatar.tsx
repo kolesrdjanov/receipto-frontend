@@ -55,10 +55,12 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground',
+        'flex items-center justify-center rounded-full font-semibold text-white',
+        (size === 'xl' || size === '2xl') && 'shadow-glass-2',
         sizeClasses[size],
         className
       )}
+      style={{ backgroundImage: 'linear-gradient(135deg, var(--brand-cyan), var(--brand-violet))' }}
     >
       {initials}
     </div>

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useCreateSettlement, type GroupMember } from '@/hooks/groups/use-groups'
+import { formatMoney } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight } from 'lucide-react'
 
@@ -105,14 +106,6 @@ export function SettlementModal({
     }
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 2,
-    }).format(value)
-  }
-
   const fromMember = acceptedMembers.find((m) => m.userId === fromUserId)
   const toMember = acceptedMembers.find((m) => m.userId === toUserId)
   const parsedAmount = parseFloat(amount.replace(',', '.'))
@@ -198,7 +191,7 @@ export function SettlementModal({
               <ArrowRight className="h-4 w-4" />
               <span className="font-medium">{getMemberName(toMember)}</span>
               <span className="text-primary font-semibold ml-2">
-                {formatCurrency(parsedAmount)}
+                {formatMoney(parsedAmount, currency || 'RSD')}
               </span>
             </div>
           )}

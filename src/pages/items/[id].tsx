@@ -4,18 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useProduct, useFrequentItems, useDeleteProduct } from '@/hooks/items/use-items'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
 import { PriceHistoryChart } from '@/components/items/price-history-chart'
 import { StoreComparison } from '@/components/items/store-comparison'
 import { Loader2, ArrowLeft, Package, ShoppingCart, Calendar, Trash2 } from 'lucide-react'
@@ -43,15 +35,6 @@ export default function ItemDetailPage() {
     } catch {
       toast.error(t('items.deleteError'))
     }
-  }
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
   }
 
   // Find item stats from frequent items
@@ -95,7 +78,7 @@ export default function ItemDetailPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="text-destructive hover:text-destructive hover:bg-destructive-soft"
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 className="h-4 w-4" />
@@ -103,7 +86,7 @@ export default function ItemDetailPage() {
           </Button>
         </div>
 
-        <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">
+        <h2 className="t-h1 mb-2">
           {product.displayName}
         </h2>
         {product.category && (
@@ -121,7 +104,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">{formatPrice(itemStats.avgPrice)}</p>
+              <p className="text-lg sm:text-2xl font-bold">{formatMoney(itemStats.avgPrice, currency)}</p>
             </CardContent>
           </Card>
 
@@ -133,10 +116,10 @@ export default function ItemDetailPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-lg sm:text-2xl font-bold">
-                <span className="block sm:inline">{formatPrice(itemStats.minPrice)}</span>
+                <span className="block sm:inline">{formatMoney(itemStats.minPrice, currency)}</span>
                 <span className="hidden sm:inline"> - </span>
                 <span className="block sm:inline text-muted-foreground sm:text-foreground">
-                  {formatPrice(itemStats.maxPrice)}
+                  {formatMoney(itemStats.maxPrice, currency)}
                 </span>
               </p>
             </CardContent>
@@ -165,7 +148,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">{formatPrice(itemStats.lastPrice)}</p>
+              <p className="text-lg sm:text-2xl font-bold">{formatMoney(itemStats.lastPrice, currency)}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {format(new Date(itemStats.lastPurchaseDate), 'MMM d, yyyy')}
               </p>
@@ -202,31 +185,17 @@ export default function ItemDetailPage() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('items.deleteConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('items.deleteConfirmDescription', { name: product.displayName })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
-              disabled={deleteProduct.isPending}
-            >
-              {deleteProduct.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title={t('items.deleteConfirmTitle')}
+        description={t('items.deleteConfirmDescription', { name: product.displayName })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="destructive"
+        isLoading={deleteProduct.isPending}
+      />
     </AppLayout>
   )
 }

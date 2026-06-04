@@ -37,6 +37,7 @@ import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
 import { ExpensesMobileHeader } from '@/components/receipts/expenses-mobile-header'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
+import { EmptyState } from '@/components/glass/empty-state'
 import { Loader2, QrCode, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -348,7 +349,7 @@ export default function Receipts() {
 
 
   return (
-    <AppLayout hideMobileHeader>
+    <AppLayout>
       <PageTransition>
       {/* Desktop sticky toolbar (breaks out of page padding to sit flush) */}
       <PageToolbar
@@ -433,26 +434,22 @@ export default function Receipts() {
               ))}
             </div>
           ) : receipts.length === 0 ? (
-            <div
-              className="flex flex-col items-center rounded-[18px] border border-dashed border-border bg-bg-subtle px-6 py-12 text-center sm:py-16"
+            <EmptyState
               data-testid="receipts-empty"
-            >
-              <div className="mb-4 grid size-[72px] place-items-center rounded-[22px] bg-card text-muted-foreground shadow-glass-2">
-                <ReceiptIcon className="size-8" />
-              </div>
-              <h3 className="t-h3 mb-1.5">{t('receipts.noReceipts')}</h3>
-              <p className="t-sm mb-5 max-w-xs text-muted-foreground">
-                {t('receipts.noReceiptsText')}
-              </p>
-              <button
-                type="button"
-                onClick={openQrScanner}
-                className="btn-brand inline-flex h-[52px] items-center gap-2 rounded-full px-6 text-base font-semibold text-white"
-              >
-                <QrCode className="size-[18px]" />
-                {t('receipts.scanReceipt')}
-              </button>
-            </div>
+              icon={ReceiptIcon}
+              title={t('receipts.noReceipts')}
+              description={t('receipts.noReceiptsText')}
+              action={
+                <button
+                  type="button"
+                  onClick={openQrScanner}
+                  className="btn-brand inline-flex h-[52px] items-center gap-2 rounded-full px-6 text-base font-semibold text-white"
+                >
+                  <QrCode className="size-[18px]" />
+                  {t('receipts.scanReceipt')}
+                </button>
+              }
+            />
           ) : (
             <>
               <ExpenseFeed

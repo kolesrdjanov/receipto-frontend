@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wallet, Pencil, Trash2, MoreVertical, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import type { Category } from '@/hooks/categories/use-categories'
 
@@ -11,11 +11,6 @@ const PALETTE = [
   '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899', '#6B7280',
 ]
 export const DEFAULT_CATEGORY_COLOR = '#22C55E'
-
-/** sr-RS grouped amount, rounded, code after a single space (e.g. "30.000 RSD"). */
-function fmtBudget(amount: number, currency: string): string {
-  return `${Math.round(amount).toLocaleString('sr-RS')} ${currency}`
-}
 
 /**
  * The color circle — the visual anchor of every category. Round, filled with the
@@ -69,7 +64,7 @@ export function BudgetLine({
       style={{ fontSize: compact ? 11.5 : 12.5 }}
     >
       <Wallet className={cn('text-fg-faint', compact ? 'size-[11px]' : 'size-3')} />
-      <span className="tabular-nums">{fmtBudget(amount, currency)}</span>
+      <span className="tabular-nums">{formatMoney(amount, currency)}</span>
       <span className="font-medium text-fg-faint">{t('categories.perMonth')}</span>
     </span>
   )

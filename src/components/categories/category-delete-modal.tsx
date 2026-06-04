@@ -21,6 +21,7 @@ import {
   type Category,
 } from '@/hooks/categories/use-categories'
 import { useUpdateReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
+import { formatMoney } from '@/lib/utils'
 
 interface CategoryDeleteModalProps {
   open: boolean
@@ -128,10 +129,10 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
   const fmtAmount = (r: Receipt) => {
     const amount = r.totalAmount
     if (amount === undefined || amount === null) return '—'
-    return `${Math.round(Number(amount)).toLocaleString('sr-RS')} ${r.currency || 'RSD'}`
+    return formatMoney(Number(amount), r.currency || 'RSD')
   }
   const fmtDate = (d?: string) =>
-    d ? new Date(d).toLocaleDateString(i18n.language === 'sr' ? 'sr-RS' : 'en-GB', { day: 'numeric', month: 'short' }) : '—'
+    d ? new Date(d).toLocaleDateString(i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-GB', { day: 'numeric', month: 'short' }) : '—'
 
   // Loading the receipt count (drives which branch to show).
   if (open && receiptsLoading) {

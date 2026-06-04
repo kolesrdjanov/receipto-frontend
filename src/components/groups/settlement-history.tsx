@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettlementHistory, type SettlementRecord } from '@/hooks/groups/use-groups'
+import { EmptyState } from '@/components/glass/empty-state'
 import { Loader2, ArrowRight, History, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { enUS, sr } from 'date-fns/locale'
+import { enUS, srLatn } from 'date-fns/locale'
 import i18n from 'i18next'
+import { formatMoney } from '@/lib/utils'
 
 interface SettlementHistoryProps {
   groupId: string
@@ -15,13 +17,8 @@ export function SettlementHistory({ groupId, currency }: SettlementHistoryProps)
   const { t } = useTranslation()
   const { data: settlements = [], isLoading } = useSettlementHistory(groupId)
 
-  const formatCurrency = (amount: number, settlementCurrency?: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: settlementCurrency || currency || 'RSD',
-      minimumFractionDigits: 2,
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number, settlementCurrency?: string) =>
+    formatMoney(amount, settlementCurrency || currency || 'RSD')
 
   const getMemberName = (user: { firstName?: string; lastName?: string; email: string }) => {
     if (user.firstName && user.lastName) {
@@ -32,7 +29,7 @@ export function SettlementHistory({ groupId, currency }: SettlementHistoryProps)
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    const locale = i18n.language === 'sr' ? sr : enUS
+    const locale = i18n.language === 'sr' ? srLatn : enUS
     return formatDistanceToNow(date, { addSuffix: true, locale })
   }
 
@@ -49,16 +46,19 @@ export function SettlementHistory({ groupId, currency }: SettlementHistoryProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
+        <CardTitle className="t-title flex items-center gap-2">
           <History className="h-5 w-5" />
           {t('groups.settlements.history')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {settlements.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            {t('groups.settlements.noHistory')}
-          </p>
+          <EmptyState
+            compact
+            className="border-0 bg-transparent shadow-none"
+            icon={History}
+            title={t('groups.settlements.noHistory')}
+          />
         ) : (
           <div className="space-y-3">
             {settlements.map((settlement: SettlementRecord) => (
@@ -68,7 +68,7 @@ export function SettlementHistory({ groupId, currency }: SettlementHistoryProps)
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Check className="h-4 w-4 text-green-600 shrink-0" />
+                    <Check className="h-4 w-4 text-success shrink-0" />
                     <span className="font-medium">
                       {getMemberName(settlement.fromUser)}
                     </span>
@@ -77,7 +77,7 @@ export function SettlementHistory({ groupId, currency }: SettlementHistoryProps)
                       {getMemberName(settlement.toUser)}
                     </span>
                   </div>
-                  <span className="font-semibold text-green-600 whitespace-nowrap">
+                  <span className="font-semibold text-success-foreground whitespace-nowrap">
                     {formatCurrency(settlement.amount, settlement.currency)}
                   </span>
                 </div>

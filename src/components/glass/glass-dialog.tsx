@@ -7,6 +7,14 @@ import { useIsMobile } from '@/hooks/use-mobile'
 
 const SHEET_EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1]
 
+/** Standardized footer actions. Desktop: right-aligned (destructive far-left). Mobile:
+ *  full-width stacked big buttons (primary → secondary → destructive). */
+export interface GlassDialogActions {
+  primary?: ReactNode
+  secondary?: ReactNode
+  destructive?: ReactNode
+}
+
 export interface GlassDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -18,7 +26,9 @@ export interface GlassDialogProps {
   header?: ReactNode
   /** Scrollable body. */
   children?: ReactNode
-  /** Pinned footer (actions). */
+  /** Standardized footer actions (preferred — auto-lays-out per breakpoint). */
+  actions?: GlassDialogActions
+  /** Raw pinned footer (legacy escape hatch; prefer `actions`). */
   footer?: ReactNode
   /** Desktop modal width in px (mobile is always full-width). */
   desktopWidth?: number
@@ -36,6 +46,10 @@ export interface GlassDialogProps {
  * focus trap, Esc, portal) + Framer Motion, mirroring the onboarding sheet. Honors
  * `prefers-reduced-motion`. Header / body (scrolls) / footer (pinned) are laid out in a
  * flex column capped to the viewport.
+ *
+ * Mobile sheet is an opaque **white** surface (not the frosted desktop glass); tapping its
+ * grab handle dismisses it (with a little bounce). Footer `actions` stack full-width.
+ * Desktop stays frosted glass with right-aligned actions.
  */
 export function GlassDialog({
   open,
@@ -44,6 +58,7 @@ export function GlassDialog({
   description,
   header,
   children,
+  actions,
   footer,
   desktopWidth = 480,
   showClose = true,
@@ -84,15 +99,13 @@ export function GlassDialog({
                 <motion.div
                   key={isMobile ? 'sheet' : 'modal'}
                   className={cn(
-                    'glass-card pointer-events-auto relative flex flex-col overflow-hidden',
-                    isMobile ? 'max-h-[92vh] w-full' : 'max-h-[88vh]',
+                    'pointer-events-auto relative flex flex-col overflow-hidden',
+                    isMobile
+                      ? 'max-h-[92vh] w-full rounded-t-[28px] border-t border-border bg-card shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]'
+                      : 'glass-card max-h-[88vh]',
                     className,
                   )}
-                  style={
-                    isMobile
-                      ? { width: '100%', borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
-                      : { width: desktopWidth, maxWidth: 'calc(100% - 2rem)' }
-                  }
+                  style={isMobile ? { width: '100%' } : { width: desktopWidth, maxWidth: 'calc(100% - 2rem)' }}
                   initial={
                     reduce
                       ? { opacity: 0 }
@@ -114,7 +127,15 @@ export function GlassDialog({
                   }}
                 >
                   {isMobile && (
-                    <div className="mx-auto mb-1 mt-3 h-[5px] w-9 shrink-0 rounded-full bg-border" />
+                    <motion.button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => onOpenChange(false)}
+                      whileTap={{ scale: 0.82 }}
+                      className="mx-auto mb-1 mt-3 flex h-6 w-full max-w-[140px] shrink-0 items-center justify-center"
+                    >
+                      <span className="h-[5px] w-9 rounded-full bg-border" />
+                    </motion.button>
                   )}
 
                   {!isMobile && showClose && (
@@ -151,14 +172,30 @@ export function GlassDialog({
                   )}
 
                   {/* Footer (pinned) */}
-                  {footer && (
+                  {(actions || footer) && (
                     <div
                       className={cn(
                         'shrink-0 border-t border-hairline-soft px-6 pt-4',
                         isMobile ? 'pb-[calc(18px+env(safe-area-inset-bottom))]' : 'pb-6',
                       )}
                     >
-                      {footer}
+                      {actions ? (
+                        isMobile ? (
+                          <div className="flex flex-col gap-2 [&_button]:h-12 [&_button]:w-full [&_button]:rounded-xl [&_button]:text-[15px]">
+                            {actions.primary}
+                            {actions.secondary}
+                            {actions.destructive}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            {actions.destructive && <div className="mr-auto">{actions.destructive}</div>}
+                            {actions.secondary}
+                            {actions.primary}
+                          </div>
+                        )
+                      ) : (
+                        footer
+                      )}
                     </div>
                   )}
                 </motion.div>

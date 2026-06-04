@@ -18,7 +18,7 @@ import { useSignUp } from '@/hooks/auth/use-sign-up'
 export default function SignUp() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { formData, errors, apiError, setApiError, isLoading, handleChange, handleSubmit } = useSignUp()
+  const { register, watch, errors, apiError, setApiError, isLoading, handleSubmit } = useSignUp()
 
   return (
     <AuthLayout cardClassName="max-w-[440px]">
@@ -43,26 +43,22 @@ export default function SignUp() {
               label={t('auth.signUp.firstName')}
               icon={User}
               id="firstName"
-              name="firstName"
               autoComplete="given-name"
               placeholder={t('auth.signUp.firstNamePlaceholder')}
-              value={formData.firstName}
-              onChange={handleChange}
               disabled={isLoading}
-              error={errors.firstName}
+              error={errors.firstName?.message}
               data-testid="signup-firstname-input"
+              {...register('firstName')}
             />
             <Field
               label={t('auth.signUp.lastName')}
               id="lastName"
-              name="lastName"
               autoComplete="family-name"
               placeholder={t('auth.signUp.lastNamePlaceholder')}
-              value={formData.lastName}
-              onChange={handleChange}
               disabled={isLoading}
-              error={errors.lastName}
+              error={errors.lastName?.message}
               data-testid="signup-lastname-input"
+              {...register('lastName')}
             />
           </div>
 
@@ -70,15 +66,13 @@ export default function SignUp() {
             label={t('auth.signUp.email')}
             icon={Mail}
             id="email"
-            name="email"
             type="email"
             autoComplete="email"
             placeholder={t('auth.signUp.emailPlaceholder')}
-            value={formData.email}
-            onChange={handleChange}
             disabled={isLoading}
-            error={errors.email}
+            error={errors.email?.message}
             data-testid="signup-email-input"
+            {...register('email')}
           />
 
           <div>
@@ -86,28 +80,24 @@ export default function SignUp() {
               label={t('auth.signUp.password')}
               icon={Lock}
               id="password"
-              name="password"
               autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
               disabled={isLoading}
-              error={errors.password}
+              error={errors.password?.message}
               data-testid="signup-password-input"
+              {...register('password')}
             />
-            <PasswordStrengthMeter value={formData.password} />
+            <PasswordStrengthMeter value={watch('password')} />
           </div>
 
           <PasswordField
             label={t('auth.signUp.confirmPassword')}
             icon={LockKeyhole}
             id="confirmPassword"
-            name="confirmPassword"
             autoComplete="new-password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
             disabled={isLoading}
-            error={errors.confirmPassword}
+            error={errors.confirmPassword?.message}
             data-testid="signup-confirm-password-input"
+            {...register('confirmPassword')}
           />
         </div>
 
@@ -115,12 +105,11 @@ export default function SignUp() {
           <div className="flex items-start gap-2.5">
             <Checkbox
               id="terms"
-              name="terms"
-              checked={formData.terms}
-              onChange={handleChange}
+              checked={watch('terms')}
               disabled={isLoading}
               className="mt-0.5"
               data-testid="signup-terms-checkbox"
+              {...register('terms')}
             />
             <span className="text-[13px] font-medium leading-relaxed text-muted-foreground">
               {t('auth.signUp.agreeToTerms')}{' '}
@@ -148,7 +137,7 @@ export default function SignUp() {
           {errors.terms && (
             <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive" data-testid="signup-terms-error">
               <CircleAlert className="size-3.5 shrink-0" />
-              {errors.terms}
+              {errors.terms.message}
             </p>
           )}
         </div>

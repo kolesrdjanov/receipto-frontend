@@ -6,7 +6,7 @@ import {
   Shield,
   CreditCard,
   Users,
-  MoreHorizontal,
+  MoreVertical,
   Plus,
   type LucideIcon,
 } from 'lucide-react'
@@ -81,7 +81,7 @@ export function MobileTabBar({ onOpenAddSheet }: MobileTabBarProps) {
           onClick={() => setOpenMobile(true)}
           className="flex flex-1 flex-col items-center gap-1 py-1.5 text-[10.5px] font-semibold text-fg-faint transition-colors"
         >
-          <MoreHorizontal className="size-[22px]" />
+          <MoreVertical className="size-[22px]" />
           {t('nav.more')}
         </button>
       </div>

@@ -1,5 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { format, differenceInCalendarDays, startOfToday } from 'date-fns'
 import { Check, Lock, Receipt } from 'lucide-react'
@@ -21,11 +23,17 @@ interface MarkPaidModalProps {
   expense: UpcomingExpense | null
 }
 
-interface FormData {
-  amount: number
-  paidDate: string
-  notes: string
-}
+const createMarkPaidSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
+  z.object({
+    amount: z.coerce.number().positive(t('recurring.modal.amountMin')),
+    // No dedicated markPaid paid-date error key exists — concise hardcoded message kept.
+    paidDate: z.string().min(1, 'Paid date is required'),
+    notes: z.string().optional(),
+  })
+
+type MarkPaidSchema = ReturnType<typeof createMarkPaidSchema>
+type FormDataInput = z.input<MarkPaidSchema>
+type FormData = z.output<MarkPaidSchema>
 
 const FORM_ID = 'mark-paid-form'
 const fieldLabel = 'mb-1.5 block text-[12px] font-semibold text-fg-2'
@@ -41,14 +49,15 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
   const { t } = useTranslation()
   const markAsPaid = useMarkAsPaid()
 
+  const schema = useMemo(() => createMarkPaidSchema(t), [t])
   const {
     register,
     handleSubmit,
     reset,
     setValue,
     watch,
-    formState: { isSubmitting },
-  } = useForm<FormData>()
+    formState: { errors, isSubmitting },
+  } = useForm<FormDataInput, unknown, FormData>({ resolver: zodResolver(schema) })
 
   register('paidDate')
   const paidDate = watch('paidDate')
@@ -150,12 +159,15 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
               min="0"
               disabled={expense.isFixed}
               className="tabular-nums disabled:bg-bg-subtle disabled:opacity-90"
-              {...register('amount', { min: 0.01 })}
+              {...register('amount')}
             />
             {expense.isFixed && (
               <Lock className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-fg-faint" />
             )}
           </div>
+          {!expense.isFixed && errors.amount && (
+            <p className="mt-1.5 text-[12px] text-destructive">{errors.amount.message}</p>
+          )}
           <p className="mt-1.5 text-[12px] text-muted-foreground">
             {expense.isFixed ? t('recurring.markPaid.fixedHint') : t('recurring.markPaid.variableHint')}
           </p>
@@ -163,7 +175,13 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
 
         <div>
           <Label className={fieldLabel}>{t('recurring.markPaid.paidDate')}</Label>
-          <DatePicker value={paidDate} onChange={(value) => setValue('paidDate', value)} />
+          <DatePicker
+            value={paidDate}
+            onChange={(value) => setValue('paidDate', value, { shouldValidate: true })}
+          />
+          {errors.paidDate && (
+            <p className="mt-1.5 text-[12px] text-destructive">{errors.paidDate.message}</p>
+          )}
         </div>
 
         <div>

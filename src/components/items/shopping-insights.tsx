@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useShoppingInsights } from '@/hooks/items/use-items'
+import { EmptyState } from '@/components/glass/empty-state'
 import {
   Sparkles,
   Repeat,
@@ -24,9 +25,9 @@ const typeIcons = {
 } as const
 
 const toneColors = {
-  positive: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
-  neutral: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
-  warning: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+  positive: 'text-success-foreground bg-success-soft border-success/20',
+  neutral: 'text-info-foreground bg-info-soft border-info/20',
+  warning: 'text-warning-foreground bg-warning-soft border-warning/20',
 } as const
 
 export function ShoppingInsights() {
@@ -43,7 +44,17 @@ export function ShoppingInsights() {
     )
   }
 
-  if (!data || data.insights.length === 0) return null
+  if (!data || data.insights.length === 0) {
+    return (
+      <EmptyState
+        compact
+        className="mb-6"
+        icon={Sparkles}
+        title={t('items.insights.title')}
+        description={t('items.insights.noInsights')}
+      />
+    )
+  }
 
   return (
     <Card className="mb-6">

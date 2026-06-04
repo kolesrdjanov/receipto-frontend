@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, CreditCard } from 'lucide-react'
+import { CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { CardGrid, CardSkeleton, RowActionList } from '@/components/loyalty-cards/primitives'
 import { formatLabel } from '@/components/loyalty-cards/format'
@@ -15,7 +16,6 @@ import {
   type LoyaltyCard,
 } from '@/hooks/loyalty-cards/use-loyalty-cards'
 import { useFabStore } from '@/store/fab'
-import { cn } from '@/lib/utils'
 
 const LoyaltyCardModal = lazy(() =>
   import('@/components/loyalty-cards/loyalty-card-modal').then((m) => ({ default: m.LoyaltyCardModal }))
@@ -23,21 +23,6 @@ const LoyaltyCardModal = lazy(() =>
 const LoyaltyCardDisplay = lazy(() =>
   import('@/components/loyalty-cards/loyalty-card-display').then((m) => ({ default: m.LoyaltyCardDisplay }))
 )
-
-/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
-function AddButton({ onClick, label, className }: { onClick: () => void; label: string; className?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn('btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white', className)}
-      data-testid="loyalty-add-button"
-    >
-      <Plus className="size-[17px]" strokeWidth={2.4} />
-      {label}
-    </button>
-  )
-}
 
 export default function LoyaltyCards() {
   const { t } = useTranslation()
@@ -106,7 +91,7 @@ export default function LoyaltyCards() {
         className="md:-mx-8 md:-mt-8 md:mb-6"
         title={t('loyaltyCards.title')}
         subtitle={t('loyaltyCards.subtitle')}
-        actions={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} />}
+        actions={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} data-testid="loyalty-add-button" />}
       />
       <div className="mb-1 flex items-end justify-between md:hidden">
         <div>
@@ -130,19 +115,14 @@ export default function LoyaltyCards() {
             ))}
           </div>
         ) : list.length === 0 ? (
-          <div
-            className="mt-4 grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1 md:mt-0"
+          <EmptyState
+            className="mt-4 md:mt-0"
             data-testid="loyalty-empty"
-          >
-            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
-              <CreditCard className="size-8" />
-            </span>
-            <h3 className="t-h3 mt-[18px]">{t('loyaltyCards.noCards')}</h3>
-            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('loyaltyCards.noCardsDescription')}</p>
-            <div className="mt-[22px]">
-              <AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} />
-            </div>
-          </div>
+            icon={CreditCard}
+            title={t('loyaltyCards.noCards')}
+            description={t('loyaltyCards.noCardsDescription')}
+            action={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} />}
+          />
         ) : (
           <>
             {/* "All cards · N" row */}

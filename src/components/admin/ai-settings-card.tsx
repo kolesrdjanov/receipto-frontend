@@ -51,7 +51,7 @@ export function AiSettingsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="h-4 w-4 text-amber-500" />
+              <Sparkles className="h-4 w-4 text-warning" />
               {t('admin.settings.aiCoach')}
             </Label>
             <p className="text-xs text-muted-foreground">
@@ -70,7 +70,7 @@ export function AiSettingsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <Bot className="h-4 w-4 text-blue-500" />
+              <Bot className="h-4 w-4 text-info" />
               {t('admin.settings.aiCategorization')}
             </Label>
             <p className="text-xs text-muted-foreground">
@@ -89,7 +89,7 @@ export function AiSettingsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-success" />
               {t('admin.settings.aiItems')}
             </Label>
             <p className="text-xs text-muted-foreground">

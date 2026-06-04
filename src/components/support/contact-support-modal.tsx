@@ -1,4 +1,7 @@
+import { useMemo } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -20,19 +23,32 @@ interface ContactSupportModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-type SupportFormData = {
-  subject: string
-  message: string
-}
+// NOTE: messages below reuse the existing hardcoded English strings that were
+// previously rendered inline (no i18n keys exist for them).
+const createSupportSchema = () =>
+  z.object({
+    subject: z
+      .string()
+      .min(1, 'Subject is required (max 200 characters)')
+      .max(200, 'Subject is required (max 200 characters)'),
+    message: z
+      .string()
+      .min(1, 'Message is required (max 5000 characters)')
+      .max(5000, 'Message is required (max 5000 characters)'),
+  })
+
+type SupportFormData = z.infer<ReturnType<typeof createSupportSchema>>
 
 export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalProps) {
   const { t } = useTranslation()
+  const schema = useMemo(() => createSupportSchema(), [])
   const {
     register,
     handleSubmit,
     reset,
     formState: { isSubmitting, errors },
   } = useForm<SupportFormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       subject: '',
       message: '',
@@ -73,15 +89,12 @@ export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalP
             <Label htmlFor="subject">{t('support.subject')}</Label>
             <Input
               id="subject"
-              {...register('subject', {
-                required: true,
-                maxLength: 200,
-              })}
+              {...register('subject')}
               placeholder={t('support.subjectPlaceholder')}
               disabled={isSubmitting}
             />
             {errors.subject && (
-              <p className="text-sm text-destructive">Subject is required (max 200 characters)</p>
+              <p className="text-sm text-destructive">{errors.subject.message}</p>
             )}
           </div>
 
@@ -89,16 +102,13 @@ export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalP
             <Label htmlFor="message">{t('support.message')}</Label>
             <Textarea
               id="message"
-              {...register('message', {
-                required: true,
-                maxLength: 5000,
-              })}
+              {...register('message')}
               placeholder={t('support.messagePlaceholder')}
               rows={6}
               disabled={isSubmitting}
             />
             {errors.message && (
-              <p className="text-sm text-destructive">Message is required (max 5000 characters)</p>
+              <p className="text-sm text-destructive">{errors.message.message}</p>
             )}
           </div>
 

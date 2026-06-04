@@ -8,7 +8,7 @@ import { useResetPassword } from '@/hooks/auth/use-reset-password'
 
 export default function ResetPassword() {
   const { t } = useTranslation()
-  const { formData, errors, apiError, success, isLoading, token, handleChange, handleSubmit } = useResetPassword()
+  const { register, watch, errors, apiError, success, isLoading, token, handleSubmit } = useResetPassword()
 
   if (!token) {
     return (
@@ -66,28 +66,24 @@ export default function ResetPassword() {
               label={t('auth.resetPassword.password')}
               icon={Lock}
               id="password"
-              name="password"
               autoComplete="new-password"
               placeholder={t('auth.resetPassword.passwordPlaceholder')}
-              value={formData.password}
-              onChange={handleChange}
               disabled={isLoading}
-              error={errors.password}
+              error={errors.password?.message}
+              {...register('password')}
             />
-            <PasswordStrengthMeter value={formData.password} />
+            <PasswordStrengthMeter value={watch('password')} />
           </div>
 
           <PasswordField
             label={t('auth.resetPassword.confirmPassword')}
             icon={LockKeyhole}
             id="confirmPassword"
-            name="confirmPassword"
             autoComplete="new-password"
             placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
-            value={formData.confirmPassword}
-            onChange={handleChange}
             disabled={isLoading}
-            error={errors.confirmPassword}
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
           />
         </div>
 

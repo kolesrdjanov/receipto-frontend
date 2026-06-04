@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -26,32 +28,54 @@ interface CreateUserModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+// `role` is managed by local state (selectedRole), not RHF, so it is omitted here.
+const createUserSchema = (t: (k: string, o?: any) => string) =>
+  z.object({
+    email: z
+      .string()
+      .min(1, t('admin.users.form.emailRequired'))
+      .regex(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, t('admin.users.form.emailInvalid')),
+    password: z
+      .string()
+      .min(1, t('admin.users.form.passwordRequired'))
+      .min(6, t('admin.users.form.passwordMinLength')),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+  })
+
+type CreateUserFormData = z.infer<ReturnType<typeof createUserSchema>>
+
 export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
   const { t } = useTranslation()
   const createUser = useCreateUser()
   const [selectedRole, setSelectedRole] = useState<'user' | 'admin'>('user')
 
+  const schema = useMemo(() => createUserSchema(t), [t])
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CreateUserInput>({
+  } = useForm<CreateUserFormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       email: '',
       password: '',
       firstName: '',
       lastName: '',
-      role: 'user',
     },
   })
 
-  const onSubmit = async (data: CreateUserInput) => {
+  const onSubmit = async (data: CreateUserFormData) => {
     try {
-      await createUser.mutateAsync({
-        ...data,
+      const payload: CreateUserInput = {
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
         role: selectedRole,
-      })
+      }
+      await createUser.mutateAsync(payload)
       toast.success(t('admin.users.createSuccess'))
       reset()
       setSelectedRole('user')
@@ -85,13 +109,7 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
               id="email"
               type="email"
               placeholder={t('admin.users.form.emailPlaceholder')}
-              {...register('email', {
-                required: t('admin.users.form.emailRequired'),
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: t('admin.users.form.emailInvalid'),
-                },
-              })}
+              {...register('email')}
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -104,13 +122,7 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
               id="password"
               type="password"
               placeholder={t('admin.users.form.passwordPlaceholder')}
-              {...register('password', {
-                required: t('admin.users.form.passwordRequired'),
-                minLength: {
-                  value: 6,
-                  message: t('admin.users.form.passwordMinLength'),
-                },
-              })}
+              {...register('password')}
             />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>

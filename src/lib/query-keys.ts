@@ -32,6 +32,7 @@ export const queryKeys = {
     all: ['currencies'] as const,
     lists: () => [...queryKeys.currencies.all, 'list'] as const,
     list: () => [...queryKeys.currencies.lists()] as const,
+    exchangeRates: (base: string) => [...queryKeys.currencies.all, 'exchange-rates', base] as const,
   },
 
   // Groups
@@ -50,6 +51,7 @@ export const queryKeys = {
   dashboard: {
     all: ['dashboard'] as const,
     stats: () => [...queryKeys.dashboard.all, 'stats'] as const,
+    categorizationAccuracy: () => [...queryKeys.dashboard.all, 'categorization-accuracy'] as const,
   },
 
   // Users

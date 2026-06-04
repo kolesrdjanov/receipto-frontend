@@ -81,7 +81,7 @@ export function UserDetailsDrawer({ userId, open, onOpenChange }: UserDetailsDra
                     size="2xl"
                   />
                   <div>
-                    <h3 className="text-xl font-semibold">
+                    <h3 className="t-h3">
                       {userDetails.firstName || userDetails.lastName
                         ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}`.trim()
                         : t('admin.users.noName')}

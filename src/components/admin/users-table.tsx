@@ -22,7 +22,8 @@ import {
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
-import { ArrowDown, ArrowUp, ArrowUpDown, Check, Eye, Filter, Loader2, Minus, Search, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Check, Eye, SlidersHorizontal, Loader2, Minus, Search, Trash2, Users, X } from 'lucide-react'
+import { EmptyState } from '@/components/glass/empty-state'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -158,13 +159,13 @@ export function UsersTable() {
   const getRoleBadge = (role: string) => {
     if (role === 'admin') {
       return (
-        <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+        <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-brand-violet-soft text-brand-violet-foreground">
           Admin
         </span>
       )
     }
     return (
-      <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+      <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-bg-subtle text-fg-2">
         User
       </span>
     )
@@ -207,7 +208,7 @@ export function UsersTable() {
               onClick={() => setShowFilters(!showFilters)}
               className="shrink-0"
             >
-              <Filter className="h-4 w-4" />
+              <SlidersHorizontal className="h-4 w-4" />
             </Button>
           </div>
 
@@ -338,13 +339,7 @@ export function UsersTable() {
 
       {/* No Users State */}
       {!isLoading && !error && (!users || users.length === 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">
-              {t('admin.users.noUsers')}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <EmptyState compact icon={Users} title={t('admin.users.noUsers')} />
       )}
 
       {/* Mobile Card View */}
@@ -402,7 +397,7 @@ export function UsersTable() {
                       {t('admin.users.table.googleAuth')}
                     </span>
                     <span className="font-medium">
-                      {user.hasGoogleAuth ? <Check className="h-4 w-4 text-green-600" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
+                      {user.hasGoogleAuth ? <Check className="h-4 w-4 text-success" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
                     </span>
                   </div>
                 </div>
@@ -514,7 +509,7 @@ export function UsersTable() {
                   <TableCell>{user.warrantyCount}</TableCell>
                   <TableCell>{user.recurringExpenseCount}</TableCell>
                   <TableCell>
-                    {user.hasGoogleAuth ? <Check className="h-4 w-4 text-green-600" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
+                    {user.hasGoogleAuth ? <Check className="h-4 w-4 text-success" /> : <Minus className="h-4 w-4 text-muted-foreground" />}
                   </TableCell>
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell className="text-right">

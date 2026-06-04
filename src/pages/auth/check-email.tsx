@@ -5,7 +5,7 @@ import { MailCheck, RotateCcw, CircleAlert, CircleCheck, Loader2 } from 'lucide-
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { EmailChip, BackLink } from '@/components/auth/glass'
 import { Badge, Alert, SecondaryButton } from '@/components/glass/glass'
-import { api } from '@/lib/api'
+import { useResendVerification } from '@/hooks/auth/use-resend-verification'
 
 const RESEND_COOLDOWN = 60
 
@@ -19,6 +19,7 @@ export default function CheckEmail() {
   const { t } = useTranslation()
   const location = useLocation()
   const email = (location.state as { email?: string })?.email || ''
+  const { mutateAsync: resendVerification } = useResendVerification()
   const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
   const [error, setError] = useState('')
@@ -37,7 +38,7 @@ export default function CheckEmail() {
     setResent(false)
 
     try {
-      await api.post('/auth/resend-verification', { email }, { requiresAuth: false })
+      await resendVerification(email)
       setResent(true)
       setCooldown(RESEND_COOLDOWN)
     } catch (err) {

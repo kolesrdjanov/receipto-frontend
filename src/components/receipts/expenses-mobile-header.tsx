@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MoreHorizontal, CircleCheckBig, ArrowDownWideNarrow, ArrowDownUp, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
+import { MoreVertical, CircleCheckBig, ArrowDownWideNarrow, ArrowDownUp, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Amount } from '@/components/receipts/primitives'
 import { QuickChips } from '@/components/receipts/quick-chips'
@@ -80,7 +80,7 @@ export function ExpensesMobileHeader({
         </div>
       ) : (
         <>
-      <div className="mb-4 flex items-end justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <div className="min-w-0">
           <h1 className="t-h1 text-[28px]">{t('receipts.title')}</h1>
           {hasReceipts && (
@@ -97,7 +97,7 @@ export function ExpensesMobileHeader({
               aria-label={t('common.more', { defaultValue: 'More' })}
               className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
             >
-              <MoreHorizontal className="size-5" />
+              <MoreVertical className="size-5" />
             </button>
           </PopoverTrigger>
           <PopoverContent align="end" sideOffset={8} className="w-[210px] rounded-xl border-border bg-popover p-1.5 shadow-lg">

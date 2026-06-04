@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useActiveAnnouncements, type Announcement } from '@/hooks/announcements/use-announcements'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { EmptyState } from '@/components/glass/empty-state'
 import { AlertTriangle, CheckCircle2, Info, ExternalLink, Megaphone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDateTime } from '@/lib/date-utils'
@@ -45,10 +46,7 @@ export function AnnouncementDrawer({ open, onOpenChange }: AnnouncementDrawerPro
       }
     >
       {listItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Megaphone className="mb-3 h-10 w-10 text-muted-foreground/30" />
-          <p className="text-sm text-muted-foreground">{t('announcements.noAnnouncements')}</p>
-        </div>
+        <EmptyState compact icon={Megaphone} title={t('announcements.noAnnouncements')} />
       ) : (
         <div className="space-y-3">
           {listItems.map((a) => (

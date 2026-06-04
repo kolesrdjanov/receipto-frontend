@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format, parse, getYear, getMonth, setMonth, setYear } from "date-fns"
-import { enUS, sr } from "date-fns/locale"
+import { enUS, srLatn } from "date-fns/locale"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
@@ -23,7 +23,7 @@ import {
 
 const locales = {
   en: enUS,
-  sr: sr,
+  sr: srLatn,
 }
 
 interface DatePickerProps {

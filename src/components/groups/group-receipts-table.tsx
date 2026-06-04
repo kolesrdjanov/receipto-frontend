@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { EmptyState } from '@/components/glass/empty-state'
 import {
   useReceipts,
   useReceipt,
@@ -19,6 +20,7 @@ import {
   type Receipt,
 } from '@/hooks/receipts/use-receipts'
 import { formatDateTime } from '@/lib/date-utils'
+import { formatMoney } from '@/lib/utils'
 import { Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Loader2, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -54,7 +56,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
     const currency: string = receipt.currency || 'RSD'
     const amount = receipt.totalAmount
     if (amount === undefined || amount === null) return '-'
-    return `${currency} ${amount}`
+    return formatMoney(amount, currency)
   }
 
 
@@ -115,14 +117,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
     return totals
   }, [receipts])
 
-  const formatTotal = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatTotal = (amount: number, currency: string) => formatMoney(amount, currency)
 
   if (isLoading) {
     return (
@@ -134,15 +129,13 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
 
   if (receipts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <ReceiptIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <p className="text-lg font-medium text-muted-foreground">
-          {t('groups.detail.noReceipts')}
-        </p>
-        <p className="text-sm text-muted-foreground/70 mt-1 max-w-sm">
-          {t('groups.detail.noReceiptsDescription')}
-        </p>
-      </div>
+      <EmptyState
+        compact
+        className="border-0 bg-transparent shadow-none"
+        icon={ReceiptIcon}
+        title={t('groups.detail.noReceipts')}
+        description={t('groups.detail.noReceiptsDescription')}
+      />
     )
   }
 
@@ -155,10 +148,10 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1">
+                  <h3 className="t-title mb-1">
                     {receipt.storeName || t('receipts.unknownStore')}
                   </h3>
-                  <p className="text-2xl font-bold text-primary">
+                  <p className="t-h2 text-primary">
                     {formatAmount(receipt)}
                   </p>
                 </div>

@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { Package, Store, Shield, UploadCloud, FileText, X, Info, Trash2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -39,6 +41,22 @@ type PreviewItem = {
 
 const today = () => new Date().toISOString().split('T')[0]
 
+const createWarrantySchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
+  z.object({
+    productName: z.string().min(1, t('warranties.modal.errors.productNameRequired')),
+    storeName: z.string().optional(),
+    purchaseDate: z.string().min(1, t('warranties.modal.errors.purchaseDateRequired')),
+    warrantyDuration: z.preprocess(
+      (v) => (v === '' || v === null || v === undefined ? undefined : v),
+      z.coerce.number().optional(),
+    ),
+    notes: z.string().optional(),
+  })
+
+type WarrantySchema = ReturnType<typeof createWarrantySchema>
+type WarrantyFormInput = z.input<WarrantySchema>
+type WarrantyForm = z.output<WarrantySchema>
+
 export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDelete }: WarrantyModalProps) {
   const { t } = useTranslation()
   const isMobile = useIsMobile(768)
@@ -47,13 +65,15 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
   const [localImages, setLocalImages] = useState<File[]>([])
   const [localPreviews, setLocalPreviews] = useState<string[]>([])
 
+  const schema = useMemo(() => createWarrantySchema(t), [t])
   const {
     register,
     handleSubmit,
     reset,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<CreateWarrantyData>({
+  } = useForm<WarrantyFormInput, unknown, WarrantyForm>({
+    resolver: zodResolver(schema),
     defaultValues: { productName: '', storeName: '', purchaseDate: today(), warrantyDuration: 24, notes: '' },
   })
 
@@ -165,7 +185,14 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
     resetFileInputs()
   }
 
-  const onSubmit = async (data: CreateWarrantyData) => {
+  const onSubmit = async (form: WarrantyForm) => {
+    const data: CreateWarrantyData = {
+      productName: form.productName,
+      storeName: form.storeName,
+      purchaseDate: form.purchaseDate,
+      warrantyDuration: form.warrantyDuration,
+      notes: form.notes,
+    }
     try {
       if (mode === 'create') {
         await createWarranty.mutateAsync({
@@ -261,7 +288,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
           icon={Package}
           error={errors.productName?.message}
           placeholder={t('warranties.modal.productNamePlaceholder')}
-          {...register('productName', { required: t('warranties.modal.errors.productNameRequired') })}
+          {...register('productName')}
         />
 
         <Field
@@ -279,7 +306,6 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
             <Controller
               name="purchaseDate"
               control={control}
-              rules={{ required: t('warranties.modal.errors.purchaseDateRequired') }}
               render={({ field }) => (
                 <DatePicker id="purchaseDate" value={field.value} onChange={field.onChange} className="h-[50px] rounded-[14px]" />
               )}
@@ -294,7 +320,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
             type="number"
             min={1}
             placeholder="24"
-            {...register('warrantyDuration', { valueAsNumber: true })}
+            {...register('warrantyDuration')}
           />
         </div>
 

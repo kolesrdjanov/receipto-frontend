@@ -19,6 +19,7 @@ import {
   HiddenDots,
   Shimmer,
 } from '@/components/dashboard/primitives'
+import { EmptyState } from '@/components/glass/empty-state'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
 import { useMe } from '@/hooks/users/use-me'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
@@ -33,7 +34,8 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { useSettingsStore } from '@/store/settings'
 import { useDashboardStore } from '@/store/dashboard'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import {
   Receipt,
   QrCode,
@@ -167,21 +169,6 @@ export default function Dashboard() {
     }, 0)
   }
 
-  const formatAmount = (amount?: number) => {
-    if (amount === undefined || amount === null) return '0'
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: displayCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return ''
-    return format(new Date(dateString), 'd MMM yyyy')
-  }
-
   const monthName = format(new Date(selectedYear, selectedMonth - 1), 'MMMM yyyy')
 
   const handlePrevMonth = () => {
@@ -297,7 +284,7 @@ export default function Dashboard() {
               <div className="size-3 shrink-0 rounded-full" style={{ backgroundColor: data.color }} />
               <span className="text-sm font-semibold">{data.icon} {data.name}</span>
             </div>
-            <p className="text-sm font-medium tabular-nums">{formatAmount(data.value)}</p>
+            <p className="text-sm font-medium tabular-nums">{formatMoney(data.value, displayCurrency)}</p>
           </div>
         )
       }
@@ -309,7 +296,7 @@ export default function Dashboard() {
           <p className="mb-1 text-sm font-semibold">{displayLabel}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-sm font-medium tabular-nums">
-              {formatAmount(entry.value)}
+              {formatMoney(entry.value, displayCurrency)}
             </p>
           ))}
           {data?.date && (
@@ -321,14 +308,10 @@ export default function Dashboard() {
     return null
   }
 
-  const formatAmountRaw = useCallback((amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: displayCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }, [displayCurrency])
+  const formatAmountRaw = useCallback(
+    (amount: number) => formatMoney(amount, displayCurrency),
+    [displayCurrency],
+  )
 
   const maskedValue = (value: number) =>
     amountsVisible ? <AnimatedNumber value={value} formatFn={formatAmountRaw} /> : <HiddenDots />
@@ -398,7 +381,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="t-xs text-fg-faint">{t('dashboard.total')}</span>
-                <span className="text-[17px] font-extrabold tabular-nums">{formatAmount(totalMonthAmount)}</span>
+                <span className="text-[17px] font-extrabold tabular-nums">{formatMoney(totalMonthAmount, displayCurrency)}</span>
               </div>
             </div>
             <ul className="flex w-full flex-col gap-1.5 text-[13px]">
@@ -406,7 +389,7 @@ export default function Dashboard() {
                 <li key={c.name} className="flex items-center gap-2">
                   <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
                   <span className="truncate">{c.icon} {c.name}</span>
-                  <span className="ml-auto tabular-nums text-muted-foreground">{formatAmount(c.value)}</span>
+                  <span className="ml-auto tabular-nums text-muted-foreground">{formatMoney(c.value, displayCurrency)}</span>
                 </li>
               ))}
             </ul>
@@ -580,12 +563,7 @@ export default function Dashboard() {
                   <p className="text-[12px] text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
                 </div>
                 <span className="ml-4 shrink-0 text-[13.5px] font-medium tabular-nums">
-                  {new Intl.NumberFormat('sr-RS', {
-                    style: 'currency',
-                    currency: receipt.currency || 'RSD',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  }).format(Number(receipt.totalAmount) || 0)}
+                  {formatMoney(Number(receipt.totalAmount) || 0, receipt.currency)}
                 </span>
               </Link>
             ))}
@@ -636,23 +614,22 @@ export default function Dashboard() {
   )
 
   const emptyHero = isEmpty && (
-    <div className="mb-4 flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-glass-1 sm:gap-5">
-      <span className="icon-tile-primary grid size-[52px] shrink-0 place-items-center rounded-[16px]">
-        <QrCode className="size-6" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <h3 className="t-title">{t('dashboard.empty.title')}</h3>
-        <p className="mt-0.5 text-[13px] text-muted-foreground">{t('dashboard.empty.description')}</p>
-      </div>
-      <button
-        type="button"
-        onClick={openQrScanner}
-        className="btn-brand inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
-      >
-        <QrCode className="size-[18px]" />
-        <span className="hidden sm:inline">{t('receipts.scanReceipt')}</span>
-      </button>
-    </div>
+    <EmptyState
+      className="mb-4"
+      icon={QrCode}
+      title={t('dashboard.empty.title')}
+      description={t('dashboard.empty.description')}
+      action={
+        <button
+          type="button"
+          onClick={openQrScanner}
+          className="btn-brand inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
+        >
+          <QrCode className="size-[18px]" />
+          {t('receipts.scanReceipt')}
+        </button>
+      }
+    />
   )
 
   return (

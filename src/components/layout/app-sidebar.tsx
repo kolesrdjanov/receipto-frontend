@@ -37,7 +37,7 @@ import {
   CreditCard,
   Settings,
   SlidersHorizontal,
-  EllipsisVertical,
+  MoreVertical,
   LogOut,
   MessageCircle,
   Star,
@@ -216,7 +216,7 @@ export function AppSidebar({
         </div>
 
         {/* Language switcher — full-width pill (expanded) / globe (rail). Desktop only;
-            on mobile the language toggle lives in the top app header. */}
+            on mobile the language toggle lives in the More drawer footer (next to Contact support). */}
         <div className="hidden px-3.5 pb-1 pt-1.5 md:block group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           {state === 'collapsed' ? <LanguageSwitcher compact /> : <LanguageSwitcher pill fullWidth />}
         </div>
@@ -327,11 +327,12 @@ export function AppSidebar({
               <button
                 type="button"
                 onClick={() => { onOpenSupportModal(); closeMobile() }}
-                className={cn(footChip, 'col-span-2')}
+                className={footChip}
               >
                 <MessageCircle className="size-4 shrink-0 text-muted-foreground" />
                 {t('support.contactSupport')}
               </button>
+              <LanguageSwitcher chip />
             </div>
             <div className="flex items-center gap-2.5 rounded-xl border border-hairline-soft px-3 py-2.5">
               <SunMoon className="size-4 shrink-0 text-muted-foreground" />
@@ -370,7 +371,7 @@ export function AppSidebar({
                         {rankName}
                       </span>
                     </div>
-                    <EllipsisVertical className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                    <MoreVertical className="ml-auto size-4 text-muted-foreground group-data-[collapsible=icon]:hidden" />
                   </SidebarMenuButton>
                 </PopoverTrigger>
                 <PopoverContent side="top" align="end" className="w-56 p-1.5">

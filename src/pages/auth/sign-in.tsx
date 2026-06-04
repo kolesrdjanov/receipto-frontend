@@ -12,8 +12,7 @@ export default function SignIn() {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const { email, setEmail, password, setPassword, error, setError, isLoading, emailNotVerified, handleSubmit } =
-    useSignIn()
+  const { register, getValues, errors, error, setError, isLoading, emailNotVerified, handleSubmit } = useSignIn()
   const [rememberMe, setRememberMe] = useState(true)
 
   return (
@@ -28,7 +27,7 @@ export default function SignIn() {
               <button
                 type="button"
                 className="font-bold underline underline-offset-2"
-                onClick={() => navigate('/check-email', { state: { email } })}
+                onClick={() => navigate('/check-email', { state: { email: getValues('email') } })}
               >
                 {t('auth.signIn.resendVerification')}
               </button>
@@ -50,26 +49,24 @@ export default function SignIn() {
             label={t('auth.signIn.email')}
             icon={Mail}
             id="email"
-            name="email"
             type="email"
             autoComplete="email"
             placeholder={t('auth.signIn.emailPlaceholder')}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
+            error={errors.email?.message}
             data-testid="signin-email-input"
+            {...register('email')}
           />
           <PasswordField
             label={t('auth.signIn.password')}
             icon={Lock}
             id="password"
-            name="password"
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
+            error={errors.password?.message}
             invalid={!!error && !emailNotVerified}
             data-testid="signin-password-input"
+            {...register('password')}
           />
         </div>
 

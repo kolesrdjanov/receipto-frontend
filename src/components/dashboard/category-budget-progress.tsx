@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Target, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { Target, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
 import { WidgetCard, WidgetHead, WidgetEmpty } from './primitives'
 import { useCategories } from '@/hooks/categories/use-categories'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 import { type CategoryStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 
 interface CategoryBudgetProgressProps {
@@ -46,15 +46,6 @@ export function CategoryBudgetProgress({
       if (!targetRate || targetRate === 0) return sum + amountInDisplay
       return sum + amountInDisplay * targetRate
     }, 0)
-  }
-
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.round(amount))
   }
 
   return (
@@ -114,7 +105,7 @@ export function CategoryBudgetProgress({
                     ) : isWarning ? (
                       <AlertTriangle className="size-3.5 text-warning-foreground" />
                     ) : (
-                      <CheckCircle className="size-3.5 text-success-foreground" />
+                      <CheckCircle2 className="size-3.5 text-success-foreground" />
                     )}
                     <span className={cn('text-xs font-semibold tabular-nums', textColor)}>
                       {percentage.toFixed(0)}%
@@ -130,8 +121,8 @@ export function CategoryBudgetProgress({
                 </div>
 
                 <div className="mt-1 flex justify-between text-[11px] text-muted-foreground tabular-nums">
-                  <span>{formatAmount(spentAmount, budgetCurrency)}</span>
-                  <span>{formatAmount(budgetAmount, budgetCurrency)}</span>
+                  <span>{formatMoney(spentAmount, budgetCurrency)}</span>
+                  <span>{formatMoney(budgetAmount, budgetCurrency)}</span>
                 </div>
               </button>
             )

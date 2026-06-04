@@ -1,4 +1,7 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { CreditCard, Barcode, Camera, Loader2, ImagePlus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,6 +25,18 @@ const FORM_ID = 'loyalty-card-form'
 // Hidden element ID for html5-qrcode file scanning (needs a DOM element)
 const FILE_SCANNER_ID = 'loyalty-file-scanner'
 
+const createLoyaltyCardSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
+  z.object({
+    // No dedicated required-message keys exist — concise hardcoded messages kept.
+    cardName: z.string().trim().min(1, `${t('loyaltyCards.cardName')} is required`),
+    codeValue: z.string().trim().min(1, `${t('loyaltyCards.codeValue')} is required`),
+    codeType: z.enum(['qr', 'barcode']),
+    codeFormat: z.string(),
+    color: z.string(),
+  })
+
+type LoyaltyCardForm = z.infer<ReturnType<typeof createLoyaltyCardSchema>>
+
 interface LoyaltyCardModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -35,38 +50,56 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
   const createCard = useCreateLoyaltyCard()
   const updateCard = useUpdateLoyaltyCard()
 
-  const [cardName, setCardName] = useState('')
-  const [codeValue, setCodeValue] = useState('')
-  const [codeType, setCodeType] = useState<'qr' | 'barcode'>('barcode')
-  const [codeFormat, setCodeFormat] = useState('code_128')
-  const [color, setColor] = useState<string>(CARD_COLORS[0])
   const [scannerOpen, setScannerOpen] = useState(false)
   const [scanningFile, setScanningFile] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isEditing = !!card
 
+  const schema = useMemo(() => createLoyaltyCardSchema(t), [t])
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<LoyaltyCardForm>({
+    resolver: zodResolver(schema),
+    defaultValues: { cardName: '', codeValue: '', codeType: 'barcode', codeFormat: 'code_128', color: CARD_COLORS[0] },
+  })
+
+  const cardName = watch('cardName')
+  const codeValue = watch('codeValue')
+  const codeType = watch('codeType')
+  const codeFormat = watch('codeFormat')
+  const color = watch('color')
+
   useEffect(() => {
     if (!open) return
     if (card) {
-      setCardName(card.cardName)
-      setCodeValue(card.codeValue)
-      setCodeType(card.codeType)
-      setCodeFormat(card.codeFormat)
-      setColor(card.color || CARD_COLORS[0])
+      reset({
+        cardName: card.cardName,
+        codeValue: card.codeValue,
+        codeType: card.codeType,
+        codeFormat: card.codeFormat,
+        color: card.color || CARD_COLORS[0],
+      })
     } else {
-      setCardName('')
-      setCodeValue('')
-      setCodeType('barcode')
-      setCodeFormat('code_128')
-      setColor(randomCardColor())
+      reset({
+        cardName: '',
+        codeValue: '',
+        codeType: 'barcode',
+        codeFormat: 'code_128',
+        color: randomCardColor(),
+      })
     }
-  }, [open, card])
+  }, [open, card, reset])
 
   const applyScanResult = (value: string, format: string) => {
-    setCodeValue(value)
-    setCodeFormat(format)
-    setCodeType(QR_FORMATS.includes(format) ? 'qr' : 'barcode')
+    setValue('codeValue', value, { shouldValidate: true })
+    setValue('codeFormat', format)
+    setValue('codeType', QR_FORMATS.includes(format) ? 'qr' : 'barcode')
   }
 
   const resizeImage = (file: File, maxDimension = 1200): Promise<File> => {
@@ -126,16 +159,13 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
 
   const close = () => onOpenChange(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!cardName.trim() || !codeValue.trim()) return
-
+  const onSubmit = async (form: LoyaltyCardForm) => {
     const data: CreateLoyaltyCardData = {
-      cardName: cardName.trim(),
-      codeType,
-      codeFormat,
-      codeValue: codeValue.trim(),
-      color,
+      cardName: form.cardName.trim(),
+      codeType: form.codeType,
+      codeFormat: form.codeFormat,
+      codeValue: form.codeValue.trim(),
+      color: form.color,
     }
 
     try {
@@ -213,14 +243,14 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
         desktopWidth={440}
         footer={footer}
       >
-        <form id={FORM_ID} onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Card name */}
           <Field
             label={t('loyaltyCards.cardName')}
             icon={CreditCard}
-            value={cardName}
-            onChange={(e) => setCardName(e.target.value)}
+            error={errors.cardName?.message}
             placeholder={t('loyaltyCards.cardNamePlaceholder')}
+            {...register('cardName')}
           />
 
           {/* Card code + scan affordances */}
@@ -228,10 +258,10 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
             <Field
               label={t('loyaltyCards.codeValue')}
               icon={Barcode}
-              value={codeValue}
-              onChange={(e) => setCodeValue(e.target.value)}
+              error={errors.codeValue?.message}
               placeholder={t('loyaltyCards.codeValuePlaceholder')}
               className="font-mono"
+              {...register('codeValue')}
             />
             <div className="mt-2.5 flex gap-2">
               <Button
@@ -267,7 +297,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
             <label className="mb-2 ml-0.5 block text-xs font-semibold text-muted-foreground">
               {t('loyaltyCards.cardColor')}
             </label>
-            <ColorSwatches value={color} onChange={setColor} />
+            <ColorSwatches value={color} onChange={(c) => setValue('color', c)} />
           </div>
 
           {/* Live preview */}

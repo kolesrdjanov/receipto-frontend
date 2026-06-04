@@ -12,6 +12,7 @@ import {
   type Group,
 } from '@/hooks/groups/use-groups'
 import { GroupModal } from '@/components/groups/group-modal'
+import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { Plus, Users, Loader2, Mail, Check, X, HelpCircle, UserPlus, Receipt, Calculator, Archive } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
@@ -73,7 +74,7 @@ export default function Groups() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('groups.title')}</h2>
+          <h2 className="t-h1 mb-1 sm:mb-2">{t('groups.title')}</h2>
           <p className="text-sm text-muted-foreground sm:text-base">
             {t('groups.subtitle')}
           </p>
@@ -96,7 +97,7 @@ export default function Groups() {
 
       {/* How It Works Guide */}
       {showGuide && (
-        <Card className="mb-6 border-primary/20 bg-primary/5">
+        <Card className="mb-6 border-border bg-primary-soft">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -116,7 +117,7 @@ export default function Groups() {
           <CardContent className="pt-0">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center">
                   <UserPlus className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -127,7 +128,7 @@ export default function Groups() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center">
                   <Receipt className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -138,7 +139,7 @@ export default function Groups() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center">
                   <Calculator className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -158,9 +159,9 @@ export default function Groups() {
 
       {/* Pending Invites */}
       {pendingInvites.length > 0 && (
-        <Card className="mb-6 border-primary/50">
+        <Card className="mb-6 border-primary">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="t-title flex items-center gap-2">
               <Mail className="h-5 w-5" />
               {t('groups.pendingInvites')}
             </CardTitle>
@@ -207,16 +208,12 @@ export default function Groups() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : groups.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">{t('groups.noGroups')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-center text-muted-foreground">
-              {t('groups.noGroupsText')}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Users}
+          title={t('groups.noGroups')}
+          description={t('groups.noGroupsText')}
+          action={<AddButton onClick={handleCreateGroup} label={t('groups.newGroup')} />}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
@@ -229,7 +226,7 @@ export default function Groups() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     {group.icon && <span className="text-2xl">{group.icon}</span>}
-                    <CardTitle className="text-lg">{group.name}</CardTitle>
+                    <CardTitle className="t-title">{group.name}</CardTitle>
                     {group.isArchived && (
                       <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
                         {t('groups.archive.archivedBadge')}

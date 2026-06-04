@@ -7,7 +7,7 @@ import { useForgotPassword } from '@/hooks/auth/use-forgot-password'
 
 export default function ForgotPassword() {
   const { t } = useTranslation()
-  const { email, setEmail, error, success, isLoading, handleSubmit } = useForgotPassword()
+  const { register, errors, error, success, isLoading, handleSubmit } = useForgotPassword()
 
   return (
     <AuthLayout>
@@ -40,13 +40,12 @@ export default function ForgotPassword() {
             label={t('auth.forgotPassword.email')}
             icon={Mail}
             id="email"
-            name="email"
             type="email"
             autoComplete="email"
             placeholder={t('auth.forgotPassword.emailPlaceholder')}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
+            error={errors.email?.message}
+            {...register('email')}
           />
 
           <GradientButton

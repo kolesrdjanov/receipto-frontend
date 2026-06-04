@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 
@@ -28,46 +30,22 @@ type SignUpFormData = z.infer<ReturnType<typeof createSignUpSchema>>
 export function useSignUp() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [formData, setFormData] = useState<SignUpFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    terms: false,
-  })
-  const [errors, setErrors] = useState<Partial<Record<keyof SignUpFormData, string>>>({})
   const [apiError, setApiError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
-    if (errors[name as keyof SignUpFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }))
-    }
-  }
+  const form = useForm<SignUpFormData>({
+    resolver: zodResolver(createSignUpSchema(t)),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      terms: false,
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const signUpSchema = createSignUpSchema(t)
-    const result = signUpSchema.safeParse(formData)
-
-    if (!result.success) {
-      const fieldErrors: Partial<Record<keyof SignUpFormData, string>> = {}
-      result.error.issues.forEach((issue) => {
-        const path = issue.path[0] as keyof SignUpFormData
-        fieldErrors[path] = issue.message
-      })
-      setErrors(fieldErrors)
-      return
-    }
-
-    setErrors({})
+  const onSubmit = form.handleSubmit(async (data) => {
     setApiError('')
     setIsLoading(true)
 
@@ -75,30 +53,30 @@ export function useSignUp() {
       await api.post(
         '/auth/register',
         {
-          firstName: result.data.firstName,
-          lastName: result.data.lastName,
-          email: result.data.email,
-          password: result.data.password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
         },
         { requiresAuth: false }
       )
 
       // Redirect to check-email page with the email in state
-      navigate('/check-email', { replace: true, state: { email: result.data.email } })
+      navigate('/check-email', { replace: true, state: { email: data.email } })
     } catch (err) {
       setApiError(err instanceof Error ? err.message : t('auth.validation.signUpFailed'))
     } finally {
       setIsLoading(false)
     }
-  }
+  })
 
   return {
-    formData,
-    errors,
+    register: form.register,
+    watch: form.watch,
+    errors: form.formState.errors,
     apiError,
     setApiError,
     isLoading,
-    handleChange,
-    handleSubmit,
+    handleSubmit: onSubmit,
   }
 }

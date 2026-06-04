@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  AlertCircle,
+  CircleAlert,
   Clock,
   Calendar,
   Check,
@@ -30,7 +30,7 @@ const TONE: Record<RecurringStatus, string> = {
   ended: 'border border-border text-fg-faint',
 }
 const STATUS_ICON: Record<RecurringStatus, LucideIcon> = {
-  overdue: AlertCircle,
+  overdue: CircleAlert,
   duesoon: Clock,
   upcoming: Calendar,
   paid: Check,

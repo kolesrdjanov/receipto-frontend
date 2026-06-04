@@ -8,6 +8,8 @@ interface LanguageSwitcherProps {
   compact?: boolean
   /** Single toggle pill: globe + current language + chevron. */
   pill?: boolean
+  /** Full-width "chip" matching the sidebar footChip (border + card bg) — for the More drawer. */
+  chip?: boolean
   /** Stretch the pill to fill its container (sidebar header). */
   fullWidth?: boolean
   /** Show the short code (EN/SR) instead of the full name (tight mobile header). */
@@ -24,6 +26,7 @@ const languages: { value: Language; label: string }[] = [
 export function LanguageSwitcher({
   compact,
   pill,
+  chip,
   fullWidth,
   abbreviated,
   syncBackend = true,
@@ -57,6 +60,24 @@ export function LanguageSwitcher({
         title={language === 'en' ? 'Prebaci na srpski' : 'Switch to English'}
       >
         <Globe className="size-4" />
+      </button>
+    )
+  }
+
+  if (chip) {
+    const label = language === 'en' ? 'English' : 'Srpski'
+    return (
+      <button
+        onClick={handleToggle}
+        className={cn(
+          'flex w-full items-center gap-2.5 rounded-xl border border-hairline-soft bg-card px-3 py-2.5 text-[13.5px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle',
+          className,
+        )}
+        aria-label={language === 'en' ? 'Prebaci na srpski' : 'Switch to English'}
+      >
+        <Globe className="size-4 shrink-0 text-muted-foreground" />
+        <span className="flex-1 truncate text-left">{label}</span>
+        <ChevronDown className="size-3.5 shrink-0 text-fg-faint" />
       </button>
     )
   }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { getDaysInMonth } from 'date-fns'
 import { Calculator } from 'lucide-react'
 import { WidgetCard, WidgetHead, WidgetEmpty, TrendPill } from './primitives'
+import { formatMoney } from '@/lib/utils'
 import { type CurrencyBreakdown, type DailyStatsByCurrency, type MonthlyStatsByCurrency } from '@/hooks/dashboard/use-dashboard'
 
 interface MonthlyForecastProps {
@@ -32,15 +33,6 @@ export function MonthlyForecast({
       if (!rate || rate === 0) return sum + item.totalAmount
       return sum + item.totalAmount / rate
     }, 0)
-  }
-
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: displayCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.round(amount))
   }
 
   const forecast = useMemo(() => {
@@ -112,7 +104,7 @@ export function MonthlyForecast({
         </span>
         <div className="mt-1 flex items-center gap-2">
           <p className="text-[26px] font-extrabold leading-none tracking-[-0.02em] tabular-nums">
-            {formatAmount(forecast.projected)}
+            {formatMoney(forecast.projected, displayCurrency)}
           </p>
           <TrendPill value={forecast.vsLastMonth} />
         </div>
@@ -123,11 +115,11 @@ export function MonthlyForecast({
         <div className="mt-4 space-y-2 rounded-xl bg-bg-subtle p-3">
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.spentSoFar')}</span>
-            <span className="text-[13px] font-semibold tabular-nums">{formatAmount(forecast.spentSoFar)}</span>
+            <span className="text-[13px] font-semibold tabular-nums">{formatMoney(forecast.spentSoFar, displayCurrency)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.dailyAvg')}</span>
-            <span className="text-[13px] font-semibold tabular-nums">{formatAmount(forecast.dailyAvg)}</span>
+            <span className="text-[13px] font-semibold tabular-nums">{formatMoney(forecast.dailyAvg, displayCurrency)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.daysProgress')}</span>
@@ -142,7 +134,7 @@ export function MonthlyForecast({
       {forecast.lastMonthTotal > 0 && (
         <div className="mt-auto flex items-center justify-between border-t border-hairline-soft pt-3 text-[13px] text-muted-foreground">
           <span>{t('dashboard.forecast.lastMonth')}</span>
-          <span className="font-medium tabular-nums">{formatAmount(forecast.lastMonthTotal)}</span>
+          <span className="font-medium tabular-nums">{formatMoney(forecast.lastMonthTotal, displayCurrency)}</span>
         </div>
       )}
     </WidgetCard>

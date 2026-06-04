@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { format, isToday, isYesterday } from 'date-fns'
-import { enUS, sr } from 'date-fns/locale'
+import { enUS, srLatn } from 'date-fns/locale'
 import { StaggerContainer, StaggerItem } from '@/components/ui/animated'
 import { Amount } from '@/components/receipts/primitives'
 import { ExpenseRow } from '@/components/receipts/expense-row'
@@ -8,7 +8,7 @@ import { groupReceiptsByDay } from '@/lib/group-receipts-by-day'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 import type { Receipt } from '@/hooks/receipts/use-receipts'
 
-const LOCALES = { en: enUS, sr } as const
+const LOCALES = { en: enUS, sr: srLatn } as const
 
 interface ExpenseFeedProps {
   receipts: Receipt[]

@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSettingsStore } from '@/store/settings'
+import { queryKeys } from '@/lib/query-keys'
+import { formatMoney } from '@/lib/utils'
 
 interface ExchangeRates {
   [currency: string]: number
@@ -52,7 +54,7 @@ export function useExchangeRates(baseCurrency?: string) {
   const base = baseCurrency || preferredCurrency || 'RSD'
 
   return useQuery({
-    queryKey: ['exchange-rates', base],
+    queryKey: queryKeys.currencies.exchangeRates(base),
     queryFn: () => fetchExchangeRates(base),
     staleTime: 1000 * 60 * 60,
     gcTime: 1000 * 60 * 60 * 24,
@@ -85,13 +87,7 @@ export function useCurrencyConverter() {
   }
 
   const formatConverted = (amount: number, fromCurrency: string): string => {
-    const converted = convert(amount, fromCurrency)
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: preferredCurrency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(converted)
+    return formatMoney(convert(amount, fromCurrency), preferredCurrency || 'RSD')
   }
 
   return {

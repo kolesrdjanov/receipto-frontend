@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Alert } from '@/components/glass/glass'
@@ -18,6 +21,8 @@ import {
   useCreateReceipt,
   useUpdateReceipt,
   type Receipt,
+  type CreateReceiptInput,
+  type UpdateReceiptInput,
 } from '@/hooks/receipts/use-receipts'
 import { useSuggestCategory } from '@/hooks/receipts/use-suggest-category'
 import { useCategories } from '@/hooks/categories/use-categories'
@@ -39,16 +44,30 @@ interface ReceiptModalProps {
   onRequestDelete?: (receipt: Receipt) => void
 }
 
-type ReceiptFormData = {
-  storeName: string
-  totalAmount: string
-  currency: string
-  receiptDate: string
-  receiptNumber: string
-  categoryId: string
-  groupId: string
-  paidById: string
-}
+// "required" messages reuse the existing shared `common.required` key (no new keys
+// added). Amount-specific messages have no i18n key, so they are hardcoded English
+// strings — NOTED in the deliverable. en.json/sr.json are NOT touched.
+const createReceiptSchema = (t: TFunction) =>
+  z.object({
+    storeName: z.string().min(1, t('common.required')),
+    totalAmount: z.coerce
+      .number({ message: 'Enter a valid amount' })
+      .positive('Amount must be greater than 0'),
+    currency: z.string().min(1, t('common.required')),
+    receiptDate: z.string().min(1, t('common.required')),
+    receiptNumber: z.string().optional(),
+    // Optional in the form (default ''); mapped to `null` at the API boundary in
+    // onSubmit. Kept as a plain string here so the Select/suggestion-card props
+    // (which expect string | undefined) stay strictly typed.
+    categoryId: z.string().optional(),
+    groupId: z.string().optional(),
+    paidById: z.string().optional(),
+  })
+
+// 3-generic signature: z.coerce.number() makes input (string) differ from output (number),
+// so single-generic useForm fails to typecheck. Input = raw form values, Output = coerced.
+type ReceiptFormInput = z.input<ReturnType<typeof createReceiptSchema>>
+type ReceiptForm = z.output<ReturnType<typeof createReceiptSchema>>
 
 const FORM_ID = 'receipt-form'
 const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
@@ -58,6 +77,8 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
   const [splitAmong, setSplitAmong] = useState<string[]>([])
   const [blurredStoreName, setBlurredStoreName] = useState('')
 
+  const schema = useMemo(() => createReceiptSchema(t), [t])
+
   const {
     register,
     handleSubmit,
@@ -65,8 +86,9 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
     control,
     watch,
     setValue,
-    formState: { isSubmitting },
-  } = useForm<ReceiptFormData>({
+    formState: { errors, isSubmitting },
+  } = useForm<ReceiptFormInput, unknown, ReceiptForm>({
+    resolver: zodResolver(schema),
     defaultValues: {
       storeName: '',
       totalAmount: '',
@@ -191,7 +213,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
     setSplitAmong([])
   }
 
-  const onSubmit = async (data: ReceiptFormData) => {
+  const onSubmit = async (data: ReceiptForm) => {
     try {
       // Determine the receiptDate to send:
       // - If editing and the date hasn't changed, preserve the original (with time)
@@ -207,10 +229,12 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
         }
       }
 
-      const payload: Record<string, unknown> = {
-        storeName: data.storeName || undefined,
-        totalAmount: data.totalAmount ? parseFloat(data.totalAmount) : undefined,
-        currency: data.currency || undefined,
+      // Shared, non-split fields. totalAmount is a validated positive number
+      // (Zod coerce), so no parseFloat / undefined-guard is needed.
+      const base = {
+        storeName: data.storeName,
+        totalAmount: data.totalAmount,
+        currency: data.currency,
         receiptDate: receiptDateToSend,
         receiptNumber: data.receiptNumber || undefined,
         categoryId: data.categoryId || null,
@@ -218,21 +242,22 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
         paidById: data.paidById || null,
       }
 
-      // Only send splitAmong when a group is selected and not all members
-      if (data.groupId && !allSelected) {
-        payload.splitAmong = effectiveSplitAmong
-      } else if (data.groupId && allSelected) {
-        // Explicitly clear participants on update if switched back to all
-        if (mode === 'edit') {
-          payload.splitAmong = null
-        }
-      }
+      // splitAmong only matters when a group is selected: send the explicit list
+      // when not all members are included, otherwise leave undefined (edit mode
+      // additionally sends null to clear any existing participants).
+      const splitAmong =
+        data.groupId && !allSelected ? effectiveSplitAmong : undefined
 
       if (mode === 'create') {
-        await createReceipt.mutateAsync(payload as any)
+        const payload: CreateReceiptInput = { ...base, splitAmong }
+        await createReceipt.mutateAsync(payload)
         toast.success(t('receipts.modal.createSuccess'))
       } else if (mode === 'edit' && receipt) {
-        await updateReceipt.mutateAsync({ id: receipt.id, data: payload as any })
+        const payload: UpdateReceiptInput = {
+          ...base,
+          splitAmong: data.groupId && allSelected ? null : splitAmong,
+        }
+        await updateReceipt.mutateAsync({ id: receipt.id, data: payload })
         toast.success(t('receipts.modal.updateSuccess'))
       }
       onOpenChange(false)
@@ -349,6 +374,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
             placeholder={t('receipts.modal.storeNamePlaceholder')}
             data-testid="receipt-store-input"
           />
+          {errors.storeName && (
+            <p className="mt-1 ml-0.5 text-[13px] text-destructive" data-testid="receipt-store-error">
+              {errors.storeName.message}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-[1.5fr_1fr_1.3fr]">
@@ -365,6 +395,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
               placeholder="0.00"
               data-testid="receipt-amount-input"
             />
+            {errors.totalAmount && (
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive" data-testid="receipt-amount-error">
+                {errors.totalAmount.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -403,6 +438,11 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
                 />
               )}
             />
+            {errors.receiptDate && (
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive" data-testid="receipt-date-error">
+                {errors.receiptDate.message}
+              </p>
+            )}
           </div>
         </div>
 

@@ -55,7 +55,7 @@ export default function Templates() {
     <AppLayout>
       <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">{t('templates.title')}</h2>
+          <h2 className="t-h1 text-[28px] mb-1 sm:mb-2">{t('templates.title')}</h2>
           <p className="text-sm text-muted-foreground sm:text-base">{t('templates.subtitle')}</p>
         </div>
         <Button onClick={handleAddTemplate} className="w-full sm:w-auto">

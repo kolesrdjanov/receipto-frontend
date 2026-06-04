@@ -8,7 +8,7 @@ import {
   useUpcomingExpenses,
   type UpcomingExpense,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 
 interface UpcomingRecurringProps {
   displayCurrency: string
@@ -31,7 +31,7 @@ const VARIANT = {
 } as const
 
 export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRecurringProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data: upcoming, isLoading } = useUpcomingExpenses(30)
   const [markPaidOpen, setMarkPaidOpen] = useState(false)
   const [expenseToPay, setExpenseToPay] = useState<UpcomingExpense | null>(null)
@@ -44,14 +44,6 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
     return num / rate
   }
 
-  const formatAmount = (amount: number) =>
-    new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: displayCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-
   const handlePay = (expense: UpcomingExpense) => {
     setExpenseToPay(expense)
     setMarkPaidOpen(true)
@@ -59,7 +51,8 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
 
   const formatDueDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00')
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    const locale = i18n.language === 'sr' ? 'sr-Latn-RS' : undefined
+    return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
   }
 
   if (isLoading) {
@@ -138,7 +131,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
               <p className="text-[12px] text-muted-foreground">{formatDueDate(item.dueDate)}</p>
             </div>
             <span className="shrink-0 text-[13.5px] font-semibold tabular-nums">
-              {formatAmount(convertAmount(item.amount, item.currency))}
+              {formatMoney(convertAmount(item.amount, item.currency), displayCurrency)}
             </span>
             <button
               type="button"
@@ -166,7 +159,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
         icon={CalendarClock}
         iconTone="primary"
         title={t('recurring.dashboard.title')}
-        trailing={<span className="text-[13.5px] font-semibold tabular-nums">{formatAmount(totalUpcoming)}</span>}
+        trailing={<span className="text-[13.5px] font-semibold tabular-nums">{formatMoney(totalUpcoming, displayCurrency)}</span>}
       />
       <div className="space-y-3">
         {renderGroup(upcoming?.overdue ?? [], 'overdue')}

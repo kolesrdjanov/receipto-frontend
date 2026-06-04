@@ -4,21 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFrequentItems, type FrequentItem } from '@/hooks/items/use-items'
 import { Loader2, ShoppingCart, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
+import { WidgetEmpty } from './primitives'
 
 export function FrequentItems() {
   const { t } = useTranslation()
   const { data: itemsResponse, isLoading } = useFrequentItems({ limit: 5 })
   const items = itemsResponse?.data
   const { currency } = useSettingsStore()
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const getPriceTrend = (item: FrequentItem) => {
     if (!item) return null
@@ -62,11 +55,9 @@ export function FrequentItems() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center h-[200px] text-muted-foreground text-sm">
-            <ShoppingCart className="h-8 w-8 mb-2 opacity-50" />
-            <p>{t('items.noItemsYet')}</p>
-            <p className="text-xs mt-1">{t('items.scanReceiptsToTrack')}</p>
-          </div>
+          <WidgetEmpty tall icon={ShoppingCart} hint={t('items.scanReceiptsToTrack')}>
+            {t('items.noItemsYet')}
+          </WidgetEmpty>
         </CardContent>
       </Card>
     )
@@ -107,7 +98,7 @@ export function FrequentItems() {
                   </p>
                 </div>
                 <div className="text-right ml-4">
-                  <p className="font-medium">{formatPrice(item.lastPrice)}</p>
+                  <p className="font-medium">{formatMoney(item.lastPrice, currency)}</p>
                   {trend && TrendIcon && (
                     <p className={`text-xs flex items-center justify-end gap-1 ${trend.color}`}>
                       <TrendIcon className="h-3 w-3" />

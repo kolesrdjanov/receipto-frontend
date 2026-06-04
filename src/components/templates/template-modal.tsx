@@ -1,5 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -37,7 +39,15 @@ interface TemplateModalProps {
   mode: 'create' | 'edit'
 }
 
-type TemplateFormData = CreateTemplateInput
+const createTemplateSchema = (t: (k: string, o?: any) => string) =>
+  z.object({
+    name: z.string().min(1, t('templates.modal.nameRequired')),
+    storeName: z.string().min(1, t('templates.modal.storeNameRequired')),
+    currency: z.string().optional(),
+    categoryId: z.string().optional(),
+  })
+
+type TemplateFormData = z.infer<ReturnType<typeof createTemplateSchema>>
 
 export function TemplateModal({ open, onOpenChange, template, mode }: TemplateModalProps) {
   const { t } = useTranslation()
@@ -45,6 +55,7 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
   const { data: categories } = useCategories()
   const { data: currencies } = useCurrencies()
 
+  const schema = useMemo(() => createTemplateSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -53,6 +64,7 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<TemplateFormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       storeName: '',
@@ -88,8 +100,10 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
   const onSubmit = async (data: TemplateFormData) => {
     try {
       // Convert empty strings to null for optional fields
-      const submitData = {
-        ...data,
+      const submitData: CreateTemplateInput = {
+        name: data.name,
+        storeName: data.storeName,
+        currency: data.currency,
         categoryId: data.categoryId || null,
       }
 
@@ -137,7 +151,7 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
             </Label>
             <Input
               id="name"
-              {...register('name', { required: t('templates.modal.nameRequired') })}
+              {...register('name')}
               placeholder={t('templates.modal.namePlaceholder')}
             />
             {errors.name && (
@@ -151,7 +165,7 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
             </Label>
             <Input
               id="storeName"
-              {...register('storeName', { required: t('templates.modal.storeNameRequired') })}
+              {...register('storeName')}
               placeholder={t('templates.modal.storeNamePlaceholder')}
             />
             {errors.storeName && (

@@ -30,6 +30,7 @@ import { useCurrencies, getCurrencyFlag } from '@/hooks/currencies/use-currencie
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
+import { formatMoney } from '@/lib/utils'
 import { GroupBalancesTab } from './group-balances-tab'
 import { toast } from 'sonner'
 import { Users, UserPlus, Trash2, LogOut, Crown, Loader2, Pencil, Wallet } from 'lucide-react'
@@ -115,13 +116,8 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
     onEdit(group)
   }
 
-  const formatAmount = (amount: number, currency?: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || displayCurrency || 'RSD',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatAmount = (amount: number, currency?: string) =>
+    formatMoney(amount, currency || displayCurrency || 'RSD')
 
   // Convert amount from one currency to the display currency
   const convertAmount = (amount: number, fromCurrency: string): number => {
@@ -269,7 +265,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
                       size="sm"
                     />
                     <div className="flex items-center gap-2">
-                      {member.role === 'owner' && <Crown className="h-4 w-4 text-yellow-500" />}
+                      {member.role === 'owner' && <Crown className="h-4 w-4 text-warning" />}
                       <span>
                         {member.user?.firstName || member.user?.lastName
                           ? `${member.user?.firstName || ''} ${member.user?.lastName || ''}`.trim()

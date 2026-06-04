@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, CreditCard, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, CreditCard, FolderOpen, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/glass/empty-state'
 import { Avatar } from '@/components/ui/avatar'
 import {
   Table,
@@ -25,6 +26,7 @@ import {
 } from '@/hooks/admin/use-admin-users'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
 import {
   Cell,
   Pie,
@@ -93,14 +95,7 @@ export default function AdminUserDetailsPage() {
   const totalTrackedSpend = analyticsData.reduce((sum, item) => sum + item.value, 0)
   const topCategory = analyticsData[0]
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: preferredCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  }
+  const formatAmount = (amount: number) => formatMoney(amount, preferredCurrency)
 
   const PieTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -148,7 +143,7 @@ export default function AdminUserDetailsPage() {
         </Button>
 
         <div>
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('admin.users.userDetails')}</h2>
+          <h2 className="t-h1 text-[28px]">{t('admin.users.userDetails')}</h2>
           <p className="text-sm text-muted-foreground sm:text-base">
             {t('admin.users.detailsSubtitle')}
           </p>
@@ -174,7 +169,7 @@ export default function AdminUserDetailsPage() {
                   size="2xl"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold">
+                  <h3 className="t-h3">
                     {userDetails.firstName || userDetails.lastName
                       ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}`.trim()
                       : t('admin.users.noName')}
@@ -242,23 +237,23 @@ export default function AdminUserDetailsPage() {
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{t('admin.users.table.warranties')}</p>
-                  <p className="text-2xl font-bold">{userDetails.warrantyCount}</p>
+                  <p className="t-h2">{userDetails.warrantyCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{t('admin.users.table.recurring')}</p>
-                  <p className="text-2xl font-bold">{userDetails.recurringExpenseCount}</p>
+                  <p className="t-h2">{userDetails.recurringExpenseCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringPayments')}</p>
-                  <p className="text-2xl font-bold">{userDetails.recurringPaymentCount}</p>
+                  <p className="t-h2">{userDetails.recurringPaymentCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringReceipts')}</p>
-                  <p className="text-2xl font-bold">{userDetails.recurringReceiptCount}</p>
+                  <p className="t-h2">{userDetails.recurringReceiptCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{t('admin.users.usage.loyaltyCards')}</p>
-                  <p className="text-2xl font-bold">{userDetails.loyaltyCardCount}</p>
+                  <p className="t-h2">{userDetails.loyaltyCardCount}</p>
                 </div>
               </div>
 
@@ -352,7 +347,7 @@ export default function AdminUserDetailsPage() {
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="rounded-lg border p-4">
                       <p className="text-xs text-muted-foreground">{t('admin.users.analytics.totalTrackedSpend')}</p>
-                      <p className="text-2xl font-bold">{formatAmount(totalTrackedSpend)}</p>
+                      <p className="t-h2">{formatAmount(totalTrackedSpend)}</p>
                     </div>
                     <div className="rounded-lg border p-4">
                       <p className="text-xs text-muted-foreground">{t('admin.users.analytics.topCategory')}</p>
@@ -375,9 +370,12 @@ export default function AdminUserDetailsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">
-                  {t('admin.users.analytics.noData')}
-                </div>
+                <EmptyState
+                  compact
+                  className="border-0 bg-transparent shadow-none"
+                  icon={PieChartIcon}
+                  title={t('admin.users.analytics.noData')}
+                />
               )}
             </CardContent>
           </Card>
@@ -443,11 +441,7 @@ export default function AdminUserDetailsPage() {
                   )}
                 </>
               ) : (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    {t('admin.users.noCategories')}
-                  </CardContent>
-                </Card>
+                <EmptyState compact icon={FolderOpen} title={t('admin.users.noCategories')} />
               )}
             </TabsContent>
 
@@ -515,11 +509,7 @@ export default function AdminUserDetailsPage() {
                   )}
                 </>
               ) : (
-                <Card>
-                  <CardContent className="p-8 text-center text-muted-foreground">
-                    {t('admin.users.noReceipts')}
-                  </CardContent>
-                </Card>
+                <EmptyState compact icon={Receipt} title={t('admin.users.noReceipts')} />
               )}
             </TabsContent>
           </Tabs>

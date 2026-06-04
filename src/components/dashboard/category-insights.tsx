@@ -1,47 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, TrendingUp, Check, Target } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Progress } from '@/components/ui/progress'
-
-interface CategorizationAccuracy {
-  totalSuggestions: number
-  acceptedSuggestions: number
-  acceptanceRate: number
-  averageConfidence: number
-  topPerformingCategories: Array<{
-    categoryId: string
-    categoryName: string
-    acceptanceRate: number
-    totalSuggestions: number
-  }>
-}
+import { useCategorizationAccuracy } from '@/hooks/dashboard/use-categorization-accuracy'
 
 export function CategoryInsights() {
   const { t } = useTranslation()
 
-  const { data, isLoading, isError } = useQuery<CategorizationAccuracy>({
-    queryKey: ['categorization-accuracy'],
-    queryFn: async () => {
-      try {
-        // api.get already returns response.data, not the full AxiosResponse
-        return await api.get<CategorizationAccuracy>('/dashboard/categorization-accuracy')
-      } catch {
-        // Return default empty data instead of throwing
-        return {
-          totalSuggestions: 0,
-          acceptedSuggestions: 0,
-          acceptanceRate: 0,
-          averageConfidence: 0,
-          topPerformingCategories: []
-        }
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: false, // Don't retry on error
-  })
+  const { data, isLoading, isError } = useCategorizationAccuracy()
 
   if (isLoading) {
     return (

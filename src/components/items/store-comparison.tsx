@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Store, TrendingUp } from 'lucide-react'
+import { EmptyState } from '@/components/glass/empty-state'
 import { useStorePriceComparison } from '@/hooks/items/use-items'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
 import { format } from 'date-fns'
 
 interface StoreComparisonProps {
@@ -13,15 +15,6 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
   const { t } = useTranslation()
   const { data: stores, isLoading } = useStorePriceComparison(productId)
   const { currency } = useSettingsStore()
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   if (isLoading) {
     return (
@@ -51,9 +44,12 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[200px] text-muted-foreground">
-            {t('items.noHistory')}
-          </div>
+          <EmptyState
+            compact
+            className="border-0 bg-transparent shadow-none"
+            icon={Store}
+            title={t('items.noHistory')}
+          />
         </CardContent>
       </Card>
     )
@@ -82,7 +78,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
               <div
                 key={store.storeName}
                 className={`p-2.5 sm:p-3 rounded-lg border ${
-                  isCheapest ? 'border-green-500/50 bg-green-500/5' : ''
+                  isCheapest ? 'border-success/50 bg-success-soft' : ''
                 }`}
               >
                 <div className="flex items-start sm:items-center justify-between gap-2 mb-2">
@@ -92,14 +88,14 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                     </span>
                     <span className="font-medium text-sm sm:text-base truncate">{store.storeName}</span>
                     {isCheapest && (
-                      <span className="hidden sm:inline px-2 py-0.5 bg-green-500/10 text-green-500 text-xs font-medium rounded-full shrink-0">
+                      <span className="hidden sm:inline px-2 py-0.5 bg-success-soft text-success text-xs font-medium rounded-full shrink-0">
                         {t('items.minPrice')}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {isCheapest && (
-                      <span className="sm:hidden px-1.5 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-medium rounded-full">
+                      <span className="sm:hidden px-1.5 py-0.5 bg-success-soft text-success text-[10px] font-medium rounded-full">
                         Best
                       </span>
                     )}
@@ -116,7 +112,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                 <div className="grid grid-cols-2 gap-2 text-sm sm:hidden">
                   <div>
                     <p className="text-muted-foreground text-[10px]">{t('items.avgPrice')}</p>
-                    <p className="font-medium text-sm">{formatPrice(store.avgPrice)}</p>
+                    <p className="font-medium text-sm">{formatMoney(store.avgPrice, currency)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-[10px]">{t('items.purchases')}</p>
@@ -125,7 +121,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                   <div className="col-span-2">
                     <p className="text-muted-foreground text-[10px]">{t('items.priceRange')}</p>
                     <p className="font-medium text-sm">
-                      {formatPrice(store.minPrice)} – {formatPrice(store.maxPrice)}
+                      {formatMoney(store.minPrice, currency)} – {formatMoney(store.maxPrice, currency)}
                     </p>
                   </div>
                 </div>
@@ -134,12 +130,12 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                 <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground text-xs">{t('items.avgPrice')}</p>
-                    <p className="font-medium">{formatPrice(store.avgPrice)}</p>
+                    <p className="font-medium">{formatMoney(store.avgPrice, currency)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">{t('items.minPrice')}/{t('items.maxPrice')}</p>
                     <p className="font-medium">
-                      {formatPrice(store.minPrice)} – {formatPrice(store.maxPrice)}
+                      {formatMoney(store.minPrice, currency)} – {formatMoney(store.maxPrice, currency)}
                     </p>
                   </div>
                   <div>
@@ -149,7 +145,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                 </div>
 
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
-                  {t('items.lastPurchase')}: {format(new Date(store.lastDate), 'MMM d')} · {formatPrice(store.lastPrice)}
+                  {t('items.lastPurchase')}: {format(new Date(store.lastDate), 'MMM d')} · {formatMoney(store.lastPrice, currency)}
                 </p>
               </div>
             )

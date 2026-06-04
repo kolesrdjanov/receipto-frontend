@@ -5,13 +5,17 @@ import { Mail, MailCheck, CircleCheck, Link2Off, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { BackLink } from '@/components/auth/glass'
 import { Field, Badge, Alert, SecondaryButton } from '@/components/glass/glass'
-import { api } from '@/lib/api'
+import { useVerifyEmail } from '@/hooks/auth/use-verify-email'
+import { useResendVerification } from '@/hooks/auth/use-resend-verification'
 
 export default function VerifyEmail() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
+
+  const { mutateAsync: verifyEmail } = useVerifyEmail()
+  const { mutateAsync: resendVerification } = useResendVerification()
 
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
   const [errorMessage, setErrorMessage] = useState('')
@@ -30,7 +34,7 @@ export default function VerifyEmail() {
 
     const verify = async () => {
       try {
-        await api.post('/auth/verify-email', { token }, { requiresAuth: false })
+        await verifyEmail(token)
         setStatus('success')
         setTimeout(() => navigate('/sign-in', { replace: true }), 2000)
       } catch (err) {
@@ -49,7 +53,7 @@ export default function VerifyEmail() {
     setResent(false)
 
     try {
-      await api.post('/auth/resend-verification', { email }, { requiresAuth: false })
+      await resendVerification(email)
       setResent(true)
     } catch {
       // Silent — same response regardless (prevents email enumeration)

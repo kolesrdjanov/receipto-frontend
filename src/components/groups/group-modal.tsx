@@ -1,5 +1,7 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -9,16 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from '@/components/ui/emoji-picker'
 import { CurrencySelect } from '@/components/ui/currency-select'
@@ -43,7 +36,7 @@ import {
   type CreateGroupInput,
 } from '@/hooks/groups/use-groups'
 import { toast } from 'sonner'
-import { Loader2, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 interface GroupModalProps {
   open: boolean
@@ -52,12 +45,16 @@ interface GroupModalProps {
   mode: 'create' | 'edit'
 }
 
-type GroupFormData = {
-  name: string
-  description: string
-  currency: string
-  icon: string
-}
+const createGroupSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
+  z.object({
+    // Original rule was keyless `required: true`; reusing the matching existing key.
+    name: z.string().min(1, t('groups.modal.nameRequired')),
+    description: z.string(),
+    currency: z.string(),
+    icon: z.string(),
+  })
+
+type GroupFormData = z.infer<ReturnType<typeof createGroupSchema>>
 
 export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps) {
   const { t } = useTranslation()
@@ -65,6 +62,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
 
+  const schema = useMemo(() => createGroupSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -72,8 +70,9 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
     control,
     watch,
     setValue,
-    formState: { isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm<GroupFormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       description: '',
@@ -173,9 +172,12 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
             <Label htmlFor="name">{t('groups.modal.name')} *</Label>
             <Input
               id="name"
-              {...register('name', { required: true })}
+              {...register('name')}
               placeholder={t('groups.modal.namePlaceholder')}
             />
+            {errors.name && (
+              <p className="text-sm text-destructive">{errors.name.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -319,31 +321,17 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       </DialogContent>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('groups.modal.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('groups.modal.deleteConfirmDescription', { name: group?.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
-              disabled={deleteGroup.isPending}
-            >
-              {deleteGroup.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title={t('groups.modal.deleteTitle')}
+        description={t('groups.modal.deleteConfirmDescription', { name: group?.name })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="destructive"
+        isLoading={deleteGroup.isPending}
+      />
     </Dialog>
   )
 }

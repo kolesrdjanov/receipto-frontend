@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useGroupActivities, type GroupActivity } from '@/hooks/groups/use-groups'
+import { EmptyState } from '@/components/glass/empty-state'
 import { Loader2, Activity, UserPlus, UserMinus, Receipt, Settings, CreditCard, Users, Link } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { enUS, sr } from 'date-fns/locale'
+import { enUS, srLatn } from 'date-fns/locale'
 import i18n from 'i18next'
+import { formatMoney } from '@/lib/utils'
 
 interface ActivityFeedProps {
   groupId: string
@@ -35,16 +37,8 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    const locale = i18n.language === 'sr' ? sr : enUS
+    const locale = i18n.language === 'sr' ? srLatn : enUS
     return formatDistanceToNow(date, { addSuffix: true, locale })
-  }
-
-  const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 2,
-    }).format(amount)
   }
 
   const getActivityMessage = (activity: GroupActivity) => {
@@ -72,14 +66,14 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
       } else if (metadata.splitType === 'custom' && metadata.participantNames) {
         splitText = ` · ${t('groups.activities.betweenMembers', { names: metadata.participantNames.join(', ') })}`
       }
-      return `${storeName} - ${formatAmount(metadata.amount, metadata.currency)}${splitText}`
+      return `${storeName} - ${formatMoney(metadata.amount, metadata.currency)}${splitText}`
     }
 
     // Show settlement details (amount + participants)
     if (activity.type === 'settlement_created' && metadata.settlementAmount && metadata.currency) {
       const from = metadata.fromUserName || ''
       const to = metadata.toUserName || ''
-      return `${from} → ${to}: ${formatAmount(metadata.settlementAmount, metadata.currency)}`
+      return `${from} → ${to}: ${formatMoney(metadata.settlementAmount, metadata.currency)}`
     }
 
     // Show member name for leave/remove events
@@ -121,9 +115,12 @@ export function ActivityFeed({ groupId }: ActivityFeedProps) {
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            {t('groups.activities.noActivities')}
-          </p>
+          <EmptyState
+            compact
+            className="border-0 bg-transparent shadow-none"
+            icon={Activity}
+            title={t('groups.activities.noActivities')}
+          />
         ) : (
           <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
             {activities.map((activity: GroupActivity) => {

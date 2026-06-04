@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Plus,
   Shield,
   ShieldCheck,
   ShieldAlert,
@@ -28,6 +27,7 @@ import {
   type Warranty,
 } from '@/hooks/warranties/use-warranties'
 import { WarrantyImportDialog } from '@/components/warranties/warranty-import-dialog'
+import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { useFabStore } from '@/store/fab'
 import { cn } from '@/lib/utils'
 
@@ -45,21 +45,6 @@ const CSV_TEMPLATE = `productName,storeName,purchaseDate,warrantyExpires,warrant
 "iPhone 15 Pro","iStyle",2024-03-20,,24,"Personal phone","https://example.com/warranty1.jpg"
 "Bosch Washing Machine","Tehnomanija",2024-02-10,2027-02-10,36,"","https://example.com/doc1.pdf;https://example.com/doc2.jpg"
 `
-
-/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
-function AddButton({ onClick, label, height = 40 }: { onClick: () => void; label: string; height?: number }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{ height }}
-      className="btn-brand inline-flex shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
-    >
-      <Plus className="size-[18px]" strokeWidth={2.4} />
-      {label}
-    </button>
-  )
-}
 
 const STAT_TONE: Record<string, { tile: string; num: string }> = {
   total: { tile: 'bg-bg-subtle text-foreground', num: 'text-foreground' },
@@ -283,7 +268,7 @@ export default function WarrantiesPage() {
             <h1 className="t-h1 text-[28px]">{t('warranties.title')}</h1>
             <p className="t-sm mt-1 text-muted-foreground">{t('warranties.mobileSubtitle')}</p>
           </div>
-          <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} height={38} />
+          <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
         </div>
 
         {isLoading ? (
@@ -293,16 +278,12 @@ export default function WarrantiesPage() {
             ))}
           </div>
         ) : allWarranties.length === 0 ? (
-          <div className="grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1">
-            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
-              <Shield className="size-8" />
-            </span>
-            <h3 className="t-h3 mt-[18px]">{t('warranties.noWarranties')}</h3>
-            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('warranties.noWarrantiesText')}</p>
-            <div className="mt-[22px]">
-              <AddButton onClick={handleAdd} label={t('warranties.addWarranty')} />
-            </div>
-          </div>
+          <EmptyState
+            icon={Shield}
+            title={t('warranties.noWarranties')}
+            description={t('warranties.noWarrantiesText')}
+            action={<AddButton onClick={handleAdd} label={t('warranties.addWarranty')} />}
+          />
         ) : (
           <>
             {/* Desktop stat cards */}
@@ -351,9 +332,7 @@ export default function WarrantiesPage() {
 
             {/* Grid */}
             {list.length === 0 ? (
-              <div className="grid place-items-center rounded-2xl border border-border bg-card px-6 py-12 text-center text-muted-foreground shadow-glass-1">
-                <p className="t-sm">{t('warranties.noWarranties')}</p>
-              </div>
+              <EmptyState compact icon={Shield} title={t('warranties.noWarranties')} />
             ) : (
               <WarrantyGrid items={list} wide {...gridHandlers} />
             )}

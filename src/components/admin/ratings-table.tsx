@@ -14,6 +14,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAdminRatings, useAdminUpdateRating } from '@/hooks/ratings/use-ratings'
 import { formatDateTime } from '@/lib/date-utils'
+import { EmptyState } from '@/components/glass/empty-state'
 import { Loader2, Star, Globe, Check, X, MessageSquare, Send, Sparkles } from 'lucide-react'
 
 interface RatingsTableProps {
@@ -29,7 +30,7 @@ function StarDisplay({ rating }: { rating: number }) {
           key={star}
           className={`h-4 w-4 ${
             star <= rating
-              ? 'fill-yellow-400 text-yellow-400'
+              ? 'fill-warning text-warning'
               : 'text-muted-foreground/20'
           }`}
         />
@@ -96,13 +97,7 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
 
       {/* Empty State */}
       {!isLoading && !error && ratings.length === 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center text-muted-foreground">
-              {t('admin.ratings.noRatings')}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <EmptyState compact icon={Star} title={t('admin.ratings.noRatings')} />
       )}
 
       {/* Mobile Card View */}
@@ -138,7 +133,7 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                     <StarDisplay rating={rating.rating} />
                     <div className="flex items-center gap-2">
                       {rating.isPublic && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-success-soft text-success-foreground">
                           <Globe className="h-3 w-3" />
                           {t('admin.ratings.table.public')}
                         </span>
@@ -148,8 +143,8 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                         disabled={adminUpdate.isPending}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
                           rating.isApproved
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                            : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                            ? 'bg-success-soft text-success-foreground'
+                            : 'bg-warning-soft text-warning-foreground'
                         }`}
                       >
                         {rating.isApproved ? (
@@ -163,8 +158,8 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                         disabled={adminUpdate.isPending}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
                           rating.isFeatured
-                            ? 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200'
-                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            ? 'bg-brand-violet-soft text-brand-violet-foreground'
+                            : 'bg-bg-subtle text-muted-foreground'
                         }`}
                       >
                         <Sparkles className="h-3 w-3" />
@@ -302,7 +297,7 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                     </TableCell>
                     <TableCell>
                       {rating.isPublic ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-success-soft text-success-foreground">
                           <Globe className="h-3 w-3" />
                           {t('admin.ratings.table.public')}
                         </span>
@@ -316,8 +311,8 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                         disabled={adminUpdate.isPending}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
                           rating.isApproved
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                            : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                            ? 'bg-success-soft text-success-foreground'
+                            : 'bg-warning-soft text-warning-foreground'
                         }`}
                       >
                         {rating.isApproved ? (
@@ -333,8 +328,8 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
                         disabled={adminUpdate.isPending}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
                           rating.isFeatured
-                            ? 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200'
-                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            ? 'bg-brand-violet-soft text-brand-violet-foreground'
+                            : 'bg-bg-subtle text-muted-foreground'
                         }`}
                       >
                         <Sparkles className="h-3 w-3" />

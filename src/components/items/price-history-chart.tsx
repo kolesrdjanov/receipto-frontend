@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, TrendingUp } from 'lucide-react'
 import { usePriceHistory } from '@/hooks/items/use-items'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
 import { format } from 'date-fns'
 
 interface PriceHistoryChartProps {
@@ -35,15 +36,6 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
   const { t } = useTranslation()
   const { data: history, isLoading } = usePriceHistory(productId, { limit: 50 })
   const { currency } = useSettingsStore()
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const { chartData, stores, yDomain } = useMemo(() => {
     if (!history || history.length === 0) {
@@ -114,7 +106,7 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
                 style={{ backgroundColor: entry.color }}
               />
               <span className="text-muted-foreground">{entry.name}:</span>
-              <span className="font-medium">{formatPrice(entry.value)}</span>
+              <span className="font-medium">{formatMoney(entry.value, currency)}</span>
             </div>
           ))}
         </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { api } from '@/lib/api'
 
@@ -27,48 +29,24 @@ export function useResetPassword() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
 
-  const [formData, setFormData] = useState<ResetPasswordFormData>({
-    password: '',
-    confirmPassword: '',
-  })
-  const [errors, setErrors] = useState<Partial<Record<keyof ResetPasswordFormData, string>>>({})
   const [apiError, setApiError] = useState('')
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-    if (errors[name as keyof ResetPasswordFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }))
-    }
-  }
+  const form = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(createResetPasswordSchema(t)),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const onSubmit = form.handleSubmit(async (data) => {
     if (!token) {
       setApiError(t('auth.validation.invalidResetLink'))
       return
     }
 
-    const resetPasswordSchema = createResetPasswordSchema(t)
-    const result = resetPasswordSchema.safeParse(formData)
-
-    if (!result.success) {
-      const fieldErrors: Partial<Record<keyof ResetPasswordFormData, string>> = {}
-      result.error.issues.forEach((issue) => {
-        const path = issue.path[0] as keyof ResetPasswordFormData
-        fieldErrors[path] = issue.message
-      })
-      setErrors(fieldErrors)
-      return
-    }
-
-    setErrors({})
     setApiError('')
     setIsLoading(true)
 
@@ -77,8 +55,8 @@ export function useResetPassword() {
         '/auth/reset-password',
         {
           token,
-          password: result.data.password,
-          confirmPassword: result.data.confirmPassword,
+          password: data.password,
+          confirmPassword: data.confirmPassword,
         },
         { requiresAuth: false }
       )
@@ -91,16 +69,16 @@ export function useResetPassword() {
     } finally {
       setIsLoading(false)
     }
-  }
+  })
 
   return {
-    formData,
-    errors,
+    register: form.register,
+    watch: form.watch,
+    errors: form.formState.errors,
     apiError,
     success,
     isLoading,
     token,
-    handleChange,
-    handleSubmit,
+    handleSubmit: onSubmit,
   }
 }

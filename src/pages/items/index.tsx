@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/glass/empty-state'
 import {
   useFrequentItems,
   useItemStats,
@@ -10,6 +11,7 @@ import {
   type FrequentItem,
 } from '@/hooks/items/use-items'
 import { useSettingsStore } from '@/store/settings'
+import { formatMoney } from '@/lib/utils'
 import {
   Loader2,
   ShoppingCart,
@@ -51,15 +53,6 @@ export default function ItemsPage() {
   const [isMigrating, setIsMigrating] = useState(false)
   const [showNoDataWarning, setShowNoDataWarning] = useState(false)
 
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || 'RSD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
   const getPriceTrend = (item: FrequentItem) => {
     if (!item || !item.avgPrice || !item.lastPrice) return null
     const diff = item.lastPrice - item.avgPrice
@@ -70,7 +63,7 @@ export default function ItemsPage() {
     } else if (diff > 0) {
       return { icon: TrendingUp, color: 'text-destructive', label: `+${percentChange.toFixed(0)}%` }
     } else {
-      return { icon: TrendingDown, color: 'text-green-500', label: `${percentChange.toFixed(0)}%` }
+      return { icon: TrendingDown, color: 'text-success', label: `${percentChange.toFixed(0)}%` }
     }
   }
 
@@ -105,7 +98,7 @@ export default function ItemsPage() {
           <div className="relative">
             <Sparkles className="h-12 w-12 text-primary" />
           </div>
-          <h3 className="mt-6 text-xl font-semibold">{t('items.import.title')}</h3>
+          <h3 className="mt-6 t-h3">{t('items.import.title')}</h3>
           <p className="mt-2 text-muted-foreground text-center max-w-md">
             {t('items.import.description')}
           </p>
@@ -120,10 +113,16 @@ export default function ItemsPage() {
 
   // Show empty state when no products exist
   if (!isLoading && !hasProducts) {
+    const onboardingSteps = [
+      { icon: QrCode, title: t('items.empty.step1Title'), description: t('items.empty.step1Description') },
+      { icon: BarChart3, title: t('items.empty.step2Title'), description: t('items.empty.step2Description') },
+      { icon: PiggyBank, title: t('items.empty.step3Title'), description: t('items.empty.step3Description') },
+    ]
+
     return (
       <AppLayout>
         <div className="mb-6 md:mb-8">
-          <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">
+          <h2 className="t-h1 mb-2">
             {t('items.title')}
           </h2>
           <p className="text-sm text-muted-foreground md:text-base">
@@ -131,73 +130,42 @@ export default function ItemsPage() {
           </p>
         </div>
 
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16 px-6">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-              <Package className="h-8 w-8 text-primary" />
+        <EmptyState
+          icon={Package}
+          title={t('items.empty.title')}
+          description={t('items.empty.description')}
+          action={
+            <div className="flex flex-col items-center gap-3">
+              <Button size="lg" onClick={handleMigrate}>
+                <Sparkles className="h-4 w-4" />
+                {t('items.empty.importButton')}
+              </Button>
+              <p className="text-xs text-muted-foreground">{t('items.empty.importHint')}</p>
             </div>
+          }
+        />
 
-            <h3 className="text-xl font-semibold mb-2 text-center">
-              {t('items.empty.title')}
-            </h3>
-            <p className="text-muted-foreground text-center max-w-md mb-8">
-              {t('items.empty.description')}
-            </p>
-
-            <div className="grid gap-4 sm:grid-cols-3 w-full max-w-2xl mb-8">
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <QrCode className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('items.empty.step1Title')}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('items.empty.step1Description')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('items.empty.step2Title')}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('items.empty.step2Description')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <PiggyBank className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{t('items.empty.step3Title')}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('items.empty.step3Description')}
-                  </p>
-                </div>
+        {/* 3-step onboarding (kept as educational content; doesn't fit the EmptyState description slot) */}
+        <div className="mx-auto mt-4 grid w-full max-w-2xl gap-3 sm:grid-cols-3">
+          {onboardingSteps.map((step) => (
+            <div key={step.title} className="flex gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-glass-1">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-bg-subtle text-primary">
+                <step.icon className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="text-sm font-medium">{step.title}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{step.description}</p>
               </div>
             </div>
+          ))}
+        </div>
 
-            {showNoDataWarning && (
-              <div className="flex gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20 w-full max-w-2xl mb-6">
-                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">
-                  {t('items.empty.noDataWarning')}
-                </p>
-              </div>
-            )}
-
-            <Button size="lg" onClick={handleMigrate}>
-              <Sparkles className="h-4 w-4" />
-              {t('items.empty.importButton')}
-            </Button>
-            <p className="text-xs text-muted-foreground mt-3">
-              {t('items.empty.importHint')}
-            </p>
-          </CardContent>
-        </Card>
+        {showNoDataWarning && (
+          <div className="mx-auto mt-4 flex w-full max-w-2xl gap-3 rounded-2xl border border-destructive/20 bg-destructive-soft p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <p className="text-sm text-destructive">{t('items.empty.noDataWarning')}</p>
+          </div>
+        )}
       </AppLayout>
     )
   }
@@ -207,7 +175,7 @@ export default function ItemsPage() {
       <div className="mb-6 md:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-2 md:text-3xl">
+            <h2 className="t-h1 mb-2">
               {t('items.title')}
             </h2>
             <p className="text-sm text-muted-foreground md:text-base">
@@ -250,7 +218,7 @@ export default function ItemsPage() {
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{stats?.totalProducts || 0}</p>
+                <p className="t-h2">{stats?.totalProducts || 0}</p>
               </CardContent>
             </Card>
 
@@ -262,7 +230,7 @@ export default function ItemsPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{stats?.totalPriceRecords || 0}</p>
+                <p className="t-h2">{stats?.totalPriceRecords || 0}</p>
               </CardContent>
             </Card>
 
@@ -274,7 +242,7 @@ export default function ItemsPage() {
                 <Store className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{stats?.uniqueStores || 0}</p>
+                <p className="t-h2">{stats?.uniqueStores || 0}</p>
               </CardContent>
             </Card>
           </div>
@@ -329,8 +297,8 @@ export default function ItemsPage() {
                                 {t('items.boughtTimes', { count: item.purchaseCount })} · {item.stores.length} {t('items.stores')}
                               </span>
                               <div className="flex items-center gap-3 text-sm">
-                                <span className="text-muted-foreground">{formatPrice(item.avgPrice)}</span>
-                                <span className="font-medium">{formatPrice(item.lastPrice)}</span>
+                                <span className="text-muted-foreground">{formatMoney(item.avgPrice, currency)}</span>
+                                <span className="font-medium">{formatMoney(item.lastPrice, currency)}</span>
                               </div>
                             </div>
                           </div>
@@ -354,7 +322,7 @@ export default function ItemsPage() {
                                 <p className="text-sm text-muted-foreground">
                                   {t('items.avgPrice')}
                                 </p>
-                                <p className="font-medium">{formatPrice(item.avgPrice)}</p>
+                                <p className="font-medium">{formatMoney(item.avgPrice, currency)}</p>
                               </div>
 
                               <div className="text-right">
@@ -362,7 +330,7 @@ export default function ItemsPage() {
                                   {t('items.lastPrice')}
                                 </p>
                                 <div className="flex items-center gap-2">
-                                  <p className="font-medium">{formatPrice(item.lastPrice)}</p>
+                                  <p className="font-medium">{formatMoney(item.lastPrice, currency)}</p>
                                   {trend && TrendIcon && (
                                     <span className={`flex items-center gap-1 text-xs ${trend.color}`}>
                                       <TrendIcon className="h-3 w-3" />

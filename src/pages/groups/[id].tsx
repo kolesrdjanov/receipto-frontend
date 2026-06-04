@@ -33,6 +33,7 @@ import type { Receipt } from '@/hooks/receipts/use-receipts'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useAuthStore } from '@/store/auth'
 import { queryKeys } from '@/lib/query-keys'
+import { formatMoney } from '@/lib/utils'
 import { GroupModal } from '@/components/groups/group-modal'
 import { InviteLinkCard } from '@/components/groups/invite-link-card'
 import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
@@ -231,13 +232,8 @@ export default function GroupDetail() {
     }
   }
 
-  const formatAmount = (amount: number, currency?: string) => {
-    return new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || displayCurrency || 'RSD',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatAmount = (amount: number, currency?: string) =>
+    formatMoney(amount, currency || displayCurrency || 'RSD')
 
   const convertAmount = (amount: number, fromCurrency: string): number => {
     if (fromCurrency === displayCurrency || !exchangeRates) {
@@ -346,7 +342,7 @@ export default function GroupDetail() {
                 {group.icon && <span className="text-3xl sm:text-4xl">{group.icon}</span>}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl sm:text-3xl font-bold tracking-tight truncate">
+                    <h2 className="t-h1 truncate">
                       {group.name}
                     </h2>
                     {group.isArchived && (
@@ -404,7 +400,7 @@ export default function GroupDetail() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalReceipts')}
                 </p>
-                <p className="text-2xl sm:text-3xl font-bold">
+                <p className="t-h2">
                   {statsLoading ? '...' : (stats?.totalReceipts ?? 0)}
                 </p>
               </div>
@@ -412,7 +408,7 @@ export default function GroupDetail() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t('groups.detail.totalAmount')}
                 </p>
-                <p className="text-2xl sm:text-3xl font-bold text-primary">
+                <p className="t-h2 text-primary">
                   {statsLoading ? '...' : formatAmount(getTotalAmount())}
                 </p>
                 {stats && stats.byCurrency.length > 1 && (
@@ -468,7 +464,7 @@ export default function GroupDetail() {
                     <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
                       <button
                         onClick={handleAddManually}
-                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary/10 rounded-lg transition-colors"
+                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary-soft rounded-lg transition-colors"
                       >
                         {t('receipts.addBlank')}
                       </button>
@@ -532,7 +528,7 @@ export default function GroupDetail() {
 
           {/* Balances Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <h3 className="t-h3 mb-4 flex items-center gap-2">
               <Wallet className="h-5 w-5" />
               {t('groups.tabs.balances')}
             </h3>
@@ -567,7 +563,7 @@ export default function GroupDetail() {
                       />
                       <div className="flex items-center gap-1.5 min-w-0">
                         {member.role === 'owner' && (
-                          <Crown className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
+                          <Crown className="h-3.5 w-3.5 text-warning shrink-0" />
                         )}
                         <span className="text-sm truncate">
                           {member.user?.firstName || member.user?.lastName
@@ -610,7 +606,7 @@ export default function GroupDetail() {
                               {member.invitedEmail || member.user?.email}
                             </span>
                             {isExpired && (
-                              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-red-100 text-red-700 shrink-0">
+                              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)] shrink-0">
                                 {t('groups.detail.inviteExpired')}
                               </span>
                             )}

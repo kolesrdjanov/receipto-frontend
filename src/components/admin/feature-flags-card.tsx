@@ -56,7 +56,7 @@ export function FeatureFlagsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <Shield className="h-4 w-4 text-blue-500" />
+              <Shield className="h-4 w-4 text-info" />
               {t('admin.settings.featureWarranties')}
             </Label>
             <p className="text-xs text-muted-foreground">
@@ -75,7 +75,7 @@ export function FeatureFlagsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-success" />
               {t('admin.settings.featureItemPricing')}
             </Label>
             <p className="text-xs text-muted-foreground">
@@ -94,7 +94,7 @@ export function FeatureFlagsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <CalendarClock className="h-4 w-4 text-indigo-500" />
+              <CalendarClock className="h-4 w-4 text-info" />
               {t('admin.settings.featureRecurringExpenses')}
             </Label>
             <p className="text-xs text-muted-foreground">
@@ -113,7 +113,7 @@ export function FeatureFlagsCard() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
             <Label className="flex items-center gap-2 text-sm font-medium">
-              <CreditCard className="h-4 w-4 text-amber-500" />
+              <CreditCard className="h-4 w-4 text-warning" />
               {t('admin.settings.featureLoyaltyCards')}
             </Label>
             <p className="text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -10,7 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useTemplates, type Template } from '@/hooks/templates/use-templates'
-import { Trash2, Pencil } from 'lucide-react'
+import { EmptyState } from '@/components/glass/empty-state'
+import { Trash2, Pencil, FileText } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 
 interface TemplatesTableProps {
@@ -46,16 +47,11 @@ export function TemplatesTable({ onEdit, onDelete }: TemplatesTableProps) {
 
   if (!templates || templates.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-center text-muted-foreground">{t('templates.noTemplates')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-center text-muted-foreground">
-            {t('templates.noTemplatesText')}
-          </p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={FileText}
+        title={t('templates.noTemplates')}
+        description={t('templates.noTemplatesText')}
+      />
     )
   }
 

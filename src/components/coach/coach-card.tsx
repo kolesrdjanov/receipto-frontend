@@ -15,16 +15,7 @@ import { useCoach, type Insight } from '@/hooks/coach/use-coach'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { WidgetCard, WidgetHead, WidgetEmpty, TrendPill, Shimmer } from '@/components/dashboard/primitives'
-import { cn } from '@/lib/utils'
-
-function formatAmount(amount: number, currency: string, locale: string = 'sr-RS'): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.round(amount))
-}
+import { cn, formatMoney } from '@/lib/utils'
 
 interface CoachCardProps {
   displayCurrency?: string
@@ -89,8 +80,7 @@ function InsightItem({ insight }: { insight: Insight }) {
 }
 
 export function CoachCard({ displayCurrency }: CoachCardProps) {
-  const { t, i18n } = useTranslation()
-  const locale = i18n.language === 'sr' ? 'sr-RS' : 'en-US'
+  const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
   const targetCurrency = displayCurrency || preferredCurrency || 'RSD'
   const { data: exchangeRates } = useExchangeRates(targetCurrency)
@@ -191,7 +181,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
         return {
           ...insight,
           message: t('coach.topCategoryMessage', {
-            amount: formatAmount(converted, targetCurrency, locale),
+            amount: formatMoney(converted, targetCurrency),
             category: details.categoryName,
           }),
         }
@@ -246,10 +236,10 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
                 <TrendPill value={convertedWeeklyChangePercent} />
               </div>
               <p className="text-[20px] font-extrabold leading-tight tabular-nums">
-                {formatAmount(thisWeekConverted, targetCurrency, locale)}
+                {formatMoney(thisWeekConverted, targetCurrency)}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                {t('coach.vsLastWeek')}: {formatAmount(lastWeekConverted, targetCurrency, locale)}
+                {t('coach.vsLastWeek')}: {formatMoney(lastWeekConverted, targetCurrency)}
               </p>
             </div>
 
@@ -258,7 +248,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
               <div className="space-y-1 rounded-xl bg-bg-subtle p-3">
                 <span className="t-xs text-muted-foreground">{t('coach.topSpending')}</span>
                 <p className="text-[20px] font-extrabold leading-tight tabular-nums">
-                  {formatAmount(topCategoryConverted ?? summary.topCategory.amount, targetCurrency, locale)}
+                  {formatMoney(topCategoryConverted ?? summary.topCategory.amount, targetCurrency)}
                 </p>
                 <p className="truncate text-[11px] text-muted-foreground">
                   {summary.topCategory.icon} {summary.topCategory.name}
@@ -296,7 +286,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
         )}
 
         {convertedInsights.length === 0 && !tip && (
-          <p className="py-4 text-center text-[13px] text-muted-foreground">{t('coach.noInsights')}</p>
+          <WidgetEmpty icon={Sparkles}>{t('coach.noInsights')}</WidgetEmpty>
         )}
       </div>
     </WidgetCard>

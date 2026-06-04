@@ -109,12 +109,32 @@ Auth-specific helpers live in `src/components/auth/glass.tsx`: `CardHead`, `Emai
 `BackLink`.
 
 `src/components/glass/glass-dialog.tsx` holds **`GlassDialog`** — the shared responsive
-overlay shell: a centered frosted modal on desktop (≥ md) and a Framer-Motion slide-up
-bottom sheet on mobile, composing Radix Dialog primitives (scrim/focus-trap/Esc) +
-`useReducedMotion`. Layout is header / scrollable body / pinned footer. The shared
-`ConfirmDialog`, all Recurring overlays, the **announcements panel**, and the **mobile FAB
-Add/Scan sheet** compose from it. Use it for any new mobile-sheet/desktop-modal surface
-instead of re-deriving the pattern.
+overlay shell: a centered **frosted** modal on desktop (≥ md) and a slide-up bottom sheet on
+mobile, composing Radix Dialog primitives (scrim/focus-trap/Esc) + Framer Motion +
+`useReducedMotion`. Layout is header / scrollable body / pinned footer.
+
+- **Mobile sheet = opaque white** (`bg-card`), *not* the frosted desktop glass — frosted reads
+  as grey on a phone. Rounded top, top hairline, upward shadow. (Dark mode = the dark card.)
+- **Notch**: the grab handle is a `motion.button` — **tap it to dismiss** (with a `whileTap`
+  bounce). Drag-to-dismiss was intentionally dropped: tap + scrim + Esc cover it, and a plain
+  `onClick` is reliable where drag-vs-tap on one handle was not.
+- **Footer `actions` API** (preferred over the raw `footer` prop): `{ primary, secondary,
+  destructive }` → **desktop right-aligned** (destructive far-left) / **mobile full-width
+  stacked big buttons** (primary → secondary → destructive). Pass plain `<Button>`s; the shell
+  lays them out + sizes them per breakpoint. Raw `footer` stays as a legacy escape hatch (the
+  remaining modals migrate to `actions` under tech-debt TD-9).
+
+The shared `ConfirmDialog`, all Recurring overlays, the **announcements panel**, and the
+**mobile FAB Add/Scan sheet** compose from it. Use it for any new mobile-sheet/desktop-modal
+surface instead of re-deriving the pattern.
+
+### Form fields — one filled style
+`Input`, `Textarea`, and the `Select`/`CurrencySelect` triggers all share the **DatePicker's
+filled look**: `h-10 rounded-xl border-border bg-bg-subtle/70 dark:bg-input/55`, focus
+`border-primary` + `ring-4 ring-primary/15`. This is the single field appearance across every
+form — don't reintroduce `bg-transparent` / `bg-background` / `rounded-md` per field. Money &
+number amounts use `.t-num` (tabular **+ Plus Jakarta Sans** display face — the system-ui body
+font's digits read "off" for amounts).
 
 ## App navigation shell (`src/components/layout/`)
 
@@ -133,10 +153,13 @@ The chrome that wraps every page, restyled to Glass and composed from the shadcn
   page-registered `useFabStore` action, else opens `FabActionSheet`.
 - `fab-action-sheet.tsx` — global "Add expense" `GlassDialog` (Scan / Add manually →
   `/receipts?action=scan|add`, consumed by the Receipts page).
-- `app-layout.tsx` — edge-to-edge frosted mobile header (language · centered logo · avatar;
-  no hamburger) + content frame + tab bar + shared modals.
-- The sidebar/mobile-header language toggle is `LanguageSwitcher` with the `pill`
-  variant (`fullWidth` in the sidebar, `abbreviated` in the mobile header).
+- `app-layout.tsx` — **no global mobile top bar** (removed; the bottom-bar **More** tab is the
+  single mobile-nav entry — it already carries language · profile · account · theme · support).
+  Content frame carries `env(safe-area-inset-top)` so page content clears the notch; + tab bar
+  + shared modals.
+- Language toggle is `LanguageSwitcher`: desktop sidebar = `pill fullWidth` (`compact` globe on
+  the rail); **mobile = the `chip` variant in the More-drawer footer, on a 50/50 row next to
+  Contact support** (matches the `footChip` style).
 
 > Sidebar widths live on the shadcn primitive (`ui/sidebar.tsx`):
 > `SIDEBAR_WIDTH=17.5rem`, `SIDEBAR_WIDTH_ICON=4.75rem`, `SIDEBAR_WIDTH_MOBILE=min(88vw,21rem)`.

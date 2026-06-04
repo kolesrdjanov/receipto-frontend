@@ -1,5 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -33,17 +35,24 @@ interface AnnouncementModalProps {
   announcement?: AdminAnnouncement | null
 }
 
-type FormData = {
-  titleEn: string
-  titleSr: string
-  messageEn: string
-  messageSr: string
-  type: 'alert' | 'success' | 'info'
-  displayMode: 'banner' | 'list' | 'both'
-  linkUrl: string
-  linkText: string
-  isActive: boolean
-}
+// NOTE: the original `required: true` rules had no message; the grouped error UI
+// renders `titleRequired` / `messageRequired` keys — reused here as the messages.
+// `linkText`'s `maxLength: 100` had no message and no error UI; kept as a bare
+// `.max(100)` (no i18n key exists, none added).
+const createAnnouncementSchema = (t: (k: string, o?: any) => string) =>
+  z.object({
+    titleEn: z.string().min(1, t('admin.announcements.form.titleRequired')).max(200),
+    titleSr: z.string().min(1, t('admin.announcements.form.titleRequired')).max(200),
+    messageEn: z.string().min(1, t('admin.announcements.form.messageRequired')).max(2000),
+    messageSr: z.string().min(1, t('admin.announcements.form.messageRequired')).max(2000),
+    type: z.enum(['alert', 'success', 'info']),
+    displayMode: z.enum(['banner', 'list', 'both']),
+    linkUrl: z.string().optional(),
+    linkText: z.string().max(100).optional(),
+    isActive: z.boolean(),
+  })
+
+type FormData = z.infer<ReturnType<typeof createAnnouncementSchema>>
 
 export function AnnouncementModal({ open, onOpenChange, announcement }: AnnouncementModalProps) {
   const { t } = useTranslation()
@@ -51,6 +60,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
   const createAnnouncement = useCreateAnnouncement()
   const updateAnnouncement = useUpdateAnnouncement()
 
+  const schema = useMemo(() => createAnnouncementSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -59,6 +69,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
     watch,
     formState: { errors },
   } = useForm<FormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       titleEn: '',
       titleSr: '',
@@ -145,7 +156,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
             <Label htmlFor="titleEn">{t('admin.announcements.form.titleEn')}</Label>
             <Input
               id="titleEn"
-              {...register('titleEn', { required: true, maxLength: 200 })}
+              {...register('titleEn')}
               placeholder={t('admin.announcements.form.titlePlaceholder')}
               disabled={isPending}
             />
@@ -155,7 +166,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
             <Label htmlFor="titleSr">{t('admin.announcements.form.titleSr')}</Label>
             <Input
               id="titleSr"
-              {...register('titleSr', { required: true, maxLength: 200 })}
+              {...register('titleSr')}
               placeholder={t('admin.announcements.form.titlePlaceholderSr')}
               disabled={isPending}
             />
@@ -168,7 +179,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
             <Label htmlFor="messageEn">{t('admin.announcements.form.messageEn')}</Label>
             <Textarea
               id="messageEn"
-              {...register('messageEn', { required: true, maxLength: 2000 })}
+              {...register('messageEn')}
               placeholder={t('admin.announcements.form.messagePlaceholder')}
               rows={3}
               disabled={isPending}
@@ -179,7 +190,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
             <Label htmlFor="messageSr">{t('admin.announcements.form.messageSr')}</Label>
             <Textarea
               id="messageSr"
-              {...register('messageSr', { required: true, maxLength: 2000 })}
+              {...register('messageSr')}
               placeholder={t('admin.announcements.form.messagePlaceholderSr')}
               rows={3}
               disabled={isPending}
@@ -233,7 +244,7 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
             <Label htmlFor="linkText">{t('admin.announcements.form.linkText')}</Label>
             <Input
               id="linkText"
-              {...register('linkText', { maxLength: 100 })}
+              {...register('linkText')}
               placeholder={t('admin.announcements.form.linkTextPlaceholder')}
               disabled={isPending}
             />

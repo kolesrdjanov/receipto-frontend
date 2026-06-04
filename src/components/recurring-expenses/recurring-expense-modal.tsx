@@ -1,5 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,7 +23,6 @@ import {
   useUpdateRecurringExpense,
   type RecurringExpense,
   type RecurringFrequency,
-  type CreateRecurringExpenseInput,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { CurrencySelect } from '@/components/ui/currency-select'
@@ -38,7 +39,32 @@ interface RecurringExpenseModalProps {
   onRequestDelete?: (expense: RecurringExpense) => void
 }
 
-type FormData = CreateRecurringExpenseInput & { isPaused?: boolean }
+const createRecurringSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
+  z.object({
+    name: z.string().min(1, t('recurring.modal.nameRequired')),
+    amount: z.coerce
+      .number({ message: t('recurring.modal.amountRequired') })
+      .min(0.01, t('recurring.modal.amountMin')),
+    currency: z.string().optional(),
+    isFixed: z.boolean().optional(),
+    frequency: z.enum(['weekly', 'monthly', 'quarterly', 'yearly']).optional(),
+    dayOfMonth: z.preprocess(
+      (v) => (v === '' || v === null || v === undefined ? undefined : v),
+      // Range messages stay as the prior hardcoded '1-31' strings (no i18n key existed)
+      z.coerce.number().min(1, '1-31').max(31, '1-31').optional(),
+    ),
+    startDate: z.string().min(1, t('recurring.modal.startDateRequired')),
+    endDate: z.string().optional(),
+    categoryId: z.string().nullish(),
+    icon: z.string().optional(),
+    color: z.string().optional(),
+    notes: z.string().optional(),
+    isPaused: z.boolean().optional(),
+  })
+
+type RecurringSchema = ReturnType<typeof createRecurringSchema>
+type FormDataInput = z.input<RecurringSchema>
+type FormData = z.output<RecurringSchema>
 
 const FORM_ID = 'recurring-expense-form'
 const FREQUENCIES: RecurringFrequency[] = ['weekly', 'monthly', 'quarterly', 'yearly']
@@ -56,6 +82,7 @@ export function RecurringExpenseModal({
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: categories } = useCategories()
 
+  const schema = useMemo(() => createRecurringSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -63,7 +90,8 @@ export function RecurringExpenseModal({
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
+  } = useForm<FormDataInput, unknown, FormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       amount: 0,
@@ -171,23 +199,13 @@ export function RecurringExpenseModal({
         mode === 'create' ? t('recurring.modal.createDescription') : t('recurring.modal.editDescription')
       }
       desktopWidth={520}
-      footer={
-        <div className="flex items-center gap-2">
-          {mode === 'edit' && expense && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="mr-auto rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => {
-                onOpenChange(false)
-                onRequestDelete?.(expense)
-              }}
-              disabled={pending}
-            >
-              <Trash2 className="size-4" />
-              <span className="hidden sm:inline">{t('recurring.actions.delete')}</span>
-            </Button>
-          )}
+      actions={{
+        primary: (
+          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
+            {primaryLabel}
+          </Button>
+        ),
+        secondary: (
           <Button
             type="button"
             variant="outline"
@@ -197,11 +215,24 @@ export function RecurringExpenseModal({
           >
             {t('common.cancel')}
           </Button>
-          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
-            {primaryLabel}
-          </Button>
-        </div>
-      }
+        ),
+        destructive:
+          mode === 'edit' && expense ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => {
+                onOpenChange(false)
+                onRequestDelete?.(expense)
+              }}
+              disabled={pending}
+            >
+              <Trash2 className="size-4" />
+              {t('recurring.actions.delete')}
+            </Button>
+          ) : undefined,
+      }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div>
@@ -210,7 +241,7 @@ export function RecurringExpenseModal({
           </Label>
           <Input
             id="name"
-            {...register('name', { required: t('recurring.modal.nameRequired') })}
+            {...register('name')}
             placeholder={t('recurring.modal.namePlaceholder')}
           />
           {errors.name && <p className="mt-1.5 text-[12px] text-destructive">{errors.name.message}</p>}
@@ -227,10 +258,7 @@ export function RecurringExpenseModal({
               step="0.01"
               min="0"
               className="tabular-nums"
-              {...register('amount', {
-                required: t('recurring.modal.amountRequired'),
-                min: { value: 0.01, message: t('recurring.modal.amountMin') },
-              })}
+              {...register('amount')}
             />
             {errors.amount && <p className="mt-1.5 text-[12px] text-destructive">{errors.amount.message}</p>}
           </div>
@@ -296,10 +324,7 @@ export function RecurringExpenseModal({
               min="1"
               max="31"
               className="tabular-nums"
-              {...register('dayOfMonth', {
-                min: { value: 1, message: '1-31' },
-                max: { value: 31, message: '1-31' },
-              })}
+              {...register('dayOfMonth')}
             />
           </div>
         )}

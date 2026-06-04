@@ -74,14 +74,18 @@ export function WidgetEmpty({
   return (
     <div
       className={cn(
-        'flex flex-1 flex-col items-center justify-center gap-1.5 px-4 text-center text-[13px] text-muted-foreground',
+        'flex flex-1 flex-col items-center justify-center px-4 text-center text-[13px] text-muted-foreground',
         tall ? 'min-h-[180px]' : 'min-h-[110px]',
         className,
       )}
     >
-      {Icon && <Icon className="mb-1 size-7 text-fg-faint" />}
+      {Icon && (
+        <span className="mb-3 grid size-[56px] place-items-center rounded-[18px] bg-bg-subtle text-muted-foreground">
+          <Icon className="size-7" strokeWidth={1.75} />
+        </span>
+      )}
       <span>{children}</span>
-      {hint && <span className="text-[12px] text-fg-faint">{hint}</span>}
+      {hint && <span className="mt-1.5 text-[12px] text-fg-faint">{hint}</span>}
     </div>
   )
 }

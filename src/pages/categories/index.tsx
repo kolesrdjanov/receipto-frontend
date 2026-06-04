@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Wallet, Tag, CircleDollarSign, type LucideIcon } from 'lucide-react'
+import { Wallet, Tag, CircleDollarSign, type LucideIcon } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { CategoryModal } from '@/components/categories/category-modal'
 import { CategoryDeleteModal } from '@/components/categories/category-delete-modal'
 import { CategoryList, RowActionList } from '@/components/categories/primitives'
@@ -13,22 +14,7 @@ import { useSettingsStore } from '@/store/settings'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
-import { cn } from '@/lib/utils'
-
-/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
-function AddButton({ onClick, label, className }: { onClick: () => void; label: string; className?: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn('btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white', className)}
-      data-testid="categories-add-button"
-    >
-      <Plus className="size-[17px]" strokeWidth={2.4} />
-      {label}
-    </button>
-  )
-}
+import { cn, formatMoney } from '@/lib/utils'
 
 function OverviewStat({ icon: Icon, iconClass, label, value }: { icon: LucideIcon; iconClass?: string; label: string; value: React.ReactNode }) {
   return (
@@ -109,7 +95,7 @@ export default function Categories() {
     [displayCurrency, exchangeRates],
   )
 
-  const fmtTotal = (amount: number) => `${Math.round(amount).toLocaleString('sr-RS')} ${displayCurrency}`
+  const fmtTotal = (amount: number) => formatMoney(amount, displayCurrency)
 
   const list = categories ?? []
   const budgeted = list.filter((c) => c.monthlyBudget && c.monthlyBudget > 0)
@@ -123,7 +109,7 @@ export default function Categories() {
         className="md:-mx-8 md:-mt-8 md:mb-6"
         title={t('categories.title')}
         subtitle={t('categories.desktopSubtitle')}
-        actions={<AddButton onClick={handleAdd} label={t('categories.addCategory')} />}
+        actions={<AddButton onClick={handleAdd} label={t('categories.addCategory')} data-testid="categories-add-button" />}
       />
       <div className="mb-1 flex items-end justify-between md:hidden">
         <div>
@@ -164,16 +150,14 @@ export default function Categories() {
             </p>
           </div>
         ) : list.length === 0 ? (
-          <div className="mt-4 grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1 md:mt-0" data-testid="categories-empty">
-            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
-              <Tag className="size-8" />
-            </span>
-            <h3 className="t-h3 mt-[18px]">{t('categories.empty.title')}</h3>
-            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('categories.empty.description')}</p>
-            <div className="mt-[22px]">
-              <AddButton onClick={handleAdd} label={t('categories.empty.cta')} />
-            </div>
-          </div>
+          <EmptyState
+            className="mt-4 md:mt-0"
+            data-testid="categories-empty"
+            icon={Tag}
+            title={t('categories.empty.title')}
+            description={t('categories.empty.description')}
+            action={<AddButton onClick={handleAdd} label={t('categories.empty.cta')} />}
+          />
         ) : (
           <>
             {/* Budget overview — desktop */}

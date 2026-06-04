@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { api, isApiError } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
@@ -16,18 +20,34 @@ interface LoginResponse {
   }
 }
 
+function createSignInSchema(t: (key: string) => string) {
+  return z.object({
+    email: z.string().min(1, t('auth.validation.emailRequired')).email(t('auth.validation.emailInvalid')),
+    // No dedicated i18n key exists for an empty password; hardcoded English fallback (noted in TD-1).
+    password: z.string().min(1, 'Password is required'),
+  })
+}
+
+type SignInFormData = z.infer<ReturnType<typeof createSignInSchema>>
+
 export function useSignIn() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [emailNotVerified, setEmailNotVerified] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<SignInFormData>({
+    resolver: zodResolver(createSignInSchema(t)),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  const onSubmit = form.handleSubmit(async (data) => {
     setError('')
     setEmailNotVerified(false)
     setIsLoading(true)
@@ -36,8 +56,8 @@ export function useSignIn() {
       const response = await api.post<LoginResponse>(
         '/auth/login',
         {
-          email,
-          password,
+          email: data.email,
+          password: data.password,
         },
         { requiresAuth: false }
       )
@@ -54,17 +74,16 @@ export function useSignIn() {
     } finally {
       setIsLoading(false)
     }
-  }
+  })
 
   return {
-    email,
-    setEmail,
-    password,
-    setPassword,
+    register: form.register,
+    getValues: form.getValues,
+    errors: form.formState.errors,
     error,
     setError,
     isLoading,
     emailNotVerified,
-    handleSubmit,
+    handleSubmit: onSubmit,
   }
 }

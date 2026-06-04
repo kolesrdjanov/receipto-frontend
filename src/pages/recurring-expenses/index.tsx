@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Info, X, CalendarClock, ArrowDownWideNarrow } from 'lucide-react'
+import { Info, X, CalendarClock, ArrowDownWideNarrow } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { RecurringExpenseModal } from '@/components/recurring-expenses/recurring-expense-modal'
 import { MarkPaidModal } from '@/components/recurring-expenses/mark-paid-modal'
@@ -25,29 +26,18 @@ import { useSettingsStore } from '@/store/settings'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 
 const INFO_KEY = 'recurring-info-dismissed'
 
-/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
-function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
-    >
-      <Plus className="size-[18px]" strokeWidth={2.4} />
-      {label}
-    </button>
-  )
-}
-
+/** Small grey stat card (design `rec-statcell`) — number over label, left-aligned. */
 function StatCell({ value, label, tone }: { value: number; label: string; tone?: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 text-center">
-      <span className={cn('text-[22px] font-bold tabular-nums', tone)}>{value}</span>
-      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+    <div className="flex flex-col gap-0.5 rounded-xl bg-bg-subtle px-3 py-2.5">
+      <span className={cn('t-num text-[19px] font-extrabold leading-none', tone ?? 'text-foreground')}>
+        {value}
+      </span>
+      <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
     </div>
   )
 }
@@ -157,12 +147,7 @@ export default function RecurringExpenses() {
   )
 
   const formatAmount = (amount: number, currency?: string) =>
-    new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency: currency || displayCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
+    formatMoney(amount, currency || displayCurrency)
 
   const rows = buildRecurringRows(expenses)
   const overdueCount = rows.filter((r) => r.status === 'overdue').length
@@ -256,34 +241,30 @@ export default function RecurringExpenses() {
             </div>
           </div>
         ) : !expenses || expenses.length === 0 ? (
-          <div className="grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1">
-            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
-              <CalendarClock className="size-8" />
-            </span>
-            <h3 className="t-h3 mt-[18px]">{t('recurring.empty.title')}</h3>
-            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('recurring.empty.description')}</p>
-            <div className="mt-[22px]">
-              <AddButton onClick={handleAdd} label={t('recurring.addRecurring')} />
-            </div>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title={t('recurring.empty.title')}
+            description={t('recurring.empty.description')}
+            action={<AddButton onClick={handleAdd} label={t('recurring.addRecurring')} />}
+          />
         ) : (
           <>
             {/* Overview — desktop two-card row */}
             <div className="mb-6 hidden gap-4 md:grid md:grid-cols-[1.4fr_1fr]">
-              <div className="rounded-2xl border border-border bg-card p-5 shadow-glass-1">
+              <div className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-glass-1">
                 <p className="t-xs mb-3 text-fg-faint">{t('recurring.overview.title')}</p>
-                <div className="flex items-end gap-5">
+                <div className="flex items-center gap-5">
                   <div className="flex flex-col gap-1">
                     <span className="text-[13px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                    <span className="text-[26px] font-extrabold tabular-nums leading-none">{formatAmount(monthlyTotal)}</span>
+                    <span className="t-num text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
                   </div>
-                  <div className="h-9 w-px bg-hairline-soft" />
+                  <div className="w-px self-stretch bg-hairline-soft" />
                   <div className="flex flex-col gap-1">
                     <span className="text-[13px] text-muted-foreground">{t('recurring.stats.annualProjection')}</span>
-                    <span className="text-[17px] font-semibold tabular-nums text-muted-foreground">{formatAmount(monthlyTotal * 12)}</span>
+                    <span className="t-num text-[18px] font-extrabold leading-none text-fg-2">{formatAmount(monthlyTotal * 12)}</span>
                   </div>
                 </div>
-                <div className="mt-5 grid grid-cols-4 gap-2 border-t border-hairline-soft pt-4">
+                <div className="mt-auto grid grid-cols-4 gap-2 pt-5">
                   <StatCell value={overdueCount} label={t('recurring.overview.overdue')} tone={overdueCount ? 'text-destructive' : undefined} />
                   <StatCell value={dueSoonCount} label={t('recurring.overview.dueSoon')} tone={dueSoonCount ? 'text-warning-foreground' : undefined} />
                   <StatCell value={activeCount} label={t('recurring.overview.active')} />
@@ -310,7 +291,7 @@ export default function RecurringExpenses() {
             <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                <span className="text-[26px] font-extrabold tabular-nums leading-none">{formatAmount(monthlyTotal)}</span>
+                <span className="t-num text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
               </div>
               <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px]">
                 <span className={cn('font-medium', overdueCount ? 'text-destructive' : 'text-muted-foreground')}>

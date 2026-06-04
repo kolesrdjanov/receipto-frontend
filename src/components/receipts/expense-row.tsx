@@ -61,7 +61,7 @@ export function ExpenseRow({
           </span>
           <Amount value={r.totalAmount ?? 0} currency={r.currency || 'RSD'} size={wide ? 16 : 15.5} />
         </div>
-        <div className="mt-[5px] flex items-center justify-between gap-2">
+        <div className="mt-[2px] flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             {showCatName && <CatName name={r.category?.name} />}
             {r.group && (
