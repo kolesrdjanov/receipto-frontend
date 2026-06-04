@@ -226,10 +226,11 @@ const importReceipts = async (file: File): Promise<ImportResult> => {
 }
 
 // Hooks
-export function useReceipts(filters?: ReceiptsFilters) {
+export function useReceipts(filters?: ReceiptsFilters, enabled = true) {
   return useQuery({
     queryKey: queryKeys.receipts.list(filters),
     queryFn: () => fetchReceipts(filters),
+    enabled,
   })
 }
 

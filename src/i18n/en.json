@@ -2,6 +2,8 @@
   "common": {
     "appName": "Receipto",
     "loading": "Loading...",
+    "today": "Today",
+    "yesterday": "Yesterday",
     "cancel": "Cancel",
     "clear": "Clear",
     "close": "Close",
@@ -373,6 +375,9 @@
       "recurring": "Recurring"
     },
     "uncategorized": "Uncategorized",
+    "loadMore": "Load more",
+    "select": "Select",
+    "count": "{{count}} total",
     "unknownStore": "Unknown Store",
     "modal": {
       "addTitle": "Add Receipt",

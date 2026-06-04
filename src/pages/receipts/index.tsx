@@ -2,15 +2,6 @@ import { useState, lazy, Suspense, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
@@ -44,15 +35,16 @@ import {
   type Receipt,
   type ReceiptsFilters,
 } from '@/hooks/receipts/use-receipts'
+import { useInfiniteReceipts } from '@/hooks/receipts/use-infinite-receipts'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
-import { formatDateTime } from '@/lib/date-utils'
-import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Camera, Plus, Pencil, Loader2, Filter, Trash2, ChevronDown, Eye, ArrowUpDown, ArrowUp, ArrowDown, Archive, Users, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { PageTransition } from '@/components/ui/animated'
+import { ExpenseFeed } from '@/components/receipts/expense-feed'
+import { ExpensesSummary } from '@/components/receipts/expenses-summary'
+import { Camera, Plus, Loader2, Filter, Trash2, ChevronDown, Archive, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
 import { toast } from 'sonner'
-import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
 "Maxi Supermarket",2450.00,RSD,2024-06-15,12345,Groceries
@@ -98,19 +90,23 @@ export default function Receipts() {
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerReceiptId, setViewerReceiptId] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState<'receiptDate' | 'createdAt'>('receiptDate')
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
+  // Sort is fixed to the backend default here; the sort toggle returns in Chunk 4's "…" menu.
+  const sortBy: 'receiptDate' | 'createdAt' = 'receiptDate'
+  const sortOrder: 'ASC' | 'DESC' = 'DESC'
   const dropdownRef = useRef<HTMLDivElement>(null)
   const scanDropdownRef = useRef<HTMLDivElement>(null)
   const importExportDropdownRef = useRef<HTMLDivElement>(null)
 
   const debouncedFilters = useDebouncedValue(filters, 400)
-  const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 10, sortBy, sortOrder })
-  const receipts = response?.data ?? []
-  const meta = response?.meta
-  const totalAmounts = response?.totalAmounts ?? []
+  const isMobile = useIsMobile(768)
+  // One data source per viewport: desktop = numbered pages, mobile = infinite Load-more.
+  const { data: response, isLoading } = useReceipts({ ...debouncedFilters, page, limit: 50, sortBy, sortOrder }, !isMobile)
+  const inf = useInfiniteReceipts({ ...debouncedFilters, limit: 50, sortBy, sortOrder }, isMobile)
+  const receipts = isMobile ? (inf.data?.pages.flatMap((p) => p.data) ?? []) : (response?.data ?? [])
+  const meta = isMobile ? inf.data?.pages[0]?.meta : response?.meta
+  const totalAmounts = (isMobile ? inf.data?.pages[0]?.totalAmounts : response?.totalAmounts) ?? []
+  const loading = isMobile ? inf.isLoading : isLoading
   const filtersActive = hasActiveFilters(debouncedFilters)
-  const { convert, preferredCurrency } = useCurrencyConverter()
   const { openQrScanner, openPfrEntry, openGalleryScanner, scannerModals, isCreating, isGalleryProcessing } = useReceiptScanner()
   const deleteReceipt = useDeleteReceipt()
   const exportReceipts = useExportReceipts()
@@ -119,6 +115,7 @@ export default function Receipts() {
   const bulkUpdateCategory = useBulkUpdateCategory()
   const { data: categories = [] } = useCategories()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectMode, setSelectMode] = useState(false)
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false)
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false)
   const [bulkCategoryId, setBulkCategoryId] = useState<string>('')
@@ -239,26 +236,6 @@ export default function Receipts() {
     setViewerOpen(true)
   }
 
-  const handleSort = (column: 'receiptDate' | 'createdAt') => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'DESC' ? 'ASC' : 'DESC')
-    } else {
-      setSortBy(column)
-      setSortOrder('DESC')
-    }
-    setPage(1)
-  }
-
-  const getSortIcon = (column: 'receiptDate' | 'createdAt') => {
-    if (sortBy !== column) {
-      return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />
-    }
-    return sortOrder === 'DESC'
-      ? <ArrowDown className="h-4 w-4 ml-1" />
-      : <ArrowUp className="h-4 w-4 ml-1" />
-  }
-
-
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev)
@@ -268,13 +245,6 @@ export default function Receipts() {
     })
   }
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === receipts.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(receipts.map((r) => r.id)))
-    }
-  }
 
   const confirmBulkDelete = async () => {
     try {
@@ -370,51 +340,6 @@ export default function Receipts() {
     }
   }
 
-  const formatAmount = (receipt: Receipt) => {
-    const currency: string = receipt.currency || 'RSD'
-    const amount = receipt.totalAmount
-    if (amount === undefined || amount === null) return '-'
-
-    return `${currency} ${amount}`
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'scraped':
-      case 'completed': // Legacy status value
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            {t('receipts.status.completed')}
-          </span>
-        )
-      case 'manual':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-            {t('receipts.status.manual')}
-          </span>
-        )
-      case 'pending':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-            {t('receipts.status.pending')}
-          </span>
-        )
-      case 'failed':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-            {t('receipts.status.failed')}
-          </span>
-        )
-      case 'recurring':
-        return (
-          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-            {t('receipts.status.recurring')}
-          </span>
-        )
-      default:
-        return null
-    }
-  }
 
   return (
     <AppLayout>
@@ -558,34 +483,23 @@ export default function Receipts() {
         <ReceiptsFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
       )}
 
-      {totalAmounts.length > 0 && !isLoading && receipts.length > 0 && (() => {
-        const convertedTotal = totalAmounts.reduce(
-          (sum, { currency, total }) => sum + convert(total, currency),
-          0,
-        )
-        const allSameCurrency = totalAmounts.length === 1 && totalAmounts[0].currency === preferredCurrency
+      {totalAmounts.length > 0 && !loading && receipts.length > 0 && (
+        <ExpensesSummary
+          totalAmounts={totalAmounts}
+          total={meta?.total ?? 0}
+          filtersActive={filtersActive}
+          selectMode={selectMode}
+          onToggleSelectMode={() => { setSelectMode((v) => !v); setSelectedIds(new Set()) }}
+          rangeFrom={meta && !isMobile ? (meta.page - 1) * meta.limit + 1 : undefined}
+          rangeTo={meta && !isMobile ? Math.min(meta.page * meta.limit, meta.total) : undefined}
+        />
+      )}
 
-        return (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 px-1 text-sm">
-            <span className="font-medium text-muted-foreground">
-              {filtersActive ? t('receipts.filteredTotal') : t('receipts.total')}:
-            </span>
-            <span className="font-semibold text-foreground">
-              {preferredCurrency} {convertedTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            {!allSameCurrency && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title={t('receipts.convertedDisclaimer')}>
-                <Info className="h-3 w-3" />
-                {t('receipts.convertedNote')}
-              </span>
-            )}
-          </div>
-        )
-      })()}
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12" data-testid="receipts-loading">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      {loading ? (
+        <div className="flex flex-col gap-3" data-testid="receipts-loading">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-border bg-bg-subtle" />
+          ))}
         </div>
       ) : receipts.length === 0 ? (
         <div className="empty-state" data-testid="receipts-empty">
@@ -634,111 +548,34 @@ export default function Receipts() {
             </div>
           )}
 
-          {/* Mobile Card View */}
-          <StaggerContainer key={receipts.map(r => r.id).join()} className="md:hidden space-y-3">
-            {receipts.map((receipt) => (
-              <StaggerItem key={receipt.id}>
-              <Card className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      <Checkbox
-                        checked={selectedIds.has(receipt.id)}
-                        onCheckedChange={() => toggleSelect(receipt.id)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1">
-                          {receipt.storeName || t('receipts.unknownStore')}
-                        </h3>
-                      <p className="text-2xl font-bold text-primary">
-                        {formatAmount(receipt)}
-                      </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      {receipt.hasJournal && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewReceipt(receipt)}
-                          title={t('receipts.viewer.viewReceipt')}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditReceipt(receipt)}
-                        disabled={!!receipt.group?.isArchived}
-                        title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteReceipt(receipt)}
-                        disabled={deleteReceipt.isPending || !!receipt.group?.isArchived}
-                        title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : undefined}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('receipts.table.date')}</span>
-                      <span className="font-medium">{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</span>
-                    </div>
+          <ExpenseFeed
+            receipts={receipts}
+            wide={!isMobile}
+            selectMode={selectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            onView={handleViewReceipt}
+            onEdit={handleEditReceipt}
+            onDelete={handleDeleteReceipt}
+          />
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('receipts.table.createdAt')}</span>
-                      <span className="font-medium">{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('receipts.table.category')}</span>
-                      {receipt.category ? (
-                        <span
-                          className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{
-                            backgroundColor: receipt.category.color ? receipt.category.color + '20' : 'var(--muted)',
-                            color: 'var(--foreground)',
-                          }}
-                        >
-                          {receipt.category.icon && (
-                            <span>{receipt.category.icon}</span>
-                          )}
-                          {receipt.category.name}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </div>
-
-                    {receipt.group && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">{t('receipts.table.group')}</span>
-                        <span className={`inline-flex items-center gap-1 font-medium ${receipt.group.isArchived ? 'text-muted-foreground' : ''}`}>
-                          <Users className="h-3 w-3" />
-                          {receipt.group.name}
-                          {receipt.group.isArchived && (
-                            <Archive className="h-3 w-3 ml-0.5" />
-                          )}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-              </StaggerItem>
-            ))}
-
-            {meta && meta.totalPages > 1 && (
-              <div className="pt-2">
+          {isMobile ? (
+            inf.hasNextPage && (
+              <div className="flex justify-center py-4">
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={inf.isFetchingNextPage}
+                  onClick={() => inf.fetchNextPage()}
+                >
+                  {inf.isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {t('receipts.loadMore')}
+                </Button>
+              </div>
+            )
+          ) : (
+            meta && meta.totalPages > 1 && (
+              <div className="pt-3">
                 <Pagination
                   page={meta.page}
                   totalPages={meta.totalPages}
@@ -747,144 +584,8 @@ export default function Receipts() {
                   onPageChange={setPage}
                 />
               </div>
-            )}
-          </StaggerContainer>
-
-          {/* Desktop Table View */}
-          <div className="hidden md:block">
-            <Table className="table-fixed w-full" data-testid="receipts-table">
-              <TableHeader>
-                <TableRow>
-                  <TableHead style={{ width: '40px' }}>
-                    <Checkbox
-                      checked={receipts.length > 0 && selectedIds.size === receipts.length}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  </TableHead>
-                  <TableHead>{t('receipts.table.store')}</TableHead>
-                  <TableHead>{t('receipts.table.amount')}</TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort('receiptDate')}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      {t('receipts.table.date')}
-                      {getSortIcon('receiptDate')}
-                    </button>
-                  </TableHead>
-                  <TableHead>
-                    <button
-                      onClick={() => handleSort('createdAt')}
-                      className="flex items-center hover:text-foreground transition-colors"
-                    >
-                      {t('receipts.table.createdAt')}
-                      {getSortIcon('createdAt')}
-                    </button>
-                  </TableHead>
-                  <TableHead>{t('receipts.table.category')}</TableHead>
-                  <TableHead>{t('receipts.table.group')}</TableHead>
-                  <TableHead style={{ width: '120px' }}>{t('receipts.table.status')}</TableHead>
-                  <TableHead style={{ width: '120px' }}></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {receipts.map((receipt) => (
-                  <TableRow key={receipt.id} data-testid={`receipt-row-${receipt.id}`}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedIds.has(receipt.id)}
-                        onCheckedChange={() => toggleSelect(receipt.id)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium" data-testid={`receipt-store-${receipt.id}`}>
-                      {receipt.storeName || t('receipts.unknownStore')}
-                    </TableCell>
-                    <TableCell>{formatAmount(receipt)}</TableCell>
-                    <TableCell>{receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}</TableCell>
-                    <TableCell>{receipt.createdAt ? formatDateTime(receipt.createdAt) : '-'}</TableCell>
-                    <TableCell>
-                      {receipt.category ? (
-                        <span
-                          className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{
-                            backgroundColor: receipt.category.color ? receipt.category.color + '20' : 'var(--muted)',
-                            color: 'var(--foreground)',
-                          }}
-                        >
-                          {receipt.category.icon && (
-                            <span>{receipt.category.icon}</span>
-                          )}
-                          {receipt.category.name}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {receipt.group ? (
-                        <span className={`inline-flex items-center gap-1 text-sm ${receipt.group.isArchived ? 'text-muted-foreground' : ''}`}>
-                          <Users className="h-3 w-3" />
-                          {receipt.group.name}
-                          {receipt.group.isArchived && (
-                            <Archive className="h-3 w-3 ml-0.5" />
-                          )}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(receipt.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        {receipt.hasJournal && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewReceipt(receipt)}
-                            title={t('receipts.viewer.viewReceipt')}
-                            data-testid={`receipt-view-${receipt.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditReceipt(receipt)}
-                          disabled={!!receipt.group?.isArchived || receipt.status === 'recurring'}
-                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : receipt.status === 'recurring' ? t('receipts.recurringLocked') : undefined}
-                          data-testid={`receipt-edit-${receipt.id}`}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteReceipt(receipt)}
-                          disabled={deleteReceipt.isPending || !!receipt.group?.isArchived || receipt.status === 'recurring'}
-                          title={receipt.group?.isArchived ? t('receipts.archivedGroupLocked') : receipt.status === 'recurring' ? t('receipts.recurringLocked') : undefined}
-                          data-testid={`receipt-delete-${receipt.id}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {meta && meta.totalPages > 1 && (
-              <div className="px-4 hidden md:block">
-                <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
-                  total={meta.total}
-                  limit={meta.limit}
-                  onPageChange={setPage}
-                />
-              </div>
-            )}
-          </div>
+            )
+          )}
         </>
       )}
 

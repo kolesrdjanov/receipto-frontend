@@ -2,6 +2,8 @@
   "common": {
     "appName": "Receipto",
     "loading": "Učitavanje...",
+    "today": "Danas",
+    "yesterday": "Juče",
     "cancel": "Otkaži",
     "clear": "Obriši",
     "close": "Zatvori",
@@ -373,6 +375,9 @@
       "recurring": "Ponavljajući"
     },
     "uncategorized": "Bez kategorije",
+    "loadMore": "Učitaj još",
+    "select": "Izaberi",
+    "count": "{{count}} ukupno",
     "unknownStore": "Nepoznata prodavnica",
     "modal": {
       "addTitle": "Dodaj račun",
