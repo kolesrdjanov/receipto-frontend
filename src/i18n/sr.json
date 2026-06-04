@@ -70,6 +70,12 @@
     }
   },
   "nav": {
+    "money": "Novac",
+    "wallet": "Novčanik",
+    "scanReceipt": "Skeniraj račun",
+    "home": "Početna",
+    "more": "Više",
+    "groupsShort": "Grupe",
     "dashboard": "Kontrolna tabla",
     "receipts": "Troškovi",
     "categories": "Kategorije",

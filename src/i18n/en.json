@@ -70,6 +70,12 @@
     }
   },
   "nav": {
+    "money": "Money",
+    "wallet": "Wallet",
+    "scanReceipt": "Scan receipt",
+    "home": "Home",
+    "more": "More",
+    "groupsShort": "Groups",
     "dashboard": "Dashboard",
     "receipts": "Expenses",
     "categories": "Categories",

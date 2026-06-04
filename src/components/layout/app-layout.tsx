@@ -6,6 +6,7 @@ import { useSettingsStore } from '@/store/settings'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { Avatar } from '@/components/ui/avatar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
 import { ContactSupportModal } from '@/components/support/contact-support-modal'
 import { AnnouncementDrawer, useAnnouncementIndicator } from '@/components/announcements/announcement-list'
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal'
@@ -66,9 +67,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Main content */}
-        <main className="container mx-auto px-4 py-6 md:px-8 md:py-8">
+        <main className="container mx-auto px-4 py-6 pb-28 md:px-8 md:py-8 md:pb-8">
           {children}
         </main>
+
+        {/* Global mobile bottom navigation (hidden on desktop) */}
+        <MobileTabBar />
       </SidebarInset>
 
       {/* Modals */}

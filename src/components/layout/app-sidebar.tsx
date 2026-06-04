@@ -46,6 +46,7 @@ import {
   Compass,
   Sparkles,
   ChevronRight,
+  QrCode,
   Crown, KeyRound, User, Globe
 } from 'lucide-react'
 import { useSettingsStore } from '@/store/settings'
@@ -152,8 +153,21 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Overview */}
+        {/* Gradient Scan CTA — the only gradient in the sidebar */}
+        <div className="px-2 pt-2 group-data-[collapsible=icon]:px-0">
+          <Link
+            to="/receipts"
+            onClick={closeMobile}
+            className="btn-brand flex h-10 items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:p-0"
+          >
+            <QrCode className="size-4 shrink-0" />
+            <span className="group-data-[collapsible=icon]:hidden">{t('nav.scanReceipt')}</span>
+          </Link>
+        </div>
+
+        {/* Money */}
         <SidebarGroup>
+          <SidebarGroupLabel>{t('nav.money')}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -168,13 +182,6 @@ export function AppSidebar({
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Expenses */}
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.expenses')}</SidebarGroupLabel>
-          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -237,9 +244,9 @@ export function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Manage */}
+        {/* Wallet */}
         <SidebarGroup>
-          <SidebarGroupLabel>{t('nav.manage')}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('nav.wallet')}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
