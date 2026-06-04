@@ -132,7 +132,19 @@
     "tryAgain": "Pokušaj ponovo",
     "scanFromImage": "Iz galerije",
     "imageScanError": "Nije moguće detektovati barkod ili QR kod na ovoj slici",
-    "imageScanSuccess": "Kod je detektovan sa slike"
+    "imageScanSuccess": "Kod je detektovan sa slike",
+    "add": "Dodaj",
+    "mobileSubtitle": "Pokažite kartice prilikom kupovine",
+    "allCards": "Sve kartice",
+    "cardCount": "{{count}} kartica",
+    "tapToShow": "Dodirnite za prikaz",
+    "footerHint": "Dodirnite karticu da prikažete kod na kasi",
+    "showCode": "Prikaži kod",
+    "actions": "Radnje",
+    "showHint": "Prinesite skeneru na kasi · ekran je posvetljen",
+    "deleteTitle": "Obriši karticu",
+    "deleteConfirm": "Da li ste sigurni da želite da obrišete „{{name}}“? Ova radnja se ne može poništiti.",
+    "preview": "Pregled"
   },
   "auth": {
     "brandTagline": "Vaš pametni pratilac za račune",

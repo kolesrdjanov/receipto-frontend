@@ -1,13 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Camera, Loader2, CameraOff, X } from 'lucide-react'
 
 interface LoyaltyCardScannerProps {
@@ -18,9 +12,12 @@ interface LoyaltyCardScannerProps {
 
 const READER_ID = 'loyalty-card-reader'
 const CAMERA_TIMEOUT_MS = 10_000
+/** Emerald scan laser (matches the handoff; a focal brand moment, kept literal). */
+const LASER = 'oklch(0.78 0.15 165)'
 
 export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardScannerProps) {
   const { t } = useTranslation()
+  const reduce = useReducedMotion()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [cameraTimedOut, setCameraTimedOut] = useState(false)
@@ -63,11 +60,7 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
 
       await scanner.start(
         { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: { width: 280, height: 280 },
-          disableFlip: false,
-        },
+        { fps: 10, qrbox: { width: 280, height: 280 }, disableFlip: false },
         (decodedText, decodedResult) => {
           if (scanningRef.current) return
           scanningRef.current = true
@@ -108,13 +101,12 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
         clearTimeout(id)
         cleanup()
       }
-    } else {
-      cleanup()
-      setError(null)
-      setIsLoading(true)
-      setCameraTimedOut(false)
-      scanningRef.current = false
     }
+    cleanup()
+    setError(null)
+    setIsLoading(true)
+    setCameraTimedOut(false)
+    scanningRef.current = false
   }, [open, startScanner, cleanup])
 
   const handleTryAgain = async () => {
@@ -123,56 +115,109 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            {t('loyaltyCards.scanCard')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('loyaltyCards.scanDescription')}
-          </DialogDescription>
-        </DialogHeader>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <AnimatePresence>
+        {open && (
+          <DialogPrimitive.Portal forceMount>
+            <DialogPrimitive.Content
+              asChild
+              forceMount
+              aria-describedby={undefined}
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <motion.div
+                className="fixed inset-0 z-[60] flex flex-col bg-[oklch(0.04_0_0/0.98)]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: reduce ? 0 : 0.2 }}
+              >
+                <DialogPrimitive.Title className="sr-only">{t('loyaltyCards.scanCard')}</DialogPrimitive.Title>
 
-        <div className="relative min-h-[250px] sm:min-h-[350px] bg-muted rounded-lg overflow-hidden">
-          {error ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-10 bg-muted">
-              <X className="h-12 w-12 text-destructive mb-2" />
-              <p className="text-sm text-center text-destructive mb-4">{error}</p>
-              <Button variant="outline" size="sm" onClick={handleTryAgain}>
-                {t('loyaltyCards.tryAgain')}
-              </Button>
-            </div>
-          ) : isLoading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10 bg-muted">
-              {cameraTimedOut ? (
-                <>
-                  <CameraOff className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-sm font-medium text-center mb-1">{t('loyaltyCards.cameraSlowTitle')}</p>
-                  <p className="text-xs text-center text-muted-foreground mb-4">{t('loyaltyCards.cameraSlowDescription')}</p>
-                  <Button variant="outline" size="sm" onClick={handleTryAgain}>
-                    {t('loyaltyCards.tryAgain')}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
-                  <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
-                </>
-              )}
-            </div>
-          ) : null}
+                {/* Top bar */}
+                <div className="flex items-center justify-between px-[18px] py-4 pt-[max(16px,env(safe-area-inset-top))]">
+                  <span className="text-[16px] font-bold text-white">{t('loyaltyCards.scanCard')}</span>
+                  <button
+                    type="button"
+                    onClick={() => onOpenChange(false)}
+                    aria-label={t('common.cancel')}
+                    className="grid size-9 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                  >
+                    <X className="size-[18px]" />
+                  </button>
+                </div>
 
-          <div id={READER_ID} className="w-full" />
-        </div>
+                {/* Stage */}
+                <div className="flex flex-1 flex-col items-center justify-center gap-[26px] px-7 pb-10">
+                  <div className="relative aspect-square w-[min(78%,300px)] rounded-[24px] bg-white/[0.03]">
+                    {/* Camera feed */}
+                    <div
+                      id={READER_ID}
+                      className="absolute inset-0 overflow-hidden rounded-[24px] [&_video]:size-full [&_video]:object-cover"
+                    />
 
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t('common.cancel')}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+                    {/* Corner brackets */}
+                    <span className="absolute left-0 top-0 size-[34px] rounded-tl-[14px] border-l-[3px] border-t-[3px] border-white" />
+                    <span className="absolute right-0 top-0 size-[34px] rounded-tr-[14px] border-r-[3px] border-t-[3px] border-white" />
+                    <span className="absolute bottom-0 left-0 size-[34px] rounded-bl-[14px] border-b-[3px] border-l-[3px] border-white" />
+                    <span className="absolute bottom-0 right-0 size-[34px] rounded-br-[14px] border-b-[3px] border-r-[3px] border-white" />
+
+                    {/* Scan laser */}
+                    {!error && !isLoading && (
+                      <motion.span
+                        className="absolute left-[10%] right-[10%] h-0.5 rounded-full"
+                        style={{ background: `linear-gradient(90deg, transparent, ${LASER}, transparent)`, boxShadow: `0 0 12px ${LASER}` }}
+                        initial={{ top: '10%' }}
+                        animate={reduce ? { top: '50%' } : { top: ['10%', '90%', '10%'] }}
+                        transition={reduce ? undefined : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                    )}
+
+                    {/* Loading / timeout / error overlays */}
+                    {(isLoading || error) && (
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[24px] bg-[oklch(0.04_0_0/0.9)] p-6 text-center">
+                        {error ? (
+                          <>
+                            <X className="size-10 text-destructive" />
+                            <p className="text-sm text-destructive">{error}</p>
+                            <button
+                              type="button"
+                              onClick={handleTryAgain}
+                              className="mt-2 rounded-full border border-white/25 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+                            >
+                              {t('loyaltyCards.tryAgain')}
+                            </button>
+                          </>
+                        ) : cameraTimedOut ? (
+                          <>
+                            <CameraOff className="size-9 text-white/70" />
+                            <p className="text-sm font-medium text-white">{t('loyaltyCards.cameraSlowTitle')}</p>
+                            <p className="text-xs text-white/60">{t('loyaltyCards.cameraSlowDescription')}</p>
+                            <button
+                              type="button"
+                              onClick={handleTryAgain}
+                              className="mt-2 rounded-full border border-white/25 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+                            >
+                              {t('loyaltyCards.tryAgain')}
+                            </button>
+                          </>
+                        ) : (
+                          <Loader2 className="size-8 animate-spin text-white/70" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex max-w-[300px] flex-col items-center gap-2 text-center text-[13px] font-medium leading-relaxed text-white/75">
+                    <Camera className="size-[15px] text-white/70" />
+                    {t('loyaltyCards.scanDescription')}
+                  </div>
+                </div>
+              </motion.div>
+            </DialogPrimitive.Content>
+          </DialogPrimitive.Portal>
+        )}
+      </AnimatePresence>
+    </DialogPrimitive.Root>
   )
 }

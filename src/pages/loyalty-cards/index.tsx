@@ -1,15 +1,20 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Plus, CreditCard } from 'lucide-react'
+import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { CardGrid, CardSkeleton, RowActionList } from '@/components/loyalty-cards/primitives'
+import { formatLabel } from '@/components/loyalty-cards/format'
 import {
   useLoyaltyCards,
   useDeleteLoyaltyCard,
   type LoyaltyCard,
 } from '@/hooks/loyalty-cards/use-loyalty-cards'
-import { Plus, CreditCard, QrCode, Barcode, Trash2, Pencil, Eye, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { useFabStore } from '@/store/fab'
 import { cn } from '@/lib/utils'
 
 const LoyaltyCardModal = lazy(() =>
@@ -18,6 +23,21 @@ const LoyaltyCardModal = lazy(() =>
 const LoyaltyCardDisplay = lazy(() =>
   import('@/components/loyalty-cards/loyalty-card-display').then((m) => ({ default: m.LoyaltyCardDisplay }))
 )
+
+/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
+function AddButton({ onClick, label, className }: { onClick: () => void; label: string; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn('btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white', className)}
+      data-testid="loyalty-add-button"
+    >
+      <Plus className="size-[17px]" strokeWidth={2.4} />
+      {label}
+    </button>
+  )
+}
 
 export default function LoyaltyCards() {
   const { t } = useTranslation()
@@ -28,11 +48,23 @@ export default function LoyaltyCards() {
   const [editCard, setEditCard] = useState<LoyaltyCard | null>(null)
   const [displayCard, setDisplayCard] = useState<LoyaltyCard | null>(null)
   const [displayOpen, setDisplayOpen] = useState(false)
+  const [actionsCard, setActionsCard] = useState<LoyaltyCard | null>(null)
+  const [actionsOpen, setActionsOpen] = useState(false)
+  const [cardToDelete, setCardToDelete] = useState<LoyaltyCard | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     setEditCard(null)
     setModalOpen(true)
-  }
+  }, [])
+
+  // Take over the global mobile FAB so it opens the Add form directly.
+  const setFab = useFabStore((s) => s.setFab)
+  const clearFab = useFabStore((s) => s.clearFab)
+  useEffect(() => {
+    setFab(handleAdd)
+    return () => clearFab()
+  }, [setFab, clearFab, handleAdd])
 
   const handleEdit = (card: LoyaltyCard) => {
     setEditCard(card)
@@ -44,143 +76,148 @@ export default function LoyaltyCards() {
     setDisplayOpen(true)
   }
 
-  const handleDelete = async (card: LoyaltyCard) => {
+  const requestDelete = (card: LoyaltyCard) => {
+    setCardToDelete(card)
+    setDeleteOpen(true)
+  }
+
+  const openActions = (card: LoyaltyCard) => {
+    setActionsCard(card)
+    setActionsOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!cardToDelete) return
     try {
-      await deleteCard.mutateAsync(card.id)
+      await deleteCard.mutateAsync(cardToDelete.id)
       toast.success(t('loyaltyCards.cardDeleted'))
     } catch {
       toast.error(t('common.error'))
+    } finally {
+      setCardToDelete(null)
     }
   }
 
+  const list = cards ?? []
+
+  const header = (
+    <>
+      <PageToolbar
+        className="md:-mx-8 md:-mt-8 md:mb-6"
+        title={t('loyaltyCards.title')}
+        subtitle={t('loyaltyCards.subtitle')}
+        actions={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} />}
+      />
+      <div className="mb-1 flex items-end justify-between md:hidden">
+        <div>
+          <h1 className="t-h1 text-[28px]">{t('loyaltyCards.title')}</h1>
+          <p className="mt-1 text-[12.5px] text-muted-foreground">{t('loyaltyCards.mobileSubtitle')}</p>
+        </div>
+        <AddButton onClick={handleAdd} label={t('loyaltyCards.add')} className="h-[38px] px-3.5" />
+      </div>
+    </>
+  )
+
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t('loyaltyCards.title')}</h1>
-            <p className="text-muted-foreground">{t('loyaltyCards.subtitle')}</p>
-          </div>
-          <Button onClick={handleAdd} className="gap-2 w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
-            {t('loyaltyCards.addCard')}
-          </Button>
-        </div>
+      <PageTransition>
+        {header}
 
-        {/* Cards grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : !cards?.length ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-1">{t('loyaltyCards.noCards')}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{t('loyaltyCards.noCardsDescription')}</p>
-            <Button onClick={handleAdd} className="gap-2">
-              <Plus className="h-4 w-4" />
-              {t('loyaltyCards.addCard')}
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card) => (
-              <div
-                key={card.id}
-                className="group relative rounded-xl border bg-card overflow-hidden transition-all hover:shadow-md cursor-pointer"
-                onClick={() => handleDisplay(card)}
-              >
-                {/* Color strip */}
-                <div
-                  className="h-2"
-                  style={{ backgroundColor: card.color || '#3B82F6' }}
-                />
-
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${card.color || '#3B82F6'}20` }}
-                      >
-                        {card.codeType === 'qr' ? (
-                          <QrCode className="h-4 w-4" style={{ color: card.color || '#3B82F6' }} />
-                        ) : (
-                          <Barcode className="h-4 w-4" style={{ color: card.color || '#3B82F6' }} />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-semibold truncate">{card.cardName}</h3>
-                        <p className="text-xs text-muted-foreground font-mono truncate">{card.codeValue}</p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="shrink-0 text-xs">
-                      {card.codeType === 'qr' ? 'QR' : card.codeFormat.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className={cn(
-                    'flex items-center gap-1 pt-3 border-t',
-                    'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'
-                  )}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 gap-1.5 flex-1"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDisplay(card)
-                      }}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      {t('loyaltyCards.show')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 gap-1.5 flex-1"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEdit(card)
-                      }}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      {t('loyaltyCards.edit')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 gap-1.5 flex-1 text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete(card)
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      {t('common.delete')}
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <div className="mt-4 grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(150px,1fr))] md:mt-0 md:gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} />
             ))}
           </div>
+        ) : list.length === 0 ? (
+          <div
+            className="mt-4 grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1 md:mt-0"
+            data-testid="loyalty-empty"
+          >
+            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
+              <CreditCard className="size-8" />
+            </span>
+            <h3 className="t-h3 mt-[18px]">{t('loyaltyCards.noCards')}</h3>
+            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('loyaltyCards.noCardsDescription')}</p>
+            <div className="mt-[22px]">
+              <AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* "All cards · N" row */}
+            <div className="mb-3.5 mt-4 flex items-baseline justify-between px-1">
+              <span className="t-xs md:hidden">{t('loyaltyCards.allCards')}</span>
+              <div className="hidden items-baseline gap-2 md:flex">
+                <span className="text-[14px] font-semibold">{t('loyaltyCards.allCards')}</span>
+                <span className="text-[13px] text-muted-foreground">· {list.length}</span>
+              </div>
+              <span className="text-[12px] text-muted-foreground md:hidden">
+                {t('loyaltyCards.cardCount', { count: list.length })}
+              </span>
+            </div>
+
+            <CardGrid
+              cards={list}
+              onShow={handleDisplay}
+              onEdit={handleEdit}
+              onDelete={requestDelete}
+              onOpenActions={openActions}
+            />
+
+            <p className="py-4 text-center text-[12px] text-fg-faint md:hidden">{t('loyaltyCards.footerHint')}</p>
+          </>
         )}
-      </div>
+      </PageTransition>
 
       <Suspense fallback={null}>
         <LoyaltyCardModal
           open={modalOpen}
           onOpenChange={setModalOpen}
           card={editCard}
+          onRequestDelete={requestDelete}
         />
-        <LoyaltyCardDisplay
-          card={displayCard}
-          open={displayOpen}
-          onOpenChange={setDisplayOpen}
-        />
+        <LoyaltyCardDisplay card={displayCard} open={displayOpen} onOpenChange={setDisplayOpen} />
       </Suspense>
+
+      {/* Mobile card action sheet */}
+      {actionsCard && (
+        <GlassDialog
+          open={actionsOpen}
+          onOpenChange={setActionsOpen}
+          title={actionsCard.cardName}
+          description={`${formatLabel(actionsCard)} · ${actionsCard.codeValue}`}
+          bodyClassName="py-3"
+        >
+          <RowActionList
+            card={actionsCard}
+            onShow={(c) => {
+              setActionsOpen(false)
+              handleDisplay(c)
+            }}
+            onEdit={(c) => {
+              setActionsOpen(false)
+              handleEdit(c)
+            }}
+            onDelete={(c) => {
+              setActionsOpen(false)
+              requestDelete(c)
+            }}
+          />
+        </GlassDialog>
+      )}
+
+      {/* Delete confirm */}
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={confirmDelete}
+        variant="destructive"
+        title={t('loyaltyCards.deleteTitle')}
+        description={t('loyaltyCards.deleteConfirm', { name: cardToDelete?.cardName ?? '' })}
+        confirmText={t('common.delete')}
+        isLoading={deleteCard.isPending}
+      />
     </AppLayout>
   )
 }

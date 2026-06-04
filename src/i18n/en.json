@@ -132,7 +132,19 @@
     "tryAgain": "Try Again",
     "scanFromImage": "From Gallery",
     "imageScanError": "Could not detect a barcode or QR code in this image",
-    "imageScanSuccess": "Code detected from image"
+    "imageScanSuccess": "Code detected from image",
+    "add": "Add",
+    "mobileSubtitle": "Show your cards when shopping",
+    "allCards": "All cards",
+    "cardCount": "{{count}} cards",
+    "tapToShow": "Tap to show",
+    "footerHint": "Tap a card to show its code at checkout",
+    "showCode": "Show code",
+    "actions": "Actions",
+    "showHint": "Hold up to the scanner at checkout · screen brightened",
+    "deleteTitle": "Delete card",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "preview": "Preview"
   },
   "auth": {
     "brandTagline": "Your smart receipt companion",
