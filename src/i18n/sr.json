@@ -1379,8 +1379,14 @@
   },
   "recurring": {
     "title": "Ponavljajući troškovi",
-    "subtitle": "Upravljajte ponavljajućim računima i pretplatama",
+    "subtitle": "Pratite ponavljajuće račune i pretplate i nikada ne propustite rok.",
+    "mobileSubtitle": "Računi i pretplate",
     "addExpense": "Dodaj trošak",
+    "addRecurring": "Dodaj trošak",
+    "allRecurring": "Svi troškovi",
+    "sortedByDueDate": "Sortirano po roku",
+    "expensesCount": "{{count}} troškova",
+    "recurringExpensesCount": "{{count}} ponavljajućih troškova",
     "deleteSuccess": "Ponavljajući trošak obrisan",
     "deleteError": "Greška pri brisanju troška",
     "deleteTitle": "Obriši ponavljajući trošak",
@@ -1397,7 +1403,28 @@
     "status": {
       "active": "Aktivan",
       "paused": "Pauziran",
-      "ended": "Završen"
+      "ended": "Završen",
+      "paid": "Plaćeno",
+      "overdue": "Kasni",
+      "dueSoon": "Uskoro",
+      "upcoming": "Predstojeće"
+    },
+    "dueLabels": {
+      "overdue": "Kasni {{count}} dana",
+      "dueToday": "Dospeva danas",
+      "dueTomorrow": "Dospeva sutra",
+      "dueInDays": "Dospeva za {{count}} dana",
+      "inDays": "za {{count}} dana",
+      "upToDate": "Izmireno"
+    },
+    "overview": {
+      "title": "Pregled",
+      "spendingByCategory": "Potrošnja po kategoriji",
+      "monthlyEquivalent": "mesečni ekviv.",
+      "overdue": "Kasni",
+      "dueSoon": "Uskoro",
+      "active": "Aktivni",
+      "paid": "Plaćeno"
     },
     "stats": {
       "monthlyCommitment": "Mesečna obaveza",
@@ -1421,8 +1448,12 @@
     },
     "actions": {
       "pay": "Označi kao plaćeno",
+      "markPaid": "Plaćeno",
       "pause": "Pauziraj",
-      "resume": "Nastavi"
+      "resume": "Nastavi",
+      "edit": "Izmeni",
+      "history": "Istorija plaćanja",
+      "delete": "Obriši"
     },
     "empty": {
       "title": "Nema ponavljajućih troškova",
@@ -1445,6 +1476,10 @@
       "amountMin": "Iznos mora biti veći od 0",
       "currency": "Valuta",
       "fixedAmount": "Fiksni iznos",
+      "fixedAmountHint": "Fiksni računi se automatski plaćaju na dan dospeća. Isključite za promenljive račune (npr. struja).",
+      "pauseExpense": "Pauziraj ovaj trošak",
+      "pauseHint": "Pauzirani računi ne generišu rokove dok ih ponovo ne aktivirate.",
+      "deleteExpense": "Obriši trošak",
       "frequency": "Učestalost",
       "dayOfMonth": "Dan u mesecu",
       "startDate": "Datum početka",
@@ -1462,8 +1497,13 @@
     },
     "markPaid": {
       "title": "Označi kao plaćeno",
+      "recordPaymentFor": "Zabeležite plaćanje za {{name}}.",
       "dueDate": "Rok",
       "amount": "Iznos",
+      "amountLabel": "Iznos ({{currency}})",
+      "fixedHint": "Fiksni iznos — zaključan.",
+      "variableHint": "Promenljiv račun — prilagodite iznosu koji ste stvarno platili.",
+      "receiptNote": "Račun će biti dodat u vaše troškove sa statusom Ponavljajući.",
       "paidDate": "Datum plaćanja",
       "notes": "Napomene",
       "notesPlaceholder": "Opcione napomene...",
@@ -1475,6 +1515,7 @@
     "payments": {
       "title": "Istorija plaćanja",
       "noPayments": "Još nema zabeleženih plaćanja.",
+      "duePrefix": "rok {{date}}",
       "dueDate": "Rok plaćanja",
       "paidDate": "Datum plaćanja",
       "amount": "Iznos",

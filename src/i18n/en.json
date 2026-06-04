@@ -1392,8 +1392,14 @@
   },
   "recurring": {
     "title": "Recurring Expenses",
-    "subtitle": "Manage your recurring bills and subscriptions",
+    "subtitle": "Track your recurring bills and subscriptions, and never miss a due date.",
+    "mobileSubtitle": "Bills & subscriptions",
     "addExpense": "Add Expense",
+    "addRecurring": "Add recurring",
+    "allRecurring": "All recurring",
+    "sortedByDueDate": "Sorted by due date",
+    "expensesCount": "{{count}} expenses",
+    "recurringExpensesCount": "{{count}} recurring expenses",
     "deleteSuccess": "Recurring expense deleted",
     "deleteError": "Failed to delete recurring expense",
     "deleteTitle": "Delete Recurring Expense",
@@ -1410,13 +1416,34 @@
     "status": {
       "active": "Active",
       "paused": "Paused",
-      "ended": "Ended"
+      "ended": "Ended",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "upcoming": "Upcoming"
+    },
+    "dueLabels": {
+      "overdue": "Overdue {{count}} days",
+      "dueToday": "Due today",
+      "dueTomorrow": "Due tomorrow",
+      "dueInDays": "Due in {{count}} days",
+      "inDays": "in {{count}} days",
+      "upToDate": "Up to date"
+    },
+    "overview": {
+      "title": "Overview",
+      "spendingByCategory": "Spending by category",
+      "monthlyEquivalent": "monthly equiv.",
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "active": "Active",
+      "paid": "Paid"
     },
     "stats": {
-      "monthlyCommitment": "Monthly Commitment",
+      "monthlyCommitment": "Monthly commitment",
       "paidThisMonth": "Paid This Month",
       "pendingThisMonth": "Pending This Month",
-      "annualProjection": "Annual Projection"
+      "annualProjection": "Annual projection"
     },
     "categoryBreakdown": {
       "title": "Spending by Category",
@@ -1434,8 +1461,12 @@
     },
     "actions": {
       "pay": "Mark as Paid",
+      "markPaid": "Mark paid",
       "pause": "Pause",
-      "resume": "Resume"
+      "resume": "Resume",
+      "edit": "Edit",
+      "history": "Payment history",
+      "delete": "Delete"
     },
     "empty": {
       "title": "No recurring expenses",
@@ -1458,6 +1489,10 @@
       "amountMin": "Amount must be greater than 0",
       "currency": "Currency",
       "fixedAmount": "Fixed amount",
+      "fixedAmountHint": "Fixed bills auto-pay on the due date. Turn off for variable bills (e.g. electricity).",
+      "pauseExpense": "Pause this expense",
+      "pauseHint": "Paused bills stop generating due dates until you resume them.",
+      "deleteExpense": "Delete expense",
       "frequency": "Frequency",
       "dayOfMonth": "Day of month",
       "startDate": "Start date",
@@ -1474,20 +1509,26 @@
       "updateError": "Failed to update recurring expense"
     },
     "markPaid": {
-      "title": "Mark as Paid",
+      "title": "Mark as paid",
+      "recordPaymentFor": "Record a payment for {{name}}.",
       "dueDate": "Due",
       "amount": "Amount",
+      "amountLabel": "Amount ({{currency}})",
+      "fixedHint": "Fixed amount — locked.",
+      "variableHint": "Variable bill — adjust to the amount you actually paid.",
+      "receiptNote": "A receipt will be added to your Expenses with the Recurring status.",
       "paidDate": "Paid date",
       "notes": "Notes",
       "notesPlaceholder": "Optional notes...",
-      "confirm": "Confirm Payment",
+      "confirm": "Confirm payment",
       "paying": "Processing...",
       "success": "Payment recorded",
       "error": "Failed to record payment"
     },
     "payments": {
-      "title": "Payment History",
+      "title": "Payment history",
       "noPayments": "No payments recorded yet.",
+      "duePrefix": "due {{date}}",
       "dueDate": "Due Date",
       "paidDate": "Paid Date",
       "amount": "Amount",

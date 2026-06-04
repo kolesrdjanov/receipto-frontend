@@ -103,12 +103,22 @@ Generic, reusable across the app:
 Auth-specific helpers live in `src/components/auth/glass.tsx`: `CardHead`, `EmailChip`,
 `BackLink`.
 
+`src/components/glass/glass-dialog.tsx` holds **`GlassDialog`** — the shared responsive
+overlay shell: a centered frosted modal on desktop (≥ md) and a Framer-Motion slide-up
+bottom sheet on mobile, composing Radix Dialog primitives (scrim/focus-trap/Esc) +
+`useReducedMotion`. Layout is header / scrollable body / pinned footer. The shared
+`ConfirmDialog` and all Recurring overlays compose from it. Use it for any new
+mobile-sheet/desktop-modal surface instead of re-deriving the pattern.
+
 ## Deferred (port on first use)
 
-The handoff's `foundations.css` also defines: list rows, segmented control, switch,
-pill, sheet, tab-bar, side-nav, avatar, skeleton, empty state. These are **not** ported
-yet — add each (here + in `index.css`/`components/glass`) when the first screen that
-needs it is migrated. Keep this list current.
+The handoff's `foundations.css` also defines: switch, pill, tab-bar, side-nav, avatar.
+These are **not** ported yet — add each (here + in `index.css`/`components/glass`) when
+the first screen that needs it is migrated. Keep this list current.
+
+**Ported:** sheet/modal (`GlassDialog`), list rows + status badges
+(`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), segmented control
+(inline in the Recurring add/edit form), skeleton + empty state (inline per screen).
 
 ## Migration order (indicative)
 
@@ -118,4 +128,6 @@ module by module. Each is its own cycle. Spec/plan templates live under
 
 **Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
 Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` + the
-`.onboarding-emerald` lock).
+`.onboarding-emerald` lock), expenses/receipts (chrome + day-grouped feed + list
+primitives + glass shared comps), recurring expenses (flat urgency-sorted list, status
+scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`).

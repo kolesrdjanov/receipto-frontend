@@ -1,14 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Loader2 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -22,6 +15,10 @@ interface ConfirmDialogProps {
   isLoading?: boolean
 }
 
+/**
+ * Shared confirm dialog — centered glass modal on desktop, slide-up bottom sheet on
+ * mobile (via {@link GlassDialog}). Props are unchanged from the original shadcn version.
+ */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -44,22 +41,29 @@ export function ConfirmDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card gap-0 sm:max-w-[420px]">
-        <DialogHeader className="items-center text-center sm:items-start sm:text-left">
+    <GlassDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      desktopWidth={420}
+      showClose={false}
+      header={
+        <div className="flex flex-col items-center pb-1 text-center md:items-start md:text-left">
           {danger && (
-            <div className="mb-1 grid size-11 place-items-center rounded-2xl bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]">
-              <AlertTriangle className="size-[22px]" />
+            <div className="mb-3.5 grid size-12 place-items-center rounded-2xl bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]">
+              <AlertTriangle className="size-6" />
             </div>
           )}
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="leading-relaxed">{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="mt-6 gap-2 sm:gap-2">
+          <h2 className="t-h3">{title}</h2>
+          <p className="t-sm mt-1.5 max-w-[340px] leading-relaxed text-muted-foreground">{description}</p>
+        </div>
+      }
+      footer={
+        <div className="flex gap-2 md:justify-end">
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="flex-1 rounded-xl md:flex-none"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
@@ -68,15 +72,15 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant={variant}
-            className="rounded-xl"
+            className="flex-1 rounded-xl md:flex-none"
             onClick={handleConfirm}
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="size-4 animate-spin" />}
             {confirmLabel}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      }
+    />
   )
 }

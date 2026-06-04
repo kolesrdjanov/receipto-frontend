@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LayoutDashboard, Receipt, Users, MoreHorizontal, Plus, type LucideIcon } from 'lucide-react'
 import { useSidebar } from '@/components/ui/sidebar'
+import { useFabStore } from '@/store/fab'
 import { cn } from '@/lib/utils'
 
 function Tab({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) {
@@ -26,9 +27,11 @@ export function MobileTabBar() {
   const { t } = useTranslation()
   const { setOpenMobile } = useSidebar()
   const navigate = useNavigate()
+  const fabAction = useFabStore((s) => s.action)
 
-  // Chunk 4 wires this to open the Add/Scan action sheet on Expenses. Until then, route there.
-  const onFab = () => navigate('/receipts')
+  // A page can register its primary create action (e.g. Recurring opens its Add sheet).
+  // Otherwise the FAB routes to Expenses (Chunk 4 will wire its Add/Scan sheet there).
+  const onFab = () => (fabAction ? fabAction() : navigate('/receipts'))
 
   return (
     <nav

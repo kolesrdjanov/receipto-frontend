@@ -1,22 +1,19 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { format, differenceInCalendarDays, startOfToday } from 'date-fns'
+import { Check, Lock, Receipt } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { CatTile } from '@/components/receipts/primitives'
+import { DueBadge } from '@/components/recurring-expenses/primitives'
+import { relativeDueLabel, type RecurringStatus } from '@/components/recurring-expenses/status'
 import { useMarkAsPaid, type UpcomingExpense } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
 
 interface MarkPaidModalProps {
   open: boolean
@@ -28,6 +25,16 @@ interface FormData {
   amount: number
   paidDate: string
   notes: string
+}
+
+const FORM_ID = 'mark-paid-form'
+const fieldLabel = 'mb-1.5 block text-[12px] font-semibold text-fg-2'
+
+function statusFromDueDate(dueDate: string): RecurringStatus {
+  const diff = differenceInCalendarDays(new Date(dueDate + 'T00:00:00'), startOfToday())
+  if (diff < 0) return 'overdue'
+  if (diff <= 7) return 'duesoon'
+  return 'upcoming'
 }
 
 export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProps) {
@@ -43,11 +50,9 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
     formState: { isSubmitting },
   } = useForm<FormData>()
 
-  // Register paidDate so it's included in form submission
   register('paidDate')
   const paidDate = watch('paidDate')
 
-  // Reset form when modal opens with new expense
   useEffect(() => {
     if (open && expense) {
       reset({
@@ -60,7 +65,6 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
 
   const onSubmit = async (data: FormData) => {
     if (!expense) return
-
     try {
       await markAsPaid.mutateAsync({
         id: expense.id,
@@ -85,68 +89,102 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
     reset()
   }
 
-  const currencySymbol = expense?.currency || 'RSD'
+  if (!expense) return null
+
+  const currency = expense.currency || 'RSD'
+  const status = statusFromDueDate(expense.dueDate)
+  const category = expense.category ?? (expense.icon ? { icon: expense.icon, color: expense.color } : null)
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <DialogTitle>{t('recurring.markPaid.title')}</DialogTitle>
-          <DialogDescription>
-            {expense?.name} — {t('recurring.markPaid.dueDate')}: {expense?.dueDate}
-          </DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}
+      title={t('recurring.markPaid.title')}
+      description={t('recurring.markPaid.recordPaymentFor', { name: expense.name })}
+      desktopWidth={460}
+      footer={
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 rounded-xl sm:flex-none"
+            onClick={handleClose}
+            disabled={markAsPaid.isPending}
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form={FORM_ID}
+            className="flex-1 rounded-xl sm:ml-auto sm:flex-none"
+            disabled={isSubmitting || markAsPaid.isPending}
+          >
+            <Check className="size-4" />
+            {markAsPaid.isPending ? t('recurring.markPaid.paying') : t('recurring.markPaid.confirm')}
+          </Button>
+        </div>
+      }
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {/* Bill summary chip */}
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-bg-subtle/60 px-3.5 py-3">
+          <CatTile category={category} size={38} radius={11} font={18} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-semibold">{expense.name}</p>
+            <p className="text-[12.5px] text-muted-foreground">
+              {t('recurring.markPaid.dueDate')} {format(new Date(expense.dueDate + 'T00:00:00'), 'd MMM yyyy')}
+            </p>
+          </div>
+          <DueBadge status={status} label={relativeDueLabel(status, expense.dueDate, t)} small />
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="amount">{t('recurring.markPaid.amount')} ({currencySymbol})</Label>
-            {expense?.isFixed ? (
-              <Input
-                id="amount"
-                type="number"
-                value={expense.amount}
-                disabled
-                className="bg-muted"
-              />
-            ) : (
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register('amount', { min: 0.01 })}
-              />
+        <div>
+          <Label htmlFor="amount" className={fieldLabel}>
+            {t('recurring.markPaid.amountLabel', { currency })}
+          </Label>
+          <div className="relative">
+            <Input
+              id="amount"
+              type="number"
+              step="0.01"
+              min="0"
+              disabled={expense.isFixed}
+              className="tabular-nums disabled:bg-bg-subtle disabled:opacity-90"
+              {...register('amount', { min: 0.01 })}
+            />
+            {expense.isFixed && (
+              <Lock className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-fg-faint" />
             )}
           </div>
+          <p className="mt-1.5 text-[12px] text-muted-foreground">
+            {expense.isFixed ? t('recurring.markPaid.fixedHint') : t('recurring.markPaid.variableHint')}
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <Label>{t('recurring.markPaid.paidDate')}</Label>
-            <DatePicker
-              value={paidDate}
-              onChange={(value) => setValue('paidDate', value)}
-            />
-          </div>
+        <div>
+          <Label className={fieldLabel}>{t('recurring.markPaid.paidDate')}</Label>
+          <DatePicker value={paidDate} onChange={(value) => setValue('paidDate', value)} />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t('recurring.markPaid.notes')}</Label>
-            <Textarea
-              id="notes"
-              {...register('notes')}
-              placeholder={t('recurring.markPaid.notesPlaceholder')}
-              rows={2}
-            />
-          </div>
+        <div>
+          <Label htmlFor="notes" className={fieldLabel}>
+            {t('recurring.markPaid.notes')}
+          </Label>
+          <Textarea
+            id="notes"
+            {...register('notes')}
+            placeholder={t('recurring.markPaid.notesPlaceholder')}
+            rows={2}
+          />
+        </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={markAsPaid.isPending}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" disabled={isSubmitting || markAsPaid.isPending}>
-              {markAsPaid.isPending ? t('recurring.markPaid.paying') : t('recurring.markPaid.confirm')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3">
+          <Receipt className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <span className="text-[12.5px] leading-[1.45] text-muted-foreground">
+            {t('recurring.markPaid.receiptNote')}
+          </span>
+        </div>
+      </form>
+    </GlassDialog>
   )
 }

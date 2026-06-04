@@ -1,71 +1,79 @@
 import { useTranslation } from 'react-i18next'
+import { Clock, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { Amount } from '@/components/receipts/primitives'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { usePaymentHistory } from '@/hooks/recurring-expenses/use-recurring-expenses'
+  usePaymentHistory,
+  type RecurringExpense,
+} from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { formatDate } from '@/lib/date-utils'
-import { Loader2 } from 'lucide-react'
 
-interface PaymentHistoryProps {
-  expenseId: string
-  currency: string
+interface PaymentHistoryModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  expense: RecurringExpense | null
 }
 
-export function PaymentHistory({ expenseId, currency }: PaymentHistoryProps) {
+/** Payment history — a glass sheet (mobile) / modal (desktop) listing recorded payments. */
+export function PaymentHistoryModal({ open, onOpenChange, expense }: PaymentHistoryModalProps) {
   const { t } = useTranslation()
-  const { data: payments, isLoading } = usePaymentHistory(expenseId)
+  const { data: payments, isLoading } = usePaymentHistory(open && expense ? expense.id : '')
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-4">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  if (!payments || payments.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground py-4 text-center">
-        {t('recurring.payments.noPayments')}
-      </p>
-    )
-  }
-
-  const formatAmount = (amount: number) =>
-    new Intl.NumberFormat('sr-RS', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount)
+  if (!expense) return null
+  const currency = expense.currency || 'RSD'
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('recurring.payments.dueDate')}</TableHead>
-          <TableHead>{t('recurring.payments.paidDate')}</TableHead>
-          <TableHead className="text-right">{t('recurring.payments.amount')}</TableHead>
-          <TableHead>{t('recurring.payments.notes')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {payments.map((payment) => (
-          <TableRow key={payment.id}>
-            <TableCell className="text-sm">{formatDate(payment.dueDate)}</TableCell>
-            <TableCell className="text-sm">{formatDate(payment.paidDate)}</TableCell>
-            <TableCell className="text-right font-medium">{formatAmount(payment.amount)}</TableCell>
-            <TableCell className="text-sm text-muted-foreground truncate max-w-[150px]">
-              {payment.notes || '-'}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <GlassDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('recurring.payments.title')}
+      description={expense.name}
+      desktopWidth={480}
+      footer={
+        <div className="flex justify-end">
+          <Button type="button" variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>
+            {t('common.close')}
+          </Button>
+        </div>
+      }
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : !payments || payments.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <span className="grid size-12 place-items-center rounded-2xl bg-bg-subtle text-muted-foreground">
+            <Clock className="size-[22px]" />
+          </span>
+          <span className="text-[13px] text-muted-foreground">{t('recurring.payments.noPayments')}</span>
+        </div>
+      ) : (
+        <div className="[&>div+div]:border-t [&>div+div]:border-hairline-soft">
+          {payments.map((p) => {
+            const late = p.paidDate !== p.dueDate
+            return (
+              <div key={p.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[14px] font-medium">{formatDate(p.paidDate)}</span>
+                    {late && (
+                      <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[11px] font-medium text-warning-foreground">
+                        {t('recurring.payments.duePrefix', { date: formatDate(p.dueDate) })}
+                      </span>
+                    )}
+                  </div>
+                  {p.notes && (
+                    <p className="mt-0.5 truncate text-[12px] text-muted-foreground">{p.notes}</p>
+                  )}
+                </div>
+                <Amount value={p.amount} currency={currency} size={14.5} weight={700} />
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </GlassDialog>
   )
 }

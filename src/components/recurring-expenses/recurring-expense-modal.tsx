@@ -1,14 +1,7 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,15 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import {
   useCreateRecurringExpense,
   useUpdateRecurringExpense,
   type RecurringExpense,
+  type RecurringFrequency,
   type CreateRecurringExpenseInput,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { useSettingsStore } from '@/store/settings'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface RecurringExpenseModalProps {
@@ -38,11 +34,24 @@ interface RecurringExpenseModalProps {
   onOpenChange: (open: boolean) => void
   expense?: RecurringExpense | null
   mode: 'create' | 'edit'
+  /** Edit mode: request deletion (page owns the confirm dialog). */
+  onRequestDelete?: (expense: RecurringExpense) => void
 }
 
 type FormData = CreateRecurringExpenseInput & { isPaused?: boolean }
 
-export function RecurringExpenseModal({ open, onOpenChange, expense, mode }: RecurringExpenseModalProps) {
+const FORM_ID = 'recurring-expense-form'
+const FREQUENCIES: RecurringFrequency[] = ['weekly', 'monthly', 'quarterly', 'yearly']
+
+const fieldLabel = 'mb-1.5 block text-[12px] font-semibold text-fg-2'
+
+export function RecurringExpenseModal({
+  open,
+  onOpenChange,
+  expense,
+  mode,
+  onRequestDelete,
+}: RecurringExpenseModalProps) {
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: categories } = useCategories()
@@ -73,6 +82,7 @@ export function RecurringExpenseModal({ open, onOpenChange, expense, mode }: Rec
 
   const frequency = watch('frequency')
   const isFixed = watch('isFixed')
+  const isPaused = watch('isPaused')
   const currency = watch('currency')
   const categoryId = watch('categoryId')
   const startDate = watch('startDate')
@@ -143,182 +153,238 @@ export function RecurringExpenseModal({ open, onOpenChange, expense, mode }: Rec
   }
 
   const showDayOfMonth = frequency === 'monthly' || frequency === 'quarterly'
+  const pending = isSubmitting || createExpense.isPending || updateExpense.isPending
+  const primaryLabel = pending
+    ? mode === 'create'
+      ? t('common.creating')
+      : t('common.updating')
+    : mode === 'create'
+      ? t('common.create')
+      : t('common.update')
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'create' ? t('recurring.modal.createTitle') : t('recurring.modal.editTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'create' ? t('recurring.modal.createDescription') : t('recurring.modal.editDescription')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              {t('recurring.modal.name')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              {...register('name', { required: t('recurring.modal.nameRequired') })}
-              placeholder={t('recurring.modal.namePlaceholder')}
-            />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount">
-                {t('recurring.modal.amount')} <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register('amount', {
-                  required: t('recurring.modal.amountRequired'),
-                  min: { value: 0.01, message: t('recurring.modal.amountMin') },
-                })}
-              />
-              {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">{t('recurring.modal.currency')}</Label>
-              <CurrencySelect
-                value={currency || preferredCurrency}
-                onValueChange={(value) => setValue('currency', value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isFixed">{t('recurring.modal.fixedAmount')}</Label>
-            <Switch
-              id="isFixed"
-              checked={isFixed}
-              onCheckedChange={(checked) => setValue('isFixed', checked)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="frequency">{t('recurring.modal.frequency')}</Label>
-              <Select
-                value={frequency}
-                onValueChange={(value) => setValue('frequency', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weekly">{t('recurring.frequency.weekly')}</SelectItem>
-                  <SelectItem value="monthly">{t('recurring.frequency.monthly')}</SelectItem>
-                  <SelectItem value="quarterly">{t('recurring.frequency.quarterly')}</SelectItem>
-                  <SelectItem value="yearly">{t('recurring.frequency.yearly')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {showDayOfMonth && (
-              <div className="space-y-2">
-                <Label htmlFor="dayOfMonth">{t('recurring.modal.dayOfMonth')}</Label>
-                <Input
-                  id="dayOfMonth"
-                  type="number"
-                  min="1"
-                  max="31"
-                  {...register('dayOfMonth', {
-                    min: { value: 1, message: '1-31' },
-                    max: { value: 31, message: '1-31' },
-                  })}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startDate">
-                {t('recurring.modal.startDate')} <span className="text-destructive">*</span>
-              </Label>
-              <DatePicker
-                id="startDate"
-                value={startDate}
-                onChange={(value: string) => setValue('startDate', value, { shouldValidate: true })}
-              />
-              {errors.startDate && <p className="text-sm text-destructive">{errors.startDate.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="endDate">{t('recurring.modal.endDate')}</Label>
-              <DatePicker
-                id="endDate"
-                value={endDate}
-                onChange={(value: string) => setValue('endDate', value || undefined)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categoryId">{t('recurring.modal.category')}</Label>
-            <Select
-              value={categoryId || 'none'}
-              onValueChange={(value) => setValue('categoryId', value === 'none' ? undefined : value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('recurring.modal.selectCategory')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{t('recurring.modal.noCategory')}</SelectItem>
-                {categories?.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.icon && <span className="mr-2">{cat.icon}</span>}
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t('recurring.modal.notes')}</Label>
-            <Textarea
-              id="notes"
-              {...register('notes')}
-              placeholder={t('recurring.modal.notesPlaceholder')}
-              rows={2}
-            />
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
+    <GlassDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}
+      title={mode === 'create' ? t('recurring.modal.createTitle') : t('recurring.modal.editTitle')}
+      description={
+        mode === 'create' ? t('recurring.modal.createDescription') : t('recurring.modal.editDescription')
+      }
+      desktopWidth={520}
+      footer={
+        <div className="flex items-center gap-2">
+          {mode === 'edit' && expense && (
             <Button
               type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || createExpense.isPending || updateExpense.isPending}
+              variant="ghost"
+              className="mr-auto rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => {
+                onOpenChange(false)
+                onRequestDelete?.(expense)
+              }}
+              disabled={pending}
             >
-              {t('common.cancel')}
+              <Trash2 className="size-4" />
+              <span className="hidden sm:inline">{t('recurring.actions.delete')}</span>
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || createExpense.isPending || updateExpense.isPending}
-            >
-              {isSubmitting || createExpense.isPending || updateExpense.isPending
-                ? mode === 'create'
-                  ? t('common.creating')
-                  : t('common.updating')
-                : mode === 'create'
-                  ? t('common.create')
-                  : t('common.update')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={handleClose}
+            disabled={pending}
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
+            {primaryLabel}
+          </Button>
+        </div>
+      }
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div>
+          <Label htmlFor="name" className={fieldLabel}>
+            {t('recurring.modal.name')} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            {...register('name', { required: t('recurring.modal.nameRequired') })}
+            placeholder={t('recurring.modal.namePlaceholder')}
+          />
+          {errors.name && <p className="mt-1.5 text-[12px] text-destructive">{errors.name.message}</p>}
+        </div>
+
+        <div className="grid grid-cols-[2fr_1fr] gap-3">
+          <div>
+            <Label htmlFor="amount" className={fieldLabel}>
+              {t('recurring.modal.amount')} <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="amount"
+              type="number"
+              step="0.01"
+              min="0"
+              className="tabular-nums"
+              {...register('amount', {
+                required: t('recurring.modal.amountRequired'),
+                min: { value: 0.01, message: t('recurring.modal.amountMin') },
+              })}
+            />
+            {errors.amount && <p className="mt-1.5 text-[12px] text-destructive">{errors.amount.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="currency" className={fieldLabel}>
+              {t('recurring.modal.currency')}
+            </Label>
+            <CurrencySelect
+              value={currency || preferredCurrency}
+              onValueChange={(value) => setValue('currency', value)}
+              triggerClassName="w-full"
+            />
+          </div>
+        </div>
+
+        {/* Fixed amount + auto-pay explainer */}
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-bg-subtle/60 px-3.5 py-3">
+          <div className="min-w-0">
+            <Label htmlFor="isFixed" className="text-[14px] font-semibold">
+              {t('recurring.modal.fixedAmount')}
+            </Label>
+            <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">
+              {t('recurring.modal.fixedAmountHint')}
+            </p>
+          </div>
+          <Switch
+            id="isFixed"
+            checked={isFixed}
+            onCheckedChange={(checked) => setValue('isFixed', checked)}
+            className="mt-0.5"
+          />
+        </div>
+
+        <div>
+          <Label className={fieldLabel}>{t('recurring.modal.frequency')}</Label>
+          <div className="grid grid-cols-4 gap-1 rounded-xl bg-bg-subtle p-1">
+            {FREQUENCIES.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setValue('frequency', f)}
+                className={cn(
+                  'rounded-lg py-2 text-[13px] font-semibold transition-colors',
+                  frequency === f
+                    ? 'bg-card text-foreground shadow-glass-1'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(`recurring.frequency.${f}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {showDayOfMonth && (
+          <div className="w-1/2 pr-1.5">
+            <Label htmlFor="dayOfMonth" className={fieldLabel}>
+              {t('recurring.modal.dayOfMonth')}
+            </Label>
+            <Input
+              id="dayOfMonth"
+              type="number"
+              min="1"
+              max="31"
+              className="tabular-nums"
+              {...register('dayOfMonth', {
+                min: { value: 1, message: '1-31' },
+                max: { value: 31, message: '1-31' },
+              })}
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="startDate" className={fieldLabel}>
+              {t('recurring.modal.startDate')} <span className="text-destructive">*</span>
+            </Label>
+            <DatePicker
+              id="startDate"
+              value={startDate}
+              onChange={(value: string) => setValue('startDate', value, { shouldValidate: true })}
+            />
+            {errors.startDate && (
+              <p className="mt-1.5 text-[12px] text-destructive">{errors.startDate.message}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="endDate" className={fieldLabel}>
+              {t('recurring.modal.endDate')}
+            </Label>
+            <DatePicker
+              id="endDate"
+              value={endDate}
+              placeholder={t('recurring.modal.endDate')}
+              onChange={(value: string) => setValue('endDate', value || undefined)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="categoryId" className={fieldLabel}>
+            {t('recurring.modal.category')}
+          </Label>
+          <Select
+            value={categoryId || 'none'}
+            onValueChange={(value) => setValue('categoryId', value === 'none' ? undefined : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('recurring.modal.selectCategory')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t('recurring.modal.noCategory')}</SelectItem>
+              {categories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.icon && <span className="mr-2">{cat.icon}</span>}
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="notes" className={fieldLabel}>
+            {t('recurring.modal.notes')}
+          </Label>
+          <Textarea
+            id="notes"
+            {...register('notes')}
+            placeholder={t('recurring.modal.notesPlaceholder')}
+            rows={2}
+          />
+        </div>
+
+        {mode === 'edit' && (
+          <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-bg-subtle/60 px-3.5 py-3">
+            <div className="min-w-0">
+              <Label htmlFor="isPaused" className="text-[14px] font-semibold">
+                {t('recurring.modal.pauseExpense')}
+              </Label>
+              <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">
+                {t('recurring.modal.pauseHint')}
+              </p>
+            </div>
+            <Switch
+              id="isPaused"
+              checked={!!isPaused}
+              onCheckedChange={(checked) => setValue('isPaused', checked)}
+              className="mt-0.5"
+            />
+          </div>
+        )}
+      </form>
+    </GlassDialog>
   )
 }
