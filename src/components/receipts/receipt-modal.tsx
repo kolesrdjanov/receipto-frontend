@@ -310,24 +310,19 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
       title={title}
       description={description}
       desktopWidth={520}
-      footer={
-        <div className="flex items-center gap-2">
-          {mode === 'edit' && receipt && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="mr-auto rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => {
-                onOpenChange(false)
-                onRequestDelete?.(receipt)
-              }}
-              disabled={pending}
-              data-testid="receipt-delete-button"
-            >
-              <Trash2 className="size-4" />
-              <span className="hidden sm:inline">{t('common.delete')}</span>
-            </Button>
-          )}
+      actions={{
+        primary: (
+          <Button
+            type="submit"
+            form={FORM_ID}
+            className="rounded-xl"
+            disabled={pending}
+            data-testid="receipt-submit-button"
+          >
+            {primaryLabel}
+          </Button>
+        ),
+        secondary: (
           <Button
             type="button"
             variant="outline"
@@ -338,17 +333,25 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
           >
             {t('common.cancel')}
           </Button>
-          <Button
-            type="submit"
-            form={FORM_ID}
-            className="rounded-xl"
-            disabled={pending}
-            data-testid="receipt-submit-button"
-          >
-            {primaryLabel}
-          </Button>
-        </div>
-      }
+        ),
+        destructive:
+          mode === 'edit' && receipt ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => {
+                onOpenChange(false)
+                onRequestDelete?.(receipt)
+              }}
+              disabled={pending}
+              data-testid="receipt-delete-button"
+            >
+              <Trash2 className="size-4" />
+              {t('common.delete')}
+            </Button>
+          ) : undefined,
+      }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" data-testid="receipt-form">
         {isReview && (

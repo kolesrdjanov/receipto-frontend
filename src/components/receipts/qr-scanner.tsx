@@ -452,18 +452,18 @@ export function QrScanner({
           <p className="t-sm mt-1 text-muted-foreground">{t('receipts.qrScanner.description')}</p>
         </div>
       }
-      footer={
-        <div className="flex md:justify-end">
+      actions={{
+        secondary: (
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="w-full rounded-xl md:w-auto md:min-w-[120px]"
+            className="rounded-xl"
           >
             {t('common.cancel')}
           </Button>
-        </div>
-      }
+        ),
+      }}
     >
       {/* Camera selection */}
       <Select value={cameraSelection} onValueChange={handleCameraSelectionChange}>

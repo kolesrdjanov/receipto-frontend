@@ -32,28 +32,30 @@ export function AssignCategoryDialog({
       title={t('receipts.assignCategory')}
       description={t('receipts.bulkCategoryDescription', { count })}
       desktopWidth={480}
-      footer={
-        <div className="flex gap-2 md:justify-end">
+      actions={{
+        primary: (
           <Button
             type="button"
-            variant="outline"
-            className="flex-1 rounded-xl md:flex-none"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
-            {t('common.cancel')}
-          </Button>
-          <Button
-            type="button"
-            className="flex-1 rounded-xl md:flex-none"
+            className="rounded-xl"
             onClick={() => selectedId && onAssign(selectedId)}
             disabled={!selectedId || isLoading}
           >
             {isLoading && <Loader2 className="size-4 animate-spin" />}
             {t('receipts.assignCategory')}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
     >
       <div className="flex flex-wrap gap-2">
         {categories.map((c) => {
