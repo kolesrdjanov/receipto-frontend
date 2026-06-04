@@ -74,6 +74,10 @@ body {
   --color-bg-subtle: var(--bg-subtle);
   --color-hairline-soft: var(--hairline-soft);
   --color-fg-faint: var(--fg-faint);
+  --color-fg-2: var(--fg-2);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-brand-violet-soft: var(--brand-violet-soft);
+  --color-brand-violet-foreground: var(--brand-violet-foreground);
   --color-primary-soft: var(--primary-soft);
   --shadow-glass-1: var(--sh-1);
   --shadow-glass-2: var(--sh-2);
@@ -131,6 +135,11 @@ body {
   --bg-subtle: oklch(0.965 0.003 250);
   --hairline-soft: oklch(0.95 0.004 250);
   --fg-faint: oklch(0.7 0.008 260);
+  --fg-2: oklch(0.45 0.01 260);            /* mid-tone text (between fg & muted) */
+  --destructive-soft: oklch(0.95 0.04 25);
+  --destructive-foreground-on-soft: oklch(0.5 0.18 25);
+  --brand-violet-soft: oklch(0.95 0.04 295);
+  --brand-violet-foreground: oklch(0.45 0.2 295);
   --primary-soft: oklch(from var(--primary) 0.95 0.04 h);
   /* glass — shadow scale */
   --sh-1: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 0 oklch(0 0 0 / 0.02);
@@ -188,6 +197,11 @@ body {
   --bg-subtle: oklch(0.235 0.012 260);
   --hairline-soft: oklch(1 0 0 / 0.06);
   --fg-faint: oklch(0.5 0.012 260);
+  --fg-2: oklch(0.78 0.01 260);
+  --destructive-soft: oklch(0.3 0.08 25);
+  --destructive-foreground-on-soft: oklch(0.82 0.12 25);
+  --brand-violet-soft: oklch(0.32 0.06 295);
+  --brand-violet-foreground: oklch(0.85 0.12 295);
   --primary-soft: oklch(from var(--primary) 0.3 0.06 h);
   /* glass — shadow scale (dark, heavier) */
   --sh-1: 0 1px 2px oklch(0 0 0 / 0.3);

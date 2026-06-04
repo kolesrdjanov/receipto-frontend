@@ -366,6 +366,7 @@
       "failed": "Failed",
       "recurring": "Recurring"
     },
+    "uncategorized": "Uncategorized",
     "unknownStore": "Unknown Store",
     "modal": {
       "addTitle": "Add Receipt",
