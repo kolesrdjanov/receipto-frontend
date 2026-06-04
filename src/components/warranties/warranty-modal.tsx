@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useForm, Controller, type Resolver } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
-import { z } from 'zod'
 import { Package, Store, Shield, UploadCloud, FileText, X, Info, Trash2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -39,38 +37,6 @@ type PreviewItem = {
   localIndex?: number
 }
 
-/* ------------------------------------------------------------------ */
-/* Zod schema + a tiny inline resolver (matches the repo's safeParse    */
-/* pattern; avoids adding @hookform/resolvers).                         */
-/* ------------------------------------------------------------------ */
-function createWarrantySchema(t: TFunction) {
-  return z.object({
-    productName: z.string().trim().min(1, t('warranties.modal.errors.productNameRequired')),
-    storeName: z.string().optional(),
-    purchaseDate: z.string().min(1, t('warranties.modal.errors.purchaseDateRequired')),
-    warrantyDuration: z
-      .number({ message: t('warranties.modal.errors.durationInvalid') })
-      .int()
-      .positive(t('warranties.modal.errors.durationInvalid'))
-      .optional(),
-    notes: z.string().optional(),
-  })
-}
-type WarrantyForm = z.infer<ReturnType<typeof createWarrantySchema>>
-
-function zodResolver(schema: ReturnType<typeof createWarrantySchema>): Resolver<WarrantyForm> {
-  return async (values) => {
-    const r = schema.safeParse(values)
-    if (r.success) return { values: r.data, errors: {} }
-    const errors: Record<string, { type: string; message: string }> = {}
-    for (const issue of r.error.issues) {
-      const path = String(issue.path[0] ?? 'root')
-      if (!errors[path]) errors[path] = { type: issue.code, message: issue.message }
-    }
-    return { values: {}, errors: errors as never }
-  }
-}
-
 const today = () => new Date().toISOString().split('T')[0]
 
 export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDelete }: WarrantyModalProps) {
@@ -87,8 +53,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
     reset,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<WarrantyForm>({
-    resolver: zodResolver(createWarrantySchema(t)),
+  } = useForm<CreateWarrantyData>({
     defaultValues: { productName: '', storeName: '', purchaseDate: today(), warrantyDuration: 24, notes: '' },
   })
 
@@ -200,18 +165,18 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
     resetFileInputs()
   }
 
-  const onSubmit = async (data: WarrantyForm) => {
+  const onSubmit = async (data: CreateWarrantyData) => {
     try {
       if (mode === 'create') {
         await createWarranty.mutateAsync({
-          data: data as CreateWarrantyData,
+          data,
           images: localImages.length ? localImages : undefined,
         })
         toast.success(t('warranties.modal.createSuccess'))
       } else if (mode === 'edit' && warranty) {
         await updateWarranty.mutateAsync({
           id: warranty.id,
-          data: data as Partial<CreateWarrantyData>,
+          data,
           images: localImages.length ? localImages : undefined,
           removeFileIndices: removeFileIndices.length > 0 ? removeFileIndices : undefined,
         })
@@ -296,7 +261,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
           icon={Package}
           error={errors.productName?.message}
           placeholder={t('warranties.modal.productNamePlaceholder')}
-          {...register('productName')}
+          {...register('productName', { required: t('warranties.modal.errors.productNameRequired') })}
         />
 
         <Field
@@ -314,6 +279,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
             <Controller
               name="purchaseDate"
               control={control}
+              rules={{ required: t('warranties.modal.errors.purchaseDateRequired') }}
               render={({ field }) => (
                 <DatePicker id="purchaseDate" value={field.value} onChange={field.onChange} className="h-[50px] rounded-[14px]" />
               )}
@@ -328,8 +294,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
             type="number"
             min={1}
             placeholder="24"
-            error={errors.warrantyDuration?.message}
-            {...register('warrantyDuration', { setValueAs: (v) => (v === '' || v == null ? undefined : Number(v)) })}
+            {...register('warrantyDuration', { valueAsNumber: true })}
           />
         </div>
 

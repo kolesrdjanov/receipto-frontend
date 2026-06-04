@@ -1109,8 +1109,7 @@
       "filesHint": "Slike ili PDF · račun, faktura, garantni list",
       "errors": {
         "productNameRequired": "Naziv proizvoda je obavezan",
-        "purchaseDateRequired": "Datum kupovine je obavezan",
-        "durationInvalid": "Unesite ispravan broj meseci"
+        "purchaseDateRequired": "Datum kupovine je obavezan"
       }
     },
     "export": {

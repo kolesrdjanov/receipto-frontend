@@ -1109,8 +1109,7 @@
       "filesHint": "Images or PDFs · receipt, invoice, warranty card",
       "errors": {
         "productNameRequired": "Product name is required",
-        "purchaseDateRequired": "Purchase date is required",
-        "durationInvalid": "Enter a valid number of months"
+        "purchaseDateRequired": "Purchase date is required"
       }
     },
     "export": {
