@@ -26,8 +26,7 @@ interface MarkPaidModalProps {
 const createMarkPaidSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
     amount: z.coerce.number().positive(t('recurring.modal.amountMin')),
-    // No dedicated markPaid paid-date error key exists — concise hardcoded message kept.
-    paidDate: z.string().min(1, 'Paid date is required'),
+    paidDate: z.string().min(1, t('common.validation.paidDateRequired')),
     notes: z.string().optional(),
   })
 

@@ -50,8 +50,7 @@ const createRecurringSchema = (t: (key: string, opts?: Record<string, unknown>) 
     frequency: z.enum(['weekly', 'monthly', 'quarterly', 'yearly']).optional(),
     dayOfMonth: z.preprocess(
       (v) => (v === '' || v === null || v === undefined ? undefined : v),
-      // Range messages stay as the prior hardcoded '1-31' strings (no i18n key existed)
-      z.coerce.number().min(1, '1-31').max(31, '1-31').optional(),
+      z.coerce.number().min(1, t('common.validation.dayOfMonthRange')).max(31, t('common.validation.dayOfMonthRange')).optional(),
     ),
     startDate: z.string().min(1, t('recurring.modal.startDateRequired')),
     endDate: z.string().optional(),

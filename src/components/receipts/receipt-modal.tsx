@@ -51,8 +51,8 @@ const createReceiptSchema = (t: TFunction) =>
   z.object({
     storeName: z.string().min(1, t('common.required')),
     totalAmount: z.coerce
-      .number({ message: 'Enter a valid amount' })
-      .positive('Amount must be greater than 0'),
+      .number({ message: t('common.validation.amountInvalid') })
+      .positive(t('common.validation.amountPositive')),
     currency: z.string().min(1, t('common.required')),
     receiptDate: z.string().min(1, t('common.required')),
     receiptNumber: z.string().optional(),

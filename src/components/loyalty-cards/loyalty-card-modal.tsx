@@ -27,9 +27,8 @@ const FILE_SCANNER_ID = 'loyalty-file-scanner'
 
 const createLoyaltyCardSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
-    // No dedicated required-message keys exist — concise hardcoded messages kept.
-    cardName: z.string().trim().min(1, `${t('loyaltyCards.cardName')} is required`),
-    codeValue: z.string().trim().min(1, `${t('loyaltyCards.codeValue')} is required`),
+    cardName: z.string().trim().min(1, t('common.validation.fieldRequired', { field: t('loyaltyCards.cardName') })),
+    codeValue: z.string().trim().min(1, t('common.validation.fieldRequired', { field: t('loyaltyCards.codeValue') })),
     codeType: z.enum(['qr', 'barcode']),
     codeFormat: z.string(),
     color: z.string(),

@@ -25,23 +25,23 @@ interface ContactSupportModalProps {
 
 // NOTE: messages below reuse the existing hardcoded English strings that were
 // previously rendered inline (no i18n keys exist for them).
-const createSupportSchema = () =>
+const createSupportSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
     subject: z
       .string()
-      .min(1, 'Subject is required (max 200 characters)')
-      .max(200, 'Subject is required (max 200 characters)'),
+      .min(1, t('common.validation.fieldRequired', { field: t('support.subject') }))
+      .max(200, t('common.validation.maxLength', { field: t('support.subject'), max: 200 })),
     message: z
       .string()
-      .min(1, 'Message is required (max 5000 characters)')
-      .max(5000, 'Message is required (max 5000 characters)'),
+      .min(1, t('common.validation.fieldRequired', { field: t('support.message') }))
+      .max(5000, t('common.validation.maxLength', { field: t('support.message'), max: 5000 })),
   })
 
 type SupportFormData = z.infer<ReturnType<typeof createSupportSchema>>
 
 export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalProps) {
   const { t } = useTranslation()
-  const schema = useMemo(() => createSupportSchema(), [])
+  const schema = useMemo(() => createSupportSchema(t), [t])
   const {
     register,
     handleSubmit,

@@ -34,6 +34,15 @@
     "allRightsReserved": "All rights reserved.",
     "unknown": "Unknown",
     "required": "This field is required",
+    "validation": {
+      "fieldRequired": "{{field}} is required",
+      "maxLength": "{{field}} must be at most {{max}} characters",
+      "amountInvalid": "Enter a valid amount",
+      "amountPositive": "Amount must be greater than 0",
+      "dayOfMonthRange": "Day of month must be 1–31",
+      "paidDateRequired": "Paid date is required",
+      "passwordRequired": "Password is required"
+    },
     "pickDate": "Pick a date",
     "next": "Next",
     "previous": "Previous",

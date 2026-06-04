@@ -23,8 +23,7 @@ interface LoginResponse {
 function createSignInSchema(t: (key: string) => string) {
   return z.object({
     email: z.string().min(1, t('auth.validation.emailRequired')).email(t('auth.validation.emailInvalid')),
-    // No dedicated i18n key exists for an empty password; hardcoded English fallback (noted in TD-1).
-    password: z.string().min(1, 'Password is required'),
+    password: z.string().min(1, t('common.validation.passwordRequired')),
   })
 }
 
