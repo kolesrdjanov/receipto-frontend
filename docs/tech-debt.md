@@ -17,6 +17,12 @@ the bottom; don't renumber existing ones.
 | TD-7 | Extract shared list/empty/action primitives into `components/glass/` | Medium | 🟡 In progress (EmptyState + AddButton done) |
 | TD-8 | Close API hook-layer gaps (net-new endpoints that skipped the hooks layer) | Low | ✅ Done |
 | TD-9 | Standardize modal footers on the `GlassDialog` `actions` API | Medium | 🟡 In progress (7 modals on actions; categories/loyalty + confirm-dialog remain) |
+| TD-10 | Templates page: replace the shadcn table with the Glass list-card pattern | Medium | 🔴 Not started |
+| TD-11 | Expenses "Load more" jumps to bottom on mobile — preserve scroll position | Medium | 🔴 Not started |
+| TD-12 | Desktop sidebar nav items don't match `design_handoff_navigation` | Medium | 🔴 Not started |
+| TD-13 | "+ Add {Entity}" label convention for every create button | Low | 🟡 In progress (categories done) |
+| TD-14 | Consolidate the 8+ hand-rolled progress bars into one shared component | Medium | 🔴 Not started |
+| TD-15 | Mobile drawer/modal buttons: one consistent full-width look | Medium | 🟡 In progress (GlassDialog modals via TD-9) |
 
 ## Progress log — 2026-06-05 execution pass
 
@@ -719,3 +725,131 @@ are per-modal and inconsistent. `recurring-expense-modal.tsx` is migrated and is
 
 ### Out of scope
 - Any change to the `actions` layout contract itself; non-`GlassDialog` overlays.
+
+---
+
+> **Findings batch — user review 2026-06-05 (TD-10…TD-15).** Raised from a manual walkthrough.
+> Quick fixes from the same review already shipped: warranties file-preview lightbox (raw Radix,
+> no double-close / white padding) `b816326`; "Contact Support" → "Support" `b816326`; DatePicker
+> month/year 50/50 `b816326`; category-row "No description" filler removed `b816326`; mobile filter
+> sheet white surface `7b38840`; category add-button → "Add Category" `b109ec0`.
+
+## TD-10 · Templates page — replace the shadcn table with the Glass list-card pattern
+
+**Priority:** Medium · **Status:** 🔴 Not started
+
+### Why this is debt
+`components/templates/templates-table.tsx` still renders a raw shadcn `<Table>` while every other list
+feature (receipts, categories, warranties, recurring, loyalty) uses the Glass card-list pattern — so
+the Templates page reads as "old design" even though the shared components and the `template-modal`
+(now `GlassDialog`, `931c855`) were migrated. There is **no** `design_handoff_templates`; apply the
+established pattern, don't invent one.
+
+### Fix
+- Rebuild the list as a glass card with hairline-separated rows (mirror `categories`/`warranties`
+  `primitives.tsx` + index): name + store + category tile + currency, a kebab `RowActionList`
+  (Edit/Delete), and the shared `EmptyState` (already wired). Reuse `Amount`/`CatTile`/`CatName` from
+  `components/glass/primitives`.
+- Loading/error → shared `Skeleton`, not the centered muted `<Card>` text.
+
+**Estimate:** ~half-day (one screen; needs preview QA). Coordinate with TD-7's shared list/row
+primitives once they land.
+
+---
+
+## TD-11 · Expenses "Load more" jumps to the bottom on mobile
+
+**Priority:** Medium · **Status:** 🔴 Not started
+
+### Why this is debt
+On mobile, tapping **Load more** (`pages/receipts/index.tsx:476`, `inf.fetchNextPage()`) appends the
+next page and the viewport jumps to the bottom of the new rows, so the user must scroll back up to
+where they were. Expected: scroll position stays put; new rows load below.
+
+### Fix
+- Capture a scroll anchor before fetching (the button's `getBoundingClientRect().top` or
+  `window.scrollY`) and restore it after the next page renders (`useLayoutEffect` keyed on item count),
+  or use CSS `overflow-anchor` with a stable sentinel. Only the explicit-button **mobile** branch is
+  affected (desktop is infinite-scroll/paged).
+
+**Estimate:** ~1–2h. Touches `receipts/index.tsx` (under active parallel edits — coordinate).
+
+---
+
+## TD-12 · Desktop sidebar nav items don't match the navigation design
+
+**Priority:** Medium · **Status:** 🔴 Not started
+
+### Why this is debt
+The desktop sidebar menu items (`components/layout/app-sidebar.tsx`) diverge from
+`~/Downloads/receipto design handoffs/design_handoff_navigation` (active-state / spacing / icon
+treatment). The nav shell was migrated earlier but item styling wasn't taken to the handoff.
+
+### Fix
+- Read the navigation handoff; align nav-item markup (rest/active/hover, icon size, row height,
+  spacing) to it.
+
+**Estimate:** ~half-day (needs design read; the sidebar is a shared shell the parallel session also
+touches — coordinate).
+
+---
+
+## TD-13 · "+ Add {Entity}" label convention for every create button
+
+**Priority:** Low · **Status:** 🟡 In progress (categories done — `b109ec0`)
+
+### The standard
+Every create-action button reads **"Add {Entity}"** (the shared `AddButton` already supplies the `+`
+icon) — never a bare "Add". EN **and** SR.
+
+### Why this is debt
+Labels are inconsistent: `categories.add`/`addCategory` were "Add"/"Add category" (now "Add Category");
+`loyaltyCards.add` = "Add" (→ "Add Card"), `recurring.addRecurring` = "Add recurring" (casing → "Add
+Recurring"). Audit the rest (groups, savings, …).
+
+### Fix
+- i18n-only sweep (EN+SR) of every `*.add*` label used by an `AddButton` / create CTA → "Add {Entity}".
+
+**Estimate:** ~1h.
+
+---
+
+## TD-14 · Consolidate the hand-rolled progress bars into one shared component
+
+**Priority:** Medium · **Status:** 🔴 Not started
+
+### Why this is debt
+There is a shared `components/ui/progress.tsx`, but at least **8 surfaces hand-roll their own bar**:
+`dashboard/category-budget-progress.tsx`, `dashboard/category-insights.tsx`,
+`dashboard/monthly-forecast.tsx`, `recurring-expenses/category-bars.tsx`, `settings/primitives.tsx`,
+`warranties/primitives.tsx` (the coverage bar), `items/price-history-chart.tsx`. They differ in
+height, radius, track/fill tokens, and threshold colors. The warranties coverage bar specifically
+should reuse the **dashboard category-budget** bar.
+
+### Fix
+- Define one tone/threshold-aware `ProgressBar` in `components/glass/` (or adopt/extend
+  `ui/progress.tsx`) and repoint all surfaces; warranties coverage = dashboard category-budget = same
+  component.
+
+**Estimate:** ~half-day. Overlaps **TD-7** (shared-primitive extraction) — do under that umbrella.
+
+---
+
+## TD-15 · Mobile drawer/modal buttons — one consistent full-width look
+
+**Priority:** Medium · **Status:** 🟡 In progress (GlassDialog modals standardized via TD-9)
+
+### The standard
+Every button inside a drawer/modal/sheet on **mobile** looks like the sidebar **Logout** button:
+full-width, `h-12 rounded-xl`, generous tap target — i.e. the `GlassDialog` `actions` mobile treatment.
+
+### Why this is debt
+TD-9 standardized this for `GlassDialog` modals, but other mobile overlays still hand-roll button
+sizing: the sidebar drawer (confirm Logout is the reference), the onboarding sheet, the loyalty/QR
+scanner sheets, and any remaining custom sheets.
+
+### Fix
+- Audit every mobile overlay; route `GlassDialog` footers through `actions`, and apply the same
+  `h-12 rounded-xl w-full` treatment to non-`GlassDialog` sheets.
+
+**Estimate:** ~2–3h. Builds on TD-9.
