@@ -36,15 +36,17 @@ accent tile.
 | `--success` / `--success-soft` / `--success-foreground` | `bg-success` / `bg-success-soft` / `text-success-foreground` | ok states |
 | `--warning` / `--warning-soft` / `--warning-foreground` | `bg-warning` / `bg-warning-soft` / `text-warning-foreground` | warn states |
 | `--info` / `--info-soft` / `--info-foreground` | `bg-info` / `bg-info-soft` / `text-info-foreground` | info states |
-| `--destructive` (shadcn) | `bg-destructive/10` / `text-destructive` | danger/error |
+| `--destructive` (shadcn) + `--destructive-soft` / `--destructive-foreground-on-soft` | `bg-destructive` / `bg-destructive-soft` / `text-[color:var(--destructive-foreground-on-soft)]` | danger/error; `*-soft` = tinted danger surfaces (failed status badge, delete confirm icon, mobile bulk Remove) |
+| `--brand-violet-soft` / `--brand-violet-foreground` | `bg-brand-violet-soft` / `text-brand-violet-foreground` | the recurring status badge (the one non-gradient use of the violet hue) |
 
 `*-soft` = tinted background; `*-foreground` = readable text **on** that soft
 background (darker in light mode, lighter in dark).
 
 ### Depth tiers (additive to shadcn)
 `--bg-subtle` (`bg-bg-subtle`), `--hairline-soft` (`border-hairline-soft`),
-`--fg-faint` (`text-fg-faint`, for placeholders/faint icons), `--primary-soft`
-(`bg-primary-soft`, tinted primary; **accent-aware** — derived from `--primary`).
+`--fg-faint` (`text-fg-faint`, for placeholders/faint icons), `--fg-2`
+(`text-fg-2`, mid-tone text between `--foreground` and `--muted-foreground`),
+`--primary-soft` (`bg-primary-soft`, tinted primary; **accent-aware** — derived from `--primary`).
 
 ### Shadow scale
 `--sh-1..4` → `shadow-glass-1 … shadow-glass-4` (heavier in dark).
@@ -153,8 +155,15 @@ dashboard → then module by module. Each is its own cycle. Spec/plan templates 
 
 **Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
 Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` + the
-`.onboarding-emerald` lock), expenses/receipts (chrome + day-grouped feed + list
-primitives + glass shared comps), recurring expenses (flat urgency-sorted list, status
+`.onboarding-emerald` lock), **expenses/receipts** (the full page — glass filter
+rail + mobile filter sheet, day-grouped feed with per-day subtotals [desktop numbered
+pages / mobile infinite Load-more], list primitives `StatusBadge`/`CatTile`/`CatName`/
+`Amount`/`SelectCheck` in `receipts/primitives.tsx`, `+`-menu / FAB Add sheet / glass
+template picker + CSV import guide, selection mode + glass bulk bars + desktop row kebab
+with archived/recurring gating + `GlassDialog` assign-category, and the glass scan flow
+`qr-scanner.tsx` → `GlassDialog` across all camera/processing/retry/error states; plus
+the glass shared comps confirm-dialog / pagination / date-picker / receipt-viewer),
+recurring expenses (flat urgency-sorted list, status
 scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`), warranties
 (coverage-bar-hero cards, urgency status language, derived emoji tiles, zod-validated
 `GlassDialog` form, restyled gallery lightbox), loyalty cards (wallet-card grid),
