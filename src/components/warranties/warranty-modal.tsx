@@ -1,125 +1,123 @@
 import { useEffect, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, type Resolver } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import type { TFunction } from 'i18next'
+import { z } from 'zod'
+import { Package, Store, Shield, UploadCloud, FileText, X, Info, Trash2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Textarea } from '@/components/ui/textarea'
+import { StatusBadge } from '@/components/warranties/primitives'
+import { formatDate } from '@/lib/date-utils'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 import {
   useCreateWarranty,
   useUpdateWarranty,
-  useDeleteWarranty,
   type Warranty,
   type CreateWarrantyData,
   MAX_WARRANTY_FILES,
 } from '@/hooks/warranties/use-warranties'
-import { toast } from 'sonner'
-import { Info, X, FileText, Loader2, Trash2 } from 'lucide-react'
+
+const FORM_ID = 'warranty-form'
 
 interface WarrantyModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   warranty?: Warranty | null
   mode: 'create' | 'edit'
+  /** Routes delete through the page-level shared ConfirmDialog. */
+  onRequestDelete?: (warranty: Warranty) => void
 }
 
-// Helper type for preview items
 type PreviewItem = {
   type: 'remote' | 'local'
   src: string
-  remoteIndex?: number // Index in the warranty.files array
-  localIndex?: number  // Index in the localImages array
+  remoteIndex?: number
+  localIndex?: number
 }
 
-export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyModalProps) {
+/* ------------------------------------------------------------------ */
+/* Zod schema + a tiny inline resolver (matches the repo's safeParse    */
+/* pattern; avoids adding @hookform/resolvers).                         */
+/* ------------------------------------------------------------------ */
+function createWarrantySchema(t: TFunction) {
+  return z.object({
+    productName: z.string().trim().min(1, t('warranties.modal.errors.productNameRequired')),
+    storeName: z.string().optional(),
+    purchaseDate: z.string().min(1, t('warranties.modal.errors.purchaseDateRequired')),
+    warrantyDuration: z
+      .number({ message: t('warranties.modal.errors.durationInvalid') })
+      .int()
+      .positive(t('warranties.modal.errors.durationInvalid'))
+      .optional(),
+    notes: z.string().optional(),
+  })
+}
+type WarrantyForm = z.infer<ReturnType<typeof createWarrantySchema>>
+
+function zodResolver(schema: ReturnType<typeof createWarrantySchema>): Resolver<WarrantyForm> {
+  return async (values) => {
+    const r = schema.safeParse(values)
+    if (r.success) return { values: r.data, errors: {} }
+    const errors: Record<string, { type: string; message: string }> = {}
+    for (const issue of r.error.issues) {
+      const path = String(issue.path[0] ?? 'root')
+      if (!errors[path]) errors[path] = { type: issue.code, message: issue.message }
+    }
+    return { values: {}, errors: errors as never }
+  }
+}
+
+const today = () => new Date().toISOString().split('T')[0]
+
+export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDelete }: WarrantyModalProps) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile(768)
 
-  // Track which original remote files should be removed (by index)
   const [removeFileIndices, setRemoveFileIndices] = useState<number[]>([])
-
-  // New local images to upload
   const [localImages, setLocalImages] = useState<File[]>([])
   const [localPreviews, setLocalPreviews] = useState<string[]>([])
-
-  // Delete confirmation dialog
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const {
     register,
     handleSubmit,
     reset,
     control,
-    formState: { isSubmitting },
-  } = useForm<CreateWarrantyData>({
-    defaultValues: {
-      productName: '',
-      storeName: '',
-      purchaseDate: new Date().toISOString().split('T')[0],
-      warrantyDuration: 24,
-      notes: '',
-    },
+    formState: { errors, isSubmitting },
+  } = useForm<WarrantyForm>({
+    resolver: zodResolver(createWarrantySchema(t)),
+    defaultValues: { productName: '', storeName: '', purchaseDate: today(), warrantyDuration: 24, notes: '' },
   })
 
   const createWarranty = useCreateWarranty()
   const updateWarranty = useUpdateWarranty()
-  const deleteWarranty = useDeleteWarranty()
+  const pending = isSubmitting || createWarranty.isPending || updateWarranty.isPending
 
-  // Build combined preview list: remaining remote files + new local images
+  /* ---- file preview list (remaining remote + new local) ---- */
   const buildPreviewItems = (): PreviewItem[] => {
     const items: PreviewItem[] = []
-
-    // Add remote files that haven't been marked for removal
-    if (mode === 'edit' && warranty?.files && Array.isArray(warranty.files)) {
-      warranty.files.forEach((file, index) => {
-        if (!removeFileIndices.includes(index)) {
-          items.push({ type: 'remote', src: file.url, remoteIndex: index })
-        }
+    if (mode === 'edit' && Array.isArray(warranty?.files)) {
+      warranty!.files.forEach((file, index) => {
+        if (!removeFileIndices.includes(index)) items.push({ type: 'remote', src: file.url, remoteIndex: index })
       })
     }
-
-    // Add local images
-    localPreviews.forEach((src, idx) => {
-      items.push({ type: 'local', src, localIndex: idx })
-    })
-
+    localPreviews.forEach((src, idx) => items.push({ type: 'local', src, localIndex: idx }))
     return items
   }
-
   const previewItems = buildPreviewItems()
   const totalFileCount = previewItems.length
   const remainingSlots = Math.max(0, MAX_WARRANTY_FILES - totalFileCount)
   const canAddMore = remainingSlots > 0
 
-  const revokePreviews = (previews: string[]) => {
-    previews.forEach((p) => {
-      if (p.startsWith('blob:')) URL.revokeObjectURL(p)
-    })
-  }
-
+  const revokePreviews = (previews: string[]) =>
+    previews.forEach((p) => p.startsWith('blob:') && URL.revokeObjectURL(p))
   const resetFileInputs = () => {
-    const fileInput = document.getElementById('warranty-files') as HTMLInputElement | null
-    if (fileInput) fileInput.value = ''
+    const el = document.getElementById('warranty-files') as HTMLInputElement | null
+    if (el) el.value = ''
   }
-
   const clearAll = () => {
     setRemoveFileIndices([])
     setLocalImages([])
@@ -132,7 +130,6 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
 
   useEffect(() => {
     if (!open) return
-
     if (mode === 'edit' && warranty) {
       reset({
         productName: warranty.productName,
@@ -141,99 +138,55 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
         warrantyDuration: warranty.warrantyDuration || undefined,
         notes: warranty.notes || '',
       })
+    } else {
+      reset({ productName: '', storeName: '', purchaseDate: today(), warrantyDuration: 24, notes: '' })
     }
-
-    if (mode === 'create') {
-      reset({
-        productName: '',
-        storeName: '',
-        purchaseDate: new Date().toISOString().split('T')[0],
-        warrantyDuration: 24,
-        notes: '',
-      })
-    }
-
-    // Always clear state when modal opens
     clearAll()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode, warranty?.id])
 
-  const isHeicFile = (file: File): boolean => {
-    return (
-      file.type === 'image/heic' ||
-      file.type === 'image/heif' ||
-      file.name.toLowerCase().endsWith('.heic') ||
-      file.name.toLowerCase().endsWith('.heif')
-    )
-  }
+  /* ---- HEIC conversion (kept verbatim) ---- */
+  const isHeicFile = (file: File): boolean =>
+    file.type === 'image/heic' ||
+    file.type === 'image/heif' ||
+    file.name.toLowerCase().endsWith('.heic') ||
+    file.name.toLowerCase().endsWith('.heif')
 
   const convertIfHeic = async (file: File): Promise<File> => {
     if (!isHeicFile(file)) return file
-
     try {
       const { default: heic2any } = await import('heic2any')
-
-      const convertedBlob = (await heic2any({
-        blob: file,
-        toType: 'image/jpeg',
-        quality: 0.85,
-      })) as Blob
-
-      return new File(
-        [convertedBlob],
-        file.name.replace(/\.(heic|heif)$/i, '.jpg'),
-        { type: 'image/jpeg' }
-      )
+      const convertedBlob = (await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 })) as Blob
+      return new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' })
     } catch {
-      // If conversion fails, return original file - Cloudinary will handle it
       return file
     }
   }
 
   const addFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
-    if (!canAddMore) return
-
+    if (!files || files.length === 0 || !canAddMore) return
     try {
-      const incoming = Array.from(files)
-      const toAdd = incoming.slice(0, remainingSlots)
-
-      // Only convert HEIC files, leave PDFs as-is
+      const toAdd = Array.from(files).slice(0, remainingSlots)
       const processed = await Promise.all(
-        toAdd.map(file => file.type === 'application/pdf' ? file : convertIfHeic(file))
+        toAdd.map((file) => (file.type === 'application/pdf' ? file : convertIfHeic(file))),
       )
-
-      // Clear inputs so selecting the same file again triggers onChange
       resetFileInputs()
-
-      // Add to local files
       setLocalImages((prev) => [...prev, ...processed])
       setLocalPreviews((prev) => [
         ...prev,
-        ...processed.map((f) => {
-          if (f.type === 'application/pdf') {
-            return 'pdf-placeholder'
-          }
-          if (isHeicFile(f)) {
-            return 'heic-placeholder'
-          }
-          return URL.createObjectURL(f)
-        }),
+        ...processed.map((f) =>
+          f.type === 'application/pdf' ? 'pdf-placeholder' : isHeicFile(f) ? 'heic-placeholder' : URL.createObjectURL(f),
+        ),
       ])
     } catch {
-      toast.error(t('warranties.modal.createError'), {
-        description: 'Failed to process file. Please try a different format.',
-      })
+      toast.error(t('warranties.modal.createError'), { description: 'Failed to process file. Please try a different format.' })
     }
   }
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    await addFiles(e.target.files)
-  }
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => addFiles(e.target.files)
 
   const removePreviewItem = (item: PreviewItem) => {
     if (item.type === 'remote' && item.remoteIndex !== undefined) {
-      // Mark remote file for removal
       setRemoveFileIndices((prev) => [...prev, item.remoteIndex!])
     } else if (item.type === 'local' && item.localIndex !== undefined) {
       const idx = item.localIndex
@@ -247,288 +200,241 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode }: WarrantyMo
     resetFileInputs()
   }
 
-  const onSubmit = async (data: CreateWarrantyData) => {
+  const onSubmit = async (data: WarrantyForm) => {
     try {
       if (mode === 'create') {
         await createWarranty.mutateAsync({
-          data,
+          data: data as CreateWarrantyData,
           images: localImages.length ? localImages : undefined,
         })
         toast.success(t('warranties.modal.createSuccess'))
       } else if (mode === 'edit' && warranty) {
         await updateWarranty.mutateAsync({
           id: warranty.id,
-          data,
+          data: data as Partial<CreateWarrantyData>,
           images: localImages.length ? localImages : undefined,
           removeFileIndices: removeFileIndices.length > 0 ? removeFileIndices : undefined,
         })
         toast.success(t('warranties.modal.updateSuccess'))
       }
-      onOpenChange(false)
+      handleOpenChange(false)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'An error occurred'
+      toast.error(mode === 'create' ? t('warranties.modal.createError') : t('warranties.modal.updateError'), {
+        description: msg,
+      })
+    }
+  }
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
       reset()
       clearAll()
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
-      toast.error(
-        mode === 'create'
-          ? t('warranties.modal.createError')
-          : t('warranties.modal.updateError'),
-        { description: errorMessage }
-      )
     }
+    onOpenChange(next)
   }
 
-  const handleDelete = async () => {
+  const requestDelete = () => {
     if (!warranty) return
-
-    try {
-      await deleteWarranty.mutateAsync(warranty.id)
-      toast.success(t('warranties.modal.deleteSuccess'))
-      setShowDeleteDialog(false)
-      onOpenChange(false)
-      reset()
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('warranties.modal.deleteError'), { description: errorMessage })
-    }
+    handleOpenChange(false)
+    onRequestDelete?.(warranty)
   }
 
-  const handleClose = () => {
-    onOpenChange(false)
-    reset()
-    clearAll()
-  }
+  /* ---- footer ---- */
+  const submitLabel = pending
+    ? mode === 'create'
+      ? t('common.creating')
+      : t('common.updating')
+    : mode === 'create'
+      ? t('common.create')
+      : t('common.update')
+
+  const footer = isMobile ? (
+    <div className="flex flex-col gap-2">
+      <Button type="submit" form={FORM_ID} disabled={pending} className="w-full">
+        {submitLabel}
+      </Button>
+      <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending} className="w-full">
+        {t('common.cancel')}
+      </Button>
+      {mode === 'edit' && (
+        <Button type="button" variant="ghost" onClick={requestDelete} disabled={pending} className="w-full text-destructive hover:text-destructive">
+          <Trash2 className="size-4" />
+          {t('common.delete')}
+        </Button>
+      )}
+    </div>
+  ) : (
+    <div className="flex items-center gap-2">
+      {mode === 'edit' && (
+        <Button type="button" variant="destructive" onClick={requestDelete} disabled={pending} className="mr-auto">
+          <Trash2 className="size-4" />
+          {t('common.delete')}
+        </Button>
+      )}
+      <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending} className={cn(mode !== 'edit' && 'ml-auto')}>
+        {t('common.cancel')}
+      </Button>
+      <Button type="submit" form={FORM_ID} disabled={pending}>
+        {submitLabel}
+      </Button>
+    </div>
+  )
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 overflow-x-hidden max-h-[90dvh] p-0 sm:p-0">
-        <div className="flex h-full flex-col">
-          <div className="px-4 pt-4 sm:px-6 sm:pt-6">
-            <DialogHeader>
-              <DialogTitle>
-                {mode === 'create'
-                  ? t('warranties.modal.createTitle')
-                  : t('warranties.modal.editTitle')}
-              </DialogTitle>
-              <DialogDescription>
-                {mode === 'create'
-                  ? t('warranties.modal.createDescription')
-                  : t('warranties.modal.editDescription')}
-              </DialogDescription>
-            </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={mode === 'create' ? t('warranties.modal.createTitle') : t('warranties.modal.editTitle')}
+      description={mode === 'create' ? t('warranties.modal.createDescription') : t('warranties.modal.editDescription')}
+      desktopWidth={520}
+      footer={footer}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <Field
+          label={t('warranties.modal.productName')}
+          icon={Package}
+          error={errors.productName?.message}
+          placeholder={t('warranties.modal.productNamePlaceholder')}
+          {...register('productName')}
+        />
+
+        <Field
+          label={t('warranties.modal.storeName')}
+          icon={Store}
+          placeholder={t('warranties.modal.storeNamePlaceholder')}
+          {...register('storeName')}
+        />
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="min-w-0">
+            <label htmlFor="purchaseDate" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+              {t('warranties.modal.purchaseDate')}
+            </label>
+            <Controller
+              name="purchaseDate"
+              control={control}
+              render={({ field }) => (
+                <DatePicker id="purchaseDate" value={field.value} onChange={field.onChange} className="h-[50px] rounded-[14px]" />
+              )}
+            />
+            {errors.purchaseDate?.message && (
+              <p className="mt-1.5 ml-0.5 text-xs font-medium text-destructive">{errors.purchaseDate.message}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6">
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="productName">{t('warranties.modal.productName')}</Label>
-                  <Input
-                    id="productName"
-                    {...register('productName', { required: true })}
-                    placeholder={t('warranties.modal.productNamePlaceholder')}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="storeName">{t('warranties.modal.storeName')}</Label>
-                  <Input
-                    id="storeName"
-                    {...register('storeName')}
-                    placeholder={t('warranties.modal.storeNamePlaceholder')}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="purchaseDate">{t('warranties.modal.purchaseDate')}</Label>
-                    <Controller
-                      name="purchaseDate"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <DatePicker
-                          id="purchaseDate"
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="warrantyDuration">{t('warranties.modal.duration')}</Label>
-                    <Input
-                      id="warrantyDuration"
-                      type="number"
-                      min="1"
-                      {...register('warrantyDuration', { valueAsNumber: true })}
-                      placeholder="24"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t('warranties.modal.durationHelp')}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="notes">{t('warranties.modal.notes')}</Label>
-                  <Textarea
-                    id="notes"
-                    {...register('notes')}
-                    placeholder={t('warranties.modal.notesPlaceholder')}
-                    rows={2}
-                  />
-                </div>
-
-                {/* File Upload */}
-                <div className="space-y-2">
-                  <Label>{t('warranties.modal.files')}</Label>
-
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    {canAddMore && (
-                      <Button type="button" variant="outline" asChild className="shrink-0">
-                        <Label htmlFor="warranty-files" className="cursor-pointer">
-                          {t('warranties.modal.addFile')}
-                        </Label>
-                      </Button>
-                    )}
-                    <p className="text-xs text-muted-foreground sm:ml-auto sm:self-center">
-                      {totalFileCount}/{MAX_WARRANTY_FILES}
-                    </p>
-                  </div>
-
-                  <input
-                    id="warranty-files"
-                    type="file"
-                    accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
-                    multiple
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    disabled={!canAddMore}
-                  />
-
-                  {previewItems.length > 0 ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {previewItems.map((item, idx) => {
-                        const lowerSrc = item.src.toLowerCase()
-                        const isPdf = item.src === 'pdf-placeholder' || lowerSrc.endsWith('.pdf') || lowerSrc.includes('/raw/upload/')
-                        return (
-                          <div key={`${item.type}-${item.remoteIndex ?? item.localIndex}-${idx}`} className="relative overflow-hidden rounded-lg border">
-                            {item.src === 'heic-placeholder' ? (
-                              <div className="w-full h-48 bg-muted flex items-center justify-center">
-                                <span className="text-sm text-muted-foreground">{t('warranties.modal.heicPlaceholder')}</span>
-                              </div>
-                            ) : isPdf ? (
-                              <div className="w-full h-48 bg-muted flex flex-col items-center justify-center gap-2">
-                                <FileText className="h-12 w-12 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">{t('warranties.modal.pdfPlaceholder')}</span>
-                              </div>
-                            ) : (
-                              <img
-                                src={
-                                  item.src.startsWith('blob:')
-                                    ? item.src
-                                    : `${item.src}${item.src.includes('?') ? '&' : '?'}f_auto,q_auto`
-                                }
-                                alt={`Preview ${idx + 1}`}
-                                className="w-full h-48 object-cover"
-                                loading="lazy"
-                              />
-                            )}
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-2 right-2"
-                              onClick={() => removePreviewItem(item)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
-                      {t('warranties.modal.imageSlots')}
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground mt-4">
-                    <Info className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p>{t('warranties.modal.heicNotice')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="shrink-0 bg-background mt-4 px-4 pb-4 sm:px-6 sm:pb-6">
-              <DialogFooter className="gap-2 sm:gap-0">
-                {mode === 'edit' && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => setShowDeleteDialog(true)}
-                    disabled={deleteWarranty.isPending || isSubmitting}
-                    className="sm:mr-auto"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    {t('common.delete')}
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || createWarranty.isPending || updateWarranty.isPending}
-                >
-                  {isSubmitting || createWarranty.isPending || updateWarranty.isPending
-                    ? mode === 'create'
-                      ? t('common.creating')
-                      : t('common.updating')
-                    : mode === 'create'
-                    ? t('common.create')
-                    : t('common.update')}
-                </Button>
-              </DialogFooter>
-            </div>
-          </form>
+          <Field
+            label={t('warranties.modal.duration')}
+            type="number"
+            min={1}
+            placeholder="24"
+            error={errors.warrantyDuration?.message}
+            {...register('warrantyDuration', { setValueAs: (v) => (v === '' || v == null ? undefined : Number(v)) })}
+          />
         </div>
-      </DialogContent>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('warranties.modal.deleteConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('warranties.modal.deleteConfirmDescription', { name: warranty?.productName })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
-              disabled={deleteWarranty.isPending}
-            >
-              {deleteWarranty.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
+        {mode === 'edit' && warranty && (
+          <div className="flex items-center gap-2 rounded-xl bg-bg-subtle px-3.5 py-3 text-[13px]">
+            <Shield className="size-[15px] shrink-0 text-muted-foreground" />
+            <span>{t('warranties.modal.expiryHint', { date: formatDate(warranty.warrantyExpires) })}</span>
+            <StatusBadge w={warranty} small className="ml-auto" />
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="notes" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            {t('warranties.modal.notes')}
+          </label>
+          <textarea
+            id="notes"
+            rows={2}
+            placeholder={t('warranties.modal.notesPlaceholder')}
+            className="min-h-[76px] w-full rounded-[14px] border border-border bg-muted/60 px-3.5 py-3 text-[15px] font-medium text-foreground outline-none transition-[border-color,box-shadow] placeholder:font-normal placeholder:text-fg-faint focus:border-primary focus:ring-4 focus:ring-primary/15"
+            {...register('notes')}
+          />
+        </div>
+
+        {/* Files */}
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="ml-0.5 text-xs font-semibold text-muted-foreground">{t('warranties.modal.files')}</label>
+            <span className="text-xs font-medium text-fg-faint tabular-nums">
+              {totalFileCount}/{MAX_WARRANTY_FILES}
+            </span>
+          </div>
+
+          <input
+            id="warranty-files"
+            type="file"
+            accept="image/*,.heic,.heif,image/heic,image/heif,.pdf,application/pdf"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+            disabled={!canAddMore}
+          />
+
+          {previewItems.length > 0 ? (
+            <div className="grid grid-cols-3 gap-3">
+              {previewItems.map((item, idx) => {
+                const lower = item.src.toLowerCase()
+                const isPdf = item.src === 'pdf-placeholder' || lower.endsWith('.pdf') || lower.includes('/raw/upload/')
+                const isHeic = item.src === 'heic-placeholder'
+                return (
+                  <div key={`${item.type}-${item.remoteIndex ?? item.localIndex}-${idx}`} className="relative aspect-square overflow-hidden rounded-xl border border-border bg-bg-subtle">
+                    {isHeic ? (
+                      <div className="grid size-full place-items-center px-1 text-center text-[10px] text-muted-foreground">
+                        {t('warranties.modal.heicPlaceholder')}
+                      </div>
+                    ) : isPdf ? (
+                      <div className="grid size-full place-items-center gap-1 text-muted-foreground">
+                        <FileText className="size-7" />
+                      </div>
+                    ) : (
+                      <img
+                        src={item.src.startsWith('blob:') ? item.src : `${item.src}${item.src.includes('?') ? '&' : '?'}f_auto,q_auto`}
+                        alt=""
+                        className="size-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removePreviewItem(item)}
+                      aria-label={t('common.delete')}
+                      className="absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-destructive text-white shadow-sm transition-transform hover:scale-105"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                )
+              })}
+              {canAddMore && (
+                <label
+                  htmlFor="warranty-files"
+                  className="grid aspect-square cursor-pointer place-items-center gap-1 rounded-xl border-2 border-dashed border-border text-fg-faint transition-colors hover:border-primary/50 hover:text-primary"
+                >
+                  <Plus className="size-5" />
+                  <span className="text-[11px] font-medium">{t('warranties.modal.addFile')}</span>
+                </label>
               )}
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Dialog>
+            </div>
+          ) : (
+            <label
+              htmlFor="warranty-files"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-dashed border-border bg-bg-subtle/50 px-6 py-7 text-center transition-colors hover:border-primary/50"
+            >
+              <UploadCloud className="size-6 text-muted-foreground" />
+              <span className="text-[13px] font-semibold">{t('warranties.modal.addUpToFiles')}</span>
+              <span className="text-[12px] text-fg-faint">{t('warranties.modal.filesHint')}</span>
+            </label>
+          )}
+
+          <div className="mt-3 flex items-start gap-2 rounded-xl bg-muted/50 px-3 py-2.5 text-[12.5px] text-muted-foreground">
+            <Info className="mt-px size-4 shrink-0" />
+            <p>{t('warranties.modal.heicNotice')}</p>
+          </div>
+        </div>
+      </form>
+    </GlassDialog>
   )
 }
