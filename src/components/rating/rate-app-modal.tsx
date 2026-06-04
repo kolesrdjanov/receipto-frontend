@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { Checkbox } from '@/components/glass/glass'
+import { StarPicker } from '@/components/settings/primitives'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useMyRating, useSubmitRating } from '@/hooks/ratings/use-ratings'
 import { toast } from 'sonner'
-import { Star } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface RateAppModalProps {
   open: boolean
@@ -27,12 +19,13 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
   const submitRating = useSubmitRating()
 
   const [rating, setRating] = useState(0)
-  const [hoveredRating, setHoveredRating] = useState(0)
   const [description, setDescription] = useState('')
   const [isPublic, setIsPublic] = useState(false)
 
   useEffect(() => {
+    // Prefill the form from the user's existing rating (or reset) each time the modal opens.
     if (open && existingRating) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRating(existingRating.rating)
       setDescription(existingRating.description || '')
       setIsPublic(existingRating.isPublic)
@@ -43,8 +36,7 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
     }
   }, [open, existingRating])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     if (rating === 0) return
 
     try {
@@ -61,44 +53,53 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
     onOpenChange(false)
   }
 
-  const displayRating = hoveredRating || rating
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t('rating.title')}</DialogTitle>
-          <DialogDescription>{t('rating.description')}</DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={handleClose}
+      title={t('rating.title')}
+      description={t('rating.description')}
+      desktopWidth={480}
+      footer={
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={submitRating.isPending}
+            className="order-2 w-full sm:order-1 sm:w-auto"
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleSubmit()}
+            disabled={rating === 0 || submitRating.isPending}
+            className="order-1 w-full sm:order-2 sm:w-auto"
+          >
+            {submitRating.isPending
+              ? t('rating.submitting')
+              : existingRating
+                ? t('rating.update')
+                : t('rating.submit')}
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <p className="mb-2.5 text-center text-sm font-semibold">{t('rating.ratingLabel')}</p>
+          <StarPicker value={rating} onChange={setRating} />
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t('rating.ratingLabel')}</Label>
-            <div className="flex gap-1 justify-center py-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="p-1 transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={cn(
-                      'h-8 w-8 transition-colors',
-                      star <= displayRating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-muted-foreground/30'
-                    )}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="rating-description">{t('rating.descriptionLabel')}</Label>
+        <div>
+          <label
+            htmlFor="rating-description"
+            className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground"
+          >
+            {t('rating.descriptionLabel')}
+          </label>
+          <div className="relative">
             <Textarea
               id="rating-description"
               value={description}
@@ -107,42 +108,23 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
               rows={4}
               maxLength={1000}
               disabled={submitRating.isPending}
+              className="resize-none rounded-[14px] pb-6"
             />
+            <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] tabular-nums text-fg-faint">
+              {description.length}/1000
+            </span>
           </div>
+        </div>
 
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
-              className="h-4 w-4 rounded border-border accent-primary"
-              disabled={submitRating.isPending}
-            />
-            <span className="text-sm text-muted-foreground">{t('rating.allowPublic')}</span>
-          </label>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={submitRating.isPending}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={rating === 0 || submitRating.isPending}
-            >
-              {submitRating.isPending
-                ? t('rating.submitting')
-                : existingRating
-                  ? t('rating.update')
-                  : t('rating.submit')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <label className="flex cursor-pointer select-none items-center gap-2.5">
+          <Checkbox
+            checked={isPublic}
+            onChange={(e) => setIsPublic((e.target as HTMLInputElement).checked)}
+            disabled={submitRating.isPending}
+          />
+          <span className="text-sm text-muted-foreground">{t('rating.allowPublic')}</span>
+        </label>
+      </div>
+    </GlassDialog>
   )
 }
