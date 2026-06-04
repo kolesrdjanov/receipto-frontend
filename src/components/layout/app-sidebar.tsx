@@ -49,13 +49,10 @@ import {
   KeyRound,
   User,
   X,
-  Sun,
-  Moon,
-  Monitor,
   SunMoon,
   type LucideIcon,
 } from 'lucide-react'
-import { useSettingsStore, type Theme } from '@/store/settings'
+import { ThemeSegmented } from '@/components/layout/theme-segmented'
 import { cn } from '@/lib/utils'
 
 interface AppSidebarProps {
@@ -105,43 +102,6 @@ const ADMIN_SUB: { to: string; labelKey: string; match: (p: string) => boolean }
   { to: '/admin/ratings', labelKey: 'nav.ratings', match: (p) => p === '/admin/ratings' },
   { to: '/admin/announcements', labelKey: 'nav.announcements', match: (p) => p === '/admin/announcements' },
 ]
-
-/** Light / Dark / System segmented control — wired to the settings store. */
-function ThemeSegmented() {
-  const { t } = useTranslation()
-  const theme = useSettingsStore((s) => s.theme)
-  const setTheme = useSettingsStore((s) => s.setTheme)
-  const opts: { value: Theme; icon: LucideIcon; label: string }[] = [
-    { value: 'light', icon: Sun, label: t('settings.appearance.light') },
-    { value: 'dark', icon: Moon, label: t('settings.appearance.dark') },
-    { value: 'system', icon: Monitor, label: t('settings.appearance.system') },
-  ]
-  return (
-    <span
-      role="group"
-      aria-label={t('settings.appearance.theme')}
-      className="inline-flex shrink-0 gap-0.5 rounded-full border border-hairline-soft bg-bg-subtle p-[3px]"
-    >
-      {opts.map(({ value, icon: Icon, label }) => (
-        <button
-          key={value}
-          type="button"
-          title={label}
-          aria-pressed={theme === value}
-          onClick={() => setTheme(value)}
-          className={cn(
-            'grid h-[26px] w-7 place-items-center rounded-full transition-colors',
-            theme === value
-              ? 'bg-card text-foreground shadow-glass-1'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          <Icon className="size-3.5" />
-        </button>
-      ))}
-    </span>
-  )
-}
 
 export function AppSidebar({
   onOpenSupportModal,
