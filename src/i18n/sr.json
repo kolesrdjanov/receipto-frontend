@@ -473,6 +473,7 @@
     "qrScanner": {
       "scanTitle": "Skeniraj",
       "scanDescription": "Izaberite način skeniranja i usmerite kameru ka računu.",
+      "scanHint": "Usmerite na QR kôd računa",
       "qrMode": "QR Kod",
       "pfrMode": "PFR",
       "title": "Skeniraj QR kod",

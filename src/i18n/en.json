@@ -473,6 +473,7 @@
     "qrScanner": {
       "scanTitle": "Scan",
       "scanDescription": "Choose scan mode and point your camera at the receipt.",
+      "scanHint": "Point at the receipt QR code",
       "qrMode": "QR Code",
       "pfrMode": "PFR",
       "title": "Scan QR Code",

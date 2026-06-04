@@ -1,12 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useMemo, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -18,7 +12,6 @@ import {
 import {
   Camera,
   X,
-  Info,
   Flashlight,
   FlashlightOff,
   Loader2,
@@ -27,6 +20,7 @@ import {
   RefreshCw,
   RotateCcw,
   Smartphone,
+  ShieldCheck,
 } from 'lucide-react'
 import * as Sentry from '@sentry/react'
 import { useDevices } from '@yudiel/react-qr-scanner'
@@ -73,6 +67,10 @@ interface RecoverableScanError extends Error {
 
 const CAMERA_TIMEOUT_MS = 10_000
 const CAMERA_SELECTION_KEY = 'receipto-camera-selection'
+
+// Glass camera-overlay buttons (white-on-black viewport)
+const CAMBTN = 'inline-flex h-8 items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 text-[12px] font-semibold text-white transition-colors hover:bg-white/20 disabled:opacity-40 disabled:pointer-events-none'
+const CAMBTN_SOLID = 'inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-[12px] font-semibold text-[#111] transition-colors hover:bg-white/90'
 
 type CameraSelection = 'auto' | 'rear' | 'front' | `device:${string}`
 
@@ -439,236 +437,203 @@ export function QrScanner({
   }
 
   return (
-    <Dialog
+    <GlassDialog
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) handleClose()
-      }}
-    >
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            {t('receipts.qrScanner.scanTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('receipts.qrScanner.scanDescription')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-2">
+      onOpenChange={(next) => { if (!next) handleClose() }}
+      title={t('receipts.qrScanner.scanTitle')}
+      desktopWidth={460}
+      dismissibleOnOverlay={!isSubmitting}
+      header={
+        <div>
           <div className="flex items-center gap-2">
-            <Smartphone className="h-4 w-4 text-muted-foreground" />
-            <Select value={cameraSelection} onValueChange={handleCameraSelectionChange}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={t('receipts.qrScanner.cameraAuto')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="auto">{t('receipts.qrScanner.cameraAuto')}</SelectItem>
-                <SelectItem value="rear">{t('receipts.qrScanner.cameraRear')}</SelectItem>
-                <SelectItem value="front">{t('receipts.qrScanner.cameraFront')}</SelectItem>
-                {devices.map((device) => (
-                  <SelectItem key={device.deviceId} value={`device:${device.deviceId}`}>
-                    {device.label || t('receipts.qrScanner.cameraDeviceFallback')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Camera className="size-5 text-primary" />
+            <h2 className="t-h3">{t('receipts.qrScanner.scanTitle')}</h2>
           </div>
-
-          {inlineNotice && (
-            <p className="text-xs text-muted-foreground bg-muted/60 px-2 py-1.5 rounded-md">
-              {inlineNotice}
-            </p>
-          )}
+          <p className="t-sm mt-1 text-muted-foreground">{t('receipts.qrScanner.description')}</p>
         </div>
-
-        <div ref={containerRef} className="relative min-h-[350px] bg-muted rounded-lg overflow-hidden">
-          {showBlockingState ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
-              <Loader2 className="h-12 w-12 text-primary mb-4 animate-spin" />
-              {isRetrying ? (
-                <>
-                  <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.retryingTitle')}</p>
-                  <p className="text-sm text-center text-muted-foreground mb-3">
-                    {retryMeta
-                      ? t('receipts.qrScanner.retryingDescription', { attempt: retryMeta.attempt, max: retryMeta.maxAttempts })
-                      : t('receipts.qrScanner.retryingGeneric')}
-                  </p>
-                  <p className="text-xs text-center text-muted-foreground mb-4">
-                    {t('receipts.qrScanner.portalDelayHint')}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={onRetryNow}
-                      disabled={!onRetryNow}
-                      className="gap-1.5"
-                    >
-                      <RefreshCw className="h-3.5 w-3.5" />
-                      {t('receipts.qrScanner.retryNow')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={onCancelRetry}
-                      disabled={!onCancelRetry}
-                      className="gap-1.5"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      {t('receipts.qrScanner.cancelRetry')}
-                    </Button>
-                    {onGalleryFallback && (
-                      <Button
-                        size="sm"
-                        onClick={handleGalleryFallback}
-                        className="gap-1.5"
-                      >
-                        <ImageIcon className="h-3.5 w-3.5" />
-                        {t('receipts.qrScanner.useGallery')}
-                      </Button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="text-base font-medium text-center mb-2">{t('receipts.qrScanner.processing')}</p>
-                  <p className="text-sm text-center text-muted-foreground">{t('receipts.qrScanner.processingDescription')}</p>
-                  <p className="text-xs text-center text-muted-foreground mt-3">{t('receipts.qrScanner.portalDelayHint')}</p>
-                </>
-              )}
-            </div>
-          ) : activeError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-4 z-10">
-              <X className="h-12 w-12 text-destructive mb-2" />
-              <p className="text-sm text-center text-destructive mb-4">{activeError}</p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleTryAgain}
-                >
-                  {t('receipts.qrScanner.tryAgain')}
-                </Button>
-                {onGalleryFallback && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGalleryFallback}
-                    className="gap-1.5"
-                  >
-                    <ImageIcon className="h-3.5 w-3.5" />
-                    {t('receipts.qrScanner.useGallery')}
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : isLoading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted rounded-lg p-6 z-10">
-              {cameraTimedOut ? (
-                <>
-                  <CameraOff className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-sm font-medium text-center mb-1">{t('receipts.qrScanner.cameraSlowTitle')}</p>
-                  <p className="text-xs text-center text-muted-foreground mb-4">{t('receipts.qrScanner.cameraSlowDescription')}</p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTryAgain}
-                    >
-                      {t('receipts.qrScanner.tryAgain')}
-                    </Button>
-                    {onGalleryFallback && (
-                      <Button
-                        size="sm"
-                        onClick={handleGalleryFallback}
-                        className="gap-1.5"
-                      >
-                        <ImageIcon className="h-3.5 w-3.5" />
-                        {t('receipts.qrScanner.useGallery')}
-                      </Button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Loader2 className="h-8 w-8 text-muted-foreground mb-2 animate-spin" />
-                  <p className="text-sm text-center text-muted-foreground">{t('common.loading')}</p>
-                </>
-              )}
-            </div>
-          ) : null}
-
-          {/* Scanner component */}
-          {open && ScannerComponent && !activeError && (
-            <>
-              <ScannerComponent
-                key={scannerKey}
-                onScan={handleScan}
-                onError={handleError}
-                scanDelay={250}
-                formats={['qr_code']}
-                constraints={cameraConstraints}
-                styles={{
-                  container: {
-                    width: '100%',
-                    height: '350px',
-                  },
-                  video: {
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  },
-                }}
-                components={{
-                  finder: false,
-                }}
-              />
-
-              {/* Torch controls (always visible area, explicit unsupported state) */}
-              {!showBlockingState && !isLoading && (
-                <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-1">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="bg-background/80 backdrop-blur-sm hover:bg-background/90"
-                    onClick={() => toggleTorch(!torchEnabled)}
-                    disabled={!torchSupported}
-                    title={
-                      torchSupported
-                        ? t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')
-                        : t('receipts.qrScanner.torchUnsupported')
-                    }
-                  >
-                    {torchEnabled ? (
-                      <FlashlightOff className="h-5 w-5" />
-                    ) : (
-                      <Flashlight className="h-5 w-5" />
-                    )}
-                  </Button>
-                  {!torchSupported && (
-                    <p className="max-w-[230px] rounded-md bg-background/80 px-2 py-1 text-[11px] text-right text-muted-foreground backdrop-blur-sm">
-                      {t('receipts.qrScanner.torchUnsupportedHint')}
-                    </p>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-          <Info className="h-4 w-4 mt-0.5 shrink-0" />
-          <p>{t('receipts.qrScanner.privacyNotice')}</p>
-        </div>
-
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+      }
+      footer={
+        <div className="flex md:justify-end">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="w-full rounded-xl md:w-auto md:min-w-[120px]"
+          >
             {t('common.cancel')}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      {/* Camera selection */}
+      <Select value={cameraSelection} onValueChange={handleCameraSelectionChange}>
+        <SelectTrigger className="mb-3 h-10 gap-2 rounded-lg border-border bg-bg-subtle px-3 text-[13px] font-semibold text-fg-2">
+          <Smartphone className="size-[15px] shrink-0 text-muted-foreground" />
+          <SelectValue placeholder={t('receipts.qrScanner.cameraAuto')} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="auto">{t('receipts.qrScanner.cameraAuto')}</SelectItem>
+          <SelectItem value="rear">{t('receipts.qrScanner.cameraRear')}</SelectItem>
+          <SelectItem value="front">{t('receipts.qrScanner.cameraFront')}</SelectItem>
+          {devices.map((device) => (
+            <SelectItem key={device.deviceId} value={`device:${device.deviceId}`}>
+              {device.label || t('receipts.qrScanner.cameraDeviceFallback')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Recoverable inline notice (non-fiscal QR / camera fallback) */}
+      {inlineNotice && (
+        <p className="mb-3 rounded-lg bg-bg-subtle px-3 py-2 text-xs text-muted-foreground">
+          {inlineNotice}
+        </p>
+      )}
+
+      {/* Camera viewport */}
+      <div
+        ref={containerRef}
+        className="relative grid h-[240px] w-full place-items-center overflow-hidden rounded-2xl bg-[#0b0b0c]"
+      >
+        {showBlockingState ? (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2.5 p-5 text-center">
+            <Loader2 className="size-9 animate-spin text-white" />
+            {isRetrying ? (
+              <>
+                <p className="text-[15px] font-semibold text-white">{t('receipts.qrScanner.retryingTitle')}</p>
+                <p className="max-w-[260px] text-[12.5px] text-white/70">
+                  {retryMeta
+                    ? t('receipts.qrScanner.retryingDescription', { attempt: retryMeta.attempt, max: retryMeta.maxAttempts })
+                    : t('receipts.qrScanner.retryingGeneric')}
+                </p>
+                <p className="max-w-[260px] text-[11px] text-white/55">{t('receipts.qrScanner.portalDelayHint')}</p>
+                <div className="mt-1.5 flex flex-wrap justify-center gap-2">
+                  <button type="button" onClick={onRetryNow} disabled={!onRetryNow} className={CAMBTN}>
+                    <RefreshCw className="size-3.5" />
+                    {t('receipts.qrScanner.retryNow')}
+                  </button>
+                  <button type="button" onClick={onCancelRetry} disabled={!onCancelRetry} className={CAMBTN}>
+                    <RotateCcw className="size-3.5" />
+                    {t('receipts.qrScanner.cancelRetry')}
+                  </button>
+                  {onGalleryFallback && (
+                    <button type="button" onClick={handleGalleryFallback} className={CAMBTN_SOLID}>
+                      <ImageIcon className="size-3.5" />
+                      {t('receipts.qrScanner.useGallery')}
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-[15px] font-semibold text-white">{t('receipts.qrScanner.processing')}</p>
+                <p className="max-w-[260px] text-[12.5px] text-white/70">{t('receipts.qrScanner.processingDescription')}</p>
+                <p className="max-w-[260px] text-[11px] text-white/55">{t('receipts.qrScanner.portalDelayHint')}</p>
+              </>
+            )}
+          </div>
+        ) : activeError ? (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-5 text-center">
+            <div className="grid size-[54px] place-items-center rounded-full bg-destructive">
+              <X className="size-6 text-white" />
+            </div>
+            <p className="max-w-[260px] text-[13.5px] text-white">{activeError}</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button type="button" onClick={handleTryAgain} className={CAMBTN}>
+                {t('receipts.qrScanner.tryAgain')}
+              </button>
+              {onGalleryFallback && (
+                <button type="button" onClick={handleGalleryFallback} className={CAMBTN_SOLID}>
+                  <ImageIcon className="size-3.5" />
+                  {t('receipts.qrScanner.useGallery')}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : isLoading ? (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2.5 p-5 text-center">
+            {cameraTimedOut ? (
+              <>
+                <CameraOff className="size-9 text-white/80" />
+                <p className="text-[14px] font-semibold text-white">{t('receipts.qrScanner.cameraSlowTitle')}</p>
+                <p className="max-w-[260px] text-[12px] text-white/65">{t('receipts.qrScanner.cameraSlowDescription')}</p>
+                <div className="mt-1 flex flex-wrap justify-center gap-2">
+                  <button type="button" onClick={handleTryAgain} className={CAMBTN}>
+                    {t('receipts.qrScanner.tryAgain')}
+                  </button>
+                  {onGalleryFallback && (
+                    <button type="button" onClick={handleGalleryFallback} className={CAMBTN_SOLID}>
+                      <ImageIcon className="size-3.5" />
+                      {t('receipts.qrScanner.useGallery')}
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Loader2 className="size-8 animate-spin text-white/80" />
+                <p className="text-[12.5px] text-white/70">{t('common.loading')}</p>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {/* Live scanner + finder reticle + hint + torch */}
+        {open && ScannerComponent && !activeError && (
+          <>
+            <ScannerComponent
+              key={scannerKey}
+              onScan={handleScan}
+              onError={handleError}
+              scanDelay={250}
+              formats={['qr_code']}
+              constraints={cameraConstraints}
+              styles={{
+                container: { width: '100%', height: '240px' },
+                video: { width: '100%', height: '100%', objectFit: 'cover' },
+              }}
+              components={{ finder: false }}
+            />
+
+            {!showBlockingState && !isLoading && (
+              <>
+                <div className="pointer-events-none absolute inset-0 z-[5] grid place-items-center">
+                  <div className="size-[148px] rounded-[18px] border-[3px] border-white/85" />
+                </div>
+                <p className="pointer-events-none absolute inset-x-0 bottom-4 z-[5] text-center text-[12.5px] text-white/80">
+                  {t('receipts.qrScanner.scanHint')}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => toggleTorch(!torchEnabled)}
+                  disabled={!torchSupported}
+                  title={
+                    torchSupported
+                      ? t(torchEnabled ? 'receipts.qrScanner.torchOff' : 'receipts.qrScanner.torchOn')
+                      : t('receipts.qrScanner.torchUnsupported')
+                  }
+                  className="absolute bottom-3 right-3 z-10 grid size-[38px] place-items-center rounded-[10px] bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25 disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {torchEnabled ? <FlashlightOff className="size-[18px]" /> : <Flashlight className="size-[18px]" />}
+                </button>
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Torch-unsupported hint (below the viewport; preserves the explicit-unsupported UX) */}
+      {open && ScannerComponent && !activeError && !showBlockingState && !isLoading && !torchSupported && (
+        <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+          {t('receipts.qrScanner.torchUnsupportedHint')}
+        </p>
+      )}
+
+      {/* Privacy notice */}
+      <div className="mt-3 flex items-start gap-2 rounded-xl bg-bg-subtle px-3.5 py-3">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <p className="text-[12.5px] leading-[1.45] text-muted-foreground">{t('receipts.qrScanner.privacyNotice')}</p>
+      </div>
+    </GlassDialog>
   )
 }
