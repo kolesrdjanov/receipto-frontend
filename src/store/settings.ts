@@ -40,7 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setAccentColor: (accentColor) => {
         set({ accentColor })
-        applyAccentColor(accentColor)
+        applyAccentColor()
       },
       setLanguage: (language) => {
         set({ language })
@@ -54,7 +54,7 @@ export const useSettingsStore = create<SettingsState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           applyTheme(state.theme)
-          applyAccentColor(state.accentColor)
+          applyAccentColor()
           if (state.language) {
             i18n.changeLanguage(state.language)
           }
@@ -79,7 +79,7 @@ function applyTheme(theme: Theme) {
   }
 }
 
-function applyAccentColor(_color: AccentColor) {
+function applyAccentColor() {
   // Accent retired — the app is locked to brand emerald (see index.css).
   // Strip any accent class persisted from before the lock; add none.
   const root = window.document.documentElement
