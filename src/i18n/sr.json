@@ -418,6 +418,10 @@
       "editTitle": "Izmeni račun",
       "addDescription": "Ručno dodajte novi račun.",
       "editDescription": "Ažurirajte detalje računa ili ga obrišite.",
+      "reviewTitle": "Pregled računa",
+      "reviewDescription": "Skenirano sa fiskalnog QR koda — potvrdite detalje i kategoriju.",
+      "scannedNotice": "Sačuvano skeniranjem fiskalnog QR koda. Pregledajte detalje i potvrdite kategoriju.",
+      "confirmSave": "Potvrdi i sačuvaj",
       "storeName": "Naziv prodavnice",
       "storeNamePlaceholder": "npr. Supermarket, Restoran",
       "totalAmount": "Ukupan iznos",
@@ -927,7 +931,10 @@
       "green": "Zelena",
       "purple": "Ljubičasta",
       "orange": "Narandžasta",
-      "rose": "Roze"
+      "rose": "Roze",
+      "retiredTag": "Povučeno",
+      "retiredTitle": "Akcentna boja",
+      "retiredHelp": "Glass redizajn koristi jednu fiksnu brend boju — smaragdnu — kako bi površine ostale mirne i čitljive u svetlom i tamnom režimu. Birač sa šest boja se uklanja."
     },
     "currency": {
       "title": "Valuta",
@@ -956,6 +963,7 @@
     "profile": {
       "title": "Profil",
       "description": "Ažurirajte svoje lične podatke",
+      "unsavedChanges": "Nesačuvane izmene",
       "email": "Email",
       "firstName": "Ime",
       "lastName": "Prezime",
@@ -1021,6 +1029,7 @@
     "dangerZone": {
       "title": "Opasna zona",
       "description": "Nepovratne i destruktivne akcije",
+      "mobileSubtitle": "Ovo je trajno i ne može se opozvati.",
       "deleteAccount": "Obriši nalog",
       "deleteAccountWarning": "Brisanje naloga je trajno i ne može se poništiti. Ovo će:",
       "deleteItem1": "Obrisati sve vaše račune i podatke o troškovima",

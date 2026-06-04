@@ -418,6 +418,10 @@
       "editTitle": "Edit Receipt",
       "addDescription": "Manually add a new receipt.",
       "editDescription": "Update the receipt details or delete it.",
+      "reviewTitle": "Review Receipt",
+      "reviewDescription": "Scanned from a fiscal QR — confirm the details and category.",
+      "scannedNotice": "Saved from a fiscal QR scan. Review the details and confirm the category.",
+      "confirmSave": "Confirm & Save",
       "storeName": "Store Name",
       "storeNamePlaceholder": "e.g., Grocery Store, Restaurant",
       "totalAmount": "Total Amount",
@@ -927,7 +931,10 @@
       "green": "Green",
       "purple": "Purple",
       "orange": "Orange",
-      "rose": "Rose"
+      "rose": "Rose",
+      "retiredTag": "Retired",
+      "retiredTitle": "Accent color",
+      "retiredHelp": "The Glass redesign uses one fixed brand accent — emerald — so surfaces stay calm and legible across light and dark. The six-color picker is being removed."
     },
     "currency": {
       "title": "Currency",
@@ -956,6 +963,7 @@
     "profile": {
       "title": "Profile",
       "description": "Update your personal information",
+      "unsavedChanges": "Unsaved changes",
       "email": "Email",
       "firstName": "First name",
       "lastName": "Last name",
@@ -1021,6 +1029,7 @@
     "dangerZone": {
       "title": "Danger Zone",
       "description": "Irreversible and destructive actions",
+      "mobileSubtitle": "This is permanent and cannot be undone.",
       "deleteAccount": "Delete Account",
       "deleteAccountWarning": "Deleting your account is permanent and cannot be undone. This will:",
       "deleteItem1": "Delete all your receipts and expense data",
