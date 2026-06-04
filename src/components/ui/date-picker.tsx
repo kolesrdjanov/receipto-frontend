@@ -3,11 +3,10 @@
 import * as React from "react"
 import { format, parse, getYear, getMonth, setMonth, setYear } from "date-fns"
 import { enUS, sr } from "date-fns/locale"
-import { ChevronDown } from "lucide-react"
+import { Calendar as CalendarIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
@@ -95,7 +94,7 @@ export function DatePicker({
   }
 
   const displayValue = selectedDate
-    ? format(selectedDate, "M/d/yyyy")
+    ? format(selectedDate, "dd.MM.yyyy")
     : null
 
   // Generate years array (100 years back from current year)
@@ -110,19 +109,27 @@ export function DatePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <button
           id={id}
-          variant="outline"
+          type="button"
           disabled={disabled}
           className={cn(
-            "w-full justify-between text-left font-normal",
-            !displayValue && "text-muted-foreground",
+            "flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-bg-subtle/70 px-3 text-left transition-[border-color,box-shadow] dark:bg-input/55",
+            "focus:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
         >
-          <span>{displayValue ?? placeholder ?? t("common.pickDate")}</span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
-        </Button>
+          <CalendarIcon className="size-4 shrink-0 text-fg-faint" />
+          <span
+            className={cn(
+              "flex-1 truncate text-[13.5px] font-medium text-foreground",
+              !displayValue && "text-muted-foreground"
+            )}
+          >
+            {displayValue ?? placeholder ?? t("common.pickDate")}
+          </span>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex items-center justify-between gap-2 px-3 pt-3">

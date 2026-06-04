@@ -102,7 +102,7 @@ export function ReceiptViewerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+      <DialogContent className="glass-card flex max-h-[90vh] flex-col sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {t('receipts.viewer.title')}
@@ -117,18 +117,18 @@ export function ReceiptViewerModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto receipt-paper my-2">
+        <div className="my-2 min-h-0 flex-1">
           {journalText ? (
             <pre
               ref={receiptRef}
-              className="font-mono text-xs leading-relaxed whitespace-pre-wrap text-slate-800 dark:text-slate-200"
+              className="max-h-[300px] overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-bg-subtle p-4 font-mono text-[11.5px] leading-[1.55] text-fg-2 custom-scrollbar"
             >
               {journalText}
             </pre>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border bg-bg-subtle py-12 text-muted-foreground">
               <div className="text-center">
-                <X className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <X className="mx-auto mb-2 h-12 w-12 opacity-50" />
                 <p>{t('receipts.viewer.noData')}</p>
               </div>
             </div>
