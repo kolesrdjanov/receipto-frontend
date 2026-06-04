@@ -1,16 +1,21 @@
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
+import { SettingsCard } from '@/components/settings/primitives'
+import { PasswordField, PasswordStrengthMeter, Alert } from '@/components/glass/glass'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
-import { KeyRound, AlertTriangle, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { KeyRound, AlertTriangle, Trash2, CircleAlert } from 'lucide-react'
 import { useChangePassword, useDeleteMyAccount } from '@/hooks/users/use-me'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
 export default function AccountSettings() {
   const { t } = useTranslation()
+  const isMobile = useIsMobile(768)
   const changePassword = useChangePassword()
   const deleteMyAccount = useDeleteMyAccount()
 
@@ -20,9 +25,6 @@ export default function AccountSettings() {
     confirmPassword: '',
   })
   const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -77,150 +79,101 @@ export default function AccountSettings() {
     }
   }
 
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false)
+    setDeleteConfirmText('')
+  }
+
+  const deleteItems = [
+    t('settings.dangerZone.deleteItem1'),
+    t('settings.dangerZone.deleteItem2'),
+    t('settings.dangerZone.deleteItem3'),
+    t('settings.dangerZone.deleteItem4'),
+  ]
+
+  const warningBox = (
+    <div className="rounded-xl bg-destructive-soft p-4">
+      <p className="text-sm font-semibold text-[color:var(--destructive-foreground-on-soft)]">
+        {t('settings.dangerZone.deleteAccountWarning')}
+      </p>
+      <ul className="mt-2 list-inside list-disc space-y-1 text-[13px] text-[color:var(--destructive-foreground-on-soft)]/85">
+        {deleteItems.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  )
+
   return (
     <AppLayout>
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2 flex items-center gap-2">
-          {t('nav.account')}
-        </h2>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          {t('settings.security.accountPageDescription')}
-        </p>
-      </div>
+      <PageTransition>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('nav.account')}
+          subtitle={t('settings.security.accountPageDescription')}
+        />
 
-      <div className="grid gap-6">
-        {/* Security - Password Change */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <KeyRound className="h-5 w-5" />
-              {t('settings.security.title')}
-            </CardTitle>
-            <CardDescription>
-              {t('settings.security.description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">{t('settings.security.currentPassword')}</Label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  value={passwordForm.currentPassword}
-                  onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
-                  autoComplete="current-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowCurrentPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">{t('settings.security.newPassword')}</Label>
-                <div className="relative">
-                  <Input
+        {/* Mobile header */}
+        <div className="mb-5 md:hidden">
+          <h1 className="t-h1 text-[28px]">{t('nav.account')}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('settings.security.accountPageDescription')}</p>
+        </div>
+
+        <div className="mx-auto max-w-3xl space-y-5">
+          {/* Security — password change */}
+          <SettingsCard icon={KeyRound} title={t('settings.security.title')} desc={t('settings.security.description')}>
+            <div className="space-y-4">
+              <PasswordField
+                label={t('settings.security.currentPassword')}
+                id="currentPassword"
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
+                autoComplete="current-password"
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <PasswordField
+                    label={t('settings.security.newPassword')}
                     id="newPassword"
-                    type={showNewPassword ? 'text' : 'password'}
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
                     autoComplete="new-password"
-                    className="pr-10"
                   />
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    onClick={() => setShowNewPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  <PasswordStrengthMeter value={passwordForm.newPassword} />
                 </div>
+                <PasswordField
+                  label={t('settings.security.confirmPassword')}
+                  id="confirmPassword"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+                  autoComplete="new-password"
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t('settings.security.confirmPassword')}</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                    autoComplete="new-password"
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    onClick={() => setShowConfirmPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+              {passwordError && (
+                <Alert kind="err" icon={CircleAlert} className="mb-0">
+                  {passwordError}
+                </Alert>
+              )}
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={handleChangePassword}
+                  disabled={changePassword.isPending || !passwordForm.currentPassword || !passwordForm.newPassword}
+                >
+                  <KeyRound className="size-4" />
+                  {changePassword.isPending ? t('common.saving') : t('settings.security.changePassword')}
+                </Button>
               </div>
             </div>
-            {passwordError && (
-              <p className="text-sm text-destructive">{passwordError}</p>
-            )}
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                onClick={handleChangePassword}
-                disabled={changePassword.isPending || !passwordForm.currentPassword || !passwordForm.newPassword}
-              >
-                <KeyRound className="h-4 w-4" />
-                {changePassword.isPending ? t('common.saving') : t('settings.security.changePassword')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </SettingsCard>
 
-        {/* Danger Zone - Delete Account */}
-        <Card className="border-destructive">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-              {t('settings.dangerZone.title')}
-            </CardTitle>
-            <CardDescription>
-              {t('settings.dangerZone.description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg bg-destructive/10 p-4 space-y-3">
-              <p className="text-sm font-medium text-destructive">
-                {t('settings.dangerZone.deleteAccountWarning')}
-              </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>{t('settings.dangerZone.deleteItem1')}</li>
-                <li>{t('settings.dangerZone.deleteItem2')}</li>
-                <li>{t('settings.dangerZone.deleteItem3')}</li>
-                <li>{t('settings.dangerZone.deleteItem4')}</li>
-              </ul>
-            </div>
+          {/* Danger zone */}
+          <SettingsCard danger icon={AlertTriangle} title={t('settings.dangerZone.title')} desc={t('settings.dangerZone.description')}>
+            {warningBox}
 
-            {!showDeleteConfirm ? (
-              <Button
-                type="button"
-                variant="destructive"
-                className="!text-white"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                <Trash2 className="h-4 w-4" />
-                {t('settings.dangerZone.deleteAccount')}
-              </Button>
-            ) : (
-              <div className="space-y-3 p-4 border border-destructive rounded-lg">
-                <p className="text-sm font-medium">
-                  {t('settings.dangerZone.confirmPrompt')}
-                </p>
+            {!isMobile && showDeleteConfirm ? (
+              <div className="mt-4 space-y-3 rounded-xl border border-destructive/50 p-4">
+                <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
                 <Input
                   type="text"
                   placeholder="DELETE"
@@ -229,31 +182,79 @@ export default function AccountSettings() {
                   className="font-mono"
                 />
                 <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowDeleteConfirm(false)
-                      setDeleteConfirmText('')
-                    }}
-                  >
+                  <Button type="button" variant="outline" onClick={cancelDelete}>
                     {t('common.cancel')}
                   </Button>
                   <Button
                     type="button"
                     variant="destructive"
+                    className="!text-white"
                     onClick={handleDeleteAccount}
                     disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="size-4" />
                     {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
                   </Button>
                 </div>
               </div>
+            ) : (
+              <Button
+                type="button"
+                variant="destructive"
+                className="mt-4 !text-white"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="size-4" />
+                {t('settings.dangerZone.deleteAccount')}
+              </Button>
             )}
-          </CardContent>
-        </Card>
-      </div>
+          </SettingsCard>
+        </div>
+      </PageTransition>
+
+      {/* Mobile delete confirm — bottom sheet */}
+      <GlassDialog
+        open={isMobile && showDeleteConfirm}
+        onOpenChange={(o) => { if (!o) cancelDelete() }}
+        title={t('settings.dangerZone.deleteAccount')}
+        description={t('settings.dangerZone.mobileSubtitle')}
+        footer={
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full !text-white"
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}
+            >
+              <Trash2 className="size-4" />
+              {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
+            </Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={cancelDelete}>
+              {t('common.cancel')}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid place-items-center">
+            <span className="grid size-[60px] place-items-center rounded-[18px] bg-destructive-soft text-destructive">
+              <AlertTriangle className="size-[26px]" />
+            </span>
+          </div>
+          {warningBox}
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
+            <Input
+              type="text"
+              placeholder="DELETE"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              className="font-mono"
+            />
+          </div>
+        </div>
+      </GlassDialog>
     </AppLayout>
   )
 }
