@@ -218,23 +218,25 @@ export default function AccountSettings() {
         onOpenChange={(o) => { if (!o) cancelDelete() }}
         title={t('settings.dangerZone.deleteAccount')}
         description={t('settings.dangerZone.mobileSubtitle')}
-        footer={
-          <div className="flex flex-col gap-2">
+        actions={{
+          primary: (
             <Button
               type="button"
               variant="destructive"
-              className="w-full !text-white"
+              className="rounded-xl !text-white"
               onClick={handleDeleteAccount}
               disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}
             >
               <Trash2 className="size-4" />
               {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
             </Button>
-            <Button type="button" variant="ghost" className="w-full" onClick={cancelDelete}>
+          ),
+          secondary: (
+            <Button type="button" variant="ghost" className="rounded-xl" onClick={cancelDelete}>
               {t('common.cancel')}
             </Button>
-          </div>
-        }
+          ),
+        }}
       >
         <div className="space-y-4">
           <div className="grid place-items-center">

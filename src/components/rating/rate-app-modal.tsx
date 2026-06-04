@@ -60,22 +60,13 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
       title={t('rating.title')}
       description={t('rating.description')}
       desktopWidth={480}
-      footer={
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      actions={{
+        primary: (
           <Button
             type="button"
-            variant="outline"
-            onClick={handleClose}
-            disabled={submitRating.isPending}
-            className="order-2 w-full sm:order-1 sm:w-auto"
-          >
-            {t('common.cancel')}
-          </Button>
-          <Button
-            type="button"
+            className="rounded-xl"
             onClick={() => handleSubmit()}
             disabled={rating === 0 || submitRating.isPending}
-            className="order-1 w-full sm:order-2 sm:w-auto"
           >
             {submitRating.isPending
               ? t('rating.submitting')
@@ -83,8 +74,19 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
                 ? t('rating.update')
                 : t('rating.submit')}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={handleClose}
+            disabled={submitRating.isPending}
+          >
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
     >
       <div className="space-y-4">
         <div>
