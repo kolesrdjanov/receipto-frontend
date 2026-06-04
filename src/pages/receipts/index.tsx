@@ -37,7 +37,7 @@ import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
 import { ExpensesMobileHeader } from '@/components/receipts/expenses-mobile-header'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
-import { Camera, Loader2, QrCode } from 'lucide-react'
+import { Loader2, QrCode, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
@@ -433,16 +433,25 @@ export default function Receipts() {
               ))}
             </div>
           ) : receipts.length === 0 ? (
-            <div className="empty-state" data-testid="receipts-empty">
-              <Camera className="empty-state-icon" />
-              <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
-              <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+            <div
+              className="flex flex-col items-center rounded-[18px] border border-dashed border-border bg-bg-subtle px-6 py-12 text-center sm:py-16"
+              data-testid="receipts-empty"
+            >
+              <div className="mb-4 grid size-[72px] place-items-center rounded-[22px] bg-card text-muted-foreground shadow-glass-2">
+                <ReceiptIcon className="size-8" />
+              </div>
+              <h3 className="t-h3 mb-1.5">{t('receipts.noReceipts')}</h3>
+              <p className="t-sm mb-5 max-w-xs text-muted-foreground">
                 {t('receipts.noReceiptsText')}
               </p>
-              <Button variant="default" onClick={openQrScanner}>
-                <Camera className="h-4 w-4" />
-                {t('receipts.scanQr')}
-              </Button>
+              <button
+                type="button"
+                onClick={openQrScanner}
+                className="btn-brand inline-flex h-[52px] items-center gap-2 rounded-full px-6 text-base font-semibold text-white"
+              >
+                <QrCode className="size-[18px]" />
+                {t('receipts.scanReceipt')}
+              </button>
             </div>
           ) : (
             <>
@@ -498,6 +507,7 @@ export default function Receipts() {
             receipt={selectedReceipt}
             mode={modalMode}
             prefillData={prefillData}
+            onRequestDelete={handleDeleteReceipt}
           />
         )}
       </Suspense>

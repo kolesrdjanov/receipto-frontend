@@ -384,8 +384,9 @@
     "filteredTotal": "Filtered total",
     "convertedNote": "Converted to your display currency",
     "convertedDisclaimer": "Amounts in other currencies are converted using approximate exchange rates. Actual totals may vary.",
-    "noReceipts": "No receipts yet",
-    "noReceiptsText": "Scan a QR code or add a receipt manually to get started",
+    "noReceipts": "No expenses yet",
+    "noReceiptsText": "Scan a fiscal QR code or add a receipt manually to get started.",
+    "scanReceipt": "Scan receipt",
     "table": {
       "store": "Store",
       "amount": "Amount",

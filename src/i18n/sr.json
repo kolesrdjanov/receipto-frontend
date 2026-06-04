@@ -384,8 +384,9 @@
     "filteredTotal": "Ukupno za filter",
     "convertedNote": "Konvertovano u vašu valutu",
     "convertedDisclaimer": "Iznosi u drugim valutama su konvertovani koristeći približne kurseve. Stvarni iznosi mogu varirati.",
-    "noReceipts": "Nema računa",
-    "noReceiptsText": "Skenirajte QR kod ili dodajte račun ručno da biste počeli",
+    "noReceipts": "Još nema troškova",
+    "noReceiptsText": "Skenirajte fiskalni QR kod ili dodajte račun ručno da biste počeli.",
+    "scanReceipt": "Skeniraj račun",
     "table": {
       "store": "Prodavnica",
       "amount": "Iznos",

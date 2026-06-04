@@ -1,24 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { Alert } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -33,7 +17,6 @@ import {
 import {
   useCreateReceipt,
   useUpdateReceipt,
-  useDeleteReceipt,
   type Receipt,
 } from '@/hooks/receipts/use-receipts'
 import { useSuggestCategory } from '@/hooks/receipts/use-suggest-category'
@@ -43,7 +26,8 @@ import { useGroups, useGroup } from '@/hooks/groups/use-groups'
 import { useAuthStore } from '@/store/auth'
 import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
-import { Loader2, Trash2, Check } from 'lucide-react'
+import { CheckCircle2, Trash2, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ReceiptModalProps {
   open: boolean
@@ -51,6 +35,8 @@ interface ReceiptModalProps {
   receipt?: Receipt | null
   mode: 'create' | 'edit'
   prefillData?: Partial<Receipt> | null
+  /** Edit mode: request deletion (the page owns the confirm dialog). */
+  onRequestDelete?: (receipt: Receipt) => void
 }
 
 type ReceiptFormData = {
@@ -64,10 +50,11 @@ type ReceiptFormData = {
   paidById: string
 }
 
+const FORM_ID = 'receipt-form'
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
-export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }: ReceiptModalProps) {
+export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, onRequestDelete }: ReceiptModalProps) {
   const { t } = useTranslation()
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [splitAmong, setSplitAmong] = useState<string[]>([])
   const [blurredStoreName, setBlurredStoreName] = useState('')
 
@@ -105,7 +92,6 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
   const user = useAuthStore((state) => state.user)
   const createReceipt = useCreateReceipt()
   const updateReceipt = useUpdateReceipt()
-  const deleteReceipt = useDeleteReceipt()
 
   // Store name category suggestion (create mode only, no category selected yet)
   const watchedCategoryId = watch('categoryId')
@@ -260,385 +246,390 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData }:
     }
   }
 
-  const handleDelete = async () => {
-    if (!receipt) return
-
-    try {
-      await deleteReceipt.mutateAsync(receipt.id)
-      toast.success(t('receipts.modal.deleteSuccess'))
-      setShowDeleteDialog(false)
-      onOpenChange(false)
-      reset()
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
-      toast.error(t('receipts.modal.deleteError'), {
-        description: errorMessage,
-      })
-    }
-  }
-
   const handleClose = () => {
     onOpenChange(false)
     reset()
   }
 
+  // "Review receipt" is the post-scan verification state: an edit-mode receipt that
+  // was auto-categorized after a fiscal QR scan (autoSuggestedCategoryId set).
+  const isReview = mode === 'edit' && !!receipt?.autoSuggestedCategoryId
+  const pending = isSubmitting || createReceipt.isPending || updateReceipt.isPending
+
+  const title =
+    mode === 'create'
+      ? t('receipts.modal.addTitle')
+      : isReview
+        ? t('receipts.modal.reviewTitle')
+        : t('receipts.modal.editTitle')
+  const description =
+    mode === 'create'
+      ? t('receipts.modal.addDescription')
+      : isReview
+        ? t('receipts.modal.reviewDescription')
+        : t('receipts.modal.editDescription')
+  const primaryLabel = pending
+    ? mode === 'create'
+      ? t('common.creating')
+      : t('common.updating')
+    : mode === 'create'
+      ? t('common.create')
+      : isReview
+        ? t('receipts.modal.confirmSave')
+        : t('common.update')
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" data-testid="receipt-modal">
-        <DialogHeader>
-          <DialogTitle data-testid="receipt-modal-title">
-            {mode === 'create' ? t('receipts.modal.addTitle') : t('receipts.modal.editTitle')}
-          </DialogTitle>
-          <DialogDescription data-testid="receipt-modal-description">
-            {mode === 'create'
-              ? t('receipts.modal.addDescription')
-              : t('receipts.modal.editDescription')}
-          </DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}
+      title={title}
+      description={description}
+      desktopWidth={520}
+      footer={
+        <div className="flex items-center gap-2">
+          {mode === 'edit' && receipt && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="mr-auto rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => {
+                onOpenChange(false)
+                onRequestDelete?.(receipt)
+              }}
+              disabled={pending}
+              data-testid="receipt-delete-button"
+            >
+              <Trash2 className="size-4" />
+              <span className="hidden sm:inline">{t('common.delete')}</span>
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={handleClose}
+            disabled={pending}
+            data-testid="receipt-cancel-button"
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form={FORM_ID}
+            className="rounded-xl"
+            disabled={pending}
+            data-testid="receipt-submit-button"
+          >
+            {primaryLabel}
+          </Button>
+        </div>
+      }
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" data-testid="receipt-form">
+        {isReview && (
+          <Alert kind="ok" icon={CheckCircle2}>
+            {t('receipts.modal.scannedNotice')}
+          </Alert>
+        )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="receipt-form">
-          <div className="space-y-2">
-            <Label htmlFor="storeName">{t('receipts.modal.storeName')}</Label>
+        <div>
+          <Label htmlFor="storeName" className={fieldLabel}>
+            {t('receipts.modal.storeName')}
+          </Label>
+          <Input
+            id="storeName"
+            {...register('storeName', {
+              onBlur: (e) => {
+                const value = e.target.value?.trim()
+                if (value && value.length >= 2 && mode === 'create') {
+                  setBlurredStoreName(value)
+                }
+              },
+            })}
+            placeholder={t('receipts.modal.storeNamePlaceholder')}
+            data-testid="receipt-store-input"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[1.5fr_1fr_1.3fr]">
+          <div>
+            <Label htmlFor="totalAmount" className={fieldLabel}>
+              {t('receipts.modal.totalAmount')}
+            </Label>
             <Input
-              id="storeName"
-              {...register('storeName', {
-                onBlur: (e) => {
-                  const value = e.target.value?.trim()
-                  if (value && value.length >= 2 && mode === 'create') {
-                    setBlurredStoreName(value)
-                  }
-                },
-              })}
-              placeholder={t('receipts.modal.storeNamePlaceholder')}
-              data-testid="receipt-store-input"
+              id="totalAmount"
+              type="number"
+              step="0.01"
+              className="tabular-nums"
+              {...register('totalAmount')}
+              placeholder="0.00"
+              data-testid="receipt-amount-input"
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="totalAmount">{t('receipts.modal.totalAmount')}</Label>
-              <Input
-                id="totalAmount"
-                type="number"
-                step="0.01"
-                {...register('totalAmount')}
-                placeholder="0.00"
-                data-testid="receipt-amount-input"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">{t('receipts.modal.currency')}</Label>
-              <Controller
-                name="currency"
-                control={control}
-                render={({ field }) => (
-                  <CurrencySelect
-                    id="currency"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder={t('receipts.modal.currency')}
-                    data-testid="receipt-currency-select"
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="receiptDate">{t('receipts.modal.date')}</Label>
-              <Controller
-                name="receiptDate"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    id="receiptDate"
-                    value={field.value}
-                    onChange={field.onChange}
-                    data-testid="receipt-date-picker"
-                  />
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="receiptNumber">{t('receipts.modal.receiptNumber')}</Label>
-            <Input
-              id="receiptNumber"
-              {...register('receiptNumber')}
-              placeholder={t('receipts.modal.receiptNumberPlaceholder')}
-              data-testid="receipt-number-input"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categoryId">{t('receipts.modal.category')}</Label>
+          <div>
+            <Label htmlFor="currency" className={fieldLabel}>
+              {t('receipts.modal.currency')}
+            </Label>
             <Controller
-              name="categoryId"
+              name="currency"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger data-testid="receipt-category-select">
-                    <SelectValue placeholder={t('receipts.modal.selectCategory')} />
+                <CurrencySelect
+                  id="currency"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t('receipts.modal.currency')}
+                  triggerClassName="w-full"
+                  data-testid="receipt-currency-select"
+                />
+              )}
+            />
+          </div>
+
+          <div className="col-span-2 sm:col-span-1">
+            <Label htmlFor="receiptDate" className={fieldLabel}>
+              {t('receipts.modal.date')}
+            </Label>
+            <Controller
+              name="receiptDate"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  id="receiptDate"
+                  value={field.value}
+                  onChange={field.onChange}
+                  data-testid="receipt-date-picker"
+                />
+              )}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="receiptNumber" className={fieldLabel}>
+            {t('receipts.modal.receiptNumber')}
+          </Label>
+          <Input
+            id="receiptNumber"
+            className="tabular-nums"
+            {...register('receiptNumber')}
+            placeholder={t('receipts.modal.receiptNumberPlaceholder')}
+            data-testid="receipt-number-input"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="categoryId" className={fieldLabel}>
+            {t('receipts.modal.category')}
+          </Label>
+          <Controller
+            name="categoryId"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger data-testid="receipt-category-select">
+                  <SelectValue placeholder={t('receipts.modal.selectCategory')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id} data-testid={`receipt-category-option-${category.id}`}>
+                      {category.icon && <span className="mr-2">{category.icon}</span>}
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+
+          {/* AI category suggestion — auto-categorized (edit) or store-name based (create) */}
+          {receipt?.autoSuggestedCategoryId && mode === 'edit' && (
+            <div className="mt-2.5">
+              <CategorySuggestionCard
+                suggestions={[
+                  {
+                    categoryId: receipt.autoSuggestedCategoryId,
+                    categoryName: receipt.autoSuggestedCategory?.name || 'Suggested',
+                    categoryIcon: receipt.autoSuggestedCategory?.icon,
+                    categoryColor: receipt.autoSuggestedCategory?.color,
+                    confidence: receipt.suggestionConfidence || 0,
+                    reason: t('categorization.basedOnPurchases'),
+                  },
+                ]}
+                currentCategoryId={watchedCategoryId}
+                onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
+
+          {storeSuggestion && mode === 'create' && (
+            <div className="mt-2.5">
+              <CategorySuggestionCard
+                suggestions={[
+                  {
+                    categoryId: storeSuggestion.categoryId,
+                    categoryName: storeSuggestion.categoryName,
+                    categoryIcon: storeSuggestion.categoryIcon,
+                    categoryColor: storeSuggestion.categoryColor,
+                    confidence: storeSuggestion.confidence,
+                    reason: storeSuggestion.reason,
+                  },
+                ]}
+                currentCategoryId={watchedCategoryId}
+                onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
+        </div>
+
+        {groups.length > 0 && (
+          <div>
+            <Label htmlFor="groupId" className={fieldLabel}>
+              {t('receipts.modal.group')}
+            </Label>
+            <Controller
+              name="groupId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => {
+                    field.onChange(val === '__none__' ? '' : val)
+                    // Reset paidById when group changes
+                    if (val === '__none__') {
+                      setValue('paidById', '')
+                    } else if (user) {
+                      // Default to current user when selecting a group
+                      setValue('paidById', user.id)
+                    }
+                  }}
+                  value={field.value || '__none__'}
+                  disabled={mode === 'create' && !!prefillData?.groupId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('receipts.modal.group')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id} data-testid={`receipt-category-option-${category.id}`}>
-                        {category.icon && <span className="mr-2">{category.icon}</span>}
-                        {category.name}
+                    <SelectItem value="__none__">{t('receipts.modal.noGroup')}</SelectItem>
+                    {groups.map((group) => (
+                      <SelectItem
+                        key={group.id}
+                        value={group.id}
+                        disabled={!!group.isArchived}
+                      >
+                        {group.icon && <span className="mr-2">{group.icon}</span>}
+                        {group.name}
+                        {group.isArchived && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({t('groups.archive.archivedBadge')})
+                          </span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-          </div>
-
-          {/* Show AI category suggestions if available */}
-          {receipt?.autoSuggestedCategoryId && mode === 'edit' && (
-            <CategorySuggestionCard
-              suggestions={[
-                {
-                  categoryId: receipt.autoSuggestedCategoryId,
-                  categoryName: receipt.autoSuggestedCategory?.name || 'Suggested',
-                  categoryIcon: receipt.autoSuggestedCategory?.icon,
-                  categoryColor: receipt.autoSuggestedCategory?.color,
-                  confidence: receipt.suggestionConfidence || 0,
-                  reason: t('categorization.basedOnPurchases'),
-                },
-              ]}
-              currentCategoryId={watchedCategoryId}
-              onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
-              disabled={isSubmitting}
-            />
-          )}
-
-          {/* Show store-name-based category suggestion (create mode) */}
-          {storeSuggestion && mode === 'create' && (
-            <CategorySuggestionCard
-              suggestions={[
-                {
-                  categoryId: storeSuggestion.categoryId,
-                  categoryName: storeSuggestion.categoryName,
-                  categoryIcon: storeSuggestion.categoryIcon,
-                  categoryColor: storeSuggestion.categoryColor,
-                  confidence: storeSuggestion.confidence,
-                  reason: storeSuggestion.reason,
-                },
-              ]}
-              currentCategoryId={watchedCategoryId}
-              onAccept={(categoryId) => setValue('categoryId', categoryId, { shouldDirty: true, shouldTouch: true })}
-              disabled={isSubmitting}
-            />
-          )}
-
-          {groups.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="groupId">{t('receipts.modal.group')}</Label>
-              <Controller
-                name="groupId"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(val) => {
-                      field.onChange(val === '__none__' ? '' : val)
-                      // Reset paidById when group changes
-                      if (val === '__none__') {
-                        setValue('paidById', '')
-                      } else if (user) {
-                        // Default to current user when selecting a group
-                        setValue('paidById', user.id)
-                      }
-                    }}
-                    value={field.value || '__none__'}
-                    disabled={mode === 'create' && !!prefillData?.groupId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('receipts.modal.group')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">{t('receipts.modal.noGroup')}</SelectItem>
-                      {groups.map((group) => (
-                        <SelectItem
-                          key={group.id}
-                          value={group.id}
-                          disabled={!!group.isArchived}
-                        >
-                          {group.icon && <span className="mr-2">{group.icon}</span>}
-                          {group.name}
-                          {group.isArchived && (
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              ({t('groups.archive.archivedBadge')})
-                            </span>
-                          )}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {mode === 'create' && prefillData?.groupId && (
-                <p className="text-xs text-muted-foreground">
-                  {t('receipts.modal.groupLocked')}
-                </p>
-              )}
-            </div>
-          )}
-
-          {selectedGroupId && groupMembers.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="paidById">{t('receipts.modal.paidBy')}</Label>
-              <Controller
-                name="paidById"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || user?.id}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('receipts.modal.selectPaidBy')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {groupMembers.map((member) => {
-                        const name = member.user?.firstName && member.user?.lastName
-                          ? `${member.user.firstName} ${member.user.lastName}`
-                          : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
-                        const isCurrentUser = member.userId === user?.id
-                        return (
-                          <SelectItem key={member.userId} value={member.userId}>
-                            {name} {isCurrentUser && t('common.me')}
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <p className="text-xs text-muted-foreground">
-                {t('receipts.modal.paidByHelp')}
+            {mode === 'create' && prefillData?.groupId && (
+              <p className="mt-1.5 ml-0.5 text-xs text-muted-foreground">
+                {t('receipts.modal.groupLocked')}
               </p>
-            </div>
-          )}
-
-          {selectedGroupId && groupMembers.length > 1 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>
-                  {t('receipts.modal.splitAmong')}{' '}
-                  <span className="text-muted-foreground font-normal">
-                    ({t('receipts.modal.splitAmongCount', {
-                      count: effectiveSplitAmong.length,
-                      total: groupMembers.length,
-                    })})
-                  </span>
-                </Label>
-                {!allSelected && (
-                  <button
-                    type="button"
-                    onClick={selectAllMembers}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    {t('receipts.modal.splitAmongAll')}
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {groupMembers.map((member) => {
-                  const name = member.user?.firstName && member.user?.lastName
-                    ? `${member.user.firstName} ${member.user.lastName}`
-                    : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
-                  const isSelected = effectiveSplitAmong.includes(member.userId)
-                  return (
-                    <button
-                      key={member.userId}
-                      type="button"
-                      onClick={() => toggleMember(member.userId)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                        isSelected
-                          ? 'bg-primary/10 border-primary/30 text-primary'
-                          : 'bg-muted/30 border-border text-muted-foreground'
-                      }`}
-                    >
-                      {isSelected && <Check className="h-3 w-3" />}
-                      {name}
-                    </button>
-                  )
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t('receipts.modal.splitAmongHelp')}
-              </p>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            {mode === 'edit' && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={deleteReceipt.isPending || isSubmitting}
-                className="sm:mr-auto"
-                data-testid="receipt-delete-button"
-              >
-                <Trash2 className="h-4 w-4" />
-                {t('common.delete')}
-              </Button>
             )}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || createReceipt.isPending || updateReceipt.isPending}
-              data-testid="receipt-cancel-button"
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || createReceipt.isPending || updateReceipt.isPending}
-              data-testid="receipt-submit-button"
-            >
-              {isSubmitting || createReceipt.isPending || updateReceipt.isPending
-                ? mode === 'create'
-                  ? t('common.creating')
-                  : t('common.updating')
-                : mode === 'create'
-                ? t('common.create')
-                : t('common.update')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+          </div>
+        )}
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('receipts.modal.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('receipts.modal.deleteConfirm', { store: receipt?.storeName || t('common.unknown') })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
-              disabled={deleteReceipt.isPending}
-            >
-              {deleteReceipt.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
+        {selectedGroupId && groupMembers.length > 0 && (
+          <div>
+            <Label htmlFor="paidById" className={fieldLabel}>
+              {t('receipts.modal.paidBy')}
+            </Label>
+            <Controller
+              name="paidById"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || user?.id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('receipts.modal.selectPaidBy')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groupMembers.map((member) => {
+                      const name = member.user?.firstName && member.user?.lastName
+                        ? `${member.user.firstName} ${member.user.lastName}`
+                        : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
+                      const isCurrentUser = member.userId === user?.id
+                      return (
+                        <SelectItem key={member.userId} value={member.userId}>
+                          {name} {isCurrentUser && t('common.me')}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
               )}
-              {t('common.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Dialog>
+            />
+            <p className="mt-1.5 ml-0.5 text-xs text-muted-foreground">
+              {t('receipts.modal.paidByHelp')}
+            </p>
+          </div>
+        )}
+
+        {selectedGroupId && groupMembers.length > 1 && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <Label className={cn(fieldLabel, 'mb-0')}>
+                {t('receipts.modal.splitAmong')}{' '}
+                <span className="font-medium text-fg-faint">
+                  ({t('receipts.modal.splitAmongCount', {
+                    count: effectiveSplitAmong.length,
+                    total: groupMembers.length,
+                  })})
+                </span>
+              </Label>
+              {!allSelected && (
+                <button
+                  type="button"
+                  onClick={selectAllMembers}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {t('receipts.modal.splitAmongAll')}
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {groupMembers.map((member) => {
+                const name = member.user?.firstName && member.user?.lastName
+                  ? `${member.user.firstName} ${member.user.lastName}`
+                  : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
+                const isSelected = effectiveSplitAmong.includes(member.userId)
+                return (
+                  <button
+                    key={member.userId}
+                    type="button"
+                    onClick={() => toggleMember(member.userId)}
+                    className={cn(
+                      'inline-flex h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold transition-colors',
+                      isSelected
+                        ? 'border-transparent bg-primary-soft text-primary'
+                        : 'border-border bg-bg-subtle text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {isSelected && <Check className="size-3.5" />}
+                    {name}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="mt-2 ml-0.5 text-xs text-muted-foreground">
+              {t('receipts.modal.splitAmongHelp')}
+            </p>
+          </div>
+        )}
+      </form>
+    </GlassDialog>
   )
 }
