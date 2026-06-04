@@ -1,58 +1,60 @@
-import { Fragment, useState, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Plus, Info, X, CalendarClock, ArrowDownWideNarrow } from 'lucide-react'
+import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
+import { GlassDialog } from '@/components/glass/glass-dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { RecurringExpenseModal } from '@/components/recurring-expenses/recurring-expense-modal'
 import { MarkPaidModal } from '@/components/recurring-expenses/mark-paid-modal'
-import { PaymentHistory } from '@/components/recurring-expenses/payment-history'
+import { PaymentHistoryModal } from '@/components/recurring-expenses/payment-history'
+import { RecurringList, RowActionList } from '@/components/recurring-expenses/primitives'
+import { buildRecurringRows, deriveStatus } from '@/components/recurring-expenses/status'
+import { useCategoryChartData } from '@/components/recurring-expenses/category-breakdown'
+import { CategoryBars } from '@/components/recurring-expenses/category-bars'
 import {
   useRecurringExpenses,
   useRecurringSummary,
   useDeleteRecurringExpense,
   useUpdateRecurringExpense,
   type RecurringExpense,
-  type RecurringFrequency,
-  type UpcomingExpense,
 } from '@/hooks/recurring-expenses/use-recurring-expenses'
 import { useSettingsStore } from '@/store/settings'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
-import { formatDate } from '@/lib/date-utils'
-import { toast } from 'sonner'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Pause,
-  Play,
-  CreditCard,
-  CalendarClock,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  Wallet,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  PieChart as PieChartIcon,
-  Info,
-  X,
-} from 'lucide-react'
-import { PageTransition, StaggerContainer, StaggerItem } from '@/components/ui/animated'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useFabStore } from '@/store/fab'
+import { cn } from '@/lib/utils'
+
+const INFO_KEY = 'recurring-info-dismissed'
+
+/** Auto-width brand-gradient CTA (gradient stays on the logo, this CTA, and the FAB only). */
+function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
+    >
+      <Plus className="size-[18px]" strokeWidth={2.4} />
+      {label}
+    </button>
+  )
+}
+
+function StatCell({ value, label, tone }: { value: number; label: string; tone?: string }) {
+  return (
+    <div className="flex flex-col items-center gap-0.5 text-center">
+      <span className={cn('text-[22px] font-bold tabular-nums', tone)}>{value}</span>
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+    </div>
+  )
+}
 
 export default function RecurringExpenses() {
   const { t } = useTranslation()
+  const isMobile = useIsMobile(768)
   const { currency: preferredCurrency } = useSettingsStore()
   const displayCurrency = preferredCurrency || 'RSD'
   const { data: exchangeRates } = useExchangeRates(displayCurrency)
@@ -68,24 +70,33 @@ export default function RecurringExpenses() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [expenseToDelete, setExpenseToDelete] = useState<RecurringExpense | null>(null)
   const [markPaidOpen, setMarkPaidOpen] = useState(false)
-  const [expenseToPay, setExpenseToPay] = useState<UpcomingExpense | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
-  const PAGE_SIZE = 10
-  const [showInfoBanner, setShowInfoBanner] = useState(() => {
-    return localStorage.getItem('recurring-info-dismissed') !== 'true'
-  })
+  const [expenseToPay, setExpenseToPay] = useState<RecurringExpense | null>(null)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyExpense, setHistoryExpense] = useState<RecurringExpense | null>(null)
+  const [actionsOpen, setActionsOpen] = useState(false)
+  const [actionsExpense, setActionsExpense] = useState<RecurringExpense | null>(null)
+  const [showInfoBanner, setShowInfoBanner] = useState(
+    () => localStorage.getItem(INFO_KEY) !== 'true',
+  )
 
   const dismissInfoBanner = () => {
     setShowInfoBanner(false)
-    localStorage.setItem('recurring-info-dismissed', 'true')
+    localStorage.setItem(INFO_KEY, 'true')
   }
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     setSelectedExpense(null)
     setModalMode('create')
     setIsModalOpen(true)
-  }
+  }, [])
+
+  // Take over the global mobile FAB so it opens the Add sheet directly.
+  const setFab = useFabStore((s) => s.setFab)
+  const clearFab = useFabStore((s) => s.clearFab)
+  useEffect(() => {
+    setFab(handleAdd)
+    return () => clearFab()
+  }, [setFab, clearFab, handleAdd])
 
   const handleEdit = (expense: RecurringExpense) => {
     setSelectedExpense(expense)
@@ -112,38 +123,38 @@ export default function RecurringExpenses() {
 
   const handleTogglePause = async (expense: RecurringExpense) => {
     try {
-      await updateExpense.mutateAsync({
-        id: expense.id,
-        data: { isPaused: !expense.isPaused },
-      })
+      await updateExpense.mutateAsync({ id: expense.id, data: { isPaused: !expense.isPaused } })
       toast.success(expense.isPaused ? t('recurring.resumed') : t('recurring.paused'))
-    } catch (error) {
+    } catch {
       toast.error(t('recurring.updateError'))
     }
   }
 
   const handleMarkPaid = (expense: RecurringExpense) => {
     if (!expense.nextDueDate) return
-    setExpenseToPay({
-      id: expense.id,
-      name: expense.name,
-      amount: expense.amount,
-      currency: expense.currency,
-      isFixed: expense.isFixed,
-      icon: expense.icon,
-      color: expense.color,
-      category: expense.category,
-      dueDate: expense.nextDueDate,
-    })
+    setExpenseToPay(expense)
     setMarkPaidOpen(true)
   }
 
-  const convertAmount = (amount: number, fromCurrency: string): number => {
-    if (fromCurrency === displayCurrency || !exchangeRates) return amount
-    const rate = exchangeRates[fromCurrency]
-    if (!rate || rate === 0) return amount
-    return amount / rate
+  const handleHistory = (expense: RecurringExpense) => {
+    setHistoryExpense(expense)
+    setHistoryOpen(true)
   }
+
+  const openActions = (expense: RecurringExpense) => {
+    setActionsExpense(expense)
+    setActionsOpen(true)
+  }
+
+  const convertAmount = useCallback(
+    (amount: number, fromCurrency: string): number => {
+      if (fromCurrency === displayCurrency || !exchangeRates) return amount
+      const rate = exchangeRates[fromCurrency]
+      if (!rate || rate === 0) return amount
+      return amount / rate
+    },
+    [displayCurrency, exchangeRates],
+  )
 
   const formatAmount = (amount: number, currency?: string) =>
     new Intl.NumberFormat('sr-RS', {
@@ -153,401 +164,261 @@ export default function RecurringExpenses() {
       maximumFractionDigits: 0,
     }).format(amount)
 
-  const getStatusBadge = (expense: RecurringExpense) => {
-    if (expense.isPaused) {
-      return <Badge variant="secondary">{t('recurring.status.paused')}</Badge>
-    }
-    if (expense.endDate && new Date(expense.endDate) < new Date()) {
-      return <Badge variant="outline">{t('recurring.status.ended')}</Badge>
-    }
-    return <Badge variant="default">{t('recurring.status.active')}</Badge>
-  }
+  const rows = buildRecurringRows(expenses)
+  const overdueCount = rows.filter((r) => r.status === 'overdue').length
+  const dueSoonCount = rows.filter((r) => r.status === 'duesoon').length
+  const activeCount =
+    summary?.totalActive ?? rows.filter((r) => r.status !== 'paused' && r.status !== 'ended').length
 
-  const monthlyTotal = summary?.monthlyCommitment?.reduce((sum, item) => {
-    return sum + convertAmount(item.amount, item.currency)
-  }, 0) ?? 0
+  const monthlyTotal =
+    summary?.monthlyCommitment?.reduce((sum, item) => sum + convertAmount(item.amount, item.currency), 0) ?? 0
+  const mixedCurrencies = (summary?.monthlyCommitment?.length ?? 0) > 1
 
-  const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+  const categoryData = useCategoryChartData(
+    expenses,
+    convertAmount,
+    t('recurring.categoryBreakdown.uncategorized'),
+  )
 
-  const toMonthly = (amount: number, freq: RecurringFrequency) => {
-    switch (freq) {
-      case 'weekly': return amount * 4.33
-      case 'monthly': return amount
-      case 'quarterly': return amount / 3
-      case 'yearly': return amount / 12
-    }
-  }
-
-  const categoryChartData = useMemo(() => {
-    if (!expenses) return []
-    const active = expenses.filter(
-      (e) => !e.isPaused && !(e.endDate && new Date(e.endDate) < new Date())
-    )
-    const map = new Map<string, { name: string; icon?: string; color: string; value: number; count: number }>()
-    for (const e of active) {
-      const val = convertAmount(toMonthly(Number(e.amount), e.frequency), e.currency)
-      const key = e.category?.id ?? '_none_'
-      const prev = map.get(key)
-      if (prev) {
-        prev.value += val
-        prev.count += 1
-      } else {
-        map.set(key, {
-          name: e.category?.name ?? t('recurring.categoryBreakdown.uncategorized'),
-          icon: e.category?.icon,
-          color: e.category?.color || FALLBACK_COLORS[map.size % FALLBACK_COLORS.length],
-          value: val,
-          count: 1,
-        })
+  // Build the MarkPaid payload from the row (the modal expects an UpcomingExpense shape).
+  const payTarget = expenseToPay?.nextDueDate
+    ? {
+        id: expenseToPay.id,
+        name: expenseToPay.name,
+        amount: expenseToPay.amount,
+        currency: expenseToPay.currency,
+        isFixed: expenseToPay.isFixed,
+        icon: expenseToPay.icon,
+        color: expenseToPay.color,
+        category: expenseToPay.category,
+        dueDate: expenseToPay.nextDueDate,
       }
-    }
-    return Array.from(map.values()).sort((a, b) => b.value - a.value)
-  }, [expenses, exchangeRates])
+    : null
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0]?.payload
-      return (
-        <div className="bg-popover border border-border rounded-lg shadow-md p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <div
-              className="w-3 h-3 rounded-full shrink-0"
-              style={{ backgroundColor: data.color }}
-            />
-            <span className="font-semibold text-sm">{data.icon} {data.name}</span>
-          </div>
-          <p className="text-sm font-medium">{formatAmount(data.value)}</p>
-        </div>
-      )
-    }
-    return null
-  }
+  const sortAffordance = (
+    <span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground">
+      <ArrowDownWideNarrow className="size-[15px]" />
+      {t('recurring.sortedByDueDate')}
+    </span>
+  )
+
+  const infoBanner = showInfoBanner && (
+    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-info-soft bg-info-soft/60 p-4">
+      <Info className="mt-0.5 size-5 shrink-0 text-info" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[13.5px] font-semibold text-info-foreground">{t('recurring.info.title')}</p>
+        <p className="mt-0.5 text-[12.5px] leading-snug text-info-foreground/80">
+          {t('recurring.info.description')}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={dismissInfoBanner}
+        aria-label={t('common.close')}
+        className="shrink-0 text-info-foreground/60 transition-colors hover:text-info-foreground"
+      >
+        <X className="size-4" />
+      </button>
+    </div>
+  )
 
   return (
     <AppLayout>
       <PageTransition>
-        <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight mb-1 sm:text-3xl sm:mb-2">
-              {t('recurring.title')}
-            </h2>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              {t('recurring.subtitle')}
-            </p>
-          </div>
-          <Button onClick={handleAdd} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
-            {t('recurring.addExpense')}
-          </Button>
+        {/* Desktop sticky toolbar (breaks out of the page padding to sit flush) */}
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('recurring.title')}
+          subtitle={t('recurring.subtitle')}
+          actions={<AddButton onClick={handleAdd} label={t('recurring.addRecurring')} />}
+        />
+
+        {/* Mobile page header */}
+        <div className="mb-5 md:hidden">
+          <h1 className="t-h1 text-[28px]">{t('nav.recurring', { defaultValue: 'Recurring' })}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('recurring.mobileSubtitle')}</p>
         </div>
 
-        {/* Stats Cards */}
-        <StaggerContainer className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <StaggerItem>
-            <Card className="border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t('recurring.stats.monthlyCommitment')}</CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(monthlyTotal)}</p>
-              </CardContent>
-            </Card>
-          </StaggerItem>
-          <StaggerItem>
-            <Card className="border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t('recurring.stats.annualProjection')}</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{formatAmount(monthlyTotal * 12)}</p>
-              </CardContent>
-            </Card>
-          </StaggerItem>
-          <StaggerItem>
-            <Card className="border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t('recurring.stats.paidThisMonth')}</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{summary?.paidThisMonth ?? 0}</p>
-              </CardContent>
-            </Card>
-          </StaggerItem>
-          <StaggerItem>
-            <Card className="border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{t('recurring.stats.pendingThisMonth')}</CardTitle>
-                <AlertCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{summary?.pendingThisMonth ?? 0}</p>
-              </CardContent>
-            </Card>
-          </StaggerItem>
-        </StaggerContainer>
-
-        {/* Category Breakdown */}
-        {categoryChartData.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <PieChartIcon className="h-4 w-4 text-primary" />
-                {t('recurring.categoryBreakdown.title')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center gap-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={categoryChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={4}
-                      cornerRadius={10}
-                      strokeLinecap="round"
-                      dataKey="value"
-                    >
-                      {categoryChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-col gap-1 text-sm w-full">
-                  {categoryChartData.map((c) => (
-                    <div key={c.name} className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: c.color }}
-                      />
-                      <span className="truncate max-w-[120px]">
-                        {c.icon} {c.name}
-                      </span>
-                      <span className="text-muted-foreground text-xs">
-                        ({c.count})
-                      </span>
-                      <span className="text-muted-foreground ml-auto">{formatAmount(c.value)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Info Banner */}
-        {showInfoBanner && (
-          <div className="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
-            <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm">
-              <p className="font-medium text-blue-900 dark:text-blue-200 mb-1">
-                {t('recurring.info.title')}
-              </p>
-              <p className="text-blue-800/80 dark:text-blue-300/80">
-                {t('recurring.info.description')}
-              </p>
-            </div>
-            <button
-              onClick={dismissInfoBanner}
-              className="shrink-0 text-blue-400 hover:text-blue-600 dark:hover:text-blue-200"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Table */}
         {isLoading ? (
-          <Card>
-            <CardContent className="p-8">
-              <div className="flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-        ) : !expenses || expenses.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <CalendarClock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{t('recurring.empty.title')}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{t('recurring.empty.description')}</p>
-              <Button onClick={handleAdd}>
-                <Plus className="h-4 w-4" />
-                {t('recurring.addExpense')}
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8"></TableHead>
-                  <TableHead>{t('recurring.table.name')}</TableHead>
-                  <TableHead className="text-right">{t('recurring.table.amount')}</TableHead>
-                  <TableHead>{t('recurring.table.frequency')}</TableHead>
-                  <TableHead>{t('recurring.table.nextDue')}</TableHead>
-                  <TableHead>{t('recurring.table.status')}</TableHead>
-                  <TableHead className="text-right">{t('recurring.table.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {expenses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((expense) => (
-                  <Fragment key={expense.id}>
-                    <TableRow className="group">
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => setExpandedId(expandedId === expense.id ? null : expense.id)}
-                        >
-                          {expandedId === expense.id ? (
-                            <ChevronDown className="h-3 w-3" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3" />
-                          )}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {expense.category?.icon && (
-                            <span className="text-lg">{expense.category.icon}</span>
-                          )}
-                          <div>
-                            <span className="font-medium">{expense.name}</span>
-                            {expense.category && (
-                              <p className="text-xs text-muted-foreground">{expense.category.name}</p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatAmount(expense.amount, expense.currency)}
-                        {!expense.isFixed && (
-                          <span className="text-xs text-muted-foreground ml-1">~</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{t(`recurring.frequency.${expense.frequency}`)}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        {expense.nextDueDate ? (
-                          <span className="text-sm">{formatDate(expense.nextDueDate)}</span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(expense)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          {expense.nextDueDate && !expense.isPaused && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleMarkPaid(expense)}
-                              title={t('recurring.actions.pay')}
-                            >
-                              <CreditCard className="w-4 h-4 text-primary" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleTogglePause(expense)}
-                            title={expense.isPaused ? t('recurring.actions.resume') : t('recurring.actions.pause')}
-                          >
-                            {expense.isPaused ? (
-                              <Play className="w-4 h-4" />
-                            ) : (
-                              <Pause className="w-4 h-4" />
-                            )}
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(expense)}>
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(expense)}>
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    {expandedId === expense.id && (
-                      <TableRow key={`${expense.id}-history`}>
-                        <TableCell colSpan={7} className="bg-muted/30 p-4">
-                          <h4 className="text-sm font-semibold mb-2">{t('recurring.payments.title')}</h4>
-                          <PaymentHistory expenseId={expense.id} currency={expense.currency} />
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </Fragment>
-                ))}
-              </TableBody>
-            </Table>
-            {expenses.length > PAGE_SIZE && (
-              <div className="flex items-center justify-between border-t px-4 py-3">
-                <p className="text-sm text-muted-foreground">
-                  {t('common.pagination.showing', {
-                    from: (page - 1) * PAGE_SIZE + 1,
-                    to: Math.min(page * PAGE_SIZE, expenses.length),
-                    total: expenses.length,
-                  })}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(p => p - 1)}
-                    disabled={page === 1}
-                  >
-                    {t('common.pagination.previous')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(p => p + 1)}
-                    disabled={page * PAGE_SIZE >= expenses.length}
-                  >
-                    {t('common.pagination.next')}
-                  </Button>
+          <div className="flex flex-col gap-3">
+            <div className="h-[120px] animate-pulse rounded-2xl border border-border bg-bg-subtle" />
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3.5 border-b border-hairline-soft px-4 py-3 last:border-0">
+                  <div className="size-11 shrink-0 animate-pulse rounded-[14px] bg-bg-subtle" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3.5 w-2/5 animate-pulse rounded bg-bg-subtle" />
+                    <div className="h-3 w-1/4 animate-pulse rounded bg-bg-subtle" />
+                  </div>
+                  <div className="h-5 w-20 animate-pulse rounded-full bg-bg-subtle" />
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
+        ) : !expenses || expenses.length === 0 ? (
+          <div className="grid place-items-center rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-glass-1">
+            <span className="grid size-[76px] place-items-center rounded-[22px] bg-bg-subtle text-muted-foreground">
+              <CalendarClock className="size-8" />
+            </span>
+            <h3 className="t-h3 mt-[18px]">{t('recurring.empty.title')}</h3>
+            <p className="t-sm mt-2 max-w-[320px] text-muted-foreground">{t('recurring.empty.description')}</p>
+            <div className="mt-[22px]">
+              <AddButton onClick={handleAdd} label={t('recurring.addRecurring')} />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Overview — desktop two-card row */}
+            <div className="mb-6 hidden gap-4 md:grid md:grid-cols-[1.4fr_1fr]">
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-glass-1">
+                <p className="t-xs mb-3 text-fg-faint">{t('recurring.overview.title')}</p>
+                <div className="flex items-end gap-5">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[13px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
+                    <span className="text-[26px] font-extrabold tabular-nums leading-none">{formatAmount(monthlyTotal)}</span>
+                  </div>
+                  <div className="h-9 w-px bg-hairline-soft" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[13px] text-muted-foreground">{t('recurring.stats.annualProjection')}</span>
+                    <span className="text-[17px] font-semibold tabular-nums text-muted-foreground">{formatAmount(monthlyTotal * 12)}</span>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-4 gap-2 border-t border-hairline-soft pt-4">
+                  <StatCell value={overdueCount} label={t('recurring.overview.overdue')} tone={overdueCount ? 'text-destructive' : undefined} />
+                  <StatCell value={dueSoonCount} label={t('recurring.overview.dueSoon')} tone={dueSoonCount ? 'text-warning-foreground' : undefined} />
+                  <StatCell value={activeCount} label={t('recurring.overview.active')} />
+                  <StatCell value={summary?.paidThisMonth ?? 0} label={t('recurring.overview.paid')} tone={(summary?.paidThisMonth ?? 0) ? 'text-success-foreground' : undefined} />
+                </div>
+                {mixedCurrencies && (
+                  <p className="mt-3 text-[11px] text-fg-faint">{t('receipts.convertedDisclaimer')}</p>
+                )}
+              </div>
+              {categoryData.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-glass-1">
+                  <p className="t-xs mb-4 text-fg-faint">
+                    {t('recurring.overview.spendingByCategory')}{' '}
+                    <span className="font-normal normal-case tracking-normal text-muted-foreground">
+                      {t('recurring.overview.monthlyEquivalent')}
+                    </span>
+                  </p>
+                  <CategoryBars data={categoryData} formatAmount={(v) => formatAmount(v)} />
+                </div>
+              )}
+            </div>
+
+            {/* Slim summary — mobile */}
+            <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">
+              <div className="flex flex-col gap-1">
+                <span className="text-[12px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
+                <span className="text-[26px] font-extrabold tabular-nums leading-none">{formatAmount(monthlyTotal)}</span>
+              </div>
+              <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px]">
+                <span className={cn('font-medium', overdueCount ? 'text-destructive' : 'text-muted-foreground')}>
+                  <b className="tabular-nums">{overdueCount}</b> {t('recurring.overview.overdue').toLowerCase()}
+                </span>
+                <span className={cn('font-medium', dueSoonCount ? 'text-warning-foreground' : 'text-muted-foreground')}>
+                  <b className="tabular-nums">{dueSoonCount}</b> {t('recurring.overview.dueSoon').toLowerCase()}
+                </span>
+                <span className="font-medium text-muted-foreground">
+                  <b className="tabular-nums">{activeCount}</b> {t('recurring.overview.active').toLowerCase()}
+                </span>
+              </div>
+            </div>
+
+            {infoBanner}
+
+            {/* List */}
+            <div className="mb-3.5 flex items-center justify-between gap-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[14px] font-semibold">{t('recurring.allRecurring')}</span>
+                <span className="text-[13px] text-muted-foreground">
+                  · {t('recurring.expensesCount', { count: expenses.length })}
+                </span>
+              </div>
+              {sortAffordance}
+            </div>
+
+            <RecurringList
+              rows={rows}
+              wide={!isMobile}
+              onOpenActions={openActions}
+              onMarkPaid={handleMarkPaid}
+              onEdit={handleEdit}
+              onHistory={handleHistory}
+              onTogglePause={handleTogglePause}
+              onDelete={handleDelete}
+            />
+
+            <p className="py-4 text-center text-[12px] text-fg-faint md:hidden">
+              {t('recurring.recurringExpensesCount', { count: expenses.length })}
+            </p>
+          </>
         )}
-
-        <RecurringExpenseModal
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          expense={selectedExpense}
-          mode={modalMode}
-        />
-
-        <MarkPaidModal
-          open={markPaidOpen}
-          onOpenChange={setMarkPaidOpen}
-          expense={expenseToPay}
-        />
-
-        <ConfirmDialog
-          open={deleteConfirmOpen}
-          onOpenChange={setDeleteConfirmOpen}
-          onConfirm={confirmDelete}
-          title={t('recurring.deleteTitle')}
-          description={t('recurring.deleteConfirm', { name: expenseToDelete?.name || '' })}
-          confirmText={t('common.delete')}
-          cancelText={t('common.cancel')}
-          variant="destructive"
-          isLoading={deleteExpense.isPending}
-        />
       </PageTransition>
+
+      {/* Add / Edit */}
+      <RecurringExpenseModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        expense={selectedExpense}
+        mode={modalMode}
+        onRequestDelete={handleDelete}
+      />
+
+      {/* Mark as paid */}
+      <MarkPaidModal open={markPaidOpen} onOpenChange={setMarkPaidOpen} expense={payTarget} />
+
+      {/* Payment history */}
+      <PaymentHistoryModal open={historyOpen} onOpenChange={setHistoryOpen} expense={historyExpense} />
+
+      {/* Delete confirm (shared, responsive) */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={confirmDelete}
+        title={t('recurring.deleteTitle')}
+        description={t('recurring.deleteConfirm', { name: expenseToDelete?.name || '' })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        variant="destructive"
+        isLoading={deleteExpense.isPending}
+      />
+
+      {/* Mobile row action sheet */}
+      {actionsExpense && (
+        <GlassDialog
+          open={actionsOpen}
+          onOpenChange={setActionsOpen}
+          title={actionsExpense.name}
+          description={t(`recurring.frequency.${actionsExpense.frequency}`)}
+          bodyClassName="py-3"
+        >
+          <RowActionList
+            expense={actionsExpense}
+            status={deriveStatus(actionsExpense)}
+            onMarkPaid={(e) => {
+              setActionsOpen(false)
+              handleMarkPaid(e)
+            }}
+            onEdit={(e) => {
+              setActionsOpen(false)
+              handleEdit(e)
+            }}
+            onHistory={(e) => {
+              setActionsOpen(false)
+              handleHistory(e)
+            }}
+            onTogglePause={(e) => {
+              setActionsOpen(false)
+              handleTogglePause(e)
+            }}
+            onDelete={(e) => {
+              setActionsOpen(false)
+              handleDelete(e)
+            }}
+          />
+        </GlassDialog>
+      )}
     </AppLayout>
   )
 }

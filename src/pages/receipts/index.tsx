@@ -23,7 +23,9 @@ import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
 const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
-import { ReceiptsFiltersBar } from '@/components/receipts/receipts-filters'
+import { FilterRail } from '@/components/receipts/filter-rail'
+import { FilterSheet } from '@/components/receipts/filter-sheet'
+import { QuickChips } from '@/components/receipts/quick-chips'
 import {
   useReceipts,
   useReceipt,
@@ -43,7 +45,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
-import { Camera, Plus, Loader2, Filter, Trash2, ChevronDown, Archive, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
+import { Camera, Plus, Loader2, SlidersHorizontal, Trash2, ChevronDown, Archive, Info, Download, Upload, X, Image, Tag } from 'lucide-react'
 import { toast } from 'sonner'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
@@ -78,8 +80,8 @@ export default function Receipts() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
-  const [showFilters, setShowFilters] = useState(() => hasActiveFilters(initialFilters))
   const [filters, setFilters] = useState<ReceiptsFilters>(initialFilters)
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
@@ -132,9 +134,6 @@ export default function Receipts() {
 
     const newFilters = getFiltersFromParams(searchParams)
     setFilters(newFilters)
-    if (hasActiveFilters(newFilters)) {
-      setShowFilters(true)
-    }
     setPage(1)
   }, [searchParams])
 
@@ -355,15 +354,6 @@ export default function Receipts() {
           </p>
         </div>
         <div className="flex flex-wrap gap-4 lg:gap-2">
-          <Button
-            variant={showFilters ? 'secondary' : 'outline'}
-            onClick={() => setShowFilters(!showFilters)}
-            className="order-2 lg:order-1 flex-1 sm:flex-none"
-            data-testid="receipts-filter-button"
-          >
-            <Filter className="h-4 w-4" />
-            {t('receipts.filtersButton')}
-          </Button>
           <div className="order-1 lg:order-2 flex gap-4 lg:gap-2 w-full lg:w-auto">
             {/* Scan dropdown */}
             <div className="relative flex-1 sm:flex-none" ref={scanDropdownRef}>
@@ -479,115 +469,137 @@ export default function Receipts() {
         </div>
       </div>
 
-      {showFilters && (
-        <ReceiptsFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
-      )}
+      {/* Mobile quick-filter row (full frosted header lands in Chunk 4) */}
+      <div className="mb-3 flex items-center gap-2 md:hidden">
+        <div className="min-w-0 flex-1">
+          <QuickChips filters={filters} categories={categories} onFiltersChange={handleFiltersChange} />
+        </div>
+        <button
+          type="button"
+          onClick={() => setFilterSheetOpen(true)}
+          aria-label={t('receipts.filtersButton')}
+          className="grid size-[42px] shrink-0 place-items-center rounded-[14px] border border-border bg-card text-fg-2 shadow-glass-1 transition-colors hover:bg-bg-subtle hover:text-foreground"
+        >
+          <SlidersHorizontal className="size-[18px]" />
+        </button>
+      </div>
 
-      {totalAmounts.length > 0 && !loading && receipts.length > 0 && (
-        <ExpensesSummary
-          totalAmounts={totalAmounts}
-          total={meta?.total ?? 0}
-          filtersActive={filtersActive}
-          selectMode={selectMode}
-          onToggleSelectMode={() => { setSelectMode((v) => !v); setSelectedIds(new Set()) }}
-          rangeFrom={meta && !isMobile ? (meta.page - 1) * meta.limit + 1 : undefined}
-          rangeTo={meta && !isMobile ? Math.min(meta.page * meta.limit, meta.total) : undefined}
+      <div className="md:flex md:items-start md:gap-6">
+        <FilterRail
+          className="hidden md:flex"
+          filters={filters}
+          categories={categories}
+          onFiltersChange={handleFiltersChange}
         />
-      )}
 
-      {loading ? (
-        <div className="flex flex-col gap-3" data-testid="receipts-loading">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-border bg-bg-subtle" />
-          ))}
-        </div>
-      ) : receipts.length === 0 ? (
-        <div className="empty-state" data-testid="receipts-empty">
-          <Camera className="empty-state-icon" />
-          <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
-          <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-            {t('receipts.noReceiptsText')}
-          </p>
-          <Button variant="default" onClick={openQrScanner}>
-            <Camera className="h-4 w-4" />
-            {t('receipts.scanQr')}
-          </Button>
-        </div>
-      ) : (
-        <>
-          {selectedIds.size > 0 && (
-            <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-muted/50 border rounded-lg">
-              <span className="text-sm font-medium">
-                {t('receipts.selected', { count: selectedIds.size })}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => { setBulkCategoryId(''); setBulkCategoryOpen(true) }}
-              >
-                <Tag className="h-4 w-4" />
-                {t('receipts.assignCategory')}
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setBulkDeleteConfirmOpen(true)}
-                disabled={bulkDelete.isPending}
-              >
-                {bulkDelete.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                {t('receipts.removeSelected')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedIds(new Set())}
-              >
-                <X className="h-4 w-4" />
-                {t('receipts.clearSelection')}
+        <div className="min-w-0 flex-1">
+          {totalAmounts.length > 0 && !loading && receipts.length > 0 && (
+            <ExpensesSummary
+              totalAmounts={totalAmounts}
+              total={meta?.total ?? 0}
+              filtersActive={filtersActive}
+              selectMode={selectMode}
+              onToggleSelectMode={() => { setSelectMode((v) => !v); setSelectedIds(new Set()) }}
+              rangeFrom={meta && !isMobile ? (meta.page - 1) * meta.limit + 1 : undefined}
+              rangeTo={meta && !isMobile ? Math.min(meta.page * meta.limit, meta.total) : undefined}
+            />
+          )}
+
+          {loading ? (
+            <div className="flex flex-col gap-3" data-testid="receipts-loading">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-border bg-bg-subtle" />
+              ))}
+            </div>
+          ) : receipts.length === 0 ? (
+            <div className="empty-state" data-testid="receipts-empty">
+              <Camera className="empty-state-icon" />
+              <h3 className="text-lg font-semibold mb-2">{t('receipts.noReceipts')}</h3>
+              <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+                {t('receipts.noReceiptsText')}
+              </p>
+              <Button variant="default" onClick={openQrScanner}>
+                <Camera className="h-4 w-4" />
+                {t('receipts.scanQr')}
               </Button>
             </div>
-          )}
-
-          <ExpenseFeed
-            receipts={receipts}
-            wide={!isMobile}
-            selectMode={selectMode}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-            onView={handleViewReceipt}
-            onEdit={handleEditReceipt}
-            onDelete={handleDeleteReceipt}
-          />
-
-          {isMobile ? (
-            inf.hasNextPage && (
-              <div className="flex justify-center py-4">
-                <Button
-                  variant="outline"
-                  className="rounded-full"
-                  disabled={inf.isFetchingNextPage}
-                  onClick={() => inf.fetchNextPage()}
-                >
-                  {inf.isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {t('receipts.loadMore')}
-                </Button>
-              </div>
-            )
           ) : (
-            meta && meta.totalPages > 1 && (
-              <div className="pt-3">
-                <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
-                  total={meta.total}
-                  limit={meta.limit}
-                  onPageChange={setPage}
-                />
-              </div>
-            )
+            <>
+              {selectedIds.size > 0 && (
+                <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-muted/50 border rounded-lg">
+                  <span className="text-sm font-medium">
+                    {t('receipts.selected', { count: selectedIds.size })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setBulkCategoryId(''); setBulkCategoryOpen(true) }}
+                  >
+                    <Tag className="h-4 w-4" />
+                    {t('receipts.assignCategory')}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDeleteConfirmOpen(true)}
+                    disabled={bulkDelete.isPending}
+                  >
+                    {bulkDelete.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    {t('receipts.removeSelected')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    <X className="h-4 w-4" />
+                    {t('receipts.clearSelection')}
+                  </Button>
+                </div>
+              )}
+
+              <ExpenseFeed
+                receipts={receipts}
+                wide={!isMobile}
+                selectMode={selectMode}
+                selectedIds={selectedIds}
+                onToggleSelect={toggleSelect}
+                onView={handleViewReceipt}
+                onEdit={handleEditReceipt}
+                onDelete={handleDeleteReceipt}
+              />
+
+              {isMobile ? (
+                inf.hasNextPage && (
+                  <div className="flex justify-center py-4">
+                    <Button
+                      variant="outline"
+                      className="rounded-full"
+                      disabled={inf.isFetchingNextPage}
+                      onClick={() => inf.fetchNextPage()}
+                    >
+                      {inf.isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {t('receipts.loadMore')}
+                    </Button>
+                  </div>
+                )
+              ) : (
+                meta && meta.totalPages > 1 && (
+                  <div className="pt-3">
+                    <Pagination
+                      page={meta.page}
+                      totalPages={meta.totalPages}
+                      total={meta.total}
+                      limit={meta.limit}
+                      onPageChange={setPage}
+                    />
+                  </div>
+                )
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
 
       <Suspense fallback={null}>
         {isModalOpen && (
@@ -741,6 +753,15 @@ export default function Receipts() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FilterSheet
+        open={filterSheetOpen}
+        onOpenChange={setFilterSheetOpen}
+        filters={filters}
+        categories={categories}
+        onFiltersChange={handleFiltersChange}
+        resultCount={meta?.total ?? 0}
+      />
       </PageTransition>
     </AppLayout>
   )

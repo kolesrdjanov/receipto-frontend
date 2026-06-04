@@ -422,7 +422,19 @@
       "maxAmountPlaceholder": "No limit",
       "fromDate": "From Date",
       "toDate": "To Date",
-      "clearFilters": "Clear filters"
+      "clearFilters": "Clear filters",
+      "title": "Filters",
+      "all": "All",
+      "amount": "Amount",
+      "min": "Min",
+      "dateRange": "Date range",
+      "thisMonth": "This month",
+      "last30Days": "Last 30 days",
+      "custom": "Custom",
+      "showAllCategories": "Show all categories",
+      "showLess": "Show less",
+      "clearAll": "Clear all",
+      "showResults": "Show {{count}} results"
     },
     "qrScanner": {
       "scanTitle": "Scan",

@@ -422,7 +422,19 @@
       "maxAmountPlaceholder": "Bez limita",
       "fromDate": "Od datuma",
       "toDate": "Do datuma",
-      "clearFilters": "Obriši filtere"
+      "clearFilters": "Obriši filtere",
+      "title": "Filteri",
+      "all": "Sve",
+      "amount": "Iznos",
+      "min": "Min",
+      "dateRange": "Period",
+      "thisMonth": "Ovaj mesec",
+      "last30Days": "Poslednjih 30 dana",
+      "custom": "Prilagođeno",
+      "showAllCategories": "Prikaži sve kategorije",
+      "showLess": "Prikaži manje",
+      "clearAll": "Obriši sve",
+      "showResults": "Prikaži {{count}} rezultata"
     },
     "qrScanner": {
       "scanTitle": "Skeniraj",
