@@ -130,7 +130,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
               <p className="truncate text-[13.5px] font-medium">{item.name}</p>
               <p className="text-[12px] text-muted-foreground">{formatDueDate(item.dueDate)}</p>
             </div>
-            <span className="shrink-0 text-[13.5px] font-semibold tabular-nums">
+            <span className="shrink-0 text-[13.5px] font-semibold">
               {formatMoney(convertAmount(item.amount, item.currency), displayCurrency)}
             </span>
             <button
@@ -159,7 +159,7 @@ export function UpcomingRecurring({ displayCurrency, exchangeRates }: UpcomingRe
         icon={CalendarClock}
         iconTone="primary"
         title={t('recurring.dashboard.title')}
-        trailing={<span className="text-[13.5px] font-semibold tabular-nums">{formatMoney(totalUpcoming, displayCurrency)}</span>}
+        trailing={<span className="text-[13.5px] font-semibold">{formatMoney(totalUpcoming, displayCurrency)}</span>}
       />
       <div className="space-y-3">
         {renderGroup(upcoming?.overdue ?? [], 'overdue')}

@@ -107,7 +107,7 @@ export function CategoryBudgetProgress({
                     ) : (
                       <CheckCircle2 className="size-3.5 text-success-foreground" />
                     )}
-                    <span className={cn('text-xs font-semibold tabular-nums', textColor)}>
+                    <span className={cn('text-xs font-semibold', textColor)}>
                       {percentage.toFixed(0)}%
                     </span>
                   </div>
@@ -120,7 +120,7 @@ export function CategoryBudgetProgress({
                   />
                 </div>
 
-                <div className="mt-1 flex justify-between text-[11px] text-muted-foreground tabular-nums">
+                <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
                   <span>{formatMoney(spentAmount, budgetCurrency)}</span>
                   <span>{formatMoney(budgetAmount, budgetCurrency)}</span>
                 </div>

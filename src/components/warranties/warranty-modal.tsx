@@ -349,7 +349,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
         <div>
           <div className="mb-2 flex items-center justify-between">
             <label className="ml-0.5 text-xs font-semibold text-muted-foreground">{t('warranties.modal.files')}</label>
-            <span className="text-xs font-medium text-fg-faint tabular-nums">
+            <span className="text-xs font-medium text-fg-faint">
               {totalFileCount}/{MAX_WARRANTY_FILES}
             </span>
           </div>

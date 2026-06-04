@@ -257,7 +257,7 @@ export function RecurringExpenseModal({
               type="number"
               step="0.01"
               min="0"
-              className="tabular-nums"
+             
               {...register('amount')}
             />
             {errors.amount && <p className="mt-1.5 text-[12px] text-destructive">{errors.amount.message}</p>}
@@ -323,7 +323,7 @@ export function RecurringExpenseModal({
               type="number"
               min="1"
               max="31"
-              className="tabular-nums"
+             
               {...register('dayOfMonth')}
             />
           </div>

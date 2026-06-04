@@ -117,7 +117,7 @@ function DashboardControls({
         >
           <ChevronLeft className="size-4" />
         </button>
-        <span className="min-w-[92px] text-center text-[13px] font-semibold tabular-nums">{monthLabel}</span>
+        <span className="min-w-[92px] text-center text-[13px] font-semibold">{monthLabel}</span>
         <button
           type="button"
           onClick={onNext}
@@ -284,7 +284,7 @@ export default function Dashboard() {
               <div className="size-3 shrink-0 rounded-full" style={{ backgroundColor: data.color }} />
               <span className="text-sm font-semibold">{data.icon} {data.name}</span>
             </div>
-            <p className="text-sm font-medium tabular-nums">{formatMoney(data.value, displayCurrency)}</p>
+            <p className="text-sm font-medium">{formatMoney(data.value, displayCurrency)}</p>
           </div>
         )
       }
@@ -295,7 +295,7 @@ export default function Dashboard() {
         <div className="rounded-xl border border-border bg-popover p-3 shadow-glass-2">
           <p className="mb-1 text-sm font-semibold">{displayLabel}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm font-medium tabular-nums">
+            <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
               {formatMoney(entry.value, displayCurrency)}
             </p>
           ))}
@@ -381,7 +381,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="t-xs text-fg-faint">{t('dashboard.total')}</span>
-                <span className="text-[17px] font-extrabold tabular-nums">{formatMoney(totalMonthAmount, displayCurrency)}</span>
+                <span className="text-[17px] font-extrabold">{formatMoney(totalMonthAmount, displayCurrency)}</span>
               </div>
             </div>
             <ul className="flex w-full flex-col gap-1.5 text-[13px]">
@@ -389,7 +389,7 @@ export default function Dashboard() {
                 <li key={c.name} className="flex items-center gap-2">
                   <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
                   <span className="truncate">{c.icon} {c.name}</span>
-                  <span className="ml-auto tabular-nums text-muted-foreground">{formatMoney(c.value, displayCurrency)}</span>
+                  <span className="ml-auto text-muted-foreground">{formatMoney(c.value, displayCurrency)}</span>
                 </li>
               ))}
             </ul>
@@ -525,7 +525,7 @@ export default function Dashboard() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[12px] text-muted-foreground">
               <span>{t('dashboard.rank.progress')}</span>
-              <span className="tabular-nums">{Math.round(rankProgress)}%</span>
+              <span>{Math.round(rankProgress)}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
               <div
@@ -562,7 +562,7 @@ export default function Dashboard() {
                   <p className="truncate text-[13.5px] font-medium">{receipt.storeName || t('dashboard.unknownStore')}</p>
                   <p className="text-[12px] text-muted-foreground">{formatDate(receipt.receiptDate || receipt.createdAt)}</p>
                 </div>
-                <span className="ml-4 shrink-0 text-[13.5px] font-medium tabular-nums">
+                <span className="ml-4 shrink-0 text-[13.5px] font-medium">
                   {formatMoney(Number(receipt.totalAmount) || 0, receipt.currency)}
                 </span>
               </Link>

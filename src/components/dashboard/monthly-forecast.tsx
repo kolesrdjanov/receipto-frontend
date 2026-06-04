@@ -103,7 +103,7 @@ export function MonthlyForecast({
             : t('dashboard.forecast.monthTotal')}
         </span>
         <div className="mt-1 flex items-center gap-2">
-          <p className="text-[26px] font-extrabold leading-none tracking-[-0.02em] tabular-nums">
+          <p className="text-[26px] font-extrabold leading-none tracking-[-0.02em]">
             {formatMoney(forecast.projected, displayCurrency)}
           </p>
           <TrendPill value={forecast.vsLastMonth} />
@@ -115,15 +115,15 @@ export function MonthlyForecast({
         <div className="mt-4 space-y-2 rounded-xl bg-bg-subtle p-3">
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.spentSoFar')}</span>
-            <span className="text-[13px] font-semibold tabular-nums">{formatMoney(forecast.spentSoFar, displayCurrency)}</span>
+            <span className="text-[13px] font-semibold">{formatMoney(forecast.spentSoFar, displayCurrency)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.dailyAvg')}</span>
-            <span className="text-[13px] font-semibold tabular-nums">{formatMoney(forecast.dailyAvg, displayCurrency)}</span>
+            <span className="text-[13px] font-semibold">{formatMoney(forecast.dailyAvg, displayCurrency)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-muted-foreground">{t('dashboard.forecast.daysProgress')}</span>
-            <span className="text-[13px] font-semibold tabular-nums">
+            <span className="text-[13px] font-semibold">
               {forecast.daysSoFar}/{forecast.totalDaysInMonth}
             </span>
           </div>
@@ -134,7 +134,7 @@ export function MonthlyForecast({
       {forecast.lastMonthTotal > 0 && (
         <div className="mt-auto flex items-center justify-between border-t border-hairline-soft pt-3 text-[13px] text-muted-foreground">
           <span>{t('dashboard.forecast.lastMonth')}</span>
-          <span className="font-medium tabular-nums">{formatMoney(forecast.lastMonthTotal, displayCurrency)}</span>
+          <span className="font-medium">{formatMoney(forecast.lastMonthTotal, displayCurrency)}</span>
         </div>
       )}
     </WidgetCard>

@@ -24,7 +24,7 @@ function OverviewStat({ icon: Icon, iconClass, label, value }: { icon: LucideIco
       </span>
       <div className="min-w-0">
         <div className="text-[12px] font-semibold text-muted-foreground">{label}</div>
-        <div className="text-[21px] font-extrabold tracking-[-0.01em] tabular-nums">{value}</div>
+        <div className="text-[21px] font-extrabold tracking-[-0.01em]">{value}</div>
       </div>
     </div>
   )
@@ -33,7 +33,7 @@ function OverviewStat({ icon: Icon, iconClass, label, value }: { icon: LucideIco
 function SummaryPill({ count, label }: { count: number; label: string }) {
   return (
     <span className="inline-flex h-[26px] items-center gap-1 rounded-full bg-bg-subtle px-[11px] text-[12px] font-semibold text-muted-foreground">
-      <b className="font-extrabold tabular-nums text-foreground">{count}</b> {label}
+      <b className="font-extrabold text-foreground">{count}</b> {label}
     </span>
   )
 }
@@ -182,7 +182,7 @@ export default function Categories() {
             <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-border bg-card px-[18px] py-4 shadow-glass-1 md:hidden">
               <div className="flex flex-col gap-[3px]">
                 <span className="text-[12px] font-semibold text-muted-foreground">{t('categories.summary.monthlyBudget')}</span>
-                <span className="text-[24px] font-extrabold leading-[1.05] tracking-[-0.015em] tabular-nums">{fmtTotal(monthlyTotal)}</span>
+                <span className="text-[24px] font-extrabold leading-[1.05] tracking-[-0.015em]">{fmtTotal(monthlyTotal)}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 <SummaryPill count={list.length} label={t('categories.summary.categoriesPill')} />

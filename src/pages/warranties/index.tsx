@@ -63,7 +63,7 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: nu
           <Icon className="size-[17px]" />
         </span>
       </div>
-      <div className={cn('mt-2 text-[30px] font-extrabold tabular-nums leading-none', s.num)}>{value}</div>
+      <div className={cn('mt-2 text-[30px] font-extrabold leading-none', s.num)}>{value}</div>
     </div>
   )
 }
@@ -303,19 +303,19 @@ export default function WarrantiesPage() {
                   <div className="flex flex-col gap-0.5">
                     <span className="t-xs text-fg-faint">{t('warranties.tracked')}</span>
                     <span className="flex items-baseline gap-1.5">
-                      <span className="text-[30px] font-extrabold tabular-nums leading-none">{stats.total}</span>
+                      <span className="text-[30px] font-extrabold leading-none">{stats.total}</span>
                       <span className="text-[12px] text-muted-foreground">{t('warranties.warrantiesLabel')}</span>
                     </span>
                   </div>
                   <div className="flex flex-wrap justify-end gap-1.5">
                     <span className="inline-flex h-7 items-center gap-1 rounded-full bg-success-soft px-2.5 text-[11.5px] font-medium text-success-foreground">
-                      <b className="tabular-nums">{stats.active}</b> {t('warranties.countActive')}
+                      <b>{stats.active}</b> {t('warranties.countActive')}
                     </span>
                     <span className="inline-flex h-7 items-center gap-1 rounded-full bg-warning-soft px-2.5 text-[11.5px] font-medium text-warning-foreground">
-                      <b className="tabular-nums">{stats.expiringSoon}</b> {t('warranties.countExpiring')}
+                      <b>{stats.expiringSoon}</b> {t('warranties.countExpiring')}
                     </span>
                     <span className="inline-flex h-7 items-center gap-1 rounded-full bg-destructive-soft px-2.5 text-[11.5px] font-medium text-[color:var(--destructive-foreground-on-soft)]">
-                      <b className="tabular-nums">{stats.expired}</b> {t('warranties.countExpired')}
+                      <b>{stats.expired}</b> {t('warranties.countExpired')}
                     </span>
                   </div>
                 </div>

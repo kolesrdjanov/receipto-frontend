@@ -390,7 +390,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
               id="totalAmount"
               type="number"
               step="0.01"
-              className="tabular-nums"
+             
               {...register('totalAmount')}
               placeholder="0.00"
               data-testid="receipt-amount-input"
@@ -452,7 +452,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
           </Label>
           <Input
             id="receiptNumber"
-            className="tabular-nums"
+           
             {...register('receiptNumber')}
             placeholder={t('receipts.modal.receiptNumberPlaceholder')}
             data-testid="receipt-number-input"

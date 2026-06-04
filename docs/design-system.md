@@ -72,8 +72,9 @@ type are kept (dead for theming) for safe migration — sweep later with product
 
 `.t-display` (44/800) · `.t-h1` (32/700) · `.t-h2` (24/700) · `.t-h3` (20/600) ·
 `.t-title` (17/600) · `.t-body` (15/400) · `.t-body-strong` (15/600) · `.t-sm` (13/500) ·
-`.t-xs` (11/600, uppercase, tracked) · `.t-num` (tabular-nums). Use these for
-headings/labels instead of ad-hoc `text-2xl font-bold`.
+`.t-xs` (11/600, uppercase, tracked). Use these for
+headings/labels instead of ad-hoc `text-2xl font-bold`. (Numbers/amounts render in the normal
+body font — **no** `tabular-nums`/`.t-num`; that utility was retired.)
 
 ## Component classes (`src/index.css`)
 
@@ -133,8 +134,8 @@ surface instead of re-deriving the pattern.
 filled look**: `h-10 rounded-xl border-border bg-bg-subtle/70 dark:bg-input/55`, focus
 `border-primary` + `ring-4 ring-primary/15`. This is the single field appearance across every
 form — don't reintroduce `bg-transparent` / `bg-background` / `rounded-md` per field. Money &
-number amounts use `.t-num` (tabular **+ Plus Jakarta Sans** display face — the system-ui body
-font's digits read "off" for amounts).
+number amounts render in the normal body font — the `.t-num` / `tabular-nums` utility was
+**retired** (do not reintroduce it).
 
 ## App navigation shell (`src/components/layout/`)
 

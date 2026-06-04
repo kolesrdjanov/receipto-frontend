@@ -54,7 +54,7 @@ export function CategorySuggestionCard({
           </span>
           <Badge
             variant="secondary"
-            className="text-[10.5px] font-semibold px-2 py-0.5 shrink-0 rounded-full bg-brand-violet/15 text-brand-violet-foreground border-0 tabular-nums"
+            className="text-[10.5px] font-semibold px-2 py-0.5 shrink-0 rounded-full bg-brand-violet/15 text-brand-violet-foreground border-0"
           >
             {suggestion.confidence}%
           </Badge>

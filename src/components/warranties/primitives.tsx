@@ -216,7 +216,7 @@ export function StatusTabs({
             {t(`warranties.tabs.${key}`)}
             <span
               className={cn(
-                'min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px] tabular-nums',
+                'min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px]',
                 on ? 'bg-primary-soft text-primary' : 'bg-bg-subtle text-fg-faint',
               )}
             >

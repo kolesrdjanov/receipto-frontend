@@ -141,7 +141,7 @@ export function StatTile({
       </div>
       <div
         className={cn(
-          'font-display font-extrabold leading-[1.05] tracking-[-0.02em] tabular-nums',
+          'font-display font-extrabold leading-[1.05] tracking-[-0.02em]',
           hero ? 'text-[36px]' : big ? 'text-[32px]' : 'text-[22px]',
           primary && 'text-primary',
         )}
@@ -167,7 +167,7 @@ export function TrendPill({ value, className }: { value: number; className?: str
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
+        'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold',
         up ? 'bg-warning-soft text-warning-foreground' : 'bg-success-soft text-success-foreground',
         className,
       )}

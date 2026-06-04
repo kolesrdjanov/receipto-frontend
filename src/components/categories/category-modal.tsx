@@ -248,7 +248,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
                   {nameValue || t('categories.modal.previewNamePlaceholder')}
                 </div>
                 {budgetValue && budgetValue > 0 ? (
-                  <div className="mt-0.5 text-[12px] tabular-nums text-muted-foreground">
+                  <div className="mt-0.5 text-[12px] text-muted-foreground">
                     {formatMoney(budgetValue, displayCurrency)} {t('categories.perMonth')}
                   </div>
                 ) : (
@@ -321,7 +321,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
                   step="1"
                   inputMode="numeric"
                   placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
-                  className={cn(inputCls, 'tabular-nums')}
+                  className={cn(inputCls, '')}
                   data-testid="category-budget-input"
                   {...register('monthlyBudget')}
                 />

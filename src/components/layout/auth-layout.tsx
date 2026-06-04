@@ -30,7 +30,7 @@ function MiniDashboard() {
               <TrendingDown className="size-3" /> 12%
             </span>
           </div>
-          <div className="text-[34px] font-extrabold leading-none tracking-tight tabular-nums">
+          <div className="text-[34px] font-extrabold leading-none tracking-tight">
             €1,284<span className="text-muted-foreground">.50</span>
           </div>
           <div className="mt-3.5 h-[7px] overflow-hidden rounded-full bg-muted">
@@ -46,7 +46,7 @@ function MiniDashboard() {
             <div className="text-[14px] font-semibold text-foreground">Maxi</div>
             <div className="text-[11.5px] font-medium text-muted-foreground">Groceries · QR scanned</div>
           </div>
-          <div className="text-[15px] font-bold tabular-nums">€48.20</div>
+          <div className="text-[15px] font-bold">€48.20</div>
         </div>
       </div>
     </div>

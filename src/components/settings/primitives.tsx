@@ -198,7 +198,7 @@ export function RankCard({
       <div className="mt-4">
         <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
           <span>{t('settings.profile.rank.progress')}</span>
-          <span className="t-num">{Math.round(progress)}%</span>
+          <span>{Math.round(progress)}%</span>
         </div>
         <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-bg-subtle">
           <div className="h-full rounded-full" style={{ width: `${progress}%`, background: tone.fill }} />

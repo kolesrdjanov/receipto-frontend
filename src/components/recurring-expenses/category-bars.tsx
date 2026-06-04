@@ -25,7 +25,7 @@ export function CategoryBars({
                 </span>
                 <span className="truncate text-[13px] font-medium">{c.name}</span>
               </span>
-              <span className="shrink-0 text-[12.5px] tabular-nums text-muted-foreground">
+              <span className="shrink-0 text-[12.5px] text-muted-foreground">
                 {formatAmount(c.value)}
               </span>
             </div>

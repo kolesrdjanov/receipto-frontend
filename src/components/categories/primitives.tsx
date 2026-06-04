@@ -64,7 +64,7 @@ export function BudgetLine({
       style={{ fontSize: compact ? 11.5 : 12.5 }}
     >
       <Wallet className={cn('text-fg-faint', compact ? 'size-[11px]' : 'size-3')} />
-      <span className="tabular-nums">{formatMoney(amount, currency)}</span>
+      <span>{formatMoney(amount, currency)}</span>
       <span className="font-medium text-fg-faint">{t('categories.perMonth')}</span>
     </span>
   )

@@ -235,7 +235,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
                 <span className="t-xs text-muted-foreground">{t('coach.thisWeek')}</span>
                 <TrendPill value={convertedWeeklyChangePercent} />
               </div>
-              <p className="text-[20px] font-extrabold leading-tight tabular-nums">
+              <p className="text-[20px] font-extrabold leading-tight">
                 {formatMoney(thisWeekConverted, targetCurrency)}
               </p>
               <p className="text-[11px] text-muted-foreground">
@@ -247,7 +247,7 @@ export function CoachCard({ displayCurrency }: CoachCardProps) {
             {summary.topCategory ? (
               <div className="space-y-1 rounded-xl bg-bg-subtle p-3">
                 <span className="t-xs text-muted-foreground">{t('coach.topSpending')}</span>
-                <p className="text-[20px] font-extrabold leading-tight tabular-nums">
+                <p className="text-[20px] font-extrabold leading-tight">
                   {formatMoney(topCategoryConverted ?? summary.topCategory.amount, targetCurrency)}
                 </p>
                 <p className="truncate text-[11px] text-muted-foreground">

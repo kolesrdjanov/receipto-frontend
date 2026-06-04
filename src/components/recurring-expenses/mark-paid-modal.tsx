@@ -158,7 +158,7 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
               step="0.01"
               min="0"
               disabled={expense.isFixed}
-              className="tabular-nums disabled:bg-bg-subtle disabled:opacity-90"
+              className="disabled:bg-bg-subtle disabled:opacity-90"
               {...register('amount')}
             />
             {expense.isFixed && (

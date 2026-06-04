@@ -34,7 +34,7 @@ const INFO_KEY = 'recurring-info-dismissed'
 function StatCell({ value, label, tone }: { value: number; label: string; tone?: string }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-xl bg-bg-subtle px-3 py-2.5">
-      <span className={cn('t-num text-[19px] font-extrabold leading-none', tone ?? 'text-foreground')}>
+      <span className={cn('text-[19px] font-extrabold leading-none', tone ?? 'text-foreground')}>
         {value}
       </span>
       <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
@@ -256,12 +256,12 @@ export default function RecurringExpenses() {
                 <div className="flex items-center gap-5">
                   <div className="flex flex-col gap-1">
                     <span className="text-[13px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                    <span className="t-num text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
+                    <span className="text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
                   </div>
                   <div className="w-px self-stretch bg-hairline-soft" />
                   <div className="flex flex-col gap-1">
                     <span className="text-[13px] text-muted-foreground">{t('recurring.stats.annualProjection')}</span>
-                    <span className="t-num text-[18px] font-extrabold leading-none text-fg-2">{formatAmount(monthlyTotal * 12)}</span>
+                    <span className="text-[18px] font-extrabold leading-none text-fg-2">{formatAmount(monthlyTotal * 12)}</span>
                   </div>
                 </div>
                 <div className="mt-auto grid grid-cols-4 gap-2 pt-5">
@@ -291,17 +291,17 @@ export default function RecurringExpenses() {
             <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                <span className="t-num text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
+                <span className="text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
               </div>
               <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px]">
                 <span className={cn('font-medium', overdueCount ? 'text-destructive' : 'text-muted-foreground')}>
-                  <b className="tabular-nums">{overdueCount}</b> {t('recurring.overview.overdue').toLowerCase()}
+                  <b>{overdueCount}</b> {t('recurring.overview.overdue').toLowerCase()}
                 </span>
                 <span className={cn('font-medium', dueSoonCount ? 'text-warning-foreground' : 'text-muted-foreground')}>
-                  <b className="tabular-nums">{dueSoonCount}</b> {t('recurring.overview.dueSoon').toLowerCase()}
+                  <b>{dueSoonCount}</b> {t('recurring.overview.dueSoon').toLowerCase()}
                 </span>
                 <span className="font-medium text-muted-foreground">
-                  <b className="tabular-nums">{activeCount}</b> {t('recurring.overview.active').toLowerCase()}
+                  <b>{activeCount}</b> {t('recurring.overview.active').toLowerCase()}
                 </span>
               </div>
             </div>

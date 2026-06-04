@@ -207,7 +207,7 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
               <div className="min-w-0">
                 <div className="truncate text-[14px] font-bold">{r.storeName || t('receipts.unknownStore')}</div>
                 <div className="mt-0.5 text-[12px] text-muted-foreground">
-                  <span className="tabular-nums">{fmtAmount(r)}</span> · {fmtDate(r.receiptDate)}
+                  <span>{fmtAmount(r)}</span> · {fmtDate(r.receiptDate)}
                 </div>
               </div>
               <div className="w-[168px] shrink-0">

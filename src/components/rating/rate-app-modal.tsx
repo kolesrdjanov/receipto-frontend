@@ -110,7 +110,7 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
               disabled={submitRating.isPending}
               className="resize-none rounded-[14px] pb-6"
             />
-            <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] tabular-nums text-fg-faint">
+            <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-fg-faint">
               {description.length}/1000
             </span>
           </div>

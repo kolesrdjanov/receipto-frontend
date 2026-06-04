@@ -9,7 +9,7 @@ export function Amount({
   const n = Math.round(Number(value) || 0).toLocaleString('sr-RS')
   return (
     <span
-      className={cn('t-num shrink-0 tabular-nums', muted ? 'text-muted-foreground' : 'text-foreground', className)}
+      className={cn('shrink-0', muted ? 'text-muted-foreground' : 'text-foreground', className)}
       style={{ fontSize: size, fontWeight: weight, lineHeight: 1 }}
     >
       {n} {currency}
