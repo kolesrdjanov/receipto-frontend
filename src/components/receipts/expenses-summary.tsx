@@ -12,6 +12,8 @@ interface ExpensesSummaryProps {
   onToggleSelectMode: () => void
   rangeFrom?: number
   rangeTo?: number
+  selectedCount: number
+  selectedTotal: number
 }
 
 export function ExpensesSummary({
@@ -22,11 +24,32 @@ export function ExpensesSummary({
   onToggleSelectMode,
   rangeFrom,
   rangeTo,
+  selectedCount,
+  selectedTotal,
 }: ExpensesSummaryProps) {
   const { t } = useTranslation()
   const { convert, preferredCurrency } = useCurrencyConverter()
   const convertedTotal = totalAmounts.reduce((s, { currency, total }) => s + convert(total, currency), 0)
   const mixed = !(totalAmounts.length === 1 && totalAmounts[0].currency === preferredCurrency)
+
+  if (selectMode) {
+    return (
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[15px] font-semibold text-foreground">{t('receipts.selected', { count: selectedCount })}</span>
+          <span className="text-sm text-muted-foreground">·</span>
+          <Amount value={selectedTotal} currency={preferredCurrency} size={15} muted />
+        </div>
+        <button
+          onClick={onToggleSelectMode}
+          className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle hover:text-foreground"
+        >
+          <X className="size-3.5" />
+          {t('common.cancel')}
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">

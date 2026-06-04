@@ -9,6 +9,8 @@
     "close": "Close",
     "delete": "Delete",
     "deleting": "Deleting...",
+    "edit": "Edit",
+    "remove": "Remove",
     "create": "Create",
     "creating": "Creating...",
     "update": "Update",
@@ -402,6 +404,8 @@
     "uncategorized": "Uncategorized",
     "loadMore": "Load more",
     "select": "Select",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
     "count": "{{count}} total",
     "unknownStore": "Unknown Store",
     "modal": {

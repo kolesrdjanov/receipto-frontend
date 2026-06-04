@@ -9,6 +9,8 @@
     "close": "Zatvori",
     "delete": "Obriši",
     "deleting": "Brisanje...",
+    "edit": "Izmeni",
+    "remove": "Ukloni",
     "create": "Kreiraj",
     "creating": "Kreiranje...",
     "update": "Ažuriraj",
@@ -402,6 +404,8 @@
     "uncategorized": "Bez kategorije",
     "loadMore": "Učitaj još",
     "select": "Izaberi",
+    "selectAll": "Izaberi sve",
+    "deselectAll": "Poništi izbor",
     "count": "{{count}} ukupno",
     "unknownStore": "Nepoznata prodavnica",
     "modal": {

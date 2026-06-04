@@ -4,21 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { AppLayout } from '@/components/layout/app-layout'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
@@ -28,6 +13,9 @@ import { FilterSheet } from '@/components/receipts/filter-sheet'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { AddMenu, AddSheet, ImportExportSheet } from '@/components/receipts/add-menu'
 import { ImportGuideDialog } from '@/components/receipts/import-guide-dialog'
+import { BulkBar } from '@/components/receipts/bulk-bar'
+import { AssignCategoryDialog } from '@/components/receipts/assign-category-dialog'
+import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 import { useFabStore } from '@/store/fab'
 import {
   useReceipts,
@@ -49,7 +37,7 @@ import { PageTransition } from '@/components/ui/animated'
 import { ExpenseFeed } from '@/components/receipts/expense-feed'
 import { ExpensesMobileHeader } from '@/components/receipts/expenses-mobile-header'
 import { ExpensesSummary } from '@/components/receipts/expenses-summary'
-import { Camera, Loader2, Trash2, X, Tag, QrCode } from 'lucide-react'
+import { Camera, Loader2, QrCode } from 'lucide-react'
 import { toast } from 'sonner'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
@@ -124,7 +112,6 @@ export default function Receipts() {
   const [selectMode, setSelectMode] = useState(false)
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false)
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false)
-  const [bulkCategoryId, setBulkCategoryId] = useState<string>('')
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: viewerReceiptFull } = useReceipt(viewerReceiptId ?? '')
@@ -167,6 +154,19 @@ export default function Receipts() {
     setPrefillData(null)
     setIsModalOpen(true)
   }
+
+  // Honor ?action=scan|add routed here by the global mobile FAB Add/Scan sheet, then
+  // strip the param so it doesn't re-fire.
+  useEffect(() => {
+    const action = searchParams.get('action')
+    if (action !== 'scan' && action !== 'add') return
+    if (action === 'scan') openQrScanner()
+    else handleAddManually()
+    const next = new URLSearchParams(searchParams)
+    next.delete('action')
+    setSearchParams(next, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const handleAddFromTemplate = () => {
     setTemplateSelectorOpen(true)
@@ -225,6 +225,33 @@ export default function Receipts() {
     })
   }
 
+  const { convert, preferredCurrency } = useCurrencyConverter()
+
+  // Select-all toggles every currently-loaded row (desktop = page, mobile = all loaded).
+  const currentPageIds = receipts.map((r) => r.id)
+  const allSelected = currentPageIds.length > 0 && currentPageIds.every((id) => selectedIds.has(id))
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (currentPageIds.every((id) => prev.has(id))) currentPageIds.forEach((id) => next.delete(id))
+      else currentPageIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  // Converted sum of selected (loaded) rows — see plan D5 for the desktop cross-page caveat.
+  const selectedTotal = receipts.reduce(
+    (s, r) => (selectedIds.has(r.id) ? s + convert(Number(r.totalAmount) || 0, r.currency || 'RSD') : s),
+    0,
+  )
+
+  // Smart-open (D1): hasJournal → viewer, else editable → edit, else locked toast.
+  const handleOpenReceipt = (r: Receipt) => {
+    if (r.hasJournal) { handleViewReceipt(r); return }
+    if (r.group?.isArchived) { toast.info(t('receipts.archivedGroupLocked')); return }
+    if (r.status === 'recurring') { toast.info(t('receipts.recurringLocked')); return }
+    handleEditReceipt(r)
+  }
 
   const confirmBulkDelete = async () => {
     try {
@@ -241,11 +268,11 @@ export default function Receipts() {
     }
   }
 
-  const confirmBulkCategoryUpdate = async () => {
+  const confirmBulkCategoryUpdate = async (categoryId: string) => {
     try {
       const result = await bulkUpdateCategory.mutateAsync({
         ids: Array.from(selectedIds),
-        categoryId: bulkCategoryId || null,
+        categoryId,
       })
       if (result.skipped > 0) {
         toast.warning(t('receipts.bulkCategoryPartial', { updated: result.updated, skipped: result.skipped }))
@@ -254,7 +281,6 @@ export default function Receipts() {
       }
       setSelectedIds(new Set())
       setBulkCategoryOpen(false)
-      setBulkCategoryId('')
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       toast.error(errorMessage)
@@ -372,6 +398,9 @@ export default function Receipts() {
         sortOrder={sortOrder}
         onToggleSort={toggleSort}
         onImportExport={() => setImportExportSheetOpen(true)}
+        selectedCount={selectedIds.size}
+        allSelected={allSelected}
+        onToggleSelectAll={toggleSelectAll}
       />
 
       <div className="md:flex md:items-start md:gap-6">
@@ -392,6 +421,8 @@ export default function Receipts() {
               onToggleSelectMode={() => { setSelectMode((v) => !v); setSelectedIds(new Set()) }}
               rangeFrom={meta && !isMobile ? (meta.page - 1) * meta.limit + 1 : undefined}
               rangeTo={meta && !isMobile ? Math.min(meta.page * meta.limit, meta.total) : undefined}
+              selectedCount={selectedIds.size}
+              selectedTotal={selectedTotal}
             />
           )}
 
@@ -415,45 +446,13 @@ export default function Receipts() {
             </div>
           ) : (
             <>
-              {selectedIds.size > 0 && (
-                <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-muted/50 border rounded-lg">
-                  <span className="text-sm font-medium">
-                    {t('receipts.selected', { count: selectedIds.size })}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => { setBulkCategoryId(''); setBulkCategoryOpen(true) }}
-                  >
-                    <Tag className="h-4 w-4" />
-                    {t('receipts.assignCategory')}
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setBulkDeleteConfirmOpen(true)}
-                    disabled={bulkDelete.isPending}
-                  >
-                    {bulkDelete.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    {t('receipts.removeSelected')}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedIds(new Set())}
-                  >
-                    <X className="h-4 w-4" />
-                    {t('receipts.clearSelection')}
-                  </Button>
-                </div>
-              )}
-
               <ExpenseFeed
                 receipts={receipts}
                 wide={!isMobile}
                 selectMode={selectMode}
                 selectedIds={selectedIds}
                 onToggleSelect={toggleSelect}
+                onOpen={handleOpenReceipt}
                 onView={handleViewReceipt}
                 onEdit={handleEditReceipt}
                 onDelete={handleDeleteReceipt}
@@ -567,41 +566,14 @@ export default function Receipts() {
         isLoading={bulkDelete.isPending}
       />
 
-      <Dialog open={bulkCategoryOpen} onOpenChange={setBulkCategoryOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t('receipts.assignCategory')}</DialogTitle>
-            <DialogDescription>
-              {t('receipts.bulkCategoryDescription', { count: selectedIds.size })}
-            </DialogDescription>
-          </DialogHeader>
-          <Select value={bulkCategoryId} onValueChange={setBulkCategoryId}>
-            <SelectTrigger>
-              <SelectValue placeholder={t('receipts.modal.selectCategory')} />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.icon && <span className="mr-2">{category.icon}</span>}
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBulkCategoryOpen(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              onClick={confirmBulkCategoryUpdate}
-              disabled={!bulkCategoryId || bulkUpdateCategory.isPending}
-            >
-              {bulkUpdateCategory.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t('common.save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AssignCategoryDialog
+        open={bulkCategoryOpen}
+        onOpenChange={setBulkCategoryOpen}
+        categories={categories}
+        count={selectedIds.size}
+        onAssign={confirmBulkCategoryUpdate}
+        isLoading={bulkUpdateCategory.isPending}
+      />
 
       <FilterSheet
         open={filterSheetOpen}
@@ -626,6 +598,18 @@ export default function Receipts() {
         onOpenChange={setImportExportSheetOpen}
         onImport={() => setImportDialogOpen(true)}
         onExport={handleExport}
+      />
+
+      <BulkBar
+        count={selectedIds.size}
+        total={selectedTotal}
+        currency={preferredCurrency}
+        allSelected={allSelected}
+        onToggleSelectAll={toggleSelectAll}
+        onAssign={() => setBulkCategoryOpen(true)}
+        onRemove={() => setBulkDeleteConfirmOpen(true)}
+        onClear={() => setSelectedIds(new Set())}
+        removing={bulkDelete.isPending}
       />
       </PageTransition>
     </AppLayout>

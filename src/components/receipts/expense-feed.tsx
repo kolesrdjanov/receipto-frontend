@@ -16,6 +16,7 @@ interface ExpenseFeedProps {
   selectMode?: boolean
   selectedIds?: Set<string>
   onToggleSelect?: (id: string) => void
+  onOpen?: (r: Receipt) => void
   onView?: (r: Receipt) => void
   onEdit?: (r: Receipt) => void
   onDelete?: (r: Receipt) => void
@@ -27,6 +28,7 @@ export function ExpenseFeed({
   selectMode,
   selectedIds,
   onToggleSelect,
+  onOpen,
   onView,
   onEdit,
   onDelete,
@@ -71,6 +73,7 @@ export function ExpenseFeed({
                   selectMode={selectMode}
                   selected={!!selectedIds?.has(r.id)}
                   onToggleSelect={onToggleSelect}
+                  onOpen={onOpen}
                   onView={onView}
                   onEdit={onEdit}
                   onDelete={onDelete}

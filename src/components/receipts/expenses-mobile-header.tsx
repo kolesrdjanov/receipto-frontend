@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MoreHorizontal, CircleCheckBig, ArrowDownWideNarrow, ArrowDownUp, SlidersHorizontal, type LucideIcon } from 'lucide-react'
+import { MoreHorizontal, CircleCheckBig, ArrowDownWideNarrow, ArrowDownUp, SlidersHorizontal, X, type LucideIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Amount } from '@/components/receipts/primitives'
 import { QuickChips } from '@/components/receipts/quick-chips'
@@ -34,12 +34,16 @@ interface ExpensesMobileHeaderProps {
   sortOrder: 'ASC' | 'DESC'
   onToggleSort: () => void
   onImportExport: () => void
+  selectedCount: number
+  allSelected: boolean
+  onToggleSelectAll: () => void
 }
 
 /** Mobile frosted page header: title + total + count + "…" menu + quick-chips + filter button. */
 export function ExpensesMobileHeader({
   totalAmounts, count, hasReceipts, filters, categories, onFiltersChange,
   onOpenFilters, selectMode, onToggleSelectMode, sortOrder, onToggleSort, onImportExport,
+  selectedCount, allSelected, onToggleSelectAll,
 }: ExpensesMobileHeaderProps) {
   const { t } = useTranslation()
   const { convert, preferredCurrency } = useCurrencyConverter()
@@ -53,6 +57,29 @@ export function ExpensesMobileHeader({
       className="sticky top-0 z-20 -mx-4 -mt-6 mb-3 border-b border-hairline-soft bg-[oklch(from_var(--background)_l_c_h/0.82)] px-5 pb-3.5 [backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)] md:hidden"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)' }}
     >
+      {selectMode ? (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={onToggleSelectMode}
+              aria-label={t('common.cancel')}
+              className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+            >
+              <X className="size-5" />
+            </button>
+            <span className="t-h3 truncate">{t('receipts.selected', { count: selectedCount })}</span>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleSelectAll}
+            className="shrink-0 text-[14px] font-semibold text-primary"
+          >
+            {allSelected ? t('receipts.deselectAll') : t('receipts.selectAll')}
+          </button>
+        </div>
+      ) : (
+        <>
       <div className="mb-4 flex items-end justify-between">
         <div className="min-w-0">
           <h1 className="t-h1 text-[28px]">{t('receipts.title')}</h1>
@@ -95,6 +122,8 @@ export function ExpensesMobileHeader({
           <SlidersHorizontal className="size-[18px]" />
         </button>
       </div>
+        </>
+      )}
     </div>
   )
 }
