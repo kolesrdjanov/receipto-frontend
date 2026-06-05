@@ -17,7 +17,7 @@ the bottom; don't renumber existing ones.
 | TD-7 | Extract shared list/empty/action primitives into `components/glass/` | Medium | 🟡 In progress (EmptyState + AddButton done) |
 | TD-8 | Close API hook-layer gaps (net-new endpoints that skipped the hooks layer) | Low | ✅ Done |
 | TD-9 | Standardize modal footers on the `GlassDialog` `actions` API | Medium | 🟡 In progress (7 modals on actions; categories/loyalty + confirm-dialog remain) |
-| TD-10 | Templates page: replace the shadcn table with the Glass list-card pattern | Medium | 🔴 Not started |
+| TD-10 | Templates page: replace the shadcn table with the Glass list-card pattern | Medium | ✅ Done (`80a92a4`) |
 | TD-11 | Expenses "Load more" jumps to bottom on mobile — preserve scroll position | Medium | 🔴 Not started |
 | TD-12 | Desktop sidebar nav items don't match `design_handoff_navigation` | Medium | 🔴 Not started |
 | TD-13 | "+ Add {Entity}" label convention for every create button | Low | 🟡 In progress (categories/loyalty/recurring done; groups/savings remain) |
@@ -736,7 +736,7 @@ are per-modal and inconsistent. `recurring-expense-modal.tsx` is migrated and is
 
 ## TD-10 · Templates page — replace the shadcn table with the Glass list-card pattern
 
-**Priority:** Medium · **Status:** 🔴 Not started
+**Priority:** Medium · **Status:** ✅ Done (`80a92a4`) — needs a visual QA pass (build-verified only)
 
 ### Why this is debt
 `components/templates/templates-table.tsx` still renders a raw shadcn `<Table>` while every other list
