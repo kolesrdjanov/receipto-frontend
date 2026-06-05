@@ -86,12 +86,14 @@ export function RowActionList({
   onDelete,
 }: { expense: RecurringExpense; status: RecurringStatus } & RowActions) {
   const { t } = useTranslation()
-  const actionable = status === 'overdue' || status === 'duesoon'
+  // Offer "Mark paid" whenever there's an outstanding due date — including `upcoming`
+  // bills (pay early). Hidden only when already caught up / paused / ended.
+  const canMarkPaid = status === 'overdue' || status === 'duesoon' || status === 'upcoming'
   const item = 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors hover:bg-bg-subtle'
   const iconCls = 'size-[18px] shrink-0 text-muted-foreground'
   return (
     <div className="flex flex-col gap-0.5">
-      {actionable && (
+      {canMarkPaid && (
         <button type="button" className={cn(item, 'text-primary')} onClick={() => onMarkPaid?.(expense)}>
           <CreditCard className="size-[18px] shrink-0" />
           {t('recurring.actions.markPaid')}

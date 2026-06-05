@@ -3,17 +3,9 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useSendSupportMessage } from '@/hooks/support/use-support'
 import { toast } from 'sonner'
@@ -23,8 +15,9 @@ interface ContactSupportModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-// NOTE: messages below reuse the existing hardcoded English strings that were
-// previously rendered inline (no i18n keys exist for them).
+const FORM_ID = 'contact-support-form'
+const labelCls = 'mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground'
+
 const createSupportSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
     subject: z
@@ -49,89 +42,80 @@ export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalP
     formState: { isSubmitting, errors },
   } = useForm<SupportFormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      subject: '',
-      message: '',
-    },
+    defaultValues: { subject: '', message: '' },
   })
 
   const sendSupportMessage = useSendSupportMessage()
+  const pending = isSubmitting || sendSupportMessage.isPending
+
+  const close = () => {
+    onOpenChange(false)
+    reset()
+  }
 
   const onSubmit = async (data: SupportFormData) => {
     try {
       await sendSupportMessage.mutateAsync(data)
       toast.success(t('support.success'))
-      onOpenChange(false)
-      reset()
+      close()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('support.error')
-      toast.error(t('support.error'), {
-        description: errorMessage,
-      })
+      toast.error(t('support.error'), { description: errorMessage })
     }
   }
 
-  const handleClose = () => {
-    onOpenChange(false)
-    reset()
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t('support.title')}</DialogTitle>
-          <DialogDescription>{t('support.description')}</DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={(v) => (v ? onOpenChange(true) : close())}
+      title={t('support.title')}
+      description={t('support.description')}
+      desktopWidth={520}
+      actions={{
+        primary: (
+          <Button type="submit" form={FORM_ID} loading={pending} loadingText={t('support.sending')}>
+            {t('support.send')}
+          </Button>
+        ),
+        secondary: (
+          <Button type="button" variant="outline" onClick={close} disabled={pending}>
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="subject" className={labelCls}>
+            {t('support.subject')}
+          </label>
+          <Input
+            id="subject"
+            {...register('subject')}
+            placeholder={t('support.subjectPlaceholder')}
+            disabled={pending}
+          />
+          {errors.subject && (
+            <p className="ml-0.5 mt-1.5 text-xs text-destructive">{errors.subject.message}</p>
+          )}
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="subject">{t('support.subject')}</Label>
-            <Input
-              id="subject"
-              {...register('subject')}
-              placeholder={t('support.subjectPlaceholder')}
-              disabled={isSubmitting}
-            />
-            {errors.subject && (
-              <p className="text-sm text-destructive">{errors.subject.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="message">{t('support.message')}</Label>
-            <Textarea
-              id="message"
-              {...register('message')}
-              placeholder={t('support.messagePlaceholder')}
-              rows={6}
-              disabled={isSubmitting}
-            />
-            {errors.message && (
-              <p className="text-sm text-destructive">{errors.message.message}</p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting || sendSupportMessage.isPending}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || sendSupportMessage.isPending}
-            >
-              {isSubmitting || sendSupportMessage.isPending
-                ? t('support.sending')
-                : t('support.send')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div>
+          <label htmlFor="message" className={labelCls}>
+            {t('support.message')}
+          </label>
+          <Textarea
+            id="message"
+            {...register('message')}
+            placeholder={t('support.messagePlaceholder')}
+            rows={6}
+            disabled={pending}
+          />
+          {errors.message && (
+            <p className="ml-0.5 mt-1.5 text-xs text-destructive">{errors.message.message}</p>
+          )}
+        </div>
+      </form>
+    </GlassDialog>
   )
 }

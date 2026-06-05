@@ -87,10 +87,14 @@ export default function Categories() {
 
   const convertAmount = useCallback(
     (amount: number, fromCurrency: string): number => {
-      if (fromCurrency === displayCurrency || !exchangeRates) return amount
+      // `monthlyBudget` is a Postgres `decimal` column → arrives as a string at
+      // runtime. Coerce to a number so the budget total adds instead of string-
+      // concatenating (which yielded NaN → "0 RSD" for 2+ budgeted categories).
+      const value = Number(amount) || 0
+      if (fromCurrency === displayCurrency || !exchangeRates) return value
       const rate = exchangeRates[fromCurrency]
-      if (!rate || rate === 0) return amount
-      return amount / rate
+      if (!rate || rate === 0) return value
+      return value / rate
     },
     [displayCurrency, exchangeRates],
   )
