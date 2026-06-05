@@ -35,15 +35,17 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
       title={t('receipts.templateSelector.title')}
       description={t('receipts.templateSelector.description')}
       desktopWidth={520}
-      footer={
-        hasTemplates ? (
-          <div className="flex">
-            <Button variant="outline" className="rounded-xl" onClick={handleCreateTemplate}>
-              <Plus className="size-4" />
-              {t('receipts.templateSelector.createTemplate')}
-            </Button>
-          </div>
-        ) : undefined
+      actions={
+        hasTemplates
+          ? {
+              primary: (
+                <Button variant="outline" className="rounded-xl" onClick={handleCreateTemplate}>
+                  <Plus className="size-4" />
+                  {t('receipts.templateSelector.createTemplate')}
+                </Button>
+              ),
+            }
+          : undefined
       }
     >
       {isLoading ? (

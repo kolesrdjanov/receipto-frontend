@@ -193,44 +193,30 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
 
   const previewCard = { cardName, codeType, codeFormat, codeValue, color } as LoyaltyCard
 
-  const footer = (
-    <>
-      {/* Desktop */}
-      <div className="hidden items-center gap-2 md:flex">
-        {isEditing ? (
-          <Button type="button" variant="destructive" size="sm" className="mr-auto" onClick={requestDelete}>
-            <Trash2 className="size-4" />
-            {t('common.delete')}
-          </Button>
-        ) : (
-          <div className="flex-1" />
-        )}
-        <Button type="button" variant="outline" onClick={close} disabled={isPending}>
-          {t('common.cancel')}
-        </Button>
-        <Button type="submit" form={FORM_ID} disabled={!canSubmit}>
-          {isPending && <Loader2 className="size-4 animate-spin" />}
-          {primaryLabel}
-        </Button>
-      </div>
-      {/* Mobile */}
-      <div className="flex flex-col gap-2 md:hidden">
-        <Button type="submit" form={FORM_ID} className="w-full" disabled={!canSubmit}>
-          {isPending && <Loader2 className="size-4 animate-spin" />}
-          {primaryLabel}
-        </Button>
-        <Button type="button" variant="ghost" className="w-full" onClick={close} disabled={isPending}>
-          {t('common.cancel')}
-        </Button>
-        {isEditing && (
-          <Button type="button" variant="ghost" className="w-full text-destructive hover:text-destructive" onClick={requestDelete}>
-            <Trash2 className="size-4" />
-            {t('loyaltyCards.deleteTitle')}
-          </Button>
-        )}
-      </div>
-    </>
-  )
+  const actions = {
+    primary: (
+      <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={!canSubmit}>
+        {isPending && <Loader2 className="size-4 animate-spin" />}
+        {primaryLabel}
+      </Button>
+    ),
+    secondary: (
+      <Button type="button" variant="outline" className="rounded-xl" onClick={close} disabled={isPending}>
+        {t('common.cancel')}
+      </Button>
+    ),
+    destructive: isEditing ? (
+      <Button
+        type="button"
+        variant="ghost"
+        className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={requestDelete}
+      >
+        <Trash2 className="size-4" />
+        {t('common.delete')}
+      </Button>
+    ) : undefined,
+  }
 
   return (
     <>
@@ -240,7 +226,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
         title={isEditing ? t('loyaltyCards.editCard') : t('loyaltyCards.addCard')}
         description={isEditing ? t('loyaltyCards.editDescription') : t('loyaltyCards.addDescription')}
         desktopWidth={440}
-        footer={footer}
+        actions={actions}
       >
         <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Card name */}

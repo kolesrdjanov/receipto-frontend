@@ -170,17 +170,19 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
       title={t('categories.reassign.title', { name: category?.name || '' })}
       description={t('categories.reassign.subtitle', { count: receipts!.length })}
       desktopWidth={580}
-      footer={
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing} className="sm:w-auto">
-            {t('common.cancel')}
-          </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isProcessing} className="sm:w-auto">
+      actions={{
+        primary: (
+          <Button variant="destructive" className="rounded-xl" onClick={handleConfirm} disabled={isProcessing}>
             {isProcessing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             {isProcessing ? t('categories.modal.reassigning') : t('categories.reassign.confirm')}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={isProcessing}>
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
     >
       <div className="flex flex-col gap-4">
         {/* Info banner */}

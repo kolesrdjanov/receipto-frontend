@@ -188,42 +188,31 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
     </button>
   )
 
-  const footer = (
-    <>
-      {/* Desktop */}
-      <div className="hidden items-center gap-2 md:flex">
-        {mode === 'edit' ? (
-          <Button type="button" variant="destructive" size="sm" className="mr-auto" onClick={requestDelete} data-testid="category-delete-button">
-            <Trash2 className="size-4" />
-            {t('common.delete')}
-          </Button>
-        ) : (
-          <div className="flex-1" />
-        )}
-        <Button type="button" variant="outline" onClick={close} disabled={pending} data-testid="category-cancel-button">
-          {t('common.cancel')}
+  const actions = {
+    primary: (
+      <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending} data-testid="category-submit-button">
+        {primaryLabel}
+      </Button>
+    ),
+    secondary: (
+      <Button type="button" variant="outline" className="rounded-xl" onClick={close} disabled={pending} data-testid="category-cancel-button">
+        {t('common.cancel')}
+      </Button>
+    ),
+    destructive:
+      mode === 'edit' ? (
+        <Button
+          type="button"
+          variant="ghost"
+          className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={requestDelete}
+          data-testid="category-delete-button"
+        >
+          <Trash2 className="size-4" />
+          {t('common.delete')}
         </Button>
-        <Button type="submit" form={FORM_ID} disabled={pending} data-testid="category-submit-button">
-          {primaryLabel}
-        </Button>
-      </div>
-      {/* Mobile */}
-      <div className="flex flex-col gap-2 md:hidden">
-        <Button type="submit" form={FORM_ID} className="w-full" disabled={pending}>
-          {primaryLabel}
-        </Button>
-        <Button type="button" variant="ghost" className="w-full" onClick={close} disabled={pending}>
-          {t('common.cancel')}
-        </Button>
-        {mode === 'edit' && (
-          <Button type="button" variant="ghost" className="w-full text-destructive hover:text-destructive" onClick={requestDelete}>
-            <Trash2 className="size-4" />
-            {t('categories.modal.deleteCategory')}
-          </Button>
-        )}
-      </div>
-    </>
-  )
+      ) : undefined,
+  }
 
   return (
     <>
@@ -233,7 +222,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
         title={mode === 'create' ? t('categories.modal.createTitle') : t('categories.modal.editTitle')}
         description={mode === 'create' ? t('categories.modal.createDescription') : t('categories.modal.editDescription')}
         desktopWidth={520}
-        footer={footer}
+        actions={actions}
       >
         <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" data-testid="category-form">
           {/* Live preview pill */}

@@ -30,18 +30,20 @@ export function WarrantyImportDialog({
 }: WarrantyImportDialogProps) {
   const { t } = useTranslation()
 
-  const footer = (
-    <div className="flex flex-col gap-2 sm:flex-row">
-      <Button type="button" variant="outline" onClick={onDownloadTemplate} className="flex-1">
-        <Download className="size-4" />
-        {t('warranties.import.guide.downloadTemplate')}
-      </Button>
-      <Button type="button" onClick={onSelectFile} disabled={importing} className="flex-1">
+  const actions = {
+    primary: (
+      <Button type="button" className="rounded-xl" onClick={onSelectFile} disabled={importing}>
         <Upload className="size-4" />
         {t('warranties.import.guide.selectFile')}
       </Button>
-    </div>
-  )
+    ),
+    secondary: (
+      <Button type="button" variant="outline" className="rounded-xl" onClick={onDownloadTemplate}>
+        <Download className="size-4" />
+        {t('warranties.import.guide.downloadTemplate')}
+      </Button>
+    ),
+  }
 
   return (
     <GlassDialog
@@ -50,7 +52,7 @@ export function WarrantyImportDialog({
       title={t('warranties.import.guide.title')}
       description={t('warranties.import.guide.description')}
       desktopWidth={500}
-      footer={footer}
+      actions={actions}
     >
       <div className="flex flex-col gap-4">
         <div>

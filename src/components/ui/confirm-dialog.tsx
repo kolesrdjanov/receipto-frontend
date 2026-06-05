@@ -48,7 +48,7 @@ export function ConfirmDialog({
       desktopWidth={420}
       showClose={false}
       header={
-        <div className="flex flex-col items-center pb-1 text-center md:items-start md:text-left">
+        <div className="flex flex-col items-center pb-6 pt-2 text-center md:items-start md:pb-1 md:pt-0 md:text-left">
           {danger && (
             <div className="mb-3.5 grid size-12 place-items-center rounded-2xl bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]">
               <AlertTriangle className="size-6" />
@@ -58,29 +58,31 @@ export function ConfirmDialog({
           <p className="t-sm mt-1.5 max-w-[340px] leading-relaxed text-muted-foreground">{description}</p>
         </div>
       }
-      footer={
-        <div className="flex gap-2 md:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 rounded-xl md:flex-none"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
-            {cancelLabel}
-          </Button>
+      actions={{
+        primary: (
           <Button
             type="button"
             variant={variant}
-            className="flex-1 rounded-xl md:flex-none"
+            className="rounded-xl"
             onClick={handleConfirm}
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="size-4 animate-spin" />}
             {confirmLabel}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            {cancelLabel}
+          </Button>
+        ),
+      }}
     />
   )
 }

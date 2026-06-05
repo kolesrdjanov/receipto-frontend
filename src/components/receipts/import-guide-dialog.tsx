@@ -31,18 +31,20 @@ export function ImportGuideDialog({ open, onOpenChange, onDownloadTemplate, onSe
       title={t('receipts.import.guide.title')}
       description={t('receipts.import.guide.description')}
       desktopWidth={520}
-      footer={
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" className="rounded-xl" onClick={onDownloadTemplate}>
-            <Download className="size-4" />
-            {t('receipts.import.guide.downloadTemplate')}
-          </Button>
+      actions={{
+        primary: (
           <Button className="rounded-xl" onClick={onSelectFile} disabled={importing}>
             {importing ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             {t('receipts.import.guide.selectFile')}
           </Button>
-        </div>
-      }
+        ),
+        secondary: (
+          <Button variant="outline" className="rounded-xl" onClick={onDownloadTemplate}>
+            <Download className="size-4" />
+            {t('receipts.import.guide.downloadTemplate')}
+          </Button>
+        ),
+      }}
     >
       <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
         {t('receipts.import.guide.columns')}
