@@ -437,9 +437,8 @@ shadcn look (verified 2026-06-04):
 - **Templates:** `components/templates/template-modal.tsx:4-11` (raw `Dialog`), legacy
   `templates-table.tsx`, `pages/templates/index.tsx:58` (`text-2xl font-bold`).
 - **Admin (LOW — internal only, defer):** all `pages/admin/*` + `components/admin/*` (legacy headers,
-  raw `Dialog` in `announcement-modal`/`create-user-modal`, the only raw `Drawer` consumer
-  `user-details-drawer.tsx:4`, literal palette colors `bg-emerald-100`/`bg-amber-100` in
-  `ratings-table.tsx`).
+  raw `Dialog` in `announcement-modal`/`create-user-modal`, literal palette colors
+  `bg-emerald-100`/`bg-amber-100` in `ratings-table.tsx`).
 
 **Cross-cutting (not screen-bound):**
 - Secondary **dashboard widgets** still carry off-token literals despite the dashboard cycle:
