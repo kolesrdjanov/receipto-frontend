@@ -3,10 +3,14 @@ import { cn } from '@/lib/utils'
 
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number
+  /** Extra classes for the fill indicator (e.g. `rounded-full`). */
+  indicatorClassName?: string
+  /** CSS color for the fill, overriding the default `bg-primary` (e.g. a status tint). */
+  indicatorColor?: string
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value = 0, ...props }, ref) => (
+  ({ className, value = 0, indicatorClassName, indicatorColor, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
@@ -16,8 +20,11 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       {...props}
     >
       <div
-        className="h-full bg-primary transition-all"
-        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        className={cn('h-full bg-primary transition-all', indicatorClassName)}
+        style={{
+          width: `${Math.min(Math.max(value, 0), 100)}%`,
+          ...(indicatorColor ? { background: indicatorColor } : null),
+        }}
       />
     </div>
   )

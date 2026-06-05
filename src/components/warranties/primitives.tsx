@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/date-utils'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { Progress } from '@/components/ui/progress'
 import {
   getWarrantyStatus,
   getRemainingDays,
@@ -128,18 +129,12 @@ export function CoverageBar({ w }: { w: Warranty }) {
           <Shield className="size-[11px]" />
         </span>
       </div>
-      <div className="relative mt-1.5 h-[7px] rounded-full bg-bg-subtle">
-        <div
-          className="absolute inset-y-0 left-0 rounded-full"
-          style={{ width: `${Math.max(4, pct * 100)}%`, background: fill }}
-        />
-        {status !== 'expired' && (
-          <span
-            className="absolute top-1/2 size-[13px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-card shadow-glass-1"
-            style={{ left: `${Math.max(4, Math.min(97, pct * 100))}%`, background: fill }}
-          />
-        )}
-      </div>
+      <Progress
+        value={pct * 100}
+        className="mt-1.5 h-2 bg-bg-subtle"
+        indicatorClassName="rounded-full"
+        indicatorColor={fill}
+      />
     </div>
   )
 }
