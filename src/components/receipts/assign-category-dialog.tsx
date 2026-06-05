@@ -36,7 +36,6 @@ export function AssignCategoryDialog({
         primary: (
           <Button
             type="button"
-            className="rounded-xl"
             onClick={() => selectedId && onAssign(selectedId)}
             disabled={!selectedId || isLoading}
           >
@@ -48,7 +47,6 @@ export function AssignCategoryDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >

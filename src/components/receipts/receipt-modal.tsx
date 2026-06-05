@@ -315,7 +315,6 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
           <Button
             type="submit"
             form={FORM_ID}
-            className="rounded-xl"
             disabled={pending}
             data-testid="receipt-submit-button"
           >
@@ -326,7 +325,6 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={handleClose}
             disabled={pending}
             data-testid="receipt-cancel-button"
@@ -339,7 +337,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
             <Button
               type="button"
               variant="ghost"
-              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => {
                 onOpenChange(false)
                 onRequestDelete?.(receipt)

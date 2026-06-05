@@ -33,13 +33,13 @@ export function ImportGuideDialog({ open, onOpenChange, onDownloadTemplate, onSe
       desktopWidth={520}
       actions={{
         primary: (
-          <Button className="rounded-xl" onClick={onSelectFile} disabled={importing}>
+          <Button onClick={onSelectFile} disabled={importing}>
             {importing ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             {t('receipts.import.guide.selectFile')}
           </Button>
         ),
         secondary: (
-          <Button variant="outline" className="rounded-xl" onClick={onDownloadTemplate}>
+          <Button variant="outline" onClick={onDownloadTemplate}>
             <Download className="size-4" />
             {t('receipts.import.guide.downloadTemplate')}
           </Button>

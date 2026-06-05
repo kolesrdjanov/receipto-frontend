@@ -14,7 +14,6 @@ import {
   RankCard,
   SaveBar,
 } from '@/components/settings/primitives'
-import { Field } from '@/components/glass/glass'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -26,7 +25,6 @@ import {
   Trash2,
   MapPin,
   Wallet,
-  Mail,
   Palette,
   DollarSign,
   Languages,
@@ -44,6 +42,9 @@ const languages: { value: Language; labelKey: string }[] = [
   { value: 'en', labelKey: 'settings.language.en' },
   { value: 'sr', labelKey: 'settings.language.sr' },
 ]
+
+// Shared label style — matches the form-modal labels used app-wide.
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return <h2 className="px-1 pt-1 text-[12px] font-bold uppercase tracking-[0.08em] text-fg-faint">{children}</h2>
@@ -270,30 +271,49 @@ export default function Settings() {
                 <div className="my-5 h-px bg-hairline-soft" />
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={t('settings.profile.firstName')} id="firstName" value={draft.firstName} onChange={(e) => setDraft((p) => ({ ...p, firstName: e.target.value }))} autoComplete="given-name" />
-                  <Field label={t('settings.profile.lastName')} id="lastName" value={draft.lastName} onChange={(e) => setDraft((p) => ({ ...p, lastName: e.target.value }))} autoComplete="family-name" />
+                  <div>
+                    <label htmlFor="firstName" className={fieldLabel}>{t('settings.profile.firstName')}</label>
+                    <Input id="firstName" value={draft.firstName} onChange={(e) => setDraft((p) => ({ ...p, firstName: e.target.value }))} autoComplete="given-name" />
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className={fieldLabel}>{t('settings.profile.lastName')}</label>
+                    <Input id="lastName" value={draft.lastName} onChange={(e) => setDraft((p) => ({ ...p, lastName: e.target.value }))} autoComplete="family-name" />
+                  </div>
                 </div>
                 <div className="mt-4">
-                  <Field label={t('settings.profile.email')} id="email" icon={Mail} value={effectiveUser.email} disabled containerClassName="opacity-70" />
+                  <label htmlFor="email" className={fieldLabel}>{t('settings.profile.email')}</label>
+                  <Input id="email" value={effectiveUser.email} disabled />
                 </div>
               </SettingsCard>
 
               {/* Address */}
               <SettingsCard icon={MapPin} title={t('settings.profile.address.title')} desc={t('settings.profile.address.description')}>
-                <Field label={t('settings.profile.address.street')} id="street" value={draft.street} onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))} autoComplete="street-address" />
+                <div>
+                  <label htmlFor="street" className={fieldLabel}>{t('settings.profile.address.street')}</label>
+                  <Input id="street" value={draft.street} onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))} autoComplete="street-address" />
+                </div>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field label={t('settings.profile.address.zipCode')} id="zipCode" value={draft.zipCode} onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))} autoComplete="postal-code" />
-                  <Field label={t('settings.profile.address.city')} id="city" value={draft.city} onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))} autoComplete="address-level2" />
+                  <div>
+                    <label htmlFor="zipCode" className={fieldLabel}>{t('settings.profile.address.zipCode')}</label>
+                    <Input id="zipCode" value={draft.zipCode} onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))} autoComplete="postal-code" />
+                  </div>
+                  <div>
+                    <label htmlFor="city" className={fieldLabel}>{t('settings.profile.address.city')}</label>
+                    <Input id="city" value={draft.city} onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))} autoComplete="address-level2" />
+                  </div>
                 </div>
               </SettingsCard>
 
               {/* Monthly income */}
               <SettingsCard icon={Wallet} title={t('settings.profile.income')} desc={t('settings.profile.incomeDescription')}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={t('settings.profile.incomeAmount')} id="monthlyIncome" type="number" min="0" step="0.01" value={draft.monthlyIncome} onChange={(e) => setDraft((p) => ({ ...p, monthlyIncome: e.target.value }))} placeholder="0.00" />
-                  <div className="min-w-0 flex-1">
-                    <label htmlFor="incomeCurrency" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">{t('settings.profile.incomeCurrency')}</label>
-                    <CurrencySelect id="incomeCurrency" value={draft.incomeCurrency} onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))} placeholder={t('settings.profile.incomeCurrency')} variant="full" triggerClassName="h-[50px] w-full rounded-[14px]" />
+                  <div>
+                    <label htmlFor="monthlyIncome" className={fieldLabel}>{t('settings.profile.incomeAmount')}</label>
+                    <Input id="monthlyIncome" type="number" min="0" step="0.01" value={draft.monthlyIncome} onChange={(e) => setDraft((p) => ({ ...p, monthlyIncome: e.target.value }))} placeholder="0.00" />
+                  </div>
+                  <div className="min-w-0">
+                    <label htmlFor="incomeCurrency" className={fieldLabel}>{t('settings.profile.incomeCurrency')}</label>
+                    <CurrencySelect id="incomeCurrency" value={draft.incomeCurrency} onValueChange={(v) => setDraft((p) => ({ ...p, incomeCurrency: v }))} placeholder={t('settings.profile.incomeCurrency')} variant="full" triggerClassName="w-full" />
                   </div>
                 </div>
               </SettingsCard>
@@ -368,16 +388,16 @@ export default function Settings() {
                 <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
                 <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="font-mono" />
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" className="rounded-xl" onClick={cancelDelete}>
+                  <Button type="button" variant="outline" onClick={cancelDelete}>
                     {t('common.cancel')}
                   </Button>
-                  <Button type="button" variant="destructive" className="rounded-xl !text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
+                  <Button type="button" variant="destructive" className="!text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
                     {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
                   </Button>
                 </div>
               </div>
             ) : (
-              <Button type="button" variant="destructive" className="mt-4 rounded-xl !text-white" onClick={() => setShowDeleteConfirm(true)}>
+              <Button type="button" variant="destructive" className="mt-4 !text-white" onClick={() => setShowDeleteConfirm(true)}>
                 {t('settings.dangerZone.deleteAccount')}
               </Button>
             )}
@@ -395,12 +415,12 @@ export default function Settings() {
         description={t('settings.dangerZone.mobileSubtitle')}
         actions={{
           primary: (
-            <Button type="button" variant="destructive" className="rounded-xl !text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
+            <Button type="button" variant="destructive" className="!text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
               {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
             </Button>
           ),
           secondary: (
-            <Button type="button" variant="ghost" className="rounded-xl" onClick={cancelDelete}>
+            <Button type="button" variant="ghost" onClick={cancelDelete}>
               {t('common.cancel')}
             </Button>
           ),

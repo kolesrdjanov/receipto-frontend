@@ -39,7 +39,7 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
         hasTemplates
           ? {
               primary: (
-                <Button variant="outline" className="rounded-xl" onClick={handleCreateTemplate}>
+                <Button variant="outline" onClick={handleCreateTemplate}>
                   <Plus className="size-4" />
                   {t('receipts.templateSelector.createTemplate')}
                 </Button>
@@ -60,7 +60,7 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
         <div className="py-8 text-center">
           <p className="mb-2 text-muted-foreground">{t('receipts.templateSelector.noTemplates')}</p>
           <p className="mb-6 text-sm text-muted-foreground">{t('receipts.templateSelector.noTemplatesText')}</p>
-          <Button className="rounded-xl" onClick={handleCreateTemplate}>
+          <Button onClick={handleCreateTemplate}>
             <Plus className="size-4" />
             {t('receipts.templateSelector.createTemplate')}
           </Button>

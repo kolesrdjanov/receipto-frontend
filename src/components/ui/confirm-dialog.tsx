@@ -63,7 +63,6 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant={variant}
-            className="rounded-xl"
             onClick={handleConfirm}
             disabled={isLoading}
           >
@@ -75,7 +74,6 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >

@@ -248,12 +248,12 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
       desktopWidth={520}
       actions={{
         primary: (
-          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
+          <Button type="submit" form={FORM_ID} disabled={pending}>
             {submitLabel}
           </Button>
         ),
         secondary: (
-          <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)} disabled={pending}>
+          <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending}>
             {t('common.cancel')}
           </Button>
         ),
@@ -262,7 +262,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
             <Button
               type="button"
               variant="ghost"
-              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={requestDelete}
               disabled={pending}
             >

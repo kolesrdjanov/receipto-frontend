@@ -32,13 +32,13 @@ export function WarrantyImportDialog({
 
   const actions = {
     primary: (
-      <Button type="button" className="rounded-xl" onClick={onSelectFile} disabled={importing}>
+      <Button type="button" onClick={onSelectFile} disabled={importing}>
         <Upload className="size-4" />
         {t('warranties.import.guide.selectFile')}
       </Button>
     ),
     secondary: (
-      <Button type="button" variant="outline" className="rounded-xl" onClick={onDownloadTemplate}>
+      <Button type="button" variant="outline" onClick={onDownloadTemplate}>
         <Download className="size-4" />
         {t('warranties.import.guide.downloadTemplate')}
       </Button>

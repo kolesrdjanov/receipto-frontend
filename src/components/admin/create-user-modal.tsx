@@ -100,12 +100,12 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
       desktopWidth={520}
       actions={{
         primary: (
-          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={createUser.isPending}>
+          <Button type="submit" form={FORM_ID} disabled={createUser.isPending}>
             {createUser.isPending ? t('common.creating') : t('common.create')}
           </Button>
         ),
         secondary: (
-          <Button type="button" variant="outline" className="rounded-xl" onClick={handleClose} disabled={createUser.isPending}>
+          <Button type="button" variant="outline" onClick={handleClose} disabled={createUser.isPending}>
             {t('common.cancel')}
           </Button>
         ),

@@ -234,7 +234,7 @@ export function SaveBar({
           {t('settings.profile.unsavedChanges')}
         </span>
       )}
-      <Button type="button" className="rounded-xl" onClick={onSave} disabled={!dirty || saving}>
+      <Button type="button" onClick={onSave} disabled={!dirty || saving}>
         {saving ? t('common.saving') : t('common.save')}
       </Button>
     </div>

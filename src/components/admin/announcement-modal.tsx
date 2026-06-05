@@ -148,12 +148,12 @@ export function AnnouncementModal({ open, onOpenChange, announcement }: Announce
       desktopWidth={560}
       actions={{
         primary: (
-          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={isPending}>
+          <Button type="submit" form={FORM_ID} disabled={isPending}>
             {isPending ? t('common.saving') : isEditing ? t('common.save') : t('admin.announcements.createAnnouncement')}
           </Button>
         ),
         secondary: (
-          <Button type="button" variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={isPending}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             {t('common.cancel')}
           </Button>
         ),

@@ -190,12 +190,12 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
 
   const actions = {
     primary: (
-      <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending} data-testid="category-submit-button">
+      <Button type="submit" form={FORM_ID} disabled={pending} data-testid="category-submit-button">
         {primaryLabel}
       </Button>
     ),
     secondary: (
-      <Button type="button" variant="outline" className="rounded-xl" onClick={close} disabled={pending} data-testid="category-cancel-button">
+      <Button type="button" variant="outline" onClick={close} disabled={pending} data-testid="category-cancel-button">
         {t('common.cancel')}
       </Button>
     ),
@@ -204,7 +204,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
         <Button
           type="button"
           variant="ghost"
-          className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={requestDelete}
           data-testid="category-delete-button"
         >

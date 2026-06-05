@@ -172,13 +172,13 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
       desktopWidth={580}
       actions={{
         primary: (
-          <Button variant="destructive" className="rounded-xl" onClick={handleConfirm} disabled={isProcessing}>
+          <Button variant="destructive" onClick={handleConfirm} disabled={isProcessing}>
             {isProcessing ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             {isProcessing ? t('categories.modal.reassigning') : t('categories.reassign.confirm')}
           </Button>
         ),
         secondary: (
-          <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={isProcessing}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
             {t('common.cancel')}
           </Button>
         ),

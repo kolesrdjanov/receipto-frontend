@@ -187,7 +187,7 @@ export function UsersTable() {
             size="icon"
             onClick={() => setShowFilters(!showFilters)}
             aria-pressed={showFilters}
-            className="size-10 shrink-0 rounded-xl"
+            className="size-10 shrink-0"
           >
             <SlidersHorizontal className="size-4" />
           </Button>

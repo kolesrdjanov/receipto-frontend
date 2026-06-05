@@ -115,7 +115,6 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
           <Button
             type="submit"
             form={FORM_ID}
-            className="rounded-xl"
             disabled={isSubmitting || markAsPaid.isPending}
           >
             <Check className="size-4" />
@@ -126,7 +125,6 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={handleClose}
             disabled={markAsPaid.isPending}
           >

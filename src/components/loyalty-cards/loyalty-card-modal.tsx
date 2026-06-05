@@ -195,13 +195,13 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
 
   const actions = {
     primary: (
-      <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={!canSubmit}>
+      <Button type="submit" form={FORM_ID} disabled={!canSubmit}>
         {isPending && <Loader2 className="size-4 animate-spin" />}
         {primaryLabel}
       </Button>
     ),
     secondary: (
-      <Button type="button" variant="outline" className="rounded-xl" onClick={close} disabled={isPending}>
+      <Button type="button" variant="outline" onClick={close} disabled={isPending}>
         {t('common.cancel')}
       </Button>
     ),
@@ -209,7 +209,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
       <Button
         type="button"
         variant="ghost"
-        className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={requestDelete}
       >
         <Trash2 className="size-4" />

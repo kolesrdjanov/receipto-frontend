@@ -64,7 +64,6 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
         primary: (
           <Button
             type="button"
-            className="rounded-xl"
             onClick={() => handleSubmit()}
             disabled={rating === 0 || submitRating.isPending}
           >
@@ -79,7 +78,6 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={handleClose}
             disabled={submitRating.isPending}
           >

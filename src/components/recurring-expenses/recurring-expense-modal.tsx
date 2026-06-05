@@ -200,7 +200,7 @@ export function RecurringExpenseModal({
       desktopWidth={520}
       actions={{
         primary: (
-          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={pending}>
+          <Button type="submit" form={FORM_ID} disabled={pending}>
             {primaryLabel}
           </Button>
         ),
@@ -208,7 +208,6 @@ export function RecurringExpenseModal({
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
             onClick={handleClose}
             disabled={pending}
           >
@@ -220,7 +219,7 @@ export function RecurringExpenseModal({
             <Button
               type="button"
               variant="ghost"
-              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => {
                 onOpenChange(false)
                 onRequestDelete?.(expense)

@@ -458,7 +458,6 @@ export function QrScanner({
             variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="rounded-xl"
           >
             {t('common.cancel')}
           </Button>

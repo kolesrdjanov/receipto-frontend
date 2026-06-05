@@ -32,7 +32,7 @@ export function PaymentHistoryModal({ open, onOpenChange, expense }: PaymentHist
       desktopWidth={480}
       actions={{
         secondary: (
-          <Button type="button" variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t('common.close')}
           </Button>
         ),
