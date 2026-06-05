@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Lock, LockKeyhole, Link2Off, CircleCheck, CircleAlert, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { CardHead, BackLink } from '@/components/auth/glass'
-import { PasswordField, PasswordStrengthMeter, Alert, Badge, GradientButton } from '@/components/glass/glass'
+import { PasswordField, PasswordStrengthMeter, Alert, Badge } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useResetPassword } from '@/hooks/auth/use-reset-password'
 
 export default function ResetPassword() {
@@ -19,12 +20,9 @@ export default function ResetPassword() {
           title={t('auth.resetPassword.invalidLink')}
           subtitle={t('auth.resetPassword.invalidLinkMessage')}
         />
-        <Link
-          to="/forgot-password"
-          className="btn-brand inline-flex h-[52px] w-full items-center justify-center rounded-full text-base font-semibold text-white"
-        >
-          {t('auth.resetPassword.requestNewLink')}
-        </Link>
+        <Button asChild variant="brand" className="h-[52px] w-full rounded-full text-base font-semibold">
+          <Link to="/forgot-password">{t('auth.resetPassword.requestNewLink')}</Link>
+        </Button>
         <div className="mt-5 text-center">
           <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>
         </div>
@@ -87,14 +85,15 @@ export default function ResetPassword() {
           />
         </div>
 
-        <GradientButton
+        <Button
           type="submit"
+          variant="brand"
           loading={isLoading}
           loadingText={t('auth.resetPassword.submitting')}
-          className="mt-5"
+          className="mt-5 h-[52px] w-full rounded-full text-base font-semibold"
         >
           {t('auth.resetPassword.submit')}
-        </GradientButton>
+        </Button>
 
         <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
           {t('auth.resetPassword.rememberPassword')}{' '}

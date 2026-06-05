@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import {
   CircleAlert,
   Clock,
@@ -187,14 +188,15 @@ export function RecurringRow({
       {wide ? (
         <div className="flex shrink-0 items-center gap-1.5" onClick={(ev) => ev.stopPropagation()}>
           {actionable && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => onMarkPaid?.(e)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-[13px] font-semibold text-primary transition-colors hover:bg-primary/[0.16]"
+              className="h-auto gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-[13px] font-semibold text-primary hover:bg-primary/[0.16] hover:text-primary [&_svg]:size-[15px]"
             >
-              <CreditCard className="size-[15px]" />
+              <CreditCard />
               {t('recurring.actions.markPaid')}
-            </button>
+            </Button>
           )}
           <Popover open={menuOpen} onOpenChange={setMenuOpen}>
             <PopoverTrigger asChild>

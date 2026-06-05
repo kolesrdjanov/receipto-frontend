@@ -80,12 +80,25 @@ body font — **no** `tabular-nums`/`.t-num`; that utility was retired.)
 
 - `.glass-card` — frosted floating surface (real `backdrop-filter` + opaque fallback;
   dark gets a top highlight).
-- `.btn-brand` — brand-gradient primary CTA (used by `GradientButton`; also applied to a
-  plain auto-width pill for the onboarding nav CTA).
+- `.btn-brand` — brand-gradient primary CTA. **Not applied by hand** — it's the internal
+  stylesheet of `<Button variant="brand">`. Use that variant, never the class directly.
 - `.bg-brand-gradient` — soft gradient fill (progress bars, blobs).
 - `.icon-tile-{emerald,cyan,violet,pink,info,primary}` — soft accent-tinted square
   backgrounds (light + dark), consumed by the `IconTile` primitive. Tints recompute
   L/C from the brand/semantic token via `oklch(from …)`.
+
+## Buttons (`src/components/ui/button.tsx`)
+
+**One component for every button.** Never hand-roll a `<button>` with button styling — add a
+variant instead. Enforced by a PostToolUse hook + an ESLint `no-restricted-syntax` rule; raw
+`<button>` is allowed only in the primitive layer (`components/ui`, `components/glass`,
+`*primitives.tsx`) for bespoke surfaces (swatches, segmented controls, kebab triggers).
+
+| | |
+|---|---|
+| **Variants** | `default` · `brand` (gradient CTA) · `glass` (neutral bordered pill) · `destructive` · `destructive-soft` · `outline` · `secondary` · `ghost` · `link` |
+| **Sizes** | `default` · `sm` · `lg` · `icon` · `pill` (rounded-full) |
+| **Props** | `loading` / `loadingText` (spinner + auto-disable) · `asChild` |
 
 ## Primitives (`src/components/glass/glass.tsx`)
 
@@ -98,8 +111,6 @@ Generic, reusable across the app:
 | `PasswordStrengthMeter` + `scorePassword` | 4-segment meter; scoring mirrors the sign-up zod rule |
 | `Alert` | `kind`: `err`/`warn`/`ok`/`info` + leading icon |
 | `Badge` | round icon badge; `kind`: `primary`/`ok`/`danger` |
-| `GradientButton` | primary CTA with `loading`/`loadingText` |
-| `SecondaryButton` | neutral pill (resend actions) |
 | `Checkbox` | custom 20px control (no shadcn Checkbox in this app) |
 | `Divider` | "or" divider with hairline rules |
 | `BrandWash` | decorative blurred brand blobs |

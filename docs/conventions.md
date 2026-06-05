@@ -77,6 +77,14 @@ never a hand-written parallel interface.
 - Compose from the **Glass** design system (`src/components/glass/`, tokens in `src/index.css`) — see
   `docs/design-system.md`. Don't re-derive surfaces/overlays per screen.
 - Overlays use `GlassDialog` (or the shared `ConfirmDialog`), not raw Radix `Dialog`/`Drawer`.
+- **Buttons: always the shared `<Button>`** (`components/ui/button.tsx`) — never hand-roll a `<button>`
+  with button styling, and never spin up a parallel button component. Add a **variant** for a new look.
+  Variants: `default · brand · glass · destructive · destructive-soft · outline · secondary · ghost · link`;
+  sizes `default · sm · lg · icon · pill`; props `loading · loadingText · asChild`. Raw `<button>` is
+  allowed only in the primitive layer (`components/ui`, `components/glass`, `*primitives.tsx`) for genuinely
+  bespoke controls (color swatches, segmented controls, kebab triggers), or with
+  `// eslint-disable-next-line no-restricted-syntax -- raw-button-ok: <reason>`. Enforced by a PostToolUse
+  hook + an ESLint `no-restricted-syntax` rule.
 - Empty states use the shared `EmptyState` / `AddButton` (`components/glass/empty-state.tsx`).
 - Headings/labels use the `.t-*` type scale, not ad-hoc `text-2xl font-bold`.
 - Colors via tokens (`bg-primary-soft`, `bg-bg-subtle`, `--success/--warning/--info/--destructive-soft`,

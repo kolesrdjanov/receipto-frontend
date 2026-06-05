@@ -5,7 +5,8 @@ import { Mail, Lock, CircleAlert, MailWarning } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { CardHead } from '@/components/auth/glass'
-import { Field, PasswordField, Alert, Divider, Checkbox, GradientButton } from '@/components/glass/glass'
+import { Field, PasswordField, Alert, Divider, Checkbox } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useSignIn } from '@/hooks/auth/use-sign-in'
 
 export default function SignIn() {
@@ -86,15 +87,16 @@ export default function SignIn() {
           </Link>
         </div>
 
-        <GradientButton
+        <Button
           type="submit"
+          variant="brand"
           loading={isLoading}
           loadingText={t('auth.signIn.submitting')}
-          className="mt-5"
+          className="mt-5 h-[52px] w-full rounded-full text-base font-semibold"
           data-testid="signin-submit-button"
         >
           {t('auth.signIn.submit')}
-        </GradientButton>
+        </Button>
 
         <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
           {t('auth.signIn.noAccount')}{' '}

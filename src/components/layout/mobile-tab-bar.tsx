@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard,
   Receipt,
@@ -67,14 +68,15 @@ export function MobileTabBar({ onOpenAddSheet }: MobileTabBarProps) {
       <div className="flex w-full items-center justify-around px-2.5 pb-1.5 pt-2" style={{ minHeight: 72 }}>
         <Tab to="/dashboard" icon={LayoutDashboard} label={t('nav.home')} />
         <Tab to="/receipts" icon={Receipt} label={t('nav.receipts')} />
-        <button
+        <Button
           type="button"
+          variant="brand"
           onClick={onFab}
           aria-label={t('fab.title')}
-          className="btn-brand -mt-[26px] grid size-[54px] shrink-0 place-items-center rounded-full text-white"
+          className="-mt-[26px] grid size-[54px] shrink-0 place-items-center rounded-full p-0 [&_svg]:size-[26px]"
         >
-          <Plus className="size-[26px]" strokeWidth={2.4} />
-        </button>
+          <Plus strokeWidth={2.4} />
+        </Button>
         <Tab to={wallet.to} icon={wallet.icon} label={wallet.label} />
         <button
           type="button"

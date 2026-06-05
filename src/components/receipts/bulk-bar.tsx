@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Tag, Trash2, X, Loader2 } from 'lucide-react'
 import { SelectCheck, Amount } from '@/components/receipts/primitives'
+import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
@@ -39,23 +40,25 @@ export function BulkBar({
           <Amount value={total} currency={currency} size={12} weight={600} muted />
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="glass"
             onClick={onAssign}
-            className="inline-flex h-[38px] items-center gap-1.5 rounded-full bg-bg-subtle px-3.5 text-[13px] font-semibold text-fg-2 transition-colors hover:text-foreground"
+            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] font-semibold [&_svg]:size-[17px]"
           >
-            <Tag className="size-[17px]" />
+            <Tag />
             {t('receipts.filters.category')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="destructive-soft"
             onClick={onRemove}
             disabled={removing}
-            className="inline-flex h-[38px] items-center gap-1.5 rounded-full bg-destructive-soft px-3.5 text-[13px] font-semibold text-[color:var(--destructive-foreground-on-soft)] transition-opacity disabled:opacity-60"
+            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] font-semibold transition-opacity [&_svg]:size-[17px] disabled:opacity-60"
           >
-            {removing ? <Loader2 className="size-[17px] animate-spin" /> : <Trash2 className="size-[17px]" />}
+            {removing ? <Loader2 className="animate-spin" /> : <Trash2 />}
             {t('common.remove')}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -84,23 +87,27 @@ export function BulkBar({
       <span className="text-[13px] text-muted-foreground">·</span>
       <Amount value={total} currency={currency} size={13} weight={600} muted />
       <div className="flex-1" />
-      <button
+      <Button
         type="button"
+        variant="glass"
+        size="pill"
         onClick={onAssign}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle hover:text-foreground"
+        className="gap-1.5 text-[13px] font-semibold [&_svg]:size-[15px]"
       >
-        <Tag className="size-[15px]" />
+        <Tag />
         {t('receipts.assignCategory')}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="destructive"
+        size="pill"
         onClick={onRemove}
         disabled={removing}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+        className="gap-1.5 text-[13px] font-semibold transition-opacity [&_svg]:size-[15px] disabled:opacity-60"
       >
-        {removing ? <Loader2 className="size-[15px] animate-spin" /> : <Trash2 className="size-[15px]" />}
+        {removing ? <Loader2 className="animate-spin" /> : <Trash2 />}
         {t('receipts.removeSelected')}
-      </button>
+      </Button>
       <button
         type="button"
         onClick={onClear}

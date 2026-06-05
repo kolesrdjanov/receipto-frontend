@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Mail, MailCheck, CircleCheck, Link2Off, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { BackLink } from '@/components/auth/glass'
-import { Field, Badge, Alert, SecondaryButton } from '@/components/glass/glass'
+import { Field, Badge, Alert } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useVerifyEmail } from '@/hooks/auth/use-verify-email'
 import { useResendVerification } from '@/hooks/auth/use-resend-verification'
 
@@ -130,7 +131,12 @@ export default function VerifyEmail() {
           </Alert>
         )}
 
-        <SecondaryButton type="submit" disabled={isResending || !email} className="mt-[18px]">
+        <Button
+          type="submit"
+          variant="glass"
+          disabled={isResending || !email}
+          className="mt-[18px] h-12 w-full rounded-full text-[15px] font-semibold text-foreground"
+        >
           {isResending ? (
             <>
               <Loader2 className="size-4 animate-spin" />
@@ -142,7 +148,7 @@ export default function VerifyEmail() {
               {t('auth.verifyEmail.resendLink')}
             </>
           )}
-        </SecondaryButton>
+        </Button>
 
         <div className="mt-5 text-center">
           <BackLink>{t('auth.checkEmail.backToSignIn')}</BackLink>

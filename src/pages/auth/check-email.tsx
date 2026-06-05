@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { MailCheck, RotateCcw, CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { EmailChip, BackLink } from '@/components/auth/glass'
-import { Badge, Alert, SecondaryButton } from '@/components/glass/glass'
+import { Badge, Alert } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useResendVerification } from '@/hooks/auth/use-resend-verification'
 
 const RESEND_COOLDOWN = 60
@@ -75,11 +76,12 @@ export default function CheckEmail() {
         )}
 
         {email && (
-          <SecondaryButton
+          <Button
             type="button"
+            variant="glass"
             onClick={handleResend}
             disabled={isResending || cooldown > 0}
-            className="mt-[22px]"
+            className="mt-[22px] h-12 w-full rounded-full text-[15px] font-semibold text-foreground"
           >
             {isResending ? (
               <>
@@ -94,7 +96,7 @@ export default function CheckEmail() {
                 {t('auth.checkEmail.resend')}
               </>
             )}
-          </SecondaryButton>
+          </Button>
         )}
 
         <div className="mt-5">

@@ -371,16 +371,17 @@ export default function Receipts() {
               onImport={() => setImportDialogOpen(true)}
               onExport={handleExport}
             />
-            <button
+            <Button
               type="button"
+              variant="brand"
               onClick={openQrScanner}
               disabled={isCreating || isGalleryProcessing}
-              className="btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white disabled:opacity-60"
+              className="h-10 rounded-full px-4 text-[15px] font-semibold disabled:opacity-60"
               data-testid="receipts-scan-button"
             >
               {(isCreating || isGalleryProcessing) ? <Loader2 className="size-4 animate-spin" /> : <QrCode className="size-4" />}
               {t('receipts.scanQr')}
-            </button>
+            </Button>
           </>
         }
       />
@@ -440,14 +441,15 @@ export default function Receipts() {
               title={t('receipts.noReceipts')}
               description={t('receipts.noReceiptsText')}
               action={
-                <button
+                <Button
                   type="button"
+                  variant="brand"
                   onClick={openQrScanner}
-                  className="btn-brand inline-flex h-[52px] items-center gap-2 rounded-full px-6 text-base font-semibold text-white"
+                  className="h-[52px] rounded-full px-6 text-base font-semibold [&_svg]:size-[18px]"
                 >
-                  <QrCode className="size-[18px]" />
+                  <QrCode />
                   {t('receipts.scanReceipt')}
-                </button>
+                </Button>
               }
             />
           ) : (

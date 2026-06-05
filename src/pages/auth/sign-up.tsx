@@ -11,8 +11,8 @@ import {
   Alert,
   Divider,
   Checkbox,
-  GradientButton,
 } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useSignUp } from '@/hooks/auth/use-sign-up'
 
 export default function SignUp() {
@@ -142,15 +142,16 @@ export default function SignUp() {
           )}
         </div>
 
-        <GradientButton
+        <Button
           type="submit"
+          variant="brand"
           loading={isLoading}
           loadingText={t('auth.signUp.submitting')}
-          className="mt-4"
+          className="mt-4 h-[52px] w-full rounded-full text-base font-semibold"
           data-testid="signup-submit-button"
         >
           {t('auth.signUp.submit')}
-        </GradientButton>
+        </Button>
 
         <p className="mt-5 text-center text-[13px] font-medium text-muted-foreground">
           {t('auth.signUp.hasAccount')}{' '}

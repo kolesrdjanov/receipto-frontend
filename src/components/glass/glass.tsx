@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { CircleAlert, Check, Eye, EyeOff, Loader2, type LucideIcon } from 'lucide-react'
+import { CircleAlert, Check, Eye, EyeOff, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /* ------------------------------------------------------------------ */
@@ -204,65 +204,6 @@ export function Badge({ icon: Icon, kind = 'primary' }: { icon: LucideIcon; kind
     <div className={cn('mx-auto mb-[18px] grid size-[60px] place-items-center rounded-[18px] shadow-sm', BADGE_STYLES[kind])}>
       <Icon className="size-[26px]" />
     </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* Brand-gradient primary CTA                                          */
-/* ------------------------------------------------------------------ */
-interface GradientButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  loading?: boolean
-  loadingText?: string
-}
-
-export function GradientButton({
-  loading = false,
-  loadingText,
-  children,
-  className,
-  disabled,
-  ...props
-}: GradientButtonProps) {
-  return (
-    <button
-      {...props}
-      disabled={disabled || loading}
-      aria-busy={loading}
-      className={cn(
-        'btn-brand inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-base font-semibold',
-        'disabled:opacity-90',
-        loading && 'cursor-progress',
-        className,
-      )}
-    >
-      {loading ? (
-        <>
-          <Loader2 className="size-[18px] animate-spin" />
-          {loadingText}
-        </>
-      ) : (
-        children
-      )}
-    </button>
-  )
-}
-
-/* Neutral secondary pill button (resend actions) */
-export function SecondaryButton({
-  className,
-  children,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      {...props}
-      className={cn(
-        'inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-border bg-card text-[15px] font-semibold text-foreground shadow-sm transition-colors hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-60',
-        className,
-      )}
-    >
-      {children}
-    </button>
   )
 }
 

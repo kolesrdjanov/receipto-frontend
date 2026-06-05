@@ -6,6 +6,7 @@ import { useLogout } from '@/hooks/auth/use-logout'
 import { useFeatureFlags } from '@/hooks/settings/use-feature-flags'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 import { Avatar } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import {
@@ -339,14 +340,15 @@ export function AppSidebar({
               <span className="flex-1 text-[13.5px] font-semibold">{t('settings.appearance.theme')}</span>
               <ThemeSegmented />
             </div>
-            <button
+            <Button
               type="button"
+              variant="destructive-soft"
               onClick={logout}
-              className="flex h-[46px] items-center justify-center gap-2 rounded-xl bg-destructive-soft text-[14.5px] font-bold text-destructive transition-colors hover:bg-destructive/15"
+              className="h-[46px] w-full rounded-xl text-[14.5px] font-bold [&_svg]:size-[17px]"
             >
-              <LogOut className="size-[17px]" />
+              <LogOut />
               {t('nav.logout')}
-            </button>
+            </Button>
           </div>
         ) : (
           /* Desktop footer — user block triggers the profile popover. */

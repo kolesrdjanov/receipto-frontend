@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -19,12 +20,24 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // ── Glass design-system variants (the single source of truth for the
+        // redesigned button language — never hand-roll these styles again) ──
+        // `brand`            = gradient primary CTA (logo / primary action / FAB only)
+        // `glass`            = neutral bordered card pill (secondary actions, toolbars)
+        // `destructive-soft` = soft red action (logout, soft delete) on the soft bg
+        brand: "btn-brand text-white",
+        glass:
+          "border border-border bg-card text-fg-2 shadow-sm hover:bg-bg-subtle hover:text-foreground",
+        "destructive-soft":
+          "bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)] hover:opacity-90",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        // Rounded-full action pill used across the glass toolbars / bulk bars.
+        pill: "h-9 rounded-full px-3.5",
       },
     },
     defaultVariants: {
@@ -38,17 +51,45 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  /** Show a leading spinner and disable the button while an action is in flight. */
+  loading?: boolean
+  /** Optional label to show in place of children while loading. */
+  loadingText?: string
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      loading = false,
+      loadingText,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={asChild ? undefined : disabled || loading}
+        aria-busy={loading || undefined}
         {...props}
-      />
+      >
+        {!asChild && loading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            {loadingText ?? children}
+          </>
+        ) : (
+          children
+        )}
+      </Comp>
     )
   }
 )

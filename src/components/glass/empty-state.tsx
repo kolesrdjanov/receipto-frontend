@@ -1,10 +1,12 @@
 import { type ReactNode } from 'react'
 import { Plus, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 /**
- * Brand-gradient CTA pill. The brand gradient is reserved for the logo, this CTA, and the FAB —
- * don't reuse it elsewhere. Shared so every page stops re-declaring its own `AddButton`.
+ * Brand-gradient CTA pill — a thin preset of the shared `<Button variant="brand">`. The brand
+ * gradient is reserved for the logo, this CTA, and the FAB — don't reuse it elsewhere. Shared so
+ * every page stops re-declaring its own `AddButton`.
  */
 export function AddButton({
   onClick,
@@ -20,18 +22,16 @@ export function AddButton({
   'data-testid'?: string
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="brand"
       onClick={onClick}
-      className={cn(
-        'btn-brand inline-flex h-10 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white',
-        className,
-      )}
+      className={cn('h-10 rounded-full px-4 text-[15px] font-semibold [&_svg]:size-[17px]', className)}
       data-testid={testId}
     >
-      <Icon className="size-[17px]" strokeWidth={2.4} />
+      <Icon strokeWidth={2.4} />
       {label}
-    </button>
+    </Button>
   )
 }
 

@@ -603,14 +603,16 @@ export default function Dashboard() {
     : t('dashboard.greetingSubtitle', { month: monthName })
 
   const amountsPill = (
-    <button
+    <Button
       type="button"
+      variant="glass"
+      size="pill"
       onClick={toggleAmountsVisible}
-      className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3.5 text-[13px] font-medium text-fg-2 transition-colors hover:bg-bg-subtle"
+      className="text-[13px] font-medium"
     >
       {amountsVisible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
       {amountsVisible ? t('dashboard.hideAmounts') : t('dashboard.showAmounts')}
-    </button>
+    </Button>
   )
 
   const emptyHero = isEmpty && (
@@ -620,14 +622,15 @@ export default function Dashboard() {
       title={t('dashboard.empty.title')}
       description={t('dashboard.empty.description')}
       action={
-        <button
+        <Button
           type="button"
+          variant="brand"
           onClick={openQrScanner}
-          className="btn-brand inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-semibold text-white"
+          className="h-10 shrink-0 rounded-full px-4 text-[15px] font-semibold [&_svg]:size-[18px]"
         >
-          <QrCode className="size-[18px]" />
+          <QrCode />
           {t('receipts.scanReceipt')}
-        </button>
+        </Button>
       }
     />
   )

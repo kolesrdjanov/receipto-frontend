@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { Mail, KeyRound, CircleAlert, CircleCheck, RotateCcw } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { CardHead, BackLink } from '@/components/auth/glass'
-import { Field, Alert, GradientButton, SecondaryButton } from '@/components/glass/glass'
+import { Field, Alert } from '@/components/glass/glass'
+import { Button } from '@/components/ui/button'
 import { useForgotPassword } from '@/hooks/auth/use-forgot-password'
 
 export default function ForgotPassword() {
@@ -19,10 +20,15 @@ export default function ForgotPassword() {
             {t('auth.forgotPassword.successMessage')}
           </Alert>
           <form onSubmit={handleSubmit}>
-            <SecondaryButton type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              variant="glass"
+              disabled={isLoading}
+              className="h-12 w-full rounded-full text-[15px] font-semibold text-foreground"
+            >
               <RotateCcw className="size-4" />
               {t('auth.forgotPassword.resend')}
-            </SecondaryButton>
+            </Button>
           </form>
           <div className="mt-5 text-center">
             <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>
@@ -48,14 +54,15 @@ export default function ForgotPassword() {
             {...register('email')}
           />
 
-          <GradientButton
+          <Button
             type="submit"
+            variant="brand"
             loading={isLoading}
             loadingText={t('auth.forgotPassword.submitting')}
-            className="mt-[18px]"
+            className="mt-[18px] h-[52px] w-full rounded-full text-base font-semibold"
           >
             {t('auth.forgotPassword.submit')}
-          </GradientButton>
+          </Button>
 
           <div className="mt-5 text-center">
             <BackLink>{t('auth.forgotPassword.backToSignIn')}</BackLink>

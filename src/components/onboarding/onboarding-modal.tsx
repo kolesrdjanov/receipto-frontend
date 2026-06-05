@@ -142,16 +142,12 @@ function LanguageStep({ language, onSelect }: { language: Language; onSelect: (l
   )
 }
 
-/** Brand-gradient nav CTA — auto-width pill (not the full-width GradientButton). */
+/** Brand-gradient nav CTA — auto-width pill preset of `<Button variant="brand">`. */
 function GradientPill({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn('btn-brand inline-flex items-center justify-center', NAV_BTN)}
-    >
+    <Button type="button" variant="brand" onClick={onClick} className={NAV_BTN}>
       {children}
-    </button>
+    </Button>
   )
 }
 
