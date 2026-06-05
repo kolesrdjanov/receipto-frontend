@@ -111,7 +111,7 @@ export default function Categories() {
         subtitle={t('categories.desktopSubtitle')}
         actions={<AddButton onClick={handleAdd} label={t('categories.addCategory')} data-testid="categories-add-button" />}
       />
-      <div className="mb-1 flex items-end justify-between md:hidden">
+      <div className="mb-1 flex items-start justify-between md:hidden">
         <div>
           <h1 className="t-h1 text-[28px]">{t('categories.title')}</h1>
           <p className="mt-1 text-[12.5px] text-muted-foreground">{t('categories.mobileSubtitle')}</p>
