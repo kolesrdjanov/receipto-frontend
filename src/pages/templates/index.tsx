@@ -81,8 +81,8 @@ export default function Templates() {
         subtitle={t('templates.subtitle')}
         actions={<AddButton onClick={handleAdd} label={t('templates.addTemplate')} data-testid="templates-add-button" />}
       />
-      <div className="mb-1 flex items-start justify-between md:hidden">
-        <div>
+      <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
+        <div className="min-w-0">
           <h1 className="t-h1 text-[28px]">{t('templates.title')}</h1>
           <p className="mt-1 text-[12.5px] text-muted-foreground">{t('templates.subtitle')}</p>
         </div>

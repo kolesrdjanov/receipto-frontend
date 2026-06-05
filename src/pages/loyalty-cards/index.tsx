@@ -93,12 +93,12 @@ export default function LoyaltyCards() {
         subtitle={t('loyaltyCards.subtitle')}
         actions={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} data-testid="loyalty-add-button" />}
       />
-      <div className="mb-1 flex items-start justify-between md:hidden">
-        <div>
+      <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
+        <div className="min-w-0">
           <h1 className="t-h1 text-[28px]">{t('loyaltyCards.title')}</h1>
           <p className="mt-1 text-[12.5px] text-muted-foreground">{t('loyaltyCards.mobileSubtitle')}</p>
         </div>
-        <AddButton onClick={handleAdd} label={t('loyaltyCards.add')} className="h-[38px] px-3.5" />
+        <AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} className="h-[38px] px-3.5" />
       </div>
     </>
   )
