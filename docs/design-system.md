@@ -215,10 +215,21 @@ page adopts, **settings & account** (App settings / Profile / Account / Rate mod
 `RankCard` tier crest/`SaveBar`/`StarPicker`; labeled `ThemeSegmented`; auth-style password
 card + strength meter; responsive danger zone [desktop inline / mobile `GlassDialog` sheet];
 rate modal on `GlassDialog`; **accent picker retired → emerald locked app-wide**),
-**dashboard** (the home grid — sticky `PageToolbar` owns currency + month controls; greeting
-+ amounts eye pill head the content; restyled widget cards via `dashboard/primitives.tsx`
-[`WidgetCard`/`WidgetHead`/`WidgetEmpty`/`StatTile`/`TrendPill`/`Shimmer`]; recharts donut
-[centered total] / day bars / monthly-trend area-gradient; per-tier-tinted rank card; honest
-empty-hero + per-widget empty voices; shimmer skeleton grid. `WidgetRenderer` drag/customize
-plumbing preserved — registry defaults re-laid-out to the 6-col spec, Recent Activity
-de-prioritized [hidden by default]).
+**dashboard** ("Focus" direction — the customizable 9-widget grid was **replaced** by a fixed,
+curated two-column layout, so the drag/reorder/visibility plumbing was deleted: `widget-renderer`/
+`widget-wrapper`/`widget-registry` + the `store/dashboard.ts` Zustand store are gone, along with the
+`monthly-forecast`/`category-budget-progress`/`upcoming-recurring`/`coach-card` widgets it distilled.
+Sticky `PageToolbar` still owns currency + month (mobile greeting header below it). New components in
+`dashboard/focus/` — `primitives.tsx` [`FocusCard` frosted module, `FocusTrailing`, `AmountsEyeToggle`]
++ `modules.tsx` [`FocusHero`, `FocusSafeToSpend`, `FocusRankRibbon`, `FocusDailyFlow`, `FocusCategories`,
+`FocusCoach`, `FocusBills`, `FocusRecent`]. Top band: a **hero** on `.glass-card` (28px) with the new
+`.dash-hero-sheen` brand glow + the month budget **baked in** as a spent-of-budget meter with a
+projected-pace tick, paired with a **Safe-to-spend** card (`bg-primary-soft`) that revives the forecast
+(safe-per-day / projected month-end / daily avg). Then a slim amber **rank ribbon**, then two
+independent columns: daily-flow **SVG area sparkline** (recharts dropped on the dashboard) + distilled
+coach (`<Trans>` prose line + real insight chips) + recent on the left; share-bar category list +
+compact bills on the right. **Monthly budget = sum of per-category budgets** (converted to the display
+currency); when 0, the meter hides and Safe-to-spend shows a "set a budget" CTA. Reuses `WidgetHead`/
+`WidgetEmpty`/`Shimmer`/`TrendPill`/`HiddenDots` from `dashboard/primitives.tsx`, `EmptyState`, and the
+existing aggregated/coach/recurring data hooks. Still no `t-num`. `WidgetCard`/`StatTile` remain in
+`primitives.tsx` (now unused by the dashboard).

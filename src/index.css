@@ -574,3 +574,34 @@ body {
 .dark .icon-tile-info    { background: oklch(from var(--info) 0.3 0.06 h);          color: oklch(from var(--info) 0.84 0.08 h); }
 .dark .icon-tile-primary { color: oklch(from var(--primary) calc(l + 0.06) c h); }
 
+/* ============================================
+   DASHBOARD "FOCUS" — hero sheen
+   Soft brand glow contained inside the hero card (decorative,
+   pointer-events:none). The one place a brand-hued radial is used
+   on the dashboard; everything else stays calm/neutral.
+   ============================================ */
+.dash-hero-sheen {
+  position: absolute;
+  top: -120px;
+  right: -10px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(8px);
+  background: radial-gradient(
+    circle at 60% 40%,
+    oklch(from var(--brand-emerald) 0.72 0.13 h / 0.22),
+    oklch(from var(--brand-cyan) 0.72 0.12 h / 0.14) 45%,
+    transparent 70%
+  );
+}
+.dark .dash-hero-sheen {
+  background: radial-gradient(
+    circle at 60% 40%,
+    oklch(from var(--brand-emerald) 0.6 0.12 h / 0.28),
+    oklch(from var(--brand-violet) 0.6 0.14 h / 0.16) 50%,
+    transparent 72%
+  );
+}
+
