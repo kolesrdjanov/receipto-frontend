@@ -263,7 +263,7 @@ export default function WarrantiesPage() {
         />
 
         {/* Mobile header */}
-        <div className="mb-5 flex items-end justify-between gap-3 md:hidden">
+        <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
           <div className="min-w-0">
             <h1 className="t-h1 text-[28px]">{t('warranties.title')}</h1>
             <p className="t-sm mt-1 text-muted-foreground">{t('warranties.mobileSubtitle')}</p>
@@ -304,7 +304,7 @@ export default function WarrantiesPage() {
                     <span className="t-xs text-fg-faint">{t('warranties.tracked')}</span>
                     <span className="flex items-baseline gap-1.5">
                       <span className="text-[30px] font-extrabold leading-none">{stats.total}</span>
-                      <span className="text-[12px] text-muted-foreground">{t('warranties.warrantiesLabel')}</span>
+                      {/*<span className="text-[12px] text-muted-foreground">{t('warranties.warrantiesLabel')}</span>*/}
                     </span>
                   </div>
                   <div className="flex flex-wrap justify-end gap-1.5">
