@@ -1232,6 +1232,7 @@
       "detailsSubtitle": "Detailed user profile, expenses, and spending insights",
       "backToUsers": "Back to users",
       "invalidUser": "Invalid user",
+      "viewDetails": "View details",
       "usage": {
         "title": "Feature Usage",
         "description": "How this user is using warranties and recurring expenses",
@@ -1247,6 +1248,7 @@
       "analytics": {
         "title": "Spending Analytics",
         "description": "Where this user spends the most, grouped by category",
+        "tracked": "Tracked",
         "noData": "No spending data available yet",
         "totalTrackedSpend": "Total tracked spend",
         "topCategory": "Top category",

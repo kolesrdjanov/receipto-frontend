@@ -1,10 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { useAppSettings, useUpdateAppSettings } from '@/hooks/admin/use-app-settings'
 import { Bot, Sparkles, Loader2, TrendingUp } from 'lucide-react'
+import { AdminCard, AdminCardHead, FeatureSwitchRow } from '@/components/admin/primitives'
 
 export function AiSettingsCard() {
   const { t } = useTranslation()
@@ -26,84 +24,50 @@ export function AiSettingsCard() {
     })
   }
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          {t('admin.settings.aiFeatures')}
-        </CardTitle>
-        <CardDescription>
-          {t('admin.settings.aiDescription')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="h-4 w-4 text-warning" />
-              {t('admin.settings.aiCoach')}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.settings.aiCoachDescription')}
-            </p>
+    <AdminCard>
+      <AdminCardHead
+        icon={Bot}
+        title={t('admin.settings.aiFeatures')}
+        desc={t('admin.settings.aiDescription')}
+      />
+      <div className="mt-3 px-5 pb-5 sm:px-[22px]">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
-          <Switch
-            checked={aiCoachEnabled}
-            onCheckedChange={(checked) => handleToggle('ai_coach_enabled', checked)}
-            disabled={updateSettings.isPending}
-          />
-        </div>
-
-        <div className="h-px bg-border" />
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <Bot className="h-4 w-4 text-info" />
-              {t('admin.settings.aiCategorization')}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.settings.aiCategorizationDescription')}
-            </p>
+        ) : (
+          <div className="divide-y divide-hairline-soft">
+            <FeatureSwitchRow
+              icon={Sparkles}
+              tone="warn"
+              title={t('admin.settings.aiCoach')}
+              desc={t('admin.settings.aiCoachDescription')}
+              checked={aiCoachEnabled}
+              onCheckedChange={(checked) => handleToggle('ai_coach_enabled', checked)}
+              disabled={updateSettings.isPending}
+            />
+            <FeatureSwitchRow
+              icon={Bot}
+              tone="info"
+              title={t('admin.settings.aiCategorization')}
+              desc={t('admin.settings.aiCategorizationDescription')}
+              checked={aiCategorizationEnabled}
+              onCheckedChange={(checked) => handleToggle('ai_categorization_enabled', checked)}
+              disabled={updateSettings.isPending}
+            />
+            <FeatureSwitchRow
+              icon={TrendingUp}
+              tone="success"
+              title={t('admin.settings.aiItems')}
+              desc={t('admin.settings.aiItemsDescription')}
+              checked={aiItemsEnabled}
+              onCheckedChange={(checked) => handleToggle('ai_items_enabled', checked)}
+              disabled={updateSettings.isPending}
+            />
           </div>
-          <Switch
-            checked={aiCategorizationEnabled}
-            onCheckedChange={(checked) => handleToggle('ai_categorization_enabled', checked)}
-            disabled={updateSettings.isPending}
-          />
-        </div>
-
-        <div className="h-px bg-border" />
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <TrendingUp className="h-4 w-4 text-success" />
-              {t('admin.settings.aiItems')}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {t('admin.settings.aiItemsDescription')}
-            </p>
-          </div>
-          <Switch
-            checked={aiItemsEnabled}
-            onCheckedChange={(checked) => handleToggle('ai_items_enabled', checked)}
-            disabled={updateSettings.isPending}
-          />
-        </div>
-
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </AdminCard>
   )
 }

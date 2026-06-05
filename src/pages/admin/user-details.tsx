@@ -1,14 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, CreditCard, FolderOpen, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, Check, CreditCard, FolderOpen, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/glass/empty-state'
 import { Avatar } from '@/components/ui/avatar'
+import { AdminCard, AdminCardHead, InfoItem, InsetStat, Pill } from '@/components/admin/primitives'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -37,6 +38,27 @@ import {
 
 const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
+type PieTooltipProps = {
+  active?: boolean
+  payload?: Array<{ value?: number; color?: string; payload?: { icon?: string; name?: string; receipts?: number } }>
+  formatAmount: (amount: number) => string
+  receiptsLabel: (count: number) => string
+}
+
+/** Custom recharts tooltip — hoisted to module scope (kept out of render). */
+function PieTooltip({ active, payload, formatAmount, receiptsLabel }: PieTooltipProps) {
+  if (!active || !payload?.length) return null
+  const point = payload[0]
+  const data = point?.payload
+  return (
+    <div className="rounded-lg border border-border bg-popover p-3 shadow-glass-3">
+      <p className="mb-1 text-sm font-semibold">{data?.icon} {data?.name}</p>
+      <p className="text-sm font-medium" style={{ color: point?.color }}>{formatAmount(Number(point?.value) || 0)}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{receiptsLabel(data?.receipts || 0)}</p>
+    </div>
+  )
+}
+
 export default function AdminUserDetailsPage() {
   const { t } = useTranslation()
   const { id: userId } = useParams<{ id: string }>()
@@ -48,26 +70,19 @@ export default function AdminUserDetailsPage() {
   const { data: exchangeRates } = useExchangeRates(preferredCurrency)
 
   const { data: userDetails, isLoading: isLoadingDetails } = useUserDetails(userId || null)
-  const { data: categoriesData, isLoading: isLoadingCategories } = useUserCategories(
-    userId || null,
-    categoriesPage,
-    8
-  )
-  const { data: receiptsData, isLoading: isLoadingReceipts } = useUserReceipts(
-    userId || null,
-    receiptsPage,
-    15
-  )
-  const { data: spendingByCategory, isLoading: isLoadingAnalytics } = useUserSpendingByCategory(
-    userId || null
-  )
+  const { data: categoriesData, isLoading: isLoadingCategories } = useUserCategories(userId || null, categoriesPage, 8)
+  const { data: receiptsData, isLoading: isLoadingReceipts } = useUserReceipts(userId || null, receiptsPage, 15)
+  const { data: spendingByCategory, isLoading: isLoadingAnalytics } = useUserSpendingByCategory(userId || null)
 
-  const convertAmount = (amount: number, fromCurrency: string) => {
-    if (fromCurrency === preferredCurrency) return amount
-    const rate = exchangeRates?.[fromCurrency]
-    if (!rate || rate === 0) return amount
-    return amount / rate
-  }
+  const convertAmount = useCallback(
+    (amount: number, fromCurrency: string) => {
+      if (fromCurrency === preferredCurrency) return amount
+      const rate = exchangeRates?.[fromCurrency]
+      if (!rate || rate === 0) return amount
+      return amount / rate
+    },
+    [preferredCurrency, exchangeRates],
+  )
 
   const analyticsData = useMemo(() => {
     if (!spendingByCategory?.length) return []
@@ -90,431 +105,328 @@ export default function AdminUserDetailsPage() {
         }
       })
       .sort((a, b) => b.value - a.value)
-  }, [spendingByCategory, exchangeRates, preferredCurrency])
+  }, [spendingByCategory, convertAmount])
 
   const totalTrackedSpend = analyticsData.reduce((sum, item) => sum + item.value, 0)
   const topCategory = analyticsData[0]
 
   const formatAmount = (amount: number) => formatMoney(amount, preferredCurrency)
 
-  const PieTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const point = payload[0]
-      const data = point?.payload
-
-      return (
-        <div className="rounded-lg border border-border bg-popover p-3 shadow-md">
-          <p className="mb-1 text-sm font-semibold">
-            {data?.icon} {data?.name}
-          </p>
-          <p className="text-sm font-medium" style={{ color: point?.color }}>
-            {formatAmount(Number(point?.value) || 0)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t('dashboard.receiptsCount', { count: data?.receipts || 0 })}
-          </p>
-        </div>
-      )
-    }
-
-    return null
-  }
+  const backAction = (
+    <Button variant="glass" size="sm" asChild>
+      <Link to="/admin/users">
+        <ArrowLeft className="size-4" />
+        {t('admin.users.backToUsers')}
+      </Link>
+    </Button>
+  )
 
   if (!userId) {
     return (
       <AppLayout>
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            {t('admin.users.invalidUser')}
-          </CardContent>
-        </Card>
+        <EmptyState compact icon={Receipt} title={t('admin.users.invalidUser')} />
       </AppLayout>
     )
   }
 
   return (
     <AppLayout>
-      <div className="mb-6 space-y-3">
-        <Button variant="ghost" asChild className="w-fit pl-0">
-          <Link to="/admin/users">
-            <ArrowLeft className="h-4 w-4" />
+      <PageTransition>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('admin.users.userDetails')}
+          subtitle={t('admin.users.detailsSubtitle')}
+          actions={backAction}
+        />
+
+        <div className="mb-5 md:hidden">
+          <Link to="/admin/users" className="mb-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground">
+            <ArrowLeft className="size-4" />
             {t('admin.users.backToUsers')}
           </Link>
-        </Button>
-
-        <div>
-          <h2 className="t-h1 text-[28px]">{t('admin.users.userDetails')}</h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
-            {t('admin.users.detailsSubtitle')}
-          </p>
+          <h1 className="t-h1 text-[28px]">{t('admin.users.userDetails')}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('admin.users.detailsSubtitle')}</p>
         </div>
-      </div>
 
-      {isLoadingDetails ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : userDetails ? (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('admin.users.information')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {isLoadingDetails ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : userDetails ? (
+          <div className="mx-auto max-w-[760px] space-y-[18px]">
+            {/* Identity */}
+            <AdminCard className="p-5 sm:p-[22px]">
               <div className="flex items-center gap-4">
                 <Avatar
                   firstName={userDetails.firstName}
                   lastName={userDetails.lastName}
                   imageUrl={userDetails.profileImageUrl}
-                  size="2xl"
+                  size="xl"
                 />
-                <div>
-                  <h3 className="t-h3">
+                <div className="min-w-0">
+                  <h3 className="text-[19px] font-bold leading-tight tracking-[-0.01em]">
                     {userDetails.firstName || userDetails.lastName
                       ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}`.trim()
                       : t('admin.users.noName')}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{userDetails.email}</p>
+                  <p className="truncate text-sm text-muted-foreground">{userDetails.email}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2">
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.emailLabel')}</p>
-                    <p className="text-sm font-medium">{userDetails.email}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.roleLabel')}</p>
-                    <p className="text-sm font-medium capitalize">{userDetails.role}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.table.joined')}</p>
-                    <p className="text-sm font-medium">{formatDateTime(userDetails.createdAt)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <Receipt className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.table.receipts')}</p>
-                    <p className="text-sm font-medium">{userDetails.receiptCount}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.addressLabel')}</p>
-                    {userDetails.street || userDetails.city ? (
-                      <p className="text-sm font-medium">
-                        {[userDetails.street, [userDetails.zipCode, userDetails.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
-                      </p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{t('admin.users.noAddress')}</p>
-                    )}
-                  </div>
-                </div>
+              <div className="mt-5 grid grid-cols-1 gap-4 border-t border-hairline-soft pt-5 sm:grid-cols-2">
+                <InfoItem icon={Mail} label={t('admin.users.emailLabel')} value={userDetails.email} />
+                <InfoItem icon={ShieldCheck} label={t('admin.users.roleLabel')} value={<span className="capitalize">{userDetails.role}</span>} />
+                <InfoItem icon={Calendar} label={t('admin.users.table.joined')} value={formatDateTime(userDetails.createdAt)} />
+                <InfoItem icon={Receipt} label={t('admin.users.table.receipts')} value={userDetails.receiptCount} />
+                <InfoItem
+                  icon={MapPin}
+                  label={t('admin.users.addressLabel')}
+                  value={
+                    userDetails.street || userDetails.city
+                      ? [userDetails.street, [userDetails.zipCode, userDetails.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+                      : t('admin.users.noAddress')
+                  }
+                  muted={!(userDetails.street || userDetails.city)}
+                />
               </div>
-            </CardContent>
-          </Card>
+            </AdminCard>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('admin.users.usage.title')}</CardTitle>
-              <p className="text-sm text-muted-foreground">{t('admin.users.usage.description')}</p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">{t('admin.users.table.warranties')}</p>
-                  <p className="t-h2">{userDetails.warrantyCount}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">{t('admin.users.table.recurring')}</p>
-                  <p className="t-h2">{userDetails.recurringExpenseCount}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringPayments')}</p>
-                  <p className="t-h2">{userDetails.recurringPaymentCount}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringReceipts')}</p>
-                  <p className="t-h2">{userDetails.recurringReceiptCount}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs text-muted-foreground">{t('admin.users.usage.loyaltyCards')}</p>
-                  <p className="t-h2">{userDetails.loyaltyCardCount}</p>
-                </div>
+            {/* Feature usage */}
+            <AdminCard className="p-5 sm:p-[22px]">
+              <AdminCardHead title={t('admin.users.usage.title')} desc={t('admin.users.usage.description')} className="px-0 pt-0" />
+              <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+                <InsetStat label={t('admin.users.table.warranties')} value={userDetails.warrantyCount} />
+                <InsetStat label={t('admin.users.table.recurring')} value={userDetails.recurringExpenseCount} />
+                <InsetStat label={t('admin.users.usage.recurringPayments')} value={userDetails.recurringPaymentCount} />
+                <InsetStat label={t('admin.users.usage.recurringReceipts')} value={userDetails.recurringReceiptCount} />
+                <InsetStat label={t('admin.users.usage.loyaltyCards')} value={userDetails.loyaltyCardCount} />
               </div>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-2 rounded-lg border p-4">
-                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.warrantyAdoption')}</p>
-                    <p className="text-sm font-semibold">
-                      {userDetails.warrantyCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
-                    </p>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {[
+                  { icon: ShieldCheck, label: t('admin.users.usage.warrantyAdoption'), used: userDetails.warrantyCount > 0 },
+                  { icon: Repeat2, label: t('admin.users.usage.recurringAdoption'), used: userDetails.recurringExpenseCount > 0 },
+                  { icon: CreditCard, label: t('admin.users.usage.loyaltyCardAdoption'), used: userDetails.loyaltyCardCount > 0 },
+                ].map((a) => (
+                  <div key={a.label} className="flex items-center gap-2.5 rounded-xl border border-border bg-bg-subtle/50 p-4">
+                    <a.icon className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <div className="t-xs text-muted-foreground">{a.label}</div>
+                      <div className="mt-1">
+                        {a.used
+                          ? <Pill tone="success" icon={Check}>{t('admin.users.usage.used')}</Pill>
+                          : <Pill tone="neutral">{t('admin.users.usage.notUsed')}</Pill>}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 rounded-lg border p-4">
-                  <Repeat2 className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.recurringAdoption')}</p>
-                    <p className="text-sm font-semibold">
-                      {userDetails.recurringExpenseCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 rounded-lg border p-4">
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('admin.users.usage.loyaltyCardAdoption')}</p>
-                    <p className="text-sm font-semibold">
-                      {userDetails.loyaltyCardCount > 0 ? t('admin.users.usage.used') : t('admin.users.usage.notUsed')}
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </AdminCard>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChartIcon className="h-5 w-5 text-primary" />
-                {t('admin.users.analytics.title')}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">{t('admin.users.analytics.description')}</p>
-            </CardHeader>
-            <CardContent>
+            {/* Spending analytics */}
+            <AdminCard className="p-5 sm:p-[22px]">
+              <AdminCardHead icon={PieChartIcon} title={t('admin.users.analytics.title')} desc={t('admin.users.analytics.description')} className="px-0 pt-0" />
               {isLoadingAnalytics ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
                 </div>
               ) : analyticsData.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="flex flex-col items-center gap-4 lg:flex-row">
-                    <ResponsiveContainer width="100%" height={220}>
-                      <PieChart>
-                        <Pie
-                          data={analyticsData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={65}
-                          outerRadius={85}
-                          paddingAngle={4}
-                          cornerRadius={10}
-                          strokeLinecap="round"
-                          dataKey="value"
-                        >
-                          {analyticsData.map((entry, index) => (
-                            <Cell key={`cell-${entry.categoryId}-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<PieTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="flex flex-col gap-1 text-sm">
-                    {analyticsData.slice(0, 5).map((category) => (
-                      <div key={category.categoryId} className="flex items-center gap-2">
-                        <div
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: category.color }}
-                        />
-                        <span className="max-w-[160px] truncate">
-                          {category.icon} {category.name}
-                        </span>
-                        <span className="ml-auto text-muted-foreground">
-                          {formatAmount(category.value)}
-                        </span>
+                <div className="mt-4 space-y-5">
+                  <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center">
+                    <div className="relative h-[200px] w-[200px] shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={analyticsData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={66}
+                            outerRadius={88}
+                            paddingAngle={4}
+                            cornerRadius={10}
+                            strokeLinecap="round"
+                            dataKey="value"
+                          >
+                            {analyticsData.map((entry, index) => (
+                              <Cell key={`cell-${entry.categoryId}-${index}`} fill={entry.color} stroke="none" />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<PieTooltip formatAmount={formatAmount} receiptsLabel={(count) => t('dashboard.receiptsCount', { count })} />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="t-xs text-muted-foreground">{t('admin.users.analytics.tracked')}</span>
+                        <span className="mt-0.5 text-[15px] font-extrabold leading-tight">{formatAmount(totalTrackedSpend)}</span>
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="flex w-full flex-1 flex-col gap-2.5">
+                      {analyticsData.slice(0, 5).map((category) => (
+                        <div key={category.categoryId} className="flex items-center gap-2 text-sm">
+                          <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />
+                          <span className="min-w-0 flex-1 truncate">{category.icon} {category.name}</span>
+                          <span className="shrink-0 font-medium text-muted-foreground">{formatAmount(category.value)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="rounded-lg border p-4">
-                      <p className="text-xs text-muted-foreground">{t('admin.users.analytics.totalTrackedSpend')}</p>
-                      <p className="t-h2">{formatAmount(totalTrackedSpend)}</p>
-                    </div>
-                    <div className="rounded-lg border p-4">
-                      <p className="text-xs text-muted-foreground">{t('admin.users.analytics.topCategory')}</p>
+                  <div className="grid grid-cols-1 gap-3 border-t border-hairline-soft pt-5 sm:grid-cols-3">
+                    <InsetStat label={t('admin.users.analytics.totalTrackedSpend')} value={formatAmount(totalTrackedSpend)} />
+                    <InsetStat label={t('admin.users.analytics.topCategory')}>
                       {topCategory ? (
                         <>
-                          <p className="mt-1 text-base font-semibold">
-                            {topCategory.icon} {topCategory.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">{formatAmount(topCategory.value)}</p>
+                          <div className="mt-1 text-[15px] font-bold">{topCategory.icon} {topCategory.name}</div>
+                          <div className="mt-0.5 text-[13px] text-muted-foreground">{formatAmount(topCategory.value)}</div>
                         </>
                       ) : (
-                        <p className="text-sm text-muted-foreground">-</p>
+                        <div className="mt-1 text-[15px] font-bold text-muted-foreground">–</div>
                       )}
-                    </div>
-                    <div className="rounded-lg border p-4">
-                      <p className="text-xs text-muted-foreground">
-                        {t('admin.users.analytics.convertedTo', { currency: preferredCurrency })}
-                      </p>
-                    </div>
+                    </InsetStat>
+                    <InsetStat label={t('admin.users.analytics.convertedTo', { currency: preferredCurrency })} className="bg-bg-subtle/30" />
                   </div>
                 </div>
               ) : (
                 <EmptyState
                   compact
-                  className="border-0 bg-transparent shadow-none"
+                  className="mt-4 border-0 bg-transparent shadow-none"
                   icon={PieChartIcon}
                   title={t('admin.users.analytics.noData')}
                 />
               )}
-            </CardContent>
-          </Card>
+            </AdminCard>
 
-          <Tabs defaultValue="categories" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="categories">{t('admin.users.categories')}</TabsTrigger>
-              <TabsTrigger value="receipts">{t('admin.users.receipts')}</TabsTrigger>
-            </TabsList>
+            {/* Categories / Expenses */}
+            <Tabs defaultValue="categories" className="space-y-4">
+              <TabsList className="h-auto w-full rounded-full bg-bg-subtle p-1">
+                <TabsTrigger value="categories" className="flex-1 rounded-full py-1.5 data-[state=active]:shadow-glass-1">{t('admin.users.categories')}</TabsTrigger>
+                <TabsTrigger value="receipts" className="flex-1 rounded-full py-1.5 data-[state=active]:shadow-glass-1">{t('admin.users.receipts')}</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="categories" className="space-y-4">
-              {isLoadingCategories ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : categoriesData && categoriesData.data.length > 0 ? (
-                <>
-                  <Card>
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-12"></TableHead>
-                            <TableHead>{t('categories.table.name')}</TableHead>
-                            <TableHead>{t('categories.table.description')}</TableHead>
-                            <TableHead>{t('categories.table.monthlyBudget')}</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {categoriesData.data.map((category) => (
-                            <TableRow key={category.id}>
-                              <TableCell>
-                                <div
-                                  className="flex h-8 w-8 items-center justify-center rounded-full text-lg"
-                                  style={{ backgroundColor: category.color + '20' }}
-                                >
-                                  {category.icon}
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-medium">{category.name}</TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {category.description || '-'}
-                              </TableCell>
-                              <TableCell>
-                                {category.monthlyBudget !== null && category.monthlyBudget !== undefined
-                                  ? `${Number(category.monthlyBudget).toFixed(2)}${category.budgetCurrency ? ` ${category.budgetCurrency}` : ''}`
-                                  : '-'}
-                              </TableCell>
+              <TabsContent value="categories" className="space-y-4">
+                {isLoadingCategories ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : categoriesData && categoriesData.data.length > 0 ? (
+                  <>
+                    <AdminCard className="overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full caption-bottom text-sm">
+                          <TableHeader className="bg-transparent">
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="w-[60px] pl-5" />
+                              <TableHead>{t('categories.table.name')}</TableHead>
+                              <TableHead>{t('categories.table.description')}</TableHead>
+                              <TableHead className="pr-5">{t('categories.table.monthlyBudget')}</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                  {categoriesData.meta.totalPages > 1 && (
-                    <Pagination
-                      page={categoriesData.meta.page}
-                      totalPages={categoriesData.meta.totalPages}
-                      total={categoriesData.meta.total}
-                      limit={categoriesData.meta.limit}
-                      onPageChange={setCategoriesPage}
-                    />
-                  )}
-                </>
-              ) : (
-                <EmptyState compact icon={FolderOpen} title={t('admin.users.noCategories')} />
-              )}
-            </TabsContent>
+                          </TableHeader>
+                          <TableBody>
+                            {categoriesData.data.map((category) => (
+                              <TableRow key={category.id}>
+                                <TableCell className="pl-5">
+                                  <span
+                                    className="grid size-9 place-items-center rounded-xl text-lg"
+                                    style={{ background: (category.color || '#888') + '1f' }}
+                                  >
+                                    {category.icon}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="font-semibold">{category.name}</TableCell>
+                                <TableCell className="text-muted-foreground">{category.description || '–'}</TableCell>
+                                <TableCell className="pr-5">
+                                  {category.monthlyBudget !== null && category.monthlyBudget !== undefined
+                                    ? `${Number(category.monthlyBudget).toFixed(2)}${category.budgetCurrency ? ` ${category.budgetCurrency}` : ''}`
+                                    : '–'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </table>
+                      </div>
+                    </AdminCard>
+                    {categoriesData.meta.totalPages > 1 && (
+                      <Pagination
+                        page={categoriesData.meta.page}
+                        totalPages={categoriesData.meta.totalPages}
+                        total={categoriesData.meta.total}
+                        limit={categoriesData.meta.limit}
+                        onPageChange={setCategoriesPage}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <EmptyState compact icon={FolderOpen} title={t('admin.users.noCategories')} />
+                )}
+              </TabsContent>
 
-            <TabsContent value="receipts" className="space-y-4">
-              {isLoadingReceipts ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : receiptsData && receiptsData.data.length > 0 ? (
-                <>
-                  <Card>
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>{t('receipts.table.store')}</TableHead>
-                            <TableHead>{t('receipts.table.amount')}</TableHead>
-                            <TableHead>{t('receipts.table.category')}</TableHead>
-                            <TableHead>{t('receipts.table.date')}</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {receiptsData.data.map((receipt) => (
-                            <TableRow key={receipt.id}>
-                              <TableCell className="font-medium">{receipt.storeName || '-'}</TableCell>
-                              <TableCell>
-                                {receipt.totalAmount
-                                  ? `${Number(receipt.totalAmount).toFixed(2)} ${receipt.currency || 'RSD'}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell>
-                                {receipt.category ? (
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="flex h-6 w-6 items-center justify-center rounded-full text-sm"
-                                      style={{
-                                        backgroundColor: receipt.category.color + '20',
-                                      }}
-                                    >
-                                      {receipt.category.icon}
-                                    </div>
-                                    <span className="text-sm">{receipt.category.name}</span>
-                                  </div>
-                                ) : (
-                                  '-'
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '-'}
-                              </TableCell>
+              <TabsContent value="receipts" className="space-y-4">
+                {isLoadingReceipts ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : receiptsData && receiptsData.data.length > 0 ? (
+                  <>
+                    <AdminCard className="overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full caption-bottom text-sm">
+                          <TableHeader className="bg-transparent">
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="pl-5">{t('receipts.table.store')}</TableHead>
+                              <TableHead>{t('receipts.table.amount')}</TableHead>
+                              <TableHead>{t('receipts.table.category')}</TableHead>
+                              <TableHead className="pr-5">{t('receipts.table.date')}</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                  {receiptsData.meta.totalPages > 1 && (
-                    <Pagination
-                      page={receiptsData.meta.page}
-                      totalPages={receiptsData.meta.totalPages}
-                      total={receiptsData.meta.total}
-                      limit={receiptsData.meta.limit}
-                      onPageChange={setReceiptsPage}
-                    />
-                  )}
-                </>
-              ) : (
-                <EmptyState compact icon={Receipt} title={t('admin.users.noReceipts')} />
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
-      ) : null}
+                          </TableHeader>
+                          <TableBody>
+                            {receiptsData.data.map((receipt) => (
+                              <TableRow key={receipt.id}>
+                                <TableCell className="pl-5 font-semibold">{receipt.storeName || '–'}</TableCell>
+                                <TableCell>
+                                  {receipt.totalAmount
+                                    ? `${Number(receipt.totalAmount).toFixed(2)} ${receipt.currency || 'RSD'}`
+                                    : '–'}
+                                </TableCell>
+                                <TableCell>
+                                  {receipt.category ? (
+                                    <span className="flex items-center gap-2">
+                                      <span
+                                        className="grid size-6 place-items-center rounded-lg text-sm"
+                                        style={{ background: (receipt.category.color || '#888') + '1f' }}
+                                      >
+                                        {receipt.category.icon}
+                                      </span>
+                                      <span>{receipt.category.name}</span>
+                                    </span>
+                                  ) : '–'}
+                                </TableCell>
+                                <TableCell className="pr-5 text-muted-foreground">
+                                  {receipt.receiptDate ? formatDateTime(receipt.receiptDate) : '–'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </table>
+                      </div>
+                    </AdminCard>
+                    {receiptsData.meta.totalPages > 1 && (
+                      <Pagination
+                        page={receiptsData.meta.page}
+                        totalPages={receiptsData.meta.totalPages}
+                        total={receiptsData.meta.total}
+                        limit={receiptsData.meta.limit}
+                        onPageChange={setReceiptsPage}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <EmptyState compact icon={Receipt} title={t('admin.users.noReceipts')} />
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        ) : null}
+      </PageTransition>
     </AppLayout>
   )
 }

@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
 import { AiSettingsCard } from '@/components/admin/ai-settings-card'
 import { FeatureFlagsCard } from '@/components/admin/feature-flags-card'
 
@@ -8,21 +10,23 @@ export default function AdminSettings() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <div>
-          <h2 className="t-h1 text-[28px] mb-1 sm:mb-2">
-            {t('admin.settings.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
-            {t('admin.settings.subtitle')}
-          </p>
-        </div>
-      </div>
+      <PageTransition>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('admin.settings.title')}
+          subtitle={t('admin.settings.subtitle')}
+        />
 
-      <div className="max-w-2xl space-y-6">
-        <FeatureFlagsCard />
-        <AiSettingsCard />
-      </div>
+        <div className="mb-5 md:hidden">
+          <h1 className="t-h1 text-[28px]">{t('admin.settings.title')}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('admin.settings.subtitle')}</p>
+        </div>
+
+        <div className="mx-auto max-w-[760px] space-y-[18px]">
+          <FeatureFlagsCard />
+          <AiSettingsCard />
+        </div>
+      </PageTransition>
     </AppLayout>
   )
 }

@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -12,9 +10,11 @@ import {
 import { Pagination } from '@/components/ui/pagination'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { useAdminRatings, useAdminUpdateRating } from '@/hooks/ratings/use-ratings'
 import { formatDateTime } from '@/lib/date-utils'
 import { EmptyState } from '@/components/glass/empty-state'
+import { AdminCard, AdminCardHead, Pill } from '@/components/admin/primitives'
 import { Loader2, Star, Globe, Check, X, MessageSquare, Send, Sparkles } from 'lucide-react'
 
 interface RatingsTableProps {
@@ -28,11 +28,7 @@ function StarDisplay({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`h-4 w-4 ${
-            star <= rating
-              ? 'fill-warning text-warning'
-              : 'text-muted-foreground/20'
-          }`}
+          className={`size-[15px] ${star <= rating ? 'fill-warning text-warning' : 'text-border'}`}
         />
       ))}
     </div>
@@ -75,24 +71,63 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
     setCommentText('')
   }
 
+  const approvedPill = (id: string, approved: boolean) => (
+    <Pill
+      tone={approved ? 'emerald' : 'warn'}
+      icon={approved ? Check : X}
+      onClick={() => handleToggleApproval(id, approved)}
+      disabled={adminUpdate.isPending}
+    >
+      {approved ? t('admin.ratings.table.approved') : t('admin.ratings.table.pending')}
+    </Pill>
+  )
+
+  const featuredPill = (id: string, featured: boolean) => (
+    <Pill
+      tone={featured ? 'violet' : 'neutral'}
+      icon={Sparkles}
+      onClick={() => handleToggleFeatured(id, featured)}
+      disabled={adminUpdate.isPending}
+    >
+      {featured ? t('admin.ratings.table.featured') : t('admin.ratings.table.notFeatured')}
+    </Pill>
+  )
+
+  const commentEditor = (ratingId: string, mobile?: boolean) => (
+    <div className="space-y-2">
+      <Textarea
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+        placeholder={t('admin.ratings.table.addComment')}
+        maxLength={1000}
+        rows={mobile ? 3 : 2}
+      />
+      <div className="flex gap-1.5">
+        <Button size="sm" variant="outline" className="h-8" onClick={() => handleSaveComment(ratingId)} disabled={adminUpdate.isPending}>
+          <Send className="size-3.5" />
+          {t('admin.ratings.table.saveComment')}
+        </Button>
+        <Button size="sm" variant="ghost" className="h-8" onClick={handleCancelComment}>
+          {t('admin.ratings.table.cancelComment')}
+        </Button>
+      </div>
+    </div>
+  )
+
   return (
     <>
       {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <Card>
-          <CardContent className="p-8">
-            <p className="text-center text-destructive">
-              {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
-          </CardContent>
-        </Card>
+        <AdminCard className="p-8">
+          <p className="text-center text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        </AdminCard>
       )}
 
       {/* Empty State */}
@@ -102,312 +137,142 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
 
       {/* Mobile Card View */}
       {!isLoading && !error && ratings.length > 0 && (
-        <div className="md:hidden space-y-4">
+        <div className="space-y-4 md:hidden">
           {meta && (
-            <div className="text-sm font-medium text-muted-foreground">
-              {t('admin.ratings.totalRatings', { count: meta.total })}
-            </div>
+            <div className="text-sm font-semibold">{t('admin.ratings.totalRatings', { count: meta.total })}</div>
           )}
           {ratings.map((rating) => (
-            <Card key={rating.id}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar
-                      firstName={rating.user?.firstName}
-                      lastName={rating.user?.lastName}
-                      imageUrl={rating.user?.profileImageUrl}
-                      size="sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {rating.user?.firstName || rating.user?.lastName
-                          ? `${rating.user?.firstName || ''} ${rating.user?.lastName || ''}`.trim()
-                          : rating.user?.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">{rating.user?.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <StarDisplay rating={rating.rating} />
-                    <div className="flex items-center gap-2">
-                      {rating.isPublic && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-success-soft text-success-foreground">
-                          <Globe className="h-3 w-3" />
-                          {t('admin.ratings.table.public')}
-                        </span>
-                      )}
-                      <button
-                        onClick={() => handleToggleApproval(rating.id, rating.isApproved)}
-                        disabled={adminUpdate.isPending}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                          rating.isApproved
-                            ? 'bg-success-soft text-success-foreground'
-                            : 'bg-warning-soft text-warning-foreground'
-                        }`}
-                      >
-                        {rating.isApproved ? (
-                          <><Check className="h-3 w-3" />{t('admin.ratings.table.approved')}</>
-                        ) : (
-                          <><X className="h-3 w-3" />{t('admin.ratings.table.pending')}</>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleToggleFeatured(rating.id, rating.isFeatured)}
-                        disabled={adminUpdate.isPending}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                          rating.isFeatured
-                            ? 'bg-brand-violet-soft text-brand-violet-foreground'
-                            : 'bg-bg-subtle text-muted-foreground'
-                        }`}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        {t('admin.ratings.table.featured')}
-                      </button>
-                    </div>
-                  </div>
-
-                  {rating.description && (
-                    <p className="text-sm text-muted-foreground">{rating.description}</p>
-                  )}
-
-                  {/* Admin Comment Section - Mobile */}
-                  {editingCommentId === rating.id ? (
-                    <div className="space-y-2">
-                      <textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        placeholder={t('admin.ratings.table.addComment')}
-                        maxLength={1000}
-                        rows={3}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleSaveComment(rating.id)}
-                          disabled={adminUpdate.isPending}
-                        >
-                          <Send className="h-3 w-3 mr-1" />
-                          {t('admin.ratings.table.saveComment')}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={handleCancelComment}>
-                          {t('admin.ratings.table.cancelComment')}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      {rating.adminComment ? (
-                        <div className="p-2 rounded-md bg-muted/50 text-sm">
-                          <p className="text-xs font-medium text-muted-foreground mb-1">{t('admin.ratings.table.comment')}</p>
-                          <p className="text-foreground">{rating.adminComment}</p>
-                          <button
-                            onClick={() => handleStartEditComment(rating.id, rating.adminComment)}
-                            className="text-xs text-primary mt-1 hover:underline"
-                          >
-                            {t('admin.ratings.table.editComment')}
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleStartEditComment(rating.id)}
-                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <MessageSquare className="h-3 w-3" />
-                          {t('admin.ratings.table.addComment')}
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="text-xs text-muted-foreground">
-                    {formatDateTime(rating.createdAt)}
-                  </div>
+            <div key={rating.id} className="rounded-2xl border border-border bg-card p-4 shadow-glass-1">
+              <div className="flex items-center gap-3">
+                <Avatar firstName={rating.user?.firstName} lastName={rating.user?.lastName} imageUrl={rating.user?.profileImageUrl} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">
+                    {rating.user?.firstName || rating.user?.lastName
+                      ? `${rating.user?.firstName || ''} ${rating.user?.lastName || ''}`.trim()
+                      : rating.user?.email}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{rating.user?.email}</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <StarDisplay rating={rating.rating} />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {rating.isPublic && <Pill tone="emerald" icon={Globe}>{t('admin.ratings.table.public')}</Pill>}
+                  {approvedPill(rating.id, rating.isApproved)}
+                </div>
+              </div>
+
+              {rating.description && <p className="mt-3 text-sm text-muted-foreground">{rating.description}</p>}
+
+              <div className="mt-3">
+                {editingCommentId === rating.id ? (
+                  commentEditor(rating.id, true)
+                ) : rating.adminComment ? (
+                  <div className="rounded-xl bg-bg-subtle/60 p-2.5 text-sm">
+                    <p className="t-xs mb-1 text-muted-foreground">{t('admin.ratings.table.comment')}</p>
+                    <p>{rating.adminComment}</p>
+                    <Button variant="link" className="mt-1 h-auto p-0 text-[12px]" onClick={() => handleStartEditComment(rating.id, rating.adminComment)}>
+                      {t('admin.ratings.table.editComment')}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button variant="ghost" size="sm" className="h-auto gap-1.5 px-2 py-1 text-[12px] text-muted-foreground" onClick={() => handleStartEditComment(rating.id)}>
+                    <MessageSquare className="size-3.5" />
+                    {t('admin.ratings.table.addComment')}
+                  </Button>
+                )}
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2">
+                {featuredPill(rating.id, rating.isFeatured)}
+                <span className="text-xs text-muted-foreground">{formatDateTime(rating.createdAt)}</span>
+              </div>
+            </div>
           ))}
 
           {meta && meta.totalPages > 1 && (
-            <div className="pt-2">
-              <Pagination
-                page={meta.page}
-                totalPages={meta.totalPages}
-                total={meta.total}
-                limit={meta.limit}
-                onPageChange={onPageChange}
-              />
-            </div>
+            <Pagination page={meta.page} totalPages={meta.totalPages} total={meta.total} limit={meta.limit} onPageChange={onPageChange} />
           )}
         </div>
       )}
 
       {/* Desktop Table View */}
       {!isLoading && !error && ratings.length > 0 && (
-        <Card className="hidden md:block">
-          <CardHeader>
-            <CardTitle>
-              {t('admin.ratings.totalRatings', { count: meta?.total || 0 })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('admin.ratings.table.user')}</TableHead>
+        <AdminCard className="hidden md:block">
+          <AdminCardHead title={t('admin.ratings.totalRatings', { count: meta?.total || 0 })} />
+          <div className="mt-3 overflow-x-auto custom-scrollbar">
+            <table className="w-full caption-bottom text-sm">
+              <TableHeader className="bg-transparent">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-5 sm:pl-[22px]">{t('admin.ratings.table.user')}</TableHead>
                   <TableHead>{t('admin.ratings.table.rating')}</TableHead>
                   <TableHead className="max-w-[250px]">{t('admin.ratings.table.description')}</TableHead>
                   <TableHead>{t('admin.ratings.table.public')}</TableHead>
                   <TableHead>{t('admin.ratings.table.approved')}</TableHead>
                   <TableHead>{t('admin.ratings.table.featured')}</TableHead>
                   <TableHead className="max-w-[250px]">{t('admin.ratings.table.comment')}</TableHead>
-                  <TableHead>{t('admin.ratings.table.date')}</TableHead>
+                  <TableHead className="pr-5 sm:pr-[22px]">{t('admin.ratings.table.date')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {ratings.map((rating) => (
                   <TableRow key={rating.id}>
-                    <TableCell>
+                    <TableCell className="pl-5 sm:pl-[22px]">
                       <div className="flex items-center gap-3">
-                        <Avatar
-                          firstName={rating.user?.firstName}
-                          lastName={rating.user?.lastName}
-                          imageUrl={rating.user?.profileImageUrl}
-                          size="sm"
-                        />
+                        <Avatar firstName={rating.user?.firstName} lastName={rating.user?.lastName} imageUrl={rating.user?.profileImageUrl} size="sm" />
                         <div className="min-w-0">
-                          <p className="font-medium truncate">
+                          <p className="truncate font-semibold">
                             {rating.user?.firstName || rating.user?.lastName
                               ? `${rating.user?.firstName || ''} ${rating.user?.lastName || ''}`.trim()
-                              : '-'}
+                              : '–'}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">{rating.user?.email}</p>
+                          <p className="truncate text-xs text-muted-foreground">{rating.user?.email}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <StarDisplay rating={rating.rating} />
-                    </TableCell>
+                    <TableCell><StarDisplay rating={rating.rating} /></TableCell>
                     <TableCell className="max-w-[250px]">
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {rating.description || '-'}
-                      </p>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{rating.description || '–'}</p>
                     </TableCell>
                     <TableCell>
-                      {rating.isPublic ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-success-soft text-success-foreground">
-                          <Globe className="h-3 w-3" />
-                          {t('admin.ratings.table.public')}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{t('admin.ratings.table.private')}</span>
-                      )}
+                      {rating.isPublic
+                        ? <Pill tone="emerald" icon={Globe}>{t('admin.ratings.table.public')}</Pill>
+                        : <Pill tone="neutral">{t('admin.ratings.table.private')}</Pill>}
                     </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => handleToggleApproval(rating.id, rating.isApproved)}
-                        disabled={adminUpdate.isPending}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
-                          rating.isApproved
-                            ? 'bg-success-soft text-success-foreground'
-                            : 'bg-warning-soft text-warning-foreground'
-                        }`}
-                      >
-                        {rating.isApproved ? (
-                          <><Check className="h-3 w-3" />{t('admin.ratings.table.approved')}</>
-                        ) : (
-                          <><X className="h-3 w-3" />{t('admin.ratings.table.pending')}</>
-                        )}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => handleToggleFeatured(rating.id, rating.isFeatured)}
-                        disabled={adminUpdate.isPending}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
-                          rating.isFeatured
-                            ? 'bg-brand-violet-soft text-brand-violet-foreground'
-                            : 'bg-bg-subtle text-muted-foreground'
-                        }`}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        {rating.isFeatured ? t('admin.ratings.table.featured') : t('admin.ratings.table.notFeatured')}
-                      </button>
-                    </TableCell>
+                    <TableCell>{approvedPill(rating.id, rating.isApproved)}</TableCell>
+                    <TableCell>{featuredPill(rating.id, rating.isFeatured)}</TableCell>
                     <TableCell className="max-w-[250px]">
                       {editingCommentId === rating.id ? (
-                        <div className="space-y-2">
-                          <textarea
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder={t('admin.ratings.table.addComment')}
-                            maxLength={1000}
-                            rows={2}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          />
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleSaveComment(rating.id)}
-                              disabled={adminUpdate.isPending}
-                              className="h-7 px-2 text-xs"
-                            >
-                              <Send className="h-3 w-3 mr-1" />
-                              {t('admin.ratings.table.saveComment')}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={handleCancelComment}
-                              className="h-7 px-2 text-xs"
-                            >
-                              {t('admin.ratings.table.cancelComment')}
-                            </Button>
-                          </div>
-                        </div>
+                        commentEditor(rating.id)
                       ) : rating.adminComment ? (
                         <div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{rating.adminComment}</p>
-                          <button
-                            onClick={() => handleStartEditComment(rating.id, rating.adminComment)}
-                            className="text-xs text-primary hover:underline mt-1"
-                          >
+                          <p className="line-clamp-2 text-sm text-muted-foreground">{rating.adminComment}</p>
+                          <Button variant="link" className="mt-1 h-auto p-0 text-[12px]" onClick={() => handleStartEditComment(rating.id, rating.adminComment)}>
                             {t('admin.ratings.table.editComment')}
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleStartEditComment(rating.id)}
-                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <MessageSquare className="h-3 w-3" />
+                        <Button variant="ghost" size="sm" className="h-auto gap-1.5 px-2 py-1 text-[12px] text-muted-foreground" onClick={() => handleStartEditComment(rating.id)}>
+                          <MessageSquare className="size-3.5" />
                           {t('admin.ratings.table.addComment')}
-                        </button>
+                        </Button>
                       )}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap pr-5 text-sm text-muted-foreground sm:pr-[22px]">
                       {formatDateTime(rating.createdAt)}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-            {meta && meta.totalPages > 1 && (
-              <div className="mt-4">
-                <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
-                  total={meta.total}
-                  limit={meta.limit}
-                  onPageChange={onPageChange}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </table>
+          </div>
+          {meta && meta.totalPages > 1 && (
+            <div className="border-t border-hairline-soft px-5 py-4 sm:px-[22px]">
+              <Pagination page={meta.page} totalPages={meta.totalPages} total={meta.total} limit={meta.limit} onPageChange={onPageChange} />
+            </div>
+          )}
+        </AdminCard>
       )}
     </>
   )

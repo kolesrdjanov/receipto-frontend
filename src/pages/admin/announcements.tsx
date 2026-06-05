@@ -1,34 +1,46 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageTransition } from '@/components/ui/animated'
+import { AddButton } from '@/components/glass/empty-state'
 import { AnnouncementsTable } from '@/components/admin/announcements-table'
 import { AnnouncementModal } from '@/components/admin/announcement-modal'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { useFabStore } from '@/store/fab'
 
 export default function AdminAnnouncements() {
   const { t } = useTranslation()
   const [page, setPage] = useState(1)
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
+  const openCreate = useCallback(() => setCreateModalOpen(true), [])
+
+  // Take over the global mobile FAB so it opens the Create Announcement sheet.
+  const setFab = useFabStore((s) => s.setFab)
+  const clearFab = useFabStore((s) => s.clearFab)
+  useEffect(() => {
+    setFab(openCreate)
+    return () => clearFab()
+  }, [setFab, clearFab, openCreate])
+
   return (
     <AppLayout>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <div>
-          <h2 className="t-h1 text-[28px] mb-1 sm:mb-2">
-            {t('admin.announcements.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground sm:text-base">
-            {t('admin.announcements.subtitle')}
-          </p>
-        </div>
-        <Button onClick={() => setCreateModalOpen(true)}>
-          <Plus className="h-4 w-4" />
-          {t('admin.announcements.createAnnouncement')}
-        </Button>
-      </div>
+      <PageTransition>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={t('admin.announcements.title')}
+          subtitle={t('admin.announcements.subtitle')}
+          actions={<AddButton onClick={openCreate} label={t('admin.announcements.createAnnouncement')} />}
+        />
 
-      <AnnouncementsTable page={page} onPageChange={setPage} />
+        <div className="mb-5 md:hidden">
+          <h1 className="t-h1 text-[28px]">{t('admin.announcements.title')}</h1>
+          <p className="t-sm mt-1 text-muted-foreground">{t('admin.announcements.subtitle')}</p>
+        </div>
+
+        <AnnouncementsTable page={page} onPageChange={setPage} />
+      </PageTransition>
+
       <AnnouncementModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
     </AppLayout>
   )

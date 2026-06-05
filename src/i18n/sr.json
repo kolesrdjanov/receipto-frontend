@@ -1231,6 +1231,7 @@
       "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
       "backToUsers": "Nazad na korisnike",
       "invalidUser": "Neispravan korisnik",
+      "viewDetails": "Prikaži detalje",
       "usage": {
         "title": "Korišćenje funkcija",
         "description": "Kako ovaj korisnik koristi garancije i ponavljajuće troškove",
@@ -1246,6 +1247,7 @@
       "analytics": {
         "title": "Analitika potrošnje",
         "description": "Gde ovaj korisnik najviše troši, grupisano po kategoriji",
+        "tracked": "Praćeno",
         "noData": "Još nema podataka o potrošnji",
         "totalTrackedSpend": "Ukupno evidentirana potrošnja",
         "topCategory": "Najveća kategorija",

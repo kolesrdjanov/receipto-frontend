@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -13,6 +11,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { AnnouncementModal } from './announcement-modal'
+import { AdminCard, AdminCardHead, Pill, type PillTone } from '@/components/admin/primitives'
 import {
   useAdminAnnouncements,
   useUpdateAnnouncement,
@@ -32,6 +31,7 @@ import {
   Info,
   ExternalLink,
   Megaphone,
+  type LucideIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -40,36 +40,15 @@ interface AnnouncementsTableProps {
   onPageChange: (page: number) => void
 }
 
-function TypeBadge({ type }: { type: AdminAnnouncement['type'] }) {
-  const { t } = useTranslation()
-
-  const styles = {
-    alert: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
-    success: 'bg-success-soft text-success-foreground',
-    info: 'bg-info-soft text-info-foreground',
-  }
-
-  const icons = {
-    alert: <AlertTriangle className="h-3 w-3" />,
-    success: <CheckCircle2 className="h-3 w-3" />,
-    info: <Info className="h-3 w-3" />,
-  }
-
-  return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${styles[type]}`}>
-      {icons[type]}
-      {t(`admin.announcements.types.${type}`)}
-    </span>
-  )
+const TYPE_TONE: Record<AdminAnnouncement['type'], PillTone> = {
+  alert: 'danger',
+  success: 'success',
+  info: 'info',
 }
-
-function DisplayBadge({ displayMode }: { displayMode: AdminAnnouncement['displayMode'] }) {
-  const { t } = useTranslation()
-  return (
-    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
-      {t(`admin.announcements.form.display${displayMode.charAt(0).toUpperCase() + displayMode.slice(1)}`)}
-    </span>
-  )
+const TYPE_ICON: Record<AdminAnnouncement['type'], LucideIcon> = {
+  alert: AlertTriangle,
+  success: CheckCircle2,
+  info: Info,
 }
 
 export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTableProps) {
@@ -87,11 +66,7 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
   const handleToggleActive = (id: string, currentActive: boolean) => {
     updateAnnouncement.mutate(
       { id, data: { isActive: !currentActive } },
-      {
-        onSuccess: () => {
-          toast.success(t('admin.announcements.updateSuccess'))
-        },
-      },
+      { onSuccess: () => toast.success(t('admin.announcements.updateSuccess')) },
     )
   }
 
@@ -104,24 +79,54 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
     })
   }
 
+  const typePill = (type: AdminAnnouncement['type']) => (
+    <Pill tone={TYPE_TONE[type]} icon={TYPE_ICON[type]}>{t(`admin.announcements.types.${type}`)}</Pill>
+  )
+  const displayPill = (mode: AdminAnnouncement['displayMode']) => (
+    <Pill tone="neutral">{t(`admin.announcements.form.display${mode.charAt(0).toUpperCase() + mode.slice(1)}`)}</Pill>
+  )
+  const activePill = (a: AdminAnnouncement) => (
+    <Pill
+      tone={a.isActive ? 'emerald' : 'warn'}
+      icon={a.isActive ? Check : X}
+      onClick={() => handleToggleActive(a.id, a.isActive)}
+      disabled={updateAnnouncement.isPending}
+    >
+      {a.isActive ? t('admin.announcements.table.active') : t('admin.announcements.table.inactive')}
+    </Pill>
+  )
+  const rowActions = (a: AdminAnnouncement) => (
+    <div className="flex items-center gap-1">
+      <Button variant="ghost" size="icon" className="size-8" title={t('admin.announcements.table.actions')} onClick={() => setEditingAnnouncement(a)}>
+        <Pencil className="size-4" />
+      </Button>
+      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.announcements.table.actions')} onClick={() => setDeletingId(a.id)}>
+        <Trash2 className="size-4" />
+      </Button>
+    </div>
+  )
+  const externalLink = (a: AdminAnnouncement, fallbackLabel: string) =>
+    a.linkUrl ? (
+      <a href={a.linkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+        <ExternalLink className="size-3" />
+        {a.linkText || fallbackLabel}
+      </a>
+    ) : null
+
   return (
     <>
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <Card>
-          <CardContent className="p-8">
-            <p className="text-center text-destructive">
-              {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
-          </CardContent>
-        </Card>
+        <AdminCard className="p-8">
+          <p className="text-center text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        </AdminCard>
       )}
 
       {/* Empty */}
@@ -131,201 +136,75 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
 
       {/* Mobile Card View */}
       {!isLoading && !error && announcements.length > 0 && (
-        <div className="md:hidden space-y-4">
+        <div className="space-y-4 md:hidden">
           {meta && (
-            <div className="text-sm font-medium text-muted-foreground">
-              {t('admin.announcements.totalAnnouncements', { count: meta.total })}
-            </div>
+            <div className="text-sm font-semibold">{t('admin.announcements.totalAnnouncements', { count: meta.total })}</div>
           )}
           {announcements.map((a) => (
-            <Card key={a.id}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm line-clamp-1">{a.title.en}</h3>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0"
-                        onClick={() => setEditingAnnouncement(a)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 w-7 p-0 text-destructive"
-                        onClick={() => setDeletingId(a.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground line-clamp-2">{a.message.en}</p>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <TypeBadge type={a.type} />
-                    <DisplayBadge displayMode={a.displayMode} />
-                    <button
-                      onClick={() => handleToggleActive(a.id, a.isActive)}
-                      disabled={updateAnnouncement.isPending}
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                        a.isActive
-                          ? 'bg-success-soft text-success-foreground'
-                          : 'bg-warning-soft text-warning-foreground'
-                      }`}
-                    >
-                      {a.isActive ? (
-                        <><Check className="h-3 w-3" />{t('admin.announcements.table.active')}</>
-                      ) : (
-                        <><X className="h-3 w-3" />{t('admin.announcements.table.inactive')}</>
-                      )}
-                    </button>
-                  </div>
-
-                  {a.linkUrl && (
-                    <a
-                      href={a.linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {a.linkText || a.linkUrl}
-                    </a>
-                  )}
-
-                  <div className="text-xs text-muted-foreground">
-                    {formatDateTime(a.createdAt)}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={a.id} className="rounded-2xl border border-border bg-card p-4 shadow-glass-1">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="line-clamp-1 text-[15px] font-bold">{a.title.en}</h3>
+                {rowActions(a)}
+              </div>
+              <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{a.message.en}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {typePill(a.type)}
+                {displayPill(a.displayMode)}
+                {activePill(a)}
+              </div>
+              {a.linkUrl && <div className="mt-3">{externalLink(a, a.linkUrl)}</div>}
+              <div className="mt-3 text-xs text-muted-foreground">{formatDateTime(a.createdAt)}</div>
+            </div>
           ))}
 
           {meta && meta.totalPages > 1 && (
-            <div className="pt-2">
-              <Pagination
-                page={meta.page}
-                totalPages={meta.totalPages}
-                total={meta.total}
-                limit={meta.limit}
-                onPageChange={onPageChange}
-              />
-            </div>
+            <Pagination page={meta.page} totalPages={meta.totalPages} total={meta.total} limit={meta.limit} onPageChange={onPageChange} />
           )}
         </div>
       )}
 
       {/* Desktop Table View */}
       {!isLoading && !error && announcements.length > 0 && (
-        <Card className="hidden md:block">
-          <CardHeader>
-            <CardTitle>
-              {t('admin.announcements.totalAnnouncements', { count: meta?.total || 0 })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('admin.announcements.table.type')}</TableHead>
+        <AdminCard className="hidden md:block">
+          <AdminCardHead title={t('admin.announcements.totalAnnouncements', { count: meta?.total || 0 })} />
+          <div className="mt-3 overflow-x-auto custom-scrollbar">
+            <table className="w-full caption-bottom text-sm">
+              <TableHeader className="bg-transparent">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-5 sm:pl-[22px]">{t('admin.announcements.table.type')}</TableHead>
                   <TableHead>{t('admin.announcements.table.title')}</TableHead>
                   <TableHead className="max-w-[300px]">{t('admin.announcements.table.message')}</TableHead>
                   <TableHead>{t('admin.announcements.table.displayMode')}</TableHead>
                   <TableHead>{t('admin.announcements.table.status')}</TableHead>
                   <TableHead>{t('admin.announcements.table.link')}</TableHead>
                   <TableHead>{t('admin.announcements.table.date')}</TableHead>
-                  <TableHead>{t('admin.announcements.table.actions')}</TableHead>
+                  <TableHead className="pr-5 sm:pr-[22px]">{t('admin.announcements.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {announcements.map((a) => (
                   <TableRow key={a.id}>
-                    <TableCell>
-                      <TypeBadge type={a.type} />
-                    </TableCell>
-                    <TableCell className="font-medium">{a.title.en}</TableCell>
+                    <TableCell className="pl-5 sm:pl-[22px]">{typePill(a.type)}</TableCell>
+                    <TableCell className="font-semibold">{a.title.en}</TableCell>
                     <TableCell className="max-w-[300px]">
-                      <p className="text-sm text-muted-foreground line-clamp-2">{a.message.en}</p>
+                      <p className="line-clamp-2 text-sm text-muted-foreground">{a.message.en}</p>
                     </TableCell>
-                    <TableCell>
-                      <DisplayBadge displayMode={a.displayMode} />
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => handleToggleActive(a.id, a.isActive)}
-                        disabled={updateAnnouncement.isPending}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors cursor-pointer ${
-                          a.isActive
-                            ? 'bg-success-soft text-success-foreground'
-                            : 'bg-warning-soft text-warning-foreground'
-                        }`}
-                      >
-                        {a.isActive ? (
-                          <><Check className="h-3 w-3" />{t('admin.announcements.table.active')}</>
-                        ) : (
-                          <><X className="h-3 w-3" />{t('admin.announcements.table.inactive')}</>
-                        )}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      {a.linkUrl ? (
-                        <a
-                          href={a.linkUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          {a.linkText || t('admin.announcements.table.viewLink')}
-                        </a>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                      {formatDateTime(a.createdAt)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 w-7 p-0"
-                          onClick={() => setEditingAnnouncement(a)}
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 w-7 p-0 text-destructive"
-                          onClick={() => setDeletingId(a.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableCell>{displayPill(a.displayMode)}</TableCell>
+                    <TableCell>{activePill(a)}</TableCell>
+                    <TableCell>{externalLink(a, t('admin.announcements.table.viewLink')) || <span className="text-xs text-muted-foreground">–</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{formatDateTime(a.createdAt)}</TableCell>
+                    <TableCell className="pr-5 sm:pr-[22px]">{rowActions(a)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-            {meta && meta.totalPages > 1 && (
-              <div className="mt-4">
-                <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
-                  total={meta.total}
-                  limit={meta.limit}
-                  onPageChange={onPageChange}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </table>
+          </div>
+          {meta && meta.totalPages > 1 && (
+            <div className="border-t border-hairline-soft px-5 py-4 sm:px-[22px]">
+              <Pagination page={meta.page} totalPages={meta.totalPages} total={meta.total} limit={meta.limit} onPageChange={onPageChange} />
+            </div>
+          )}
+        </AdminCard>
       )}
 
       {/* Edit Modal */}
@@ -342,6 +221,8 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
         title={t('admin.announcements.deleteAnnouncement')}
         description={t('admin.announcements.deleteConfirm')}
         onConfirm={() => deletingId && handleDelete(deletingId)}
+        confirmText={t('common.delete')}
+        variant="destructive"
         isLoading={deleteAnnouncement.isPending}
       />
     </>

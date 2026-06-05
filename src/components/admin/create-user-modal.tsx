@@ -4,13 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,8 +22,11 @@ interface CreateUserModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+const FORM_ID = 'create-user-form'
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+
 // `role` is managed by local state (selectedRole), not RHF, so it is omitted here.
-const createUserSchema = (t: (k: string, o?: any) => string) =>
+const createUserSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
     email: z
       .string()
@@ -95,83 +92,60 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t('admin.users.createTitle')}</DialogTitle>
-          <DialogDescription>{t('admin.users.createDescription')}</DialogDescription>
-        </DialogHeader>
+    <GlassDialog
+      open={open}
+      onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}
+      title={t('admin.users.createTitle')}
+      description={t('admin.users.createDescription')}
+      desktopWidth={520}
+      actions={{
+        primary: (
+          <Button type="submit" form={FORM_ID} className="rounded-xl" disabled={createUser.isPending}>
+            {createUser.isPending ? t('common.creating') : t('common.create')}
+          </Button>
+        ),
+        secondary: (
+          <Button type="button" variant="outline" className="rounded-xl" onClick={handleClose} disabled={createUser.isPending}>
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div>
+          <Label htmlFor="email" className={fieldLabel}>{t('admin.users.form.email')}</Label>
+          <Input id="email" type="email" placeholder={t('admin.users.form.emailPlaceholder')} {...register('email')} />
+          {errors.email && <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.email.message}</p>}
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('admin.users.form.email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t('admin.users.form.emailPlaceholder')}
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+        <div>
+          <Label htmlFor="password" className={fieldLabel}>{t('admin.users.form.password')}</Label>
+          <Input id="password" type="password" placeholder={t('admin.users.form.passwordPlaceholder')} {...register('password')} />
+          {errors.password && <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.password.message}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="firstName" className={fieldLabel}>{t('admin.users.form.firstName')}</Label>
+            <Input id="firstName" placeholder={t('admin.users.form.firstNamePlaceholder')} {...register('firstName')} />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('admin.users.form.password')}</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t('admin.users.form.passwordPlaceholder')}
-              {...register('password')}
-            />
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
+          <div>
+            <Label htmlFor="lastName" className={fieldLabel}>{t('admin.users.form.lastName')}</Label>
+            <Input id="lastName" placeholder={t('admin.users.form.lastNamePlaceholder')} {...register('lastName')} />
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">{t('admin.users.form.firstName')}</Label>
-              <Input
-                id="firstName"
-                placeholder={t('admin.users.form.firstNamePlaceholder')}
-                {...register('firstName')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastName">{t('admin.users.form.lastName')}</Label>
-              <Input
-                id="lastName"
-                placeholder={t('admin.users.form.lastNamePlaceholder')}
-                {...register('lastName')}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">{t('admin.users.form.role')}</Label>
-            <Select value={selectedRole} onValueChange={(value: 'user' | 'admin') => setSelectedRole(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">{t('admin.users.form.roleUser')}</SelectItem>
-                <SelectItem value="admin">{t('admin.users.form.roleAdmin')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" disabled={createUser.isPending}>
-              {createUser.isPending ? t('common.creating') : t('common.create')}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div>
+          <Label htmlFor="role" className={fieldLabel}>{t('admin.users.form.role')}</Label>
+          <Select value={selectedRole} onValueChange={(value: 'user' | 'admin') => setSelectedRole(value)}>
+            <SelectTrigger id="role"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="user">{t('admin.users.form.roleUser')}</SelectItem>
+              <SelectItem value="admin">{t('admin.users.form.roleAdmin')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </form>
+    </GlassDialog>
   )
 }
