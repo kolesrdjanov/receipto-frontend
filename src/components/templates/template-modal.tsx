@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,7 +22,6 @@ import {
   type CreateTemplateInput,
 } from '@/hooks/templates/use-templates'
 import { useCategories } from '@/hooks/categories/use-categories'
-import { useCurrencies } from '@/hooks/currencies/use-currencies'
 import { useSettingsStore } from '@/store/settings'
 import { toast } from 'sonner'
 
@@ -48,7 +48,6 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
   const { t } = useTranslation()
   const { currency: preferredCurrency } = useSettingsStore()
   const { data: categories } = useCategories()
-  const { data: currencies } = useCurrencies()
 
   const schema = useMemo(() => createTemplateSchema(t), [t])
   const {
@@ -185,21 +184,14 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
 
         <div className="space-y-2">
           <Label htmlFor="currency">{t('templates.modal.currency')}</Label>
-          <Select
+          <CurrencySelect
+            id="currency"
             value={currency || preferredCurrency}
             onValueChange={(value) => setValue('currency', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t('templates.modal.selectCurrency')} />
-            </SelectTrigger>
-            <SelectContent>
-              {currencies?.map((curr) => (
-                <SelectItem key={curr.code} value={curr.code}>
-                  {curr.symbol} {curr.code} - {curr.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder={t('templates.modal.selectCurrency')}
+            variant="full"
+            triggerClassName="w-full"
+          />
         </div>
 
         <div className="space-y-2">

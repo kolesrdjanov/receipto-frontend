@@ -85,6 +85,13 @@ never a hand-written parallel interface.
   bespoke controls (color swatches, segmented controls, kebab triggers), or with
   `// eslint-disable-next-line no-restricted-syntax -- raw-button-ok: <reason>`. Enforced by a PostToolUse
   hook + an ESLint `no-restricted-syntax` rule.
+- **Currency dropdowns: always the shared `<CurrencySelect>`** (`components/ui/currency-select.tsx`) — never
+  hand-roll a `<Select>` mapping over `useCurrencies()`. It pulls the currency list itself and renders the
+  emoji flag via `getCurrencyFlag(currency.icon)` (the `icon` field, e.g. `flag-rs` — **not** `currency.code`,
+  which silently returns no flag). Props: `value` · `onValueChange` · `placeholder` · `id` · `triggerClassName`
+  (for sizing) · `variant` (`compact` = flag + code, default; `full` = flag + name + symbol, used on Settings).
+  Used by receipt / template / group / recurring-expense modals, the Settings + Profile pages, and the
+  dashboard/group currency switchers — keep it that way.
 - Empty states use the shared `EmptyState` / `AddButton` (`components/glass/empty-state.tsx`).
 - Headings/labels use the `.t-*` type scale, not ad-hoc `text-2xl font-bold`.
 - Colors via tokens (`bg-primary-soft`, `bg-bg-subtle`, `--success/--warning/--info/--destructive-soft`,

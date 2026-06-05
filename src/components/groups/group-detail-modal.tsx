@@ -7,13 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
@@ -26,7 +20,6 @@ import {
   useLeaveGroup,
   type Group,
 } from '@/hooks/groups/use-groups'
-import { useCurrencies, getCurrencyFlag } from '@/hooks/currencies/use-currencies'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
@@ -51,7 +44,6 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
   const { user } = useAuthStore()
   const { currency: preferredCurrency } = useSettingsStore()
   const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
-  const { data: currencies = [] } = useCurrencies()
   const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
   const { data: stats, isLoading: statsLoading } = useGroupStats(group?.id || '')
@@ -167,18 +159,11 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
           <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
             <Wallet className="h-4 w-4" />
             <span>{t('groups.detail.displayCurrency')}</span>
-            <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
-              <SelectTrigger className="h-7 w-auto min-w-20 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {currencies.map((c) => (
-                  <SelectItem key={c.id} value={c.code}>
-                    {getCurrencyFlag(c.code)} {c.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CurrencySelect
+              value={displayCurrency}
+              onValueChange={setDisplayCurrency}
+              triggerClassName="h-7 w-auto min-w-20 text-xs"
+            />
             {ratesLoading && <Loader2 className="h-3 w-3 animate-spin" />}
           </div>
         </DialogHeader>

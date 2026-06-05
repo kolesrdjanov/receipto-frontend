@@ -8,14 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useCurrencies, getCurrencyFlag } from '@/hooks/currencies/use-currencies'
+import { CurrencySelect } from '@/components/ui/currency-select'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import {
@@ -74,7 +67,6 @@ export default function GroupDetail() {
   const { user } = useAuthStore()
   const { currency: preferredCurrency } = useSettingsStore()
   const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
-  const { data: currencies = [] } = useCurrencies()
   const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
 
   // Receipt entry state
@@ -432,18 +424,11 @@ export default function GroupDetail() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Wallet className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">{t('groups.detail.displayCurrency')}</span>
-              <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
-                <SelectTrigger className="h-7 w-auto min-w-[80px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((c) => (
-                    <SelectItem key={c.id} value={c.code}>
-                      {getCurrencyFlag(c.code)} {c.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CurrencySelect
+                value={displayCurrency}
+                onValueChange={setDisplayCurrency}
+                triggerClassName="h-7 w-auto min-w-[80px] text-xs"
+              />
               {ratesLoading && <Loader2 className="h-3 w-3 animate-spin" />}
             </div>
 
