@@ -5,8 +5,6 @@ import {
   Crown,
   Sparkles,
   Compass,
-  Save,
-  Loader2,
   Star,
   type LucideIcon,
 } from 'lucide-react'
@@ -236,8 +234,7 @@ export function SaveBar({
           {t('settings.profile.unsavedChanges')}
         </span>
       )}
-      <Button type="button" onClick={onSave} disabled={!dirty || saving}>
-        {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+      <Button type="button" className="rounded-xl" onClick={onSave} disabled={!dirty || saving}>
         {saving ? t('common.saving') : t('common.save')}
       </Button>
     </div>

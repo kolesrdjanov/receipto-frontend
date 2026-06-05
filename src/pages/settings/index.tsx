@@ -368,18 +368,16 @@ export default function Settings() {
                 <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
                 <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="font-mono" />
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={cancelDelete}>
+                  <Button type="button" variant="outline" className="rounded-xl" onClick={cancelDelete}>
                     {t('common.cancel')}
                   </Button>
-                  <Button type="button" variant="destructive" className="!text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
-                    <Trash2 className="size-4" />
+                  <Button type="button" variant="destructive" className="rounded-xl !text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
                     {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
                   </Button>
                 </div>
               </div>
             ) : (
-              <Button type="button" variant="destructive" className="mt-4 !text-white" onClick={() => setShowDeleteConfirm(true)}>
-                <Trash2 className="size-4" />
+              <Button type="button" variant="destructive" className="mt-4 rounded-xl !text-white" onClick={() => setShowDeleteConfirm(true)}>
                 {t('settings.dangerZone.deleteAccount')}
               </Button>
             )}
@@ -398,7 +396,6 @@ export default function Settings() {
         actions={{
           primary: (
             <Button type="button" variant="destructive" className="rounded-xl !text-white" onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE' || deleteMyAccount.isPending}>
-              <Trash2 className="size-4" />
               {deleteMyAccount.isPending ? t('common.deleting') : t('settings.dangerZone.confirmDelete')}
             </Button>
           ),
