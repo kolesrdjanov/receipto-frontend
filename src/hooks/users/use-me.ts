@@ -38,11 +38,6 @@ export interface UpdateMeData {
   incomeCurrency?: string | null
 }
 
-export interface ChangePasswordData {
-  currentPassword: string
-  newPassword: string
-}
-
 const fetchMe = async (): Promise<Me> => {
   return api.get<Me>('/users/me')
 }
@@ -110,18 +105,8 @@ export function useUploadProfileImage() {
   })
 }
 
-const changePassword = async (data: ChangePasswordData): Promise<{ message: string }> => {
-  return api.patch<{ message: string }>('/users/me/password', data)
-}
-
 const deleteMyAccount = async (): Promise<{ message: string }> => {
   return api.delete<{ message: string }>('/users/me')
-}
-
-export function useChangePassword() {
-  return useMutation({
-    mutationFn: changePassword,
-  })
 }
 
 export function useDeleteMyAccount() {

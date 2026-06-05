@@ -47,8 +47,6 @@ import {
   Sparkles,
   ChevronRight,
   Crown,
-  KeyRound,
-  User,
   X,
   SunMoon,
   type LucideIcon,
@@ -248,7 +246,7 @@ export function AppSidebar({
                 tooltip={t('nav.settings')}
                 className={cn(navItem, path.startsWith('/settings') && navItemActive)}
               >
-                <Link to="/settings/app" onClick={closeMobile}>
+                <Link to="/settings" onClick={closeMobile}>
                   <Settings />
                   <span>{t('nav.settings')}</span>
                 </Link>
@@ -317,14 +315,6 @@ export function AppSidebar({
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Link to="/settings/profile" onClick={closeMobile} className={footChip}>
-                <User className="size-4 shrink-0 text-muted-foreground" />
-                {t('nav.profile')}
-              </Link>
-              <Link to="/settings/account" onClick={closeMobile} className={footChip}>
-                <KeyRound className="size-4 shrink-0 text-muted-foreground" />
-                {t('nav.account')}
-              </Link>
               <button
                 type="button"
                 onClick={() => { onOpenSupportModal(); closeMobile() }}
@@ -377,13 +367,9 @@ export function AppSidebar({
                   </SidebarMenuButton>
                 </PopoverTrigger>
                 <PopoverContent side="top" align="end" className="w-56 p-1.5">
-                  <Link to="/settings/profile" className={popRow} onClick={closeMobile}>
-                    <User className="size-4 shrink-0 text-muted-foreground" />
-                    {t('nav.profile')}
-                  </Link>
-                  <Link to="/settings/account" className={popRow} onClick={closeMobile}>
-                    <KeyRound className="size-4 shrink-0 text-muted-foreground" />
-                    {t('nav.account')}
+                  <Link to="/settings" className={popRow} onClick={closeMobile}>
+                    <Settings className="size-4 shrink-0 text-muted-foreground" />
+                    {t('nav.settings')}
                   </Link>
                   <button
                     type="button"

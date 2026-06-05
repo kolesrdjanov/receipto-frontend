@@ -181,17 +181,33 @@
     "hidePassword": "Sakrij lozinku",
     "signIn": {
       "title": "Dobrodošli nazad",
-      "subtitle": "Prijavite se na svoj nalog da nastavite",
+      "subtitle": "Unesite email i poslaćemo vam kod za prijavu",
       "email": "Email adresa",
       "emailPlaceholder": "ime@primer.com",
-      "password": "Lozinka",
-      "rememberMe": "Zapamti me",
-      "forgotPassword": "Zaboravili ste lozinku?",
-      "submit": "Prijavi se",
-      "submitting": "Prijavljivanje...",
-      "noAccount": "Nemate nalog?",
-      "signUp": "Registrujte se",
-      "resendVerification": "Ponovo pošalji verifikacioni email"
+      "sendCode": "Pošalji kod",
+      "sending": "Slanje...",
+      "passwordlessNote": "Bez lozinke — poslaćemo vam šestocifreni kod na email.",
+      "codeTitle": "Unesite kod",
+      "codeSubtitle": "Poslali smo šestocifreni kod na vaš email",
+      "codeResent": "Novi kod je na putu.",
+      "verify": "Potvrdi i nastavi",
+      "verifying": "Provera...",
+      "resendCode": "Pošalji ponovo",
+      "resendCooldown": "Pošalji ponovo za {{time}}",
+      "changeEmail": "Koristi drugu email adresu",
+      "requestError": "Slanje koda nije uspelo. Pokušajte ponovo.",
+      "invalidCode": "Kod nije ispravan. Pokušajte ponovo."
+    },
+    "completeProfile": {
+      "title": "Dobro došli u Receipto",
+      "subtitle": "Recite nam svoje ime da završite podešavanje",
+      "firstName": "Ime",
+      "firstNamePlaceholder": "Vaše ime",
+      "lastName": "Prezime",
+      "lastNamePlaceholder": "Vaše prezime (opciono)",
+      "submit": "Nastavi",
+      "firstNameRequired": "Unesite svoje ime",
+      "error": "Čuvanje profila nije uspelo. Pokušajte ponovo."
     },
     "signUp": {
       "title": "Kreirajte nalog",
@@ -928,6 +944,10 @@
   "settings": {
     "title": "Podešavanja",
     "subtitle": "Upravljajte podešavanjima aplikacije",
+    "sections": {
+      "profile": "Profil",
+      "app": "Podešavanja aplikacije"
+    },
     "tabs": {
       "application": "Aplikacija",
       "profile": "Profil",

@@ -181,17 +181,33 @@
     "hidePassword": "Hide password",
     "signIn": {
       "title": "Welcome back",
-      "subtitle": "Sign in to your account to continue",
+      "subtitle": "Enter your email and we'll send you a sign-in code",
       "email": "Email address",
       "emailPlaceholder": "name@example.com",
-      "password": "Password",
-      "rememberMe": "Remember me",
-      "forgotPassword": "Forgot password?",
-      "submit": "Sign in",
-      "submitting": "Signing in...",
-      "noAccount": "Don't have an account?",
-      "signUp": "Sign up",
-      "resendVerification": "Resend verification email"
+      "sendCode": "Send code",
+      "sending": "Sending...",
+      "passwordlessNote": "No password needed — we'll email you a 6-digit code.",
+      "codeTitle": "Enter your code",
+      "codeSubtitle": "We sent a 6-digit code to your email",
+      "codeResent": "A new code is on its way.",
+      "verify": "Verify & continue",
+      "verifying": "Verifying...",
+      "resendCode": "Resend code",
+      "resendCooldown": "Resend code in {{time}}",
+      "changeEmail": "Use a different email",
+      "requestError": "Couldn't send the code. Please try again.",
+      "invalidCode": "That code isn't right. Please try again."
+    },
+    "completeProfile": {
+      "title": "Welcome to Receipto",
+      "subtitle": "Tell us your name to finish setting up",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Your first name",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Your last name (optional)",
+      "submit": "Continue",
+      "firstNameRequired": "Please enter your first name",
+      "error": "Couldn't save your profile. Please try again."
     },
     "signUp": {
       "title": "Create an account",
@@ -928,6 +944,10 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage your application preferences",
+    "sections": {
+      "profile": "Profile",
+      "app": "App settings"
+    },
     "tabs": {
       "application": "Application",
       "profile": "Profile",

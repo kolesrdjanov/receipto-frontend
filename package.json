@@ -41,6 +41,7 @@
     "heic2any": "^0.0.4",
     "html5-qrcode": "^2.3.8",
     "i18next": "^25.7.3",
+    "input-otp": "^1.4.2",
     "lucide-react": "^0.562.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",

@@ -16,17 +16,10 @@ import Settings from './pages/settings'
 import Items from './pages/items'
 import RecurringExpenses from './pages/recurring-expenses'
 import LoyaltyCards from './pages/loyalty-cards'
-import AppSettings from './pages/settings/app'
-import ProfileSettings from './pages/settings/profile'
-import AccountSettings from './pages/settings/account'
 
 // Lazy-load pages behind secondary navigation or auth walls
 const SignIn = lazy(() => import('./pages/auth/sign-in'))
-const SignUp = lazy(() => import('./pages/auth/sign-up'))
-const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'))
-const ResetPassword = lazy(() => import('./pages/auth/reset-password'))
-const CheckEmail = lazy(() => import('./pages/auth/check-email'))
-const VerifyEmail = lazy(() => import('./pages/auth/verify-email'))
+const CompleteProfile = lazy(() => import('./pages/auth/complete-profile'))
 const Templates = lazy(() => import('./pages/templates'))
 const ItemDetail = lazy(() => import('./pages/items/[id]'))
 const JoinGroup = lazy(() => import('./pages/groups/join'))
@@ -57,25 +50,19 @@ export const routes: RouteObject[] = [
     element: <SignIn />,
   },
   {
-    path: '/sign-up',
-    element: <SignUp />,
+    path: '/complete-profile',
+    element: (
+      <ProtectedRoute>
+        <CompleteProfile />
+      </ProtectedRoute>
+    ),
   },
-  {
-    path: '/forgot-password',
-    element: <ForgotPassword />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPassword />,
-  },
-  {
-    path: '/check-email',
-    element: <CheckEmail />,
-  },
-  {
-    path: '/verify-email',
-    element: <VerifyEmail />,
-  },
+  // Legacy auth routes → unified passwordless sign-in
+  { path: '/sign-up', element: <Navigate to="/sign-in" replace /> },
+  { path: '/forgot-password', element: <Navigate to="/sign-in" replace /> },
+  { path: '/reset-password', element: <Navigate to="/sign-in" replace /> },
+  { path: '/check-email', element: <Navigate to="/sign-in" replace /> },
+  { path: '/verify-email', element: <Navigate to="/sign-in" replace /> },
   {
     path: '/dashboard',
     element: (
@@ -191,30 +178,9 @@ export const routes: RouteObject[] = [
       </ProtectedRoute>
     ),
   },
-  {
-    path: '/settings/app',
-    element: (
-      <ProtectedRoute>
-        <AppSettings />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/settings/profile',
-    element: (
-      <ProtectedRoute>
-        <ProfileSettings />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/settings/account',
-    element: (
-      <ProtectedRoute>
-        <AccountSettings />
-      </ProtectedRoute>
-    ),
-  },
+  { path: '/settings/app', element: <Navigate to="/settings" replace /> },
+  { path: '/settings/profile', element: <Navigate to="/settings" replace /> },
+  { path: '/settings/account', element: <Navigate to="/settings" replace /> },
   // Admin routes
   {
     path: '/admin/users',
