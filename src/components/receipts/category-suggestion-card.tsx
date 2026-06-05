@@ -68,10 +68,10 @@ export function CategorySuggestionCard({
         ) : (
           <Button
             type="button"
-            size="sm"
+            variant="brand-violet"
             onClick={() => onAccept(suggestion.categoryId)}
             disabled={disabled}
-            className="text-[12.5px] font-semibold h-[30px] px-4 shrink-0 rounded-full bg-brand-violet text-white hover:bg-brand-violet/90"
+            className="text-[12.5px] font-semibold h-[31px] px-4 shrink-0 rounded-full"
           >
             {t('categorization.apply', 'Apply')}
           </Button>

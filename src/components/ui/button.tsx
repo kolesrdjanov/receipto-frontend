@@ -26,6 +26,8 @@ const buttonVariants = cva(
         // `glass`            = neutral bordered card pill (secondary actions, toolbars)
         // `destructive-soft` = soft red action (logout, soft delete) on the soft bg
         brand: "btn-brand text-white",
+        // `brand-violet`     = vivid violet AI-action CTA (AI category suggestion "Apply")
+        "brand-violet": "btn-violet text-white",
         glass:
           "border border-border bg-card text-fg-2 shadow-sm hover:bg-bg-subtle hover:text-foreground",
         "destructive-soft":
