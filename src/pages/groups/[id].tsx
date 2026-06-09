@@ -474,6 +474,7 @@ export default function GroupDetail() {
   return (
     <AppLayout>
       <PageToolbar
+        className="md:-mx-8 md:-mt-8 md:mb-6"
         title={group.name}
         subtitle={group.description || t('groups.membersCount', { count: acceptedMembers.length })}
         actions={
@@ -497,7 +498,7 @@ export default function GroupDetail() {
         }
       />
 
-      <div className="mx-auto mt-6 max-w-[1080px]">
+      <div className="mx-auto max-w-[1080px]">
         <Button variant="ghost" size="sm" className="mb-3 -ml-2 text-muted-foreground" onClick={() => navigate('/groups')}>
           <ArrowLeft className="size-4" />
           {t('groups.title')}

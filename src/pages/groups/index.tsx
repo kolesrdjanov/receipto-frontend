@@ -81,6 +81,7 @@ export default function Groups() {
   return (
     <AppLayout>
       <PageToolbar
+        className="md:-mx-8 md:-mt-8 md:mb-6"
         title={t('groups.title')}
         subtitle={t('groups.subtitle')}
         actions={
@@ -110,7 +111,7 @@ export default function Groups() {
       </div>
       <div className="mb-4 flex justify-end md:hidden">{archivedToggle}</div>
 
-      <div className="mx-auto flex max-w-[1080px] flex-col gap-4 md:pt-6">
+      <div className="mx-auto flex max-w-[1080px] flex-col gap-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
