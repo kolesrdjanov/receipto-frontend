@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type HTMLAttributes, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Receipt as ReceiptIcon, Check, type LucideIcon } from 'lucide-react'
 import { cn, formatMoney } from '@/lib/utils'
@@ -28,7 +28,7 @@ export function Amount({
 /** Shared tone vocabulary for status pills/badges. Features map their own statuses to a Tone. */
 export type Tone = 'ok' | 'info' | 'warn' | 'danger' | 'violet' | 'primary' | 'neutral' | 'muted' | 'outline'
 
-export const TONE_CLASS: Record<Tone, string> = {
+const TONE_CLASS: Record<Tone, string> = {
   ok: 'bg-success-soft text-success-foreground',
   info: 'bg-info-soft text-info-foreground',
   warn: 'bg-warning-soft text-warning-foreground',
@@ -120,5 +120,64 @@ export function SelectCheck({ on, className }: { on?: boolean; className?: strin
     >
       <Check className={cn('size-3.5', on ? 'opacity-100' : 'opacity-0')} strokeWidth={3} />
     </span>
+  )
+}
+
+/**
+ * The glass list-card shell — one rounded card whose direct children are hairline-separated
+ * rows. The single source of truth for every flat feature list (receipts feed, categories,
+ * templates, recurring, …) so they can't drift on radius/border/shadow/divider.
+ */
+export function ListCard({
+  className,
+  children,
+  ...props
+}: { className?: string; children: ReactNode } & HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        'overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1 [&>div+div]:border-t [&>div+div]:border-hairline-soft',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+/**
+ * One action row inside a kebab popover / mobile action sheet — icon + label, full-width,
+ * left-aligned. `danger` recolours it as a destructive action. The shared shell behind every
+ * feature's RowActionList/CardActionList so the action-item markup stays in one place.
+ */
+export function RowActionItem({
+  icon: Icon,
+  label,
+  onClick,
+  danger,
+  className,
+  'data-testid': testId,
+}: {
+  icon: LucideIcon
+  label: ReactNode
+  onClick?: () => void
+  danger?: boolean
+  className?: string
+  'data-testid'?: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid={testId}
+      className={cn(
+        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors hover:bg-bg-subtle',
+        danger && 'text-destructive hover:bg-destructive/10',
+        className,
+      )}
+    >
+      <Icon className="size-[18px] shrink-0" /> {label}
+    </button>
   )
 }

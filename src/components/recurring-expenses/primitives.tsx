@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Amount, CatTile, CatName, StatusBadge as GlassStatusBadge, type Tone } from '@/components/glass/primitives'
+import { Amount, CatTile, CatName, ListCard, StatusBadge as GlassStatusBadge, type Tone } from '@/components/glass/primitives'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { relativeDueLabel, type RecurringStatus, type RecurringRowData } from '@/components/recurring-expenses/status'
 import type { RecurringExpense } from '@/hooks/recurring-expenses/use-recurring-expenses'
@@ -243,7 +243,7 @@ export function RecurringList({
   onDelete,
 }: { rows: RecurringRowData[]; wide?: boolean; onOpenActions?: (e: RecurringExpense) => void } & RowActions) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1 [&>div+div]:border-t [&>div+div]:border-hairline-soft">
+    <ListCard>
       {rows.map((r) => (
         <RecurringRow
           key={r.expense.id}
@@ -257,6 +257,6 @@ export function RecurringList({
           onDelete={onDelete}
         />
       ))}
-    </div>
+    </ListCard>
   )
 }

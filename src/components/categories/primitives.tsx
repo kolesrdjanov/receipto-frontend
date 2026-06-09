@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Wallet, Pencil, Trash2, MoreVertical, Check } from 'lucide-react'
 import { cn, formatMoney } from '@/lib/utils'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { ListCard, RowActionItem } from '@/components/glass/primitives'
 import type { Category } from '@/hooks/categories/use-categories'
 
 /* The 10-swatch palette — shared visual language with Recurring + Loyalty cards. */
@@ -123,14 +124,7 @@ export function RowActionList({ category, onEdit, onDelete }: { category: Catego
         <Pencil className="size-[18px] shrink-0 text-muted-foreground" />
         {t('categories.actions.edit')}
       </button>
-      <button
-        type="button"
-        className={cn(item, 'text-destructive hover:bg-destructive/10')}
-        onClick={() => onDelete?.(category)}
-      >
-        <Trash2 className="size-[18px] shrink-0" />
-        {t('categories.actions.delete')}
-      </button>
+      <RowActionItem icon={Trash2} label={t('categories.actions.delete')} onClick={() => onDelete?.(category)} danger />
     </div>
   )
 }
@@ -217,7 +211,7 @@ export function CategoryList({
   onOpenActions,
 }: { categories: Category[]; wide?: boolean; onOpenActions?: (c: Category) => void } & RowActions) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1 [&>div+div]:border-t [&>div+div]:border-hairline-soft">
+    <ListCard>
       {categories.map((category) => (
         <CategoryRow
           key={category.id}
@@ -228,6 +222,6 @@ export function CategoryList({
           onOpenActions={onOpenActions}
         />
       ))}
-    </div>
+    </ListCard>
   )
 }

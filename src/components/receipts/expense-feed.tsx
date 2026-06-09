@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { format, isToday, isYesterday } from 'date-fns'
 import { enUS, srLatn } from 'date-fns/locale'
 import { StaggerContainer, StaggerItem } from '@/components/ui/animated'
+import { ListCard } from '@/components/glass/primitives'
 import { Amount } from '@/components/receipts/primitives'
 import { ExpenseRow } from '@/components/receipts/expense-row'
 import { groupReceiptsByDay } from '@/lib/group-receipts-by-day'
@@ -64,7 +65,7 @@ export function ExpenseFeed({
               </span>
               {subtotal(g.subtotalsByCurrency)}
             </div>
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1 [&>div+div]:border-t [&>div+div]:border-hairline-soft">
+            <ListCard>
               {g.items.map((r) => (
                 <ExpenseRow
                   key={r.id}
@@ -79,7 +80,7 @@ export function ExpenseFeed({
                   onDelete={onDelete}
                 />
               ))}
-            </div>
+            </ListCard>
           </StaggerItem>
         )
       })}

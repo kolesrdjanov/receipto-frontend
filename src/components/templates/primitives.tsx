@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { CatTile, CatName } from '@/components/glass/primitives'
+import { CatTile, CatName, ListCard, RowActionItem } from '@/components/glass/primitives'
 import type { Template } from '@/hooks/templates/use-templates'
 
 interface RowActions {
@@ -22,14 +22,7 @@ export function RowActionList({ template, onEdit, onDelete }: { template: Templa
         <Pencil className="size-[18px] shrink-0 text-muted-foreground" />
         {t('common.edit')}
       </button>
-      <button
-        type="button"
-        className={cn(item, 'text-destructive hover:bg-destructive/10')}
-        onClick={() => onDelete?.(template)}
-      >
-        <Trash2 className="size-[18px] shrink-0" />
-        {t('common.delete')}
-      </button>
+      <RowActionItem icon={Trash2} label={t('common.delete')} onClick={() => onDelete?.(template)} danger />
     </div>
   )
 }
@@ -121,7 +114,7 @@ export function TemplateList({
   onOpenActions,
 }: { templates: Template[]; wide?: boolean; onOpenActions?: (t: Template) => void } & RowActions) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1 [&>div+div]:border-t [&>div+div]:border-hairline-soft">
+    <ListCard>
       {templates.map((template) => (
         <TemplateRow
           key={template.id}
@@ -132,6 +125,6 @@ export function TemplateList({
           onOpenActions={onOpenActions}
         />
       ))}
-    </div>
+    </ListCard>
   )
 }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { QrCode, Barcode, Eye, Pencil, Trash2, MoreVertical, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { RowActionItem } from '@/components/glass/primitives'
 import type { LoyaltyCard } from '@/hooks/loyalty-cards/use-loyalty-cards'
 import { CARD_COLORS, formatLabel } from './format'
 
@@ -82,14 +83,7 @@ export function RowActionList({ card, onShow, onEdit, onDelete }: { card: Loyalt
         <Pencil className="size-[18px] shrink-0 text-muted-foreground" />
         {t('loyaltyCards.edit')}
       </button>
-      <button
-        type="button"
-        className={cn(item, 'text-destructive hover:bg-destructive/10')}
-        onClick={() => onDelete?.(card)}
-      >
-        <Trash2 className="size-[18px] shrink-0" />
-        {t('common.delete')}
-      </button>
+      <RowActionItem icon={Trash2} label={t('common.delete')} onClick={() => onDelete?.(card)} danger />
     </div>
   )
 }
