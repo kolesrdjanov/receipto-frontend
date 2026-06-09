@@ -78,7 +78,7 @@ export function GMemberAvatar({
     : `linear-gradient(135deg, oklch(0.74 0.13 ${hueFor(key)}), oklch(0.62 0.16 ${hueFor(key)}))`
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-full font-bold text-white"
+      className="relative grid shrink-0 place-items-center rounded-full font-bold text-white"
       style={{
         width: size,
         height: size,

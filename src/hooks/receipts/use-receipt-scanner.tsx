@@ -453,9 +453,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
         paidById: qrContext?.paidById,
       })
 
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
+      toast.success(t('receipts.qrScanner.scanSuccess'))
 
       if (navigateOnSuccess) navigate('/receipts')
     } catch (error) {
@@ -502,9 +500,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
           SdcDateTime: pfrData.SdcDateTime,
         },
       })
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
+      toast.success(t('receipts.qrScanner.scanSuccess'))
       setIsPfrEntryOpen(false)
       if (navigateOnSuccess) navigate('/receipts')
     } catch (error) {
@@ -537,9 +533,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
         paidById: qrContext?.paidById,
       })
 
-      toast.success(t('receipts.qrScanner.scanSuccess'), {
-        description: t('receipts.qrScanner.scanSuccessDescription'),
-      })
+      toast.success(t('receipts.qrScanner.scanSuccess'))
       if (navigateOnSuccess) navigate('/receipts')
     } catch (error) {
       if (error instanceof Error && error.message === 'NO_QR_FOUND') {

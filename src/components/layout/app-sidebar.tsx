@@ -162,7 +162,7 @@ export function AppSidebar({
         >
           <Link to={item.to} onClick={closeMobile}>
             <Icon />
-            <span>{t(item.labelKey)}</span>
+            <span className="group-data-[collapsible=icon]:hidden">{t(item.labelKey)}</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -252,7 +252,7 @@ export function AppSidebar({
               >
                 <Link to="/settings" onClick={closeMobile}>
                   <Settings />
-                  <span>{t('nav.settings')}</span>
+                  <span className="group-data-[collapsible=icon]:hidden">{t('nav.settings')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -267,7 +267,7 @@ export function AppSidebar({
                       className={cn(navItem, path.startsWith('/admin') && navItemActive)}
                     >
                       <SlidersHorizontal />
-                      <span>{t('nav.admin')}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{t('nav.admin')}</span>
                       <ChevronRight className="ml-auto !size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -352,7 +352,7 @@ export function AppSidebar({
                 <PopoverTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
-                    className="rounded-xl data-[state=open]:bg-bg-subtle"
+                    className="rounded-xl data-[state=open]:bg-bg-subtle group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!justify-center"
                   >
                     <Avatar
                       firstName={user?.firstName}
