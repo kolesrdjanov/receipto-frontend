@@ -1,116 +1,206 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Avatar } from '@/components/ui/avatar'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { CurrencySelect } from '@/components/ui/currency-select'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
+import { useAuthStore } from '@/store/auth'
+import { useFabStore } from '@/store/fab'
+import { useIsMobile } from '@/hooks/use-mobile'
 import {
   useGroup,
-  useGroupStats,
-  useInviteMember,
   useRemoveMember,
   useLeaveGroup,
   useArchiveGroup,
   useUnarchiveGroup,
+  useSettlementHistory,
   type GroupMember,
 } from '@/hooks/groups/use-groups'
 import { useGroupPolling } from '@/hooks/groups/use-group-polling'
-import type { Receipt } from '@/hooks/receipts/use-receipts'
 import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
-import { useAuthStore } from '@/store/auth'
-import { queryKeys } from '@/lib/query-keys'
-import { formatMoney } from '@/lib/utils'
+import { useDeleteReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
 import { getErrorMessage } from '@/lib/api'
+import { memberName, type ComputedSettlement } from '@/lib/groups'
 import { GroupModal } from '@/components/groups/group-modal'
-import { InviteLinkCard } from '@/components/groups/invite-link-card'
-import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
-import { GroupReceiptsTable } from '@/components/groups/group-receipts-table'
-import { ActivityFeed } from '@/components/groups/activity-feed'
+import { SettlementModal } from '@/components/groups/settlement-modal'
+import { ExpenseDetailDialog } from '@/components/groups/expense-detail-dialog'
+import { GroupMenuDialog } from '@/components/groups/group-menu-dialog'
+import { InviteDialog } from '@/components/groups/invite-dialog'
+import { GroupOverview } from '@/components/groups/group-overview'
+import { GroupExpensesList } from '@/components/groups/group-expenses-list'
+import { GroupBalancePanel } from '@/components/groups/group-balance-panel'
+import { GroupActivityTimeline } from '@/components/groups/group-activity-timeline'
+import { GroupMembersPanel } from '@/components/groups/group-members-panel'
+import { GroupHistoryList } from '@/components/groups/group-history-list'
+import { GAvatarStack, GroupTabs } from '@/components/groups/primitives'
 import { toast } from 'sonner'
-import {
-  ArrowLeft,
-  Users,
-  UserPlus,
-  Trash2,
-  LogOut,
-  Crown,
-  Loader2,
-  Pencil,
-  Receipt as ReceiptIcon,
-  Wallet,
-  Camera,
-  Plus,
-  ChevronDown,
-  Archive,
-  ArchiveRestore,
-  RefreshCw,
-} from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Plus, Loader2 } from 'lucide-react'
 
-const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
+const ReceiptModal = lazy(() =>
+  import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
+)
+
+type Screen = 'overview' | 'expenses' | 'balances' | 'activity' | 'members' | 'history'
 
 export default function GroupDetail() {
   const { t } = useTranslation()
-  const { id } = useParams<{ id: string }>()
+  const { id = '' } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
-  const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false)
-  const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
-  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
+  const isMobile = useIsMobile(768)
   const { user } = useAuthStore()
   const { currency: preferredCurrency } = useSettingsStore()
+
+  const { data: group, isLoading } = useGroup(id)
+  useGroupPolling(id)
+  const { data: settlementHistory = [] } = useSettlementHistory(id)
   const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
-  const { data: exchangeRates, isLoading: ratesLoading } = useExchangeRates(displayCurrency)
+  useExchangeRates(displayCurrency)
 
-  // Receipt entry state
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
-  const [showAddDropdown, setShowAddDropdown] = useState(false)
-  const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
-
-  const queryClient = useQueryClient()
-  const { data: group, isLoading: groupLoading } = useGroup(id || '')
-  const { data: stats, isLoading: statsLoading } = useGroupStats(id || '')
-  useGroupPolling(id || '')
-  const inviteMember = useInviteMember()
   const removeMember = useRemoveMember()
   const leaveGroup = useLeaveGroup()
   const archiveGroup = useArchiveGroup()
   const unarchiveGroup = useUnarchiveGroup()
-  const { openQrScannerWithContext, scannerModals, isCreating } = useReceiptScanner()
+  const deleteReceipt = useDeleteReceipt()
+  const { openQrScannerWithContext, scannerModals } = useReceiptScanner()
 
-  // Set display currency to group's default currency when group is loaded
+  const [screen, setScreen] = useState<Screen>('overview')
+  const [returnScreen, setReturnScreen] = useState<Screen>('overview')
+
+  // Overlays
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false)
+  const [receiptModalMode, setReceiptModalMode] = useState<'create' | 'edit'>('create')
+  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
+  const [detailReceipt, setDetailReceipt] = useState<Receipt | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [settleOpen, setSettleOpen] = useState(false)
+  const [settlePrefill, setSettlePrefill] = useState<{ fromUserId?: string; toUserId?: string; amount?: number }>({})
+  const [editGroupOpen, setEditGroupOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
+
+  // Confirm dialogs
+  const [leaveOpen, setLeaveOpen] = useState(false)
+  const [archiveOpen, setArchiveOpen] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null)
+  const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
+
+  // Default the display currency to the group's currency once loaded.
   useEffect(() => {
-    if (group?.currency) {
-      setDisplayCurrency(group.currency)
-    }
+    if (group?.currency) setDisplayCurrency(group.currency)
   }, [group?.currency])
 
-  if (groupLoading) {
+  const currentMember = group?.members?.find((m) => m.userId === user?.id)
+  const isOwner = currentMember?.role === 'owner'
+  const isAdmin = currentMember?.role === 'admin' || isOwner
+  const isArchived = !!group?.isArchived
+  const acceptedMembers = useMemo(
+    () => group?.members?.filter((m) => m.status === 'accepted') || [],
+    [group?.members],
+  )
+
+  // Actions ---------------------------------------------------------------
+  const openAdd = () => {
+    setReceiptModalMode('create')
+    setEditingReceipt(null)
+    setReceiptModalOpen(true)
+  }
+  const openScan = () => openQrScannerWithContext({ groupId: id, paidById: user?.id })
+  const openEditExpense = (receipt: Receipt) => {
+    setReceiptModalMode('edit')
+    setEditingReceipt(receipt)
+    setReceiptModalOpen(true)
+  }
+  const openExpenseDetail = (receipt: Receipt) => {
+    setDetailReceipt(receipt)
+    setDetailOpen(true)
+  }
+  const onSettle = (s: ComputedSettlement) => {
+    setSettlePrefill({ fromUserId: s.from.userId, toUserId: s.to.userId, amount: s.amount })
+    setSettleOpen(true)
+  }
+  const goScreen = (s: Screen) => {
+    if ((s === 'members' || s === 'history') && screen !== 'members' && screen !== 'history') setReturnScreen(screen)
+    setScreen(s)
+  }
+
+  // Mobile FAB → add expense (when on a group surface, not archived)
+  const setFab = useFabStore((s) => s.setFab)
+  const clearFab = useFabStore((s) => s.clearFab)
+  useEffect(() => {
+    if (isArchived) return
+    setFab(openAdd)
+    return () => clearFab()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isArchived, setFab, clearFab])
+
+  // Confirm handlers ------------------------------------------------------
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) return
+    const memberId = memberToRemove.status === 'accepted' ? memberToRemove.userId : memberToRemove.id
+    try {
+      await removeMember.mutateAsync({ groupId: id, memberId })
+      toast.success(t('groups.detail.memberRemoved'))
+      setMemberToRemove(null)
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('groups.detail.removeMemberError')))
+    }
+  }
+  const confirmLeave = async () => {
+    try {
+      await leaveGroup.mutateAsync(id)
+      toast.success(t('groups.detail.leftGroup'))
+      setLeaveOpen(false)
+      navigate('/groups')
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('groups.detail.leaveError')))
+    }
+  }
+  const confirmArchive = async () => {
+    try {
+      if (isArchived) {
+        await unarchiveGroup.mutateAsync(id)
+        toast.success(t('groups.archive.unarchiveSuccess'))
+      } else {
+        await archiveGroup.mutateAsync(id)
+        toast.success(t('groups.archive.success'))
+      }
+      setArchiveOpen(false)
+    } catch (error) {
+      toast.error(getErrorMessage(error, isArchived ? t('groups.archive.unarchiveError') : t('groups.archive.error')))
+    }
+  }
+  const confirmDeleteExpense = async () => {
+    if (!receiptToDelete) return
+    try {
+      await deleteReceipt.mutateAsync(receiptToDelete.id)
+      toast.success(t('receipts.modal.deleteSuccess'))
+      setReceiptToDelete(null)
+    } catch (error) {
+      toast.error(t('receipts.modal.deleteError'), { description: getErrorMessage(error) })
+    }
+  }
+
+  // Loading / not found ---------------------------------------------------
+  if (isLoading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
       </AppLayout>
     )
   }
-
   if (!group) {
     return (
       <AppLayout>
-        <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex flex-col items-center justify-center py-16">
           <p className="text-muted-foreground">{t('common.noData')}</p>
           <Button variant="link" onClick={() => navigate('/groups')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4" />
             {t('common.back')}
           </Button>
         </div>
@@ -118,588 +208,373 @@ export default function GroupDetail() {
     )
   }
 
-  const currentUserMember = group.members?.find((m) => m.userId === user?.id)
-  const isOwner = currentUserMember?.role === 'owner'
-  const isAdmin = currentUserMember?.role === 'admin' || isOwner
+  const settleHandler = isArchived ? undefined : onSettle
 
-  // Sort members: owner first, then admin, then by name
-  const sortMembers = (members: GroupMember[]) => {
-    return [...members].sort((a, b) => {
-      const rolePriority = { owner: 0, admin: 1, member: 2 }
-      const aPriority = rolePriority[a.role] ?? 2
-      const bPriority = rolePriority[b.role] ?? 2
-
-      if (aPriority !== bPriority) {
-        return aPriority - bPriority
-      }
-
-      const aName = `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.trim().toLowerCase()
-      const bName = `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.trim().toLowerCase()
-      return aName.localeCompare(bName)
-    })
+  // Tab bodies ------------------------------------------------------------
+  const renderBody = (s: Screen) => {
+    switch (s) {
+      case 'overview':
+        return (
+          <GroupOverview
+            groupId={id}
+            members={acceptedMembers}
+            displayCurrency={displayCurrency}
+            currentUserId={user?.id}
+            isArchived={isArchived}
+            onAdd={openAdd}
+            onGoBalances={() => setScreen('balances')}
+            onSeeAllExpenses={() => setScreen('expenses')}
+            onOpenExpense={openExpenseDetail}
+            onSettle={onSettle}
+          />
+        )
+      case 'expenses':
+        return (
+          <GroupExpensesList
+            groupId={id}
+            members={acceptedMembers}
+            currentUserId={user?.id}
+            displayCurrency={displayCurrency}
+            isArchived={isArchived}
+            onOpenExpense={openExpenseDetail}
+            onAdd={openAdd}
+          />
+        )
+      case 'balances':
+        return (
+          <GroupBalancePanel
+            groupId={id}
+            displayCurrency={displayCurrency}
+            currentUserId={user?.id}
+            settlementsCount={settlementHistory.length}
+            onSettle={settleHandler ?? (() => {})}
+            onOpenHistory={() => goScreen('history')}
+          />
+        )
+      case 'activity':
+        return <GroupActivityTimeline groupId={id} />
+      case 'members':
+        return (
+          <GroupMembersPanel
+            group={group}
+            isAdmin={isAdmin}
+            isArchived={isArchived}
+            currentUserId={user?.id}
+            onInvite={() => setInviteOpen(true)}
+            onRemoveMember={setMemberToRemove}
+          />
+        )
+      case 'history':
+        return <GroupHistoryList groupId={id} displayCurrency={displayCurrency} />
+    }
   }
 
-  const acceptedMembers = sortMembers(
-    group.members?.filter((m) => m.status === 'accepted') || []
+  const membersButton = (
+    <button
+      type="button"
+      onClick={() => goScreen('members')}
+      className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground"
+    >
+      {/* raw-button-ok: tappable members summary (avatar stack → members screen) */}
+      <GAvatarStack members={acceptedMembers.map((m) => m.user)} max={5} size={24} currentUserId={user?.id} />
+      <span>{t('groups.membersCount', { count: acceptedMembers.length })}</span>
+      <ChevronRight className="size-3.5 text-fg-faint" />
+    </button>
   )
-  const pendingMembers = group.members?.filter((m) => m.status === 'pending') || []
 
-  const handleInvite = async () => {
-    if (!inviteEmail.trim()) return
+  const currencyControl = (
+    <CurrencySelect
+      value={displayCurrency}
+      onValueChange={setDisplayCurrency}
+      triggerClassName="h-9 w-auto min-w-[90px] text-[13px]"
+    />
+  )
 
-    try {
-      await inviteMember.mutateAsync({ groupId: group.id, email: inviteEmail })
-      toast.success(t('groups.detail.inviteSent'))
-      setInviteEmail('')
-    } catch (error) {
-      const errorMessage = getErrorMessage(error, t('groups.detail.inviteError'))
-      toast.error(errorMessage)
-    }
-  }
+  const overlays = (
+    <>
+      <Suspense fallback={null}>
+        {receiptModalOpen && (
+          <ReceiptModal
+            open={receiptModalOpen}
+            onOpenChange={setReceiptModalOpen}
+            receipt={editingReceipt}
+            mode={receiptModalMode}
+            prefillData={
+              receiptModalMode === 'create' ? { groupId: id, currency: group.currency || 'RSD' } : undefined
+            }
+            onRequestDelete={(r) => setReceiptToDelete(r)}
+          />
+        )}
+      </Suspense>
 
-  const handleRemoveMemberClick = (memberId: string) => {
-    setMemberToRemove(memberId)
-    setShowRemoveMemberConfirm(true)
-  }
-
-  const handleRemoveMemberConfirm = async () => {
-    if (!memberToRemove) return
-
-    try {
-      await removeMember.mutateAsync({ groupId: group.id, memberId: memberToRemove })
-      toast.success(t('groups.detail.memberRemoved'))
-      setShowRemoveMemberConfirm(false)
-      setMemberToRemove(null)
-    } catch (error) {
-      const errorMessage = getErrorMessage(error, t('groups.detail.removeMemberError'))
-      toast.error(errorMessage)
-    }
-  }
-
-  const handleLeaveConfirm = async () => {
-    try {
-      await leaveGroup.mutateAsync(group.id)
-      toast.success(t('groups.detail.leftGroup'))
-      setShowLeaveConfirm(false)
-      navigate('/groups')
-    } catch (error) {
-      const errorMessage = getErrorMessage(error, t('groups.detail.leaveError'))
-      toast.error(errorMessage)
-    }
-  }
-
-  const handleArchiveConfirm = async () => {
-    try {
-      if (group.isArchived) {
-        await unarchiveGroup.mutateAsync(group.id)
-        toast.success(t('groups.archive.unarchiveSuccess'))
-      } else {
-        await archiveGroup.mutateAsync(group.id)
-        toast.success(t('groups.archive.success'))
-      }
-      setShowArchiveConfirm(false)
-    } catch (error) {
-      const errorMessage = getErrorMessage(
-        error,
-        group.isArchived
-          ? t('groups.archive.unarchiveError')
-          : t('groups.archive.error'),
-      )
-      toast.error(errorMessage)
-    }
-  }
-
-  const formatAmount = (amount: number, currency?: string) =>
-    formatMoney(amount, currency || displayCurrency || 'RSD')
-
-  const convertAmount = (amount: number, fromCurrency: string): number => {
-    if (fromCurrency === displayCurrency || !exchangeRates) {
-      return amount
-    }
-    const rate = exchangeRates[fromCurrency]
-    if (!rate || rate === 0) {
-      return amount
-    }
-    return amount / rate
-  }
-
-  const getTotalAmount = (): number => {
-    if (!stats?.byCurrency) return 0
-    return stats.byCurrency.reduce((sum, curr) => {
-      return sum + convertAmount(curr.totalAmount, curr.currency)
-    }, 0)
-  }
-
-  const getUserTotalSpent = (userByCurrency: { currency: string; totalSpent: number }[]): number => {
-    return userByCurrency.reduce((sum, curr) => {
-      return sum + convertAmount(curr.totalSpent, curr.currency)
-    }, 0)
-  }
-
-  const handleAddManually = () => {
-    setPrefillData({
-      groupId: group.id,
-      currency: group.currency || 'RSD',
-    })
-    setIsReceiptModalOpen(true)
-    setShowAddDropdown(false)
-  }
-
-  const handleScanQr = () => {
-    openQrScannerWithContext({
-      groupId: group.id,
-      paidById: user?.id,
-    })
-    setShowAddDropdown(false)
-  }
-
-  return (
-    <AppLayout>
-      {/* Hero header */}
-      <div className="mb-6 sm:mb-8">
-        {/* Nav bar */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/groups')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('common.back')}
-          </Button>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.groups.detail(id!) })}
-              title={t('groups.detail.refresh')}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            {isOwner && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowArchiveConfirm(true)}
-                disabled={archiveGroup.isPending || unarchiveGroup.isPending}
-              >
-                {archiveGroup.isPending || unarchiveGroup.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : group.isArchived ? (
-                  <ArchiveRestore className="h-4 w-4" />
-                ) : (
-                  <Archive className="h-4 w-4" />
-                )}
-                <span className="hidden sm:inline">
-                  {group.isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
-                </span>
-              </Button>
-            )}
-            {!isOwner && !group.isArchived && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowLeaveConfirm(true)}
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('groups.detail.leaveGroup')}</span>
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Group identity + stats hero */}
-        <div className="rounded-2xl bg-gradient-to-br from-primary/[0.06] to-primary/[0.02] border border-primary/[0.08] p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
-            {/* Group icon + name */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-1">
-                {group.icon && <span className="text-3xl sm:text-4xl">{group.icon}</span>}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="t-h1 truncate">
-                      {group.name}
-                    </h2>
-                    {group.isArchived && (
-                      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground shrink-0">
-                        {t('groups.archive.archivedBadge')}
-                      </span>
-                    )}
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0"
-                        onClick={() => setIsEditModalOpen(true)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </div>
-                  {group.description && (
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {group.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Member avatars row */}
-              <div className="flex items-center gap-3 mt-3 sm:mt-4">
-                <div className="flex -space-x-2">
-                  {acceptedMembers.slice(0, 5).map((member) => (
-                    <div key={member.id} className="ring-2 ring-background rounded-full">
-                      <Avatar
-                        firstName={member.user?.firstName}
-                        lastName={member.user?.lastName}
-                        imageUrl={member.user?.profileImageUrl}
-                        size="sm"
-                      />
-                    </div>
-                  ))}
-                  {acceptedMembers.length > 5 && (
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-semibold ring-2 ring-background">
-                      +{acceptedMembers.length - 5}
-                    </div>
-                  )}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {t('groups.detail.members', { count: acceptedMembers.length })}
-                </span>
-              </div>
-            </div>
-
-            {/* Stats summary */}
-            <div className="flex gap-6 sm:gap-8 shrink-0">
-              <div className="sm:text-right">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                  {t('groups.detail.totalReceipts')}
-                </p>
-                <p className="t-h2">
-                  {statsLoading ? '...' : (stats?.totalReceipts ?? 0)}
-                </p>
-              </div>
-              <div className="sm:text-right">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                  {t('groups.detail.totalAmount')}
-                </p>
-                <p className="t-h2 text-primary">
-                  {statsLoading ? '...' : formatAmount(getTotalAmount())}
-                </p>
-                {stats && stats.byCurrency.length > 1 && (
-                  <div className="flex flex-wrap gap-1 mt-1 sm:justify-end">
-                    {stats.byCurrency.map((curr, idx) => (
-                      <span
-                        key={idx}
-                        className="text-xs px-1.5 py-0.5 rounded bg-background/80 text-muted-foreground"
-                      >
-                        {formatAmount(curr.totalAmount, curr.currency)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Currency selector + actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-primary/[0.08]">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Wallet className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">{t('groups.detail.displayCurrency')}</span>
-              <CurrencySelect
-                value={displayCurrency}
-                onValueChange={setDisplayCurrency}
-                triggerClassName="h-7 w-auto min-w-[80px] text-xs"
-              />
-              {ratesLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-            </div>
-
-            {!group.isArchived && (
-              <div className="flex gap-2">
-                <div className="flex-1 sm:flex-initial">
-                  <Popover open={showAddDropdown} onOpenChange={setShowAddDropdown}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4" />
-                        {t('receipts.addManually')}
-                        <ChevronDown className="h-3 w-3 ml-1" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" className="w-48 p-1.5">
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          handleAddManually()
-                          setShowAddDropdown(false)
-                        }}
-                        className="h-auto w-full justify-start px-3 py-2.5 text-sm font-normal hover:bg-primary-soft"
-                      >
-                        {t('receipts.addBlank')}
-                      </Button>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Button
-                  size="sm"
-                  className="flex-1 sm:flex-initial"
-                  onClick={handleScanQr}
-                  disabled={isCreating}
-                >
-                  {isCreating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Camera className="h-4 w-4" />
-                  )}
-                  {t('receipts.scanQr')}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Per-member breakdown (compact, below hero) */}
-      {stats && stats.perUser.length > 0 && (
-        <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
-          {stats.perUser.map((u) => (
-            <div
-              key={u.userId}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-sm"
-            >
-              <span className="font-medium">{u.firstName} {u.lastName}</span>
-              <span className="text-muted-foreground">
-                {formatAmount(getUserTotalSpent(u.byCurrency))}
-              </span>
-              <span className="text-xs text-muted-foreground/70">
-                ({u.receiptsCount})
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-        {/* Left column: Receipts and Balances */}
-        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-          {/* Receipts Table */}
-          <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
-            <CardHeader className="max-sm:px-0">
-              <CardTitle className="flex items-center gap-2">
-                <ReceiptIcon className="h-5 w-5" />
-                {t('groups.detail.receipts')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="max-sm:px-0">
-              <GroupReceiptsTable groupId={group.id} isArchived={!!group.isArchived} />
-            </CardContent>
-          </Card>
-
-          {/* Balances Section */}
-          <div>
-            <h3 className="t-h3 mb-4 flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              {t('groups.tabs.balances')}
-            </h3>
-            <GroupBalancesTab groupId={group.id} displayCurrency={displayCurrency} exchangeRates={exchangeRates} />
-          </div>
-        </div>
-
-        {/* Right column: Members then Activity */}
-        <div className="space-y-4 sm:space-y-6">
-          {/* Members Card */}
-          <Card className="max-sm:border-0 max-sm:shadow-none max-sm:bg-transparent">
-            <CardHeader className="pb-3 max-sm:px-0">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="h-4 w-4" />
-                {t('groups.detail.members', { count: acceptedMembers.length })}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 max-sm:px-0">
-              {/* Accepted Members */}
-              <div className="space-y-1">
-                {acceptedMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors -mx-2"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Avatar
-                        firstName={member.user?.firstName}
-                        lastName={member.user?.lastName}
-                        imageUrl={member.user?.profileImageUrl}
-                        size="sm"
-                      />
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {member.role === 'owner' && (
-                          <Crown className="h-3.5 w-3.5 text-warning shrink-0" />
-                        )}
-                        <span className="text-sm truncate">
-                          {member.user?.firstName || member.user?.lastName
-                            ? `${member.user?.firstName || ''} ${member.user?.lastName || ''}`.trim()
-                            : member.user?.email || t('common.unknown')}
-                        </span>
-                      </div>
-                    </div>
-                    {isAdmin && !group.isArchived && member.role !== 'owner' && member.userId !== user?.id && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100"
-                        onClick={() => handleRemoveMemberClick(member.userId)}
-                        disabled={removeMember.isPending}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Pending Invites */}
-              {pendingMembers.length > 0 && (
-                <div className="pt-3 border-t">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
-                    {t('groups.detail.pendingInvites', { count: pendingMembers.length })}
-                  </p>
-                  <div className="space-y-1">
-                    {pendingMembers.map((member) => {
-                      const isExpired = member.expiresAt && new Date(member.expiresAt) < new Date()
-                      return (
-                        <div
-                          key={member.id}
-                          className="flex items-center justify-between py-1.5"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-sm text-muted-foreground truncate">
-                              {member.invitedEmail || member.user?.email}
-                            </span>
-                            {isExpired && (
-                              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)] shrink-0">
-                                {t('groups.detail.inviteExpired')}
-                              </span>
-                            )}
-                          </div>
-                          {isAdmin && !group.isArchived && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0"
-                              onClick={() => handleRemoveMemberClick(member.id)}
-                              disabled={removeMember.isPending}
-                            >
-                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Invite Member */}
-              {isAdmin && !group.isArchived && (
-                <div className="pt-3 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      type="email"
-                      placeholder={t('groups.detail.emailPlaceholder')}
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-                      className="flex-1 h-9 text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleInvite}
-                      disabled={!inviteEmail.trim() || inviteMember.isPending}
-                    >
-                      {inviteMember.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <UserPlus className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Invite Link */}
-              {isAdmin && !group.isArchived && (
-                <InviteLinkCard groupId={group.id} />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Activity Feed */}
-          <ActivityFeed groupId={group.id} />
-        </div>
-      </div>
-
-      {/* Edit Group Modal */}
-      <GroupModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        group={group}
-        mode="edit"
+      <ExpenseDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        receipt={detailReceipt}
+        members={acceptedMembers}
+        isArchived={isArchived}
+        onEdit={openEditExpense}
+        onDelete={(r) => setReceiptToDelete(r)}
       />
 
-      {/* Leave Group Confirm Dialog */}
+      <SettlementModal
+        open={settleOpen}
+        onOpenChange={setSettleOpen}
+        groupId={id}
+        currency={displayCurrency}
+        members={acceptedMembers}
+        prefillData={settlePrefill}
+      />
+
+      <GroupModal open={editGroupOpen} onOpenChange={setEditGroupOpen} group={group} mode="edit" />
+
+      <GroupMenuDialog
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        group={group}
+        isOwner={isOwner}
+        isAdmin={isAdmin}
+        onEdit={() => setEditGroupOpen(true)}
+        onInvite={() => setInviteOpen(true)}
+        onManageMembers={() => goScreen('members')}
+        onScan={openScan}
+        onArchiveToggle={() => setArchiveOpen(true)}
+        onLeave={() => setLeaveOpen(true)}
+      />
+
+      <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} group={group} />
+
       <ConfirmDialog
-        open={showLeaveConfirm}
-        onOpenChange={setShowLeaveConfirm}
+        open={leaveOpen}
+        onOpenChange={setLeaveOpen}
         title={t('groups.detail.leaveGroupTitle')}
         description={t('groups.detail.leaveConfirm')}
-        onConfirm={handleLeaveConfirm}
+        onConfirm={confirmLeave}
         confirmText={t('groups.detail.leaveGroup')}
         variant="destructive"
         isLoading={leaveGroup.isPending}
       />
 
-      {/* Remove Member Confirm Dialog */}
       <ConfirmDialog
-        open={showRemoveMemberConfirm}
-        onOpenChange={setShowRemoveMemberConfirm}
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title={isArchived ? t('groups.archive.unarchiveTitle') : t('groups.archive.confirmTitle')}
+        description={
+          isArchived
+            ? t('groups.archive.unarchiveDescription', { name: group.name })
+            : t('groups.archive.confirmDescription', { name: group.name })
+        }
+        onConfirm={confirmArchive}
+        confirmText={isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
+        isLoading={archiveGroup.isPending || unarchiveGroup.isPending}
+      />
+
+      <ConfirmDialog
+        open={!!memberToRemove}
+        onOpenChange={(o) => !o && setMemberToRemove(null)}
         title={t('groups.detail.removeMemberTitle')}
-        description={t('groups.detail.removeMemberConfirm')}
-        onConfirm={handleRemoveMemberConfirm}
+        description={t('groups.members.removeConfirm', {
+          name:
+            memberToRemove?.status === 'accepted'
+              ? memberName(memberToRemove?.user)
+              : memberToRemove?.invitedEmail || memberToRemove?.user?.email || '',
+        })}
+        onConfirm={confirmRemoveMember}
         confirmText={t('common.delete')}
         variant="destructive"
         isLoading={removeMember.isPending}
       />
 
-      {/* Archive Confirm Dialog */}
       <ConfirmDialog
-        open={showArchiveConfirm}
-        onOpenChange={setShowArchiveConfirm}
-        title={group.isArchived ? t('groups.archive.unarchiveTitle') : t('groups.archive.confirmTitle')}
-        description={
-          group.isArchived
-            ? t('groups.archive.unarchiveDescription', { name: group.name })
-            : t('groups.archive.confirmDescription', { name: group.name })
-        }
-        onConfirm={handleArchiveConfirm}
-        confirmText={group.isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
-        isLoading={archiveGroup.isPending || unarchiveGroup.isPending}
+        open={!!receiptToDelete}
+        onOpenChange={(o) => !o && setReceiptToDelete(null)}
+        title={t('receipts.modal.deleteTitle')}
+        description={t('receipts.modal.deleteConfirm', {
+          store: receiptToDelete?.storeName || t('receipts.unknownStore'),
+        })}
+        onConfirm={confirmDeleteExpense}
+        confirmText={t('common.delete')}
+        variant="destructive"
+        isLoading={deleteReceipt.isPending}
       />
 
-      {/* Receipt Modal */}
-      <Suspense fallback={null}>
-        {isReceiptModalOpen && (
-          <ReceiptModal
-            open={isReceiptModalOpen}
-            onOpenChange={setIsReceiptModalOpen}
-            receipt={null}
-            mode="create"
-            prefillData={prefillData}
-          />
-        )}
-      </Suspense>
-
       {scannerModals}
+    </>
+  )
+
+  // ----------------------------------------------------------------------
+  // MOBILE
+  // ----------------------------------------------------------------------
+  if (isMobile) {
+    if (screen === 'members' || screen === 'history') {
+      return (
+        <AppLayout>
+          <PushedHeader
+            title={
+              screen === 'members'
+                ? `${t('groups.tabsNav.members')} · ${group.name}`
+                : t('groups.settlements.history')
+            }
+            onBack={() => setScreen(returnScreen)}
+          />
+          {renderBody(screen)}
+          {overlays}
+        </AppLayout>
+      )
+    }
+    return (
+      <AppLayout>
+        <div className="-mt-2 mb-2 flex items-center justify-between">
+          <Button variant="ghost" size="icon" className="size-9" onClick={() => navigate('/groups')} aria-label={t('common.back')}>
+            <ArrowLeft className="size-5" />
+          </Button>
+          <div className="flex items-center gap-1">
+            {currencyControl}
+            <Button variant="ghost" size="icon" className="size-9" onClick={() => setMenuOpen(true)} aria-label={t('groups.menu.title')}>
+              <MoreHorizontal className="size-5" />
+            </Button>
+          </div>
+        </div>
+        <div className="mb-3.5 flex items-center gap-3">
+          <span className="grid size-[52px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[28px]">
+            {group.icon || '👥'}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[22px] font-extrabold tracking-[-0.02em]">{group.name}</div>
+            <div className="mt-1">{membersButton}</div>
+          </div>
+        </div>
+        <div className="mb-4">
+          <GroupTabs
+            tabs={[
+              { id: 'overview', label: t('groups.tabsNav.overview') },
+              { id: 'expenses', label: t('groups.tabsNav.expenses') },
+              { id: 'balances', label: t('groups.tabsNav.balances') },
+              { id: 'activity', label: t('groups.tabsNav.activity') },
+            ]}
+            active={screen}
+            onChange={(s) => setScreen(s as Screen)}
+          />
+        </div>
+        {renderBody(screen)}
+        {overlays}
+      </AppLayout>
+    )
+  }
+
+  // ----------------------------------------------------------------------
+  // DESKTOP — two columns (left tabs + content, right persistent balance rail)
+  // ----------------------------------------------------------------------
+  const leftTab: Screen = (['expenses', 'activity', 'members'] as Screen[]).includes(screen)
+    ? screen
+    : screen === 'history'
+      ? 'history'
+      : 'expenses'
+
+  return (
+    <AppLayout>
+      <PageToolbar
+        title={group.name}
+        subtitle={group.description || t('groups.membersCount', { count: acceptedMembers.length })}
+        actions={
+          <>
+            {currencyControl}
+            {!isArchived && (
+              <Button variant="outline" size="icon" onClick={openScan} aria-label={t('receipts.scanQr')}>
+                <Camera className="size-4" />
+              </Button>
+            )}
+            {!isArchived && (
+              <Button variant="brand" onClick={openAdd}>
+                <Plus className="size-[17px]" />
+                {t('groups.expense.addExpense')}
+              </Button>
+            )}
+            <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label={t('groups.menu.title')}>
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </>
+        }
+      />
+
+      <div className="mx-auto mt-6 max-w-[1080px]">
+        <Button variant="ghost" size="sm" className="mb-3 -ml-2 text-muted-foreground" onClick={() => navigate('/groups')}>
+          <ArrowLeft className="size-4" />
+          {t('groups.title')}
+        </Button>
+
+        <div className="flex items-center gap-3.5">
+          <span className="grid size-[52px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[28px]">
+            {group.icon || '👥'}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[24px] font-extrabold tracking-[-0.02em]">{group.name}</div>
+            <div className="mt-1">{membersButton}</div>
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.55fr_1fr]">
+          {/* Left: tabbed content */}
+          <div className="flex flex-col">
+            {screen === 'history' ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mb-3 -ml-2 w-fit text-muted-foreground"
+                  onClick={() => setScreen(returnScreen === 'history' ? 'expenses' : returnScreen)}
+                >
+                  <ArrowLeft className="size-4" />
+                  {t('groups.settlements.history')}
+                </Button>
+                {renderBody('history')}
+              </>
+            ) : (
+              <>
+                <div className="mb-4 max-w-[460px]">
+                  <GroupTabs
+                    tabs={[
+                      { id: 'expenses', label: t('groups.tabsNav.expenses') },
+                      { id: 'activity', label: t('groups.tabsNav.activity') },
+                      { id: 'members', label: t('groups.tabsNav.members') },
+                    ]}
+                    active={leftTab}
+                    onChange={(s) => setScreen(s as Screen)}
+                  />
+                </div>
+                {renderBody(leftTab)}
+              </>
+            )}
+          </div>
+
+          {/* Right: persistent balance rail */}
+          <div className="lg:sticky lg:top-24">
+            <GroupBalancePanel
+              groupId={id}
+              displayCurrency={displayCurrency}
+              currentUserId={user?.id}
+              settlementsCount={settlementHistory.length}
+              compactHeadline
+              onSettle={settleHandler ?? (() => {})}
+              onOpenHistory={() => goScreen('history')}
+            />
+          </div>
+        </div>
+      </div>
+
+      {overlays}
     </AppLayout>
   )
+
+  // Shared overlays (declared after render branches so every layout includes them) -----------
+  function PushedHeader({ title, onBack }: { title: string; onBack: () => void }) {
+    return (
+      <div className="-mt-2 mb-4 flex items-center gap-2">
+        <Button variant="ghost" size="icon" className="size-9" onClick={onBack} aria-label={t('common.back')}>
+          <ArrowLeft className="size-5" />
+        </Button>
+        <div className="truncate text-[16px] font-bold">{title}</div>
+      </div>
+    )
+  }
 }

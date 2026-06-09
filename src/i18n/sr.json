@@ -907,7 +907,10 @@
       "youAreOwed": "Vama se duguje {{amount}}",
       "allSettled": "Svi dugovi su poravnati!",
       "suggestedSettlements": "Predložena poravnanja",
-      "settlementsHelp": "Ovo su optimizovani predlozi plaćanja za poravnanje svih dugova sa minimalnim brojem transakcija."
+      "settlementsHelp": "Ovo su optimizovani predlozi plaćanja za poravnanje svih dugova sa minimalnim brojem transakcija.",
+      "paidShare": "platio {{paid}} · udeo {{share}}",
+      "getsBack": "vraća mu se",
+      "owes": "duguje"
     },
     "settlements": {
       "title": "Poravnaj dugove",
@@ -928,7 +931,8 @@
       "error": "Greška pri beleženju poravnanja",
       "pays": "plaća",
       "selectPayer": "Izaberite ko plaća",
-      "selectReceiver": "Izaberite ko prima uplatu"
+      "selectReceiver": "Izaberite ko prima uplatu",
+      "paidVerb": "je platio/la"
     },
     "archive": {
       "button": "Arhiviraj grupu",
@@ -981,6 +985,106 @@
       "joinFailed": "Nije moguće pridružiti se grupi",
       "invalidLink": "Ovaj link za pozivnicu je nevažeći ili je onemogućen.",
       "goToGroups": "Idi na Grupe"
+    },
+    "seeAll": "Prikaži sve",
+    "you": "Vi",
+    "hub": {
+      "overallOwed": "Ukupno, duguju vam",
+      "overallOwe": "Ukupno, vi dugujete",
+      "acrossAll": "U svim grupama",
+      "allSettled": "Sve izmireno",
+      "groupsCount": "{{count}} grupa",
+      "invitedYou": "{{name}} vas je pozvao/la · {{count}} članova",
+      "join": "Pridruži se"
+    },
+    "empty": {
+      "title": "Podelite svoj prvi trošak",
+      "description": "Napravite grupu za stan, putovanje ili večeru s prijateljima — Receipto izračunava ko kome duguje.",
+      "step1": "Dodajte ljude s kojima delite troškove",
+      "step2": "Beležite troškove i ko je platio",
+      "step3": "Izmirite dugove uz najmanje uplata"
+    },
+    "headline": {
+      "owed": "duguju vam",
+      "owe": "vi dugujete",
+      "settled": "sve izmireno",
+      "settledLong": "Sve je izmireno"
+    },
+    "settle": {
+      "owesYou": "duguje vam",
+      "youOwe": "Vi dugujete",
+      "settleUp": "Izmiri",
+      "remind": "Podseti"
+    },
+    "simplify": {
+      "title": "Pojednostavljeno izmirenje",
+      "nothing": "Nema ničega za izmirenje",
+      "clears": "{{count}} uplata izmiruje sve",
+      "allSettled": "Sve je izmireno",
+      "note": "Receipto je pronašao najmanji broj uplata za izmirenje.",
+      "clears_one": "{{count}} uplata izmiruje sve",
+      "clears_few": "{{count}} uplate izmiruju sve",
+      "clears_other": "{{count}} uplata izmiruje sve"
+    },
+    "pill": {
+      "owed": "duguju vam",
+      "owe": "vi dugujete",
+      "settled": "izmireno"
+    },
+    "roles": {
+      "owner": "vlasnik",
+      "admin": "admin",
+      "member": "član"
+    },
+    "tabsNav": {
+      "overview": "Pregled",
+      "expenses": "Troškovi",
+      "balances": "Stanja",
+      "activity": "Aktivnost",
+      "members": "Članovi"
+    },
+    "overview": {
+      "yourSettlePath": "Vaš plan izmirenja",
+      "allSquared": "Ovde su svi izmireni.",
+      "recentExpenses": "Nedavni troškovi"
+    },
+    "expense": {
+      "title": "Trošak",
+      "paidTheBill": "je platio/la račun",
+      "splitBetween": "Podeljeno na {{count}} · {{each}} po osobi",
+      "payer": "platilac",
+      "youLent": "pozajmili ste {{amount}}",
+      "youOwe": "dugujete {{amount}}",
+      "notInvolved": "niste uključeni",
+      "whoPaid": "{{name}} platio/la",
+      "groupTotal": "Ukupno u grupi",
+      "add": "Dodaj",
+      "addExpense": "Dodaj trošak",
+      "undated": "Bez datuma"
+    },
+    "menu": {
+      "title": "Meni grupe",
+      "edit": "Izmeni grupu",
+      "invite": "Pozovi ljude",
+      "manageMembers": "Upravljaj članovima",
+      "scan": "Skeniraj račun"
+    },
+    "members": {
+      "invitePeople": "Pozovi ljude",
+      "removeConfirm": "Ukloniti {{name}}? Izgubiće pristup troškovima grupe. Sva stanja ostaju zabeležena."
+    },
+    "invite": {
+      "title": "Pozovi u {{name}}",
+      "byEmail": "Putem e-pošte",
+      "send": "Pošalji",
+      "shareLink": "Podeli link",
+      "createLink": "Napravi link za poziv"
+    },
+    "share": {
+      "messages": "Poruke",
+      "telegram": "Telegram",
+      "email": "E-pošta",
+      "more": "Više"
     }
   },
   "settings": {

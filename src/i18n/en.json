@@ -907,7 +907,10 @@
       "youAreOwed": "You are owed {{amount}}",
       "allSettled": "You're all settled up!",
       "suggestedSettlements": "Suggested Settlements",
-      "settlementsHelp": "These are optimized payment suggestions to settle all balances with minimum transactions."
+      "settlementsHelp": "These are optimized payment suggestions to settle all balances with minimum transactions.",
+      "paidShare": "paid {{paid}} · share {{share}}",
+      "getsBack": "gets back",
+      "owes": "owes"
     },
     "settlements": {
       "title": "Settle Debts",
@@ -928,7 +931,8 @@
       "error": "Failed to record settlement",
       "pays": "pays",
       "selectPayer": "Select who is paying",
-      "selectReceiver": "Select who receives payment"
+      "selectReceiver": "Select who receives payment",
+      "paidVerb": "paid"
     },
     "archive": {
       "button": "Archive Group",
@@ -981,6 +985,105 @@
       "joinFailed": "Could not join group",
       "invalidLink": "This invite link is invalid or has been disabled.",
       "goToGroups": "Go to Groups"
+    },
+    "seeAll": "See all",
+    "you": "You",
+    "hub": {
+      "overallOwed": "Overall, you're owed",
+      "overallOwe": "Overall, you owe",
+      "acrossAll": "Across all groups",
+      "allSettled": "All settled",
+      "groupsCount": "{{count}} groups",
+      "invitedYou": "{{name}} invited you · {{count}} members",
+      "join": "Join"
+    },
+    "empty": {
+      "title": "Split your first expense",
+      "description": "Create a group for your flat, a trip, or dinner with friends — Receipto works out who owes who.",
+      "step1": "Add the people you share costs with",
+      "step2": "Log expenses & who paid",
+      "step3": "Settle up with the fewest payments"
+    },
+    "headline": {
+      "owed": "you're owed",
+      "owe": "you owe",
+      "settled": "all settled",
+      "settledLong": "You're all settled up"
+    },
+    "settle": {
+      "owesYou": "owes you",
+      "youOwe": "You owe",
+      "settleUp": "Settle up",
+      "remind": "Remind"
+    },
+    "simplify": {
+      "title": "Simplified settle-up",
+      "nothing": "Nothing to settle",
+      "clears": "{{count}} payments clears everyone",
+      "allSettled": "All settled up",
+      "note": "Receipto found the fewest payments to settle up.",
+      "clears_one": "{{count}} payment clears everyone",
+      "clears_other": "{{count}} payments clears everyone"
+    },
+    "pill": {
+      "owed": "you're owed",
+      "owe": "you owe",
+      "settled": "settled"
+    },
+    "roles": {
+      "owner": "owner",
+      "admin": "admin",
+      "member": "member"
+    },
+    "tabsNav": {
+      "overview": "Overview",
+      "expenses": "Expenses",
+      "balances": "Balances",
+      "activity": "Activity",
+      "members": "Members"
+    },
+    "overview": {
+      "yourSettlePath": "Your settle path",
+      "allSquared": "Everyone's squared up here.",
+      "recentExpenses": "Recent expenses"
+    },
+    "expense": {
+      "title": "Expense",
+      "paidTheBill": "paid the bill",
+      "splitBetween": "Split between {{count}} · {{each}} each",
+      "payer": "payer",
+      "youLent": "you lent {{amount}}",
+      "youOwe": "you owe {{amount}}",
+      "notInvolved": "not involved",
+      "whoPaid": "{{name}} paid",
+      "groupTotal": "Group total",
+      "add": "Add",
+      "addExpense": "Add expense",
+      "undated": "Undated"
+    },
+    "menu": {
+      "title": "Group menu",
+      "edit": "Edit group",
+      "invite": "Invite people",
+      "manageMembers": "Manage members",
+      "scan": "Scan a receipt"
+    },
+    "members": {
+      "invitePeople": "Invite people",
+      "removeConfirm": "Remove {{name}}? They'll lose access to this group's expenses. Any balances stay recorded."
+    },
+    "invite": {
+      "title": "Invite to {{name}}",
+      "byEmail": "By email",
+      "send": "Send",
+      "shareLink": "Share a link",
+      "createLink": "Create invite link"
+    },
+    "share": {
+      "messages": "Messages",
+      "telegram": "Telegram",
+      "email": "Email",
+      "more": "More"
     }
   },
   "settings": {

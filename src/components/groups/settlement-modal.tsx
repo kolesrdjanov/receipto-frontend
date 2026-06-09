@@ -1,27 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useCreateSettlement, type GroupMember } from '@/hooks/groups/use-groups'
+import { useAuthStore } from '@/store/auth'
 import { getErrorMessage } from '@/lib/api'
 import { formatMoney } from '@/lib/utils'
+import { memberFirstName } from '@/lib/groups'
+import { GMemberAvatar } from '@/components/groups/primitives'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 interface SettlementModalProps {
   open: boolean
@@ -36,6 +25,10 @@ interface SettlementModalProps {
   }
 }
 
+const fieldLabel = 'mb-2 block text-center text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint'
+
+/** Record-payment (settle up) sheet/modal — two avatar pickers (From → To), a big amount field, an
+ *  optional note, and a live preview. Prefills from a tapped settle-path row. */
 export function SettlementModal({
   open,
   onOpenChange,
@@ -45,189 +38,132 @@ export function SettlementModal({
   prefillData,
 }: SettlementModalProps) {
   const { t } = useTranslation()
+  const { user } = useAuthStore()
   const createSettlement = useCreateSettlement()
 
-  const [fromUserId, setFromUserId] = useState(prefillData?.fromUserId || '')
-  const [toUserId, setToUserId] = useState(prefillData?.toUserId || '')
-  const [amount, setAmount] = useState(prefillData?.amount?.toString() || '')
+  const accepted = members.filter((m) => m.status === 'accepted' && m.user)
+
+  const [fromUserId, setFromUserId] = useState('')
+  const [toUserId, setToUserId] = useState('')
+  const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
 
-  // Update state when prefillData changes
+  // Seed/reset whenever the sheet opens (honouring prefill from a settle row).
   useEffect(() => {
-    if (prefillData) {
-      if (prefillData.fromUserId) setFromUserId(prefillData.fromUserId)
-      if (prefillData.toUserId) setToUserId(prefillData.toUserId)
-      if (prefillData.amount) setAmount(prefillData.amount.toString())
-    }
-  }, [prefillData])
-
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!open) {
-      setFromUserId(prefillData?.fromUserId || '')
-      setToUserId(prefillData?.toUserId || '')
-      setAmount(prefillData?.amount?.toString() || '')
-      setNote('')
-    }
+    if (!open) return
+    const fallbackFrom = prefillData?.fromUserId || user?.id || accepted[0]?.userId || ''
+    const fallbackTo =
+      prefillData?.toUserId || accepted.find((m) => m.userId !== fallbackFrom)?.userId || ''
+    setFromUserId(fallbackFrom)
+    setToUserId(fallbackTo)
+    setAmount(prefillData?.amount ? String(prefillData.amount) : '')
+    setNote('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, prefillData])
 
-  const acceptedMembers = members.filter((m) => m.status === 'accepted' && m.user)
+  const userOf = (id: string) => accepted.find((m) => m.userId === id)?.user
+  const parsedAmount = parseFloat(amount.replace(',', '.'))
+  const valid = !!fromUserId && !!toUserId && fromUserId !== toUserId && !isNaN(parsedAmount) && parsedAmount > 0
 
-  const getMemberName = (member: GroupMember) => {
-    if (member.user?.firstName && member.user?.lastName) {
-      return `${member.user.firstName} ${member.user.lastName}`
-    }
-    return member.user?.firstName || member.user?.lastName || member.user?.email || ''
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const parsedAmount = parseFloat(amount.replace(',', '.'))
-    if (!fromUserId || !toUserId || isNaN(parsedAmount) || parsedAmount <= 0) {
-      return
-    }
-
+  const handleSubmit = async () => {
+    if (!valid) return
     try {
       await createSettlement.mutateAsync({
         groupId,
-        data: {
-          fromUserId,
-          toUserId,
-          amount: parsedAmount,
-          currency,
-          note: note.trim() || undefined,
-        },
+        data: { fromUserId, toUserId, amount: parsedAmount, currency, note: note.trim() || undefined },
       })
       toast.success(t('groups.settlements.success'))
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = getErrorMessage(error, t('groups.settlements.error'))
-      toast.error(errorMessage)
+      toast.error(getErrorMessage(error, t('groups.settlements.error')))
     }
   }
 
-  const fromMember = acceptedMembers.find((m) => m.userId === fromUserId)
-  const toMember = acceptedMembers.find((m) => m.userId === toUserId)
-  const parsedAmount = parseFloat(amount.replace(',', '.'))
+  const Picker = ({ label, value, exclude, onChange }: { label: string; value: string; exclude: string; onChange: (id: string) => void }) => (
+    <div className="flex flex-1 flex-col items-center gap-1.5">
+      <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">{label}</div>
+      <GMemberAvatar user={userOf(value)} self={value === user?.id} size={48} />
+      <div className="text-[14px] font-bold">{memberFirstName(userOf(value))}</div>
+      <div className="mt-1 flex flex-wrap justify-center gap-1.5">
+        {accepted
+          .filter((m) => m.userId !== exclude)
+          .map((m) => (
+            // raw-button-ok: bespoke avatar-selector dot (tappable avatar swatch)
+            <button
+              key={m.userId}
+              type="button"
+              aria-label={memberFirstName(m.user)}
+              onClick={() => onChange(m.userId)}
+              className={`rounded-full border-2 transition-opacity ${m.userId === value ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-80'}`}
+            >
+              <GMemberAvatar user={m.user} self={m.userId === user?.id} size={22} />
+            </button>
+          ))}
+      </div>
+    </div>
+  )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{t('groups.settlements.recordPayment')}</DialogTitle>
-          <DialogDescription>
-            {t('groups.settlements.title')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fromUser">{t('groups.settlements.from')}</Label>
-            <Select value={fromUserId} onValueChange={setFromUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('groups.settlements.selectPayer')} />
-              </SelectTrigger>
-              <SelectContent>
-                {acceptedMembers.map((member) => (
-                  <SelectItem
-                    key={member.userId}
-                    value={member.userId}
-                    disabled={member.userId === toUserId}
-                  >
-                    {getMemberName(member)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <GlassDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('groups.settlements.recordPayment')}
+      description={t('groups.settlements.title')}
+      desktopWidth={452}
+      actions={{
+        primary: (
+          <Button type="button" onClick={handleSubmit} disabled={!valid} loading={createSettlement.isPending}>
+            {t('groups.settlements.recordPayment')}
+          </Button>
+        ),
+        secondary: (
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            {t('common.cancel')}
+          </Button>
+        ),
+      }}
+    >
+      <div className="flex flex-col">
+        <div className="flex items-center gap-2 pb-3">
+          <Picker label={t('groups.settlements.from')} value={fromUserId} exclude={toUserId} onChange={setFromUserId} />
+          <div className="grid shrink-0 place-items-center pt-6">
+            <ArrowRight className="size-5 text-fg-faint" />
           </div>
+          <Picker label={t('groups.settlements.to')} value={toUserId} exclude={fromUserId} onChange={setToUserId} />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="toUser">{t('groups.settlements.to')}</Label>
-            <Select value={toUserId} onValueChange={setToUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('groups.settlements.selectReceiver')} />
-              </SelectTrigger>
-              <SelectContent>
-                {acceptedMembers.map((member) => (
-                  <SelectItem
-                    key={member.userId}
-                    value={member.userId}
-                    disabled={member.userId === fromUserId}
-                  >
-                    {getMemberName(member)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex items-baseline justify-center gap-2 py-3">
+          <input
+            className="t-num w-auto min-w-[60px] max-w-[220px] border-none bg-transparent text-right text-[34px] font-extrabold tracking-[-0.03em] text-foreground outline-none placeholder:text-fg-faint"
+            inputMode="decimal"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
+          />
+          <span className="text-[18px] font-bold text-muted-foreground">{currency}</span>
+        </div>
+
+        <div className="mt-1">
+          <span className={fieldLabel}>{t('groups.settlements.note')}</span>
+          <Input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('groups.settlements.notePlaceholder')}
+          />
+        </div>
+
+        {valid && (
+          <div className="mt-3.5 flex items-center gap-2 rounded-[10px] bg-bg-subtle px-3.5 py-3 text-[13.5px]">
+            <GMemberAvatar user={userOf(fromUserId)} self={fromUserId === user?.id} size={26} />
+            <b className="font-bold">{memberFirstName(userOf(fromUserId))}</b>
+            <ArrowRight className="size-[15px] text-fg-faint" />
+            <GMemberAvatar user={userOf(toUserId)} self={toUserId === user?.id} size={26} />
+            <b className="font-bold">{memberFirstName(userOf(toUserId))}</b>
+            <span className="flex-1" />
+            <span className="t-num font-bold text-success">{formatMoney(parsedAmount, currency)}</span>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="amount">{t('groups.settlements.amount')} ({currency})</Label>
-            <Input
-              id="amount"
-              type="text"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="note">{t('groups.settlements.note')}</Label>
-            <Input
-              id="note"
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t('groups.settlements.notePlaceholder')}
-            />
-          </div>
-
-          {/* Preview */}
-          {fromMember && toMember && !isNaN(parsedAmount) && parsedAmount > 0 && (
-            <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-center gap-2 text-sm">
-              <span className="font-medium">{getMemberName(fromMember)}</span>
-              <ArrowRight className="h-4 w-4" />
-              <span className="font-medium">{getMemberName(toMember)}</span>
-              <span className="text-primary font-semibold ml-2">
-                {formatMoney(parsedAmount, currency || 'RSD')}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={
-                !fromUserId ||
-                !toUserId ||
-                fromUserId === toUserId ||
-                isNaN(parsedAmount) ||
-                parsedAmount <= 0 ||
-                createSettlement.isPending
-              }
-            >
-              {createSettlement.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('common.saving')}
-                </>
-              ) : (
-                t('groups.settlements.recordPayment')
-              )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        )}
+      </div>
+    </GlassDialog>
   )
 }
