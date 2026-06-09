@@ -6,10 +6,12 @@ import {
   Sparkles,
   Compass,
   Star,
+  Camera,
   type LucideIcon,
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { ReceiptRank } from '@/lib/rank'
 
@@ -149,67 +151,29 @@ export function NotifRow({
 }
 
 /* ------------------------------------------------------------------ */
-/* Rank crest — restyled Glass tier card                                */
+/* Rank chip — tinted tier pill folded into the profile hero            */
 /* ------------------------------------------------------------------ */
-const RANK_TONE: Record<ReceiptRank, { tile: string; fill: string; card: string; icon: LucideIcon }> = {
-  status_a: { tile: 'bg-warning-soft text-warning-foreground', fill: 'var(--warning)', card: 'border-warning/30', icon: Crown },
-  status_b: { tile: 'bg-info-soft text-info-foreground', fill: 'var(--info)', card: 'border-info/30', icon: Sparkles },
-  status_c: { tile: 'bg-success-soft text-success-foreground', fill: 'var(--success)', card: 'border-success/30', icon: Compass },
-  none: { tile: 'bg-bg-subtle text-muted-foreground', fill: 'var(--muted-foreground)', card: 'border-border', icon: Compass },
+const RANK_CHIP: Record<ReceiptRank, { tone: string; icon: LucideIcon }> = {
+  status_a: { tone: 'bg-warning-soft text-warning-foreground', icon: Crown },
+  status_b: { tone: 'bg-info-soft text-info-foreground', icon: Sparkles },
+  status_c: { tone: 'bg-success-soft text-success-foreground', icon: Compass },
+  none: { tone: 'bg-bg-subtle text-muted-foreground', icon: Compass },
 }
 
-export function RankCard({
-  count,
-  rank,
-  name,
-  description,
-  progress,
-  nextRankName,
-  receiptsToNextRank,
-}: {
-  count: number
-  rank: ReceiptRank
-  name: string
-  description: string
-  progress: number
-  nextRankName: string
-  receiptsToNextRank: number
-}) {
+export function RankChip({ rank, name }: { rank: ReceiptRank; name: string }) {
   const { t } = useTranslation()
-  const tone = RANK_TONE[rank] ?? RANK_TONE.none
-  const TierIcon = tone.icon
+  const { tone, icon: Icon } = RANK_CHIP[rank] ?? RANK_CHIP.none
   return (
-    <div className={cn('rounded-2xl border bg-card p-5 shadow-glass-1 sm:p-[22px]', tone.card)}>
-      <div className="flex items-start gap-3.5">
-        <span className={cn('grid size-[54px] shrink-0 place-items-center rounded-2xl', tone.tile)}>
-          <TierIcon className="size-[26px]" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <span className="t-xs text-fg-faint">{t('settings.profile.rank.title')}</span>
-          <div className="text-[22px] font-extrabold leading-tight tracking-[-0.02em]">{name}</div>
-          <div className="mt-0.5 text-[13px] text-muted-foreground">
-            {t('settings.profile.rank.receiptsTracked', { count })}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <div className="flex items-center justify-between text-[12.5px] text-muted-foreground">
-          <span>{t('settings.profile.rank.progress')}</span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-bg-subtle">
-          <div className="h-full rounded-full" style={{ width: `${progress}%`, background: tone.fill }} />
-        </div>
-        <div className="mt-1.5 text-[13px] text-muted-foreground">
-          {receiptsToNextRank > 0
-            ? t('settings.profile.rank.nextTarget', { count: receiptsToNextRank, rank: nextRankName })
-            : t('settings.profile.rank.topTier')}
-        </div>
-      </div>
-
-      <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
-    </div>
+    <span
+      title={`${t('settings.profile.rank.title')} — ${name}`}
+      className={cn(
+        'inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-[9px] pr-3 text-[12.5px] font-bold',
+        tone,
+      )}
+    >
+      <Icon className="size-[14px]" />
+      {name}
+    </span>
   )
 }
 
@@ -260,6 +224,112 @@ export function StarPicker({ value, onChange }: { value: number; onChange: (n: n
           className="p-1 transition-transform hover:scale-110"
         >
           <Star className={cn('size-[34px] transition-colors', n <= shown ? 'fill-warning text-warning' : 'text-border')} />
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Profile avatar — 92px gradient avatar with a camera affordance       */
+/* ------------------------------------------------------------------ */
+export function ProfileAvatar({
+  firstName,
+  lastName,
+  imageUrl,
+  label,
+  onPick,
+}: {
+  firstName?: string | null
+  lastName?: string | null
+  imageUrl?: string | null
+  label: string
+  onPick: () => void
+}) {
+  return (
+    <div className="relative shrink-0">
+      <Avatar firstName={firstName} lastName={lastName} imageUrl={imageUrl} size="2xl" className="size-[92px] text-[31px]" />
+      <button
+        type="button"
+        onClick={onPick}
+        aria-label={label}
+        className="absolute -bottom-[3px] -right-[3px] grid size-8 place-items-center rounded-full border border-border bg-card text-fg-2 shadow-glass-2 transition-[transform,background-color] hover:scale-105 hover:bg-bg-subtle hover:text-foreground"
+      >
+        <Camera className="size-[15px]" />
+      </button>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Desktop section-nav rail — sticky, scroll-spied, click-to-jump       */
+/* ------------------------------------------------------------------ */
+export function SettingsNavRail<Id extends string>({
+  items,
+  active,
+  onJump,
+}: {
+  items: { id: Id; label: string; icon: LucideIcon; danger?: boolean }[]
+  active: Id
+  onJump: (id: Id) => void
+}) {
+  return (
+    <aside className="sticky top-[84px] flex w-[212px] shrink-0 flex-col gap-0.5">
+      {items.map((item) => {
+        const on = active === item.id
+        const Icon = item.icon
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onJump(item.id)}
+            aria-current={on ? 'true' : undefined}
+            className={cn(
+              'flex min-h-[42px] items-center gap-[11px] rounded-xl px-[13px] text-left text-[13.5px] font-semibold transition-colors',
+              item.danger
+                ? on
+                  ? 'bg-destructive-soft text-destructive'
+                  : 'text-destructive/85 hover:bg-destructive-soft/60'
+                : on
+                  ? 'bg-primary-soft font-bold text-primary'
+                  : 'text-fg-2 hover:bg-bg-subtle hover:text-foreground',
+            )}
+          >
+            <Icon className={cn('size-[17px] shrink-0', !item.danger && (on ? 'text-primary' : 'text-muted-foreground'))} />
+            <span className="flex-1">{item.label}</span>
+          </button>
+        )
+      })}
+    </aside>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile segmented tab strip (Profile / App / Account)                 */
+/* ------------------------------------------------------------------ */
+export function SettingsTabStrip<Id extends string>({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { id: Id; label: string }[]
+  active: Id
+  onChange: (id: Id) => void
+}) {
+  return (
+    <div className="flex gap-1 rounded-full border border-hairline-soft bg-bg-subtle p-1">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          onClick={() => onChange(tab.id)}
+          aria-pressed={active === tab.id}
+          className={cn(
+            'h-[38px] flex-1 rounded-full text-[13.5px] font-semibold transition-colors',
+            active === tab.id ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground',
+          )}
+        >
+          {tab.label}
         </button>
       ))}
     </div>

@@ -1092,12 +1092,24 @@
     "subtitle": "Upravljajte podešavanjima aplikacije",
     "sections": {
       "profile": "Profil",
-      "app": "Podešavanja aplikacije"
+      "app": "Podešavanja aplikacije",
+      "account": "Nalog"
     },
     "tabs": {
       "application": "Aplikacija",
       "profile": "Profil",
       "account": "Nalog"
+    },
+    "nav": {
+      "profile": "Profil",
+      "appearance": "Izgled",
+      "region": "Jezik i valuta",
+      "notifications": "Obaveštenja",
+      "danger": "Opasna zona"
+    },
+    "region": {
+      "title": "Jezik i valuta",
+      "description": "Izaberite jezik interfejsa i valutu u kojoj se prikazuju iznosi"
     },
     "appearance": {
       "title": "Izgled",
@@ -1154,6 +1166,9 @@
       "lastName": "Prezime",
       "picture": "Profilna slika",
       "pictureHelp": "Dodajte profilnu sliku ili koristite inicijale",
+      "dropText": "Prevucite i otpustite fotografiju, ili",
+      "dropBrowse": "izaberite datoteku",
+      "dropHelp": "JPEG, PNG, WebP ili HEIC · do 5MB. Ili zadržite inicijale.",
       "upload": "Dodaj",
       "remove": "Ukloni",
       "saved": "Profil je ažuriran",
@@ -1180,6 +1195,8 @@
         "progress": "Napredak do sledećeg ranga",
         "nextTarget": "Još {{count}} računa do ranga {{rank}}",
         "topTier": "Dostigli ste najviši rang. Održite niz.",
+        "trackedMeta": "{{count}} praćeno · još {{remaining}} do ranga {{rank}}",
+        "trackedTop": "{{count}} računa praćeno · Najviši nivo",
         "maxRank": "Maksimalni rang",
         "names": {
           "noStatus": "Receipt Rookie",

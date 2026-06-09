@@ -1091,12 +1091,24 @@
     "subtitle": "Manage your application preferences",
     "sections": {
       "profile": "Profile",
-      "app": "App settings"
+      "app": "App settings",
+      "account": "Account"
     },
     "tabs": {
       "application": "Application",
       "profile": "Profile",
       "account": "Account"
+    },
+    "nav": {
+      "profile": "Profile",
+      "appearance": "Appearance",
+      "region": "Language & currency",
+      "notifications": "Notifications",
+      "danger": "Danger zone"
+    },
+    "region": {
+      "title": "Language & currency",
+      "description": "Choose your interface language and the currency amounts are shown in"
     },
     "appearance": {
       "title": "Appearance",
@@ -1153,6 +1165,9 @@
       "lastName": "Last name",
       "picture": "Profile picture",
       "pictureHelp": "Upload a profile picture or use your initials",
+      "dropText": "Drag & drop a photo, or",
+      "dropBrowse": "browse files",
+      "dropHelp": "JPEG, PNG, WebP or HEIC · up to 5MB. Or keep your initials.",
       "upload": "Upload",
       "remove": "Remove",
       "saved": "Profile updated",
@@ -1179,6 +1194,8 @@
         "progress": "Progress to next rank",
         "nextTarget": "{{count}} more receipts to unlock {{rank}}",
         "topTier": "Top tier reached. Keep the streak alive.",
+        "trackedMeta": "{{count}} tracked · {{remaining}} to {{rank}}",
+        "trackedTop": "{{count}} receipts tracked · Top tier",
         "maxRank": "Max Rank",
         "names": {
           "noStatus": "Receipt Rookie",
