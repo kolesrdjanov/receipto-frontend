@@ -12,6 +12,7 @@ import { TemplateList, RowActionList } from '@/components/templates/primitives'
 import { useTemplates, useDeleteTemplate, type Template } from '@/hooks/templates/use-templates'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 export default function Templates() {
@@ -66,7 +67,7 @@ export default function Templates() {
       setTemplateToDelete(null)
     } catch (err) {
       toast.error(t('templates.modal.deleteError'), {
-        description: err instanceof Error ? err.message : 'An error occurred',
+        description: getErrorMessage(err),
       })
     }
   }
@@ -112,7 +113,7 @@ export default function Templates() {
         ) : error ? (
           <div className="mt-4 grid place-items-center rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-glass-1 md:mt-0">
             <p className="text-sm text-destructive">
-              {t('templates.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
+              {t('templates.loadError', { message: getErrorMessage(error, 'Unknown error') })}
             </p>
           </div>
         ) : list.length === 0 ? (

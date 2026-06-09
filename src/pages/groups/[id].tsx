@@ -27,6 +27,7 @@ import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useAuthStore } from '@/store/auth'
 import { queryKeys } from '@/lib/query-keys'
 import { formatMoney } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 import { GroupModal } from '@/components/groups/group-modal'
 import { InviteLinkCard } from '@/components/groups/invite-link-card'
 import { GroupBalancesTab } from '@/components/groups/group-balances-tab'
@@ -168,7 +169,7 @@ export default function GroupDetail() {
       toast.success(t('groups.detail.inviteSent'))
       setInviteEmail('')
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.inviteError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.inviteError'))
       toast.error(errorMessage)
     }
   }
@@ -187,7 +188,7 @@ export default function GroupDetail() {
       setShowRemoveMemberConfirm(false)
       setMemberToRemove(null)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.removeMemberError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.removeMemberError'))
       toast.error(errorMessage)
     }
   }
@@ -199,7 +200,7 @@ export default function GroupDetail() {
       setShowLeaveConfirm(false)
       navigate('/groups')
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.leaveError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.leaveError'))
       toast.error(errorMessage)
     }
   }
@@ -215,11 +216,12 @@ export default function GroupDetail() {
       }
       setShowArchiveConfirm(false)
     } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : group.isArchived
+      const errorMessage = getErrorMessage(
+        error,
+        group.isArchived
           ? t('groups.archive.unarchiveError')
-          : t('groups.archive.error')
+          : t('groups.archive.error'),
+      )
       toast.error(errorMessage)
     }
   }

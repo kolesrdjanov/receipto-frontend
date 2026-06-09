@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
@@ -154,7 +155,7 @@ export default function WarrantiesPage() {
       toast.success(t('warranties.modal.deleteSuccess'))
       setWarrantyToDelete(null)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'An error occurred'
+      const msg = getErrorMessage(error)
       toast.error(t('warranties.modal.deleteError'), { description: msg })
     }
   }
@@ -169,7 +170,7 @@ export default function WarrantiesPage() {
       await exportWarranties.mutateAsync()
       toast.success(t('warranties.export.success'))
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'An error occurred'
+      const msg = getErrorMessage(error)
       toast.error(t('warranties.export.error'), { description: msg })
     }
   }
@@ -202,7 +203,7 @@ export default function WarrantiesPage() {
       }
       setImportDialogOpen(false)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'An error occurred'
+      const msg = getErrorMessage(error)
       toast.error(t('warranties.import.error'), { description: msg })
     }
     if (importInputRef.current) importInputRef.current.value = ''

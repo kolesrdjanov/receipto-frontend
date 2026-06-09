@@ -19,6 +19,7 @@ import {
   type AdminAnnouncement,
 } from '@/hooks/announcements/use-announcements'
 import { formatDateTime } from '@/lib/date-utils'
+import { getErrorMessage } from '@/lib/api'
 import { EmptyState } from '@/components/glass/empty-state'
 import {
   Loader2,
@@ -125,7 +126,7 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
       {/* Error */}
       {error && (
         <AdminCard className="p-8">
-          <p className="text-center text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          <p className="text-center text-destructive">{getErrorMessage(error, 'Unknown error')}</p>
         </AdminCard>
       )}
 

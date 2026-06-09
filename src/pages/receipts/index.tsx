@@ -40,6 +40,7 @@ import { ExpensesSummary } from '@/components/receipts/expenses-summary'
 import { EmptyState } from '@/components/glass/empty-state'
 import { Loader2, QrCode, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 
 const CSV_TEMPLATE = `storeName,totalAmount,currency,receiptDate,receiptNumber,categoryName
 "Maxi Supermarket",2450.00,RSD,2024-06-15,12345,Groceries
@@ -204,8 +205,7 @@ export default function Receipts() {
       toast.success(t('receipts.modal.deleteSuccess'))
       setReceiptToDelete(null)
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('receipts.modal.deleteError'), {
         description: errorMessage,
       })
@@ -264,7 +264,7 @@ export default function Receipts() {
       }
       setSelectedIds(new Set())
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(errorMessage)
     }
   }
@@ -283,7 +283,7 @@ export default function Receipts() {
       setSelectedIds(new Set())
       setBulkCategoryOpen(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(errorMessage)
     }
   }
@@ -293,7 +293,7 @@ export default function Receipts() {
       await exportReceipts.mutateAsync()
       toast.success(t('receipts.export.success'))
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('receipts.export.error'), { description: errorMessage })
     }
   }
@@ -338,7 +338,7 @@ export default function Receipts() {
 
       setImportDialogOpen(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('receipts.import.error'), { description: errorMessage })
     }
 

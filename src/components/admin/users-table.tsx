@@ -20,6 +20,7 @@ import {
 import { useAdminUsers, useDeleteUser, type SortField, type SortOrder } from '@/hooks/admin/use-admin-users'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { formatDateTime } from '@/lib/date-utils'
+import { getErrorMessage } from '@/lib/api'
 import { Check, Eye, SlidersHorizontal, Loader2, Minus, Search, Trash2, Users, X } from 'lucide-react'
 import { EmptyState } from '@/components/glass/empty-state'
 import { AdminCard, AdminCardHead, RoleBadge, SortHeader } from '@/components/admin/primitives'
@@ -139,7 +140,7 @@ export function UsersTable() {
       toast.success(t('admin.users.deleteSuccess'))
       setUserToDelete(null)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = getErrorMessage(error, 'Unknown error')
       toast.error(t('admin.users.deleteError'), {
         description: errorMessage,
       })
@@ -260,7 +261,7 @@ export function UsersTable() {
       {error && (
         <AdminCard className="p-8">
           <p className="text-center text-destructive">
-            {t('admin.users.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
+            {t('admin.users.loadError', { message: getErrorMessage(error, 'Unknown error') })}
           </p>
         </AdminCard>
       )}

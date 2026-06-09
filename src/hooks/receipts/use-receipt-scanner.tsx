@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import * as Sentry from '@sentry/react'
 import { useCreateReceipt, type CreateReceiptInput } from './use-receipts'
 import type { PfrData } from '@/components/receipts/pfr-entry-modal'
-import { ApiError, isApiError } from '@/lib/api'
+import { ApiError, isApiError, getErrorMessage } from '@/lib/api'
 import type { RetryMeta, ScanFlowState } from './scan-flow'
 
 const QrScanner = lazy(() => import('@/components/receipts/qr-scanner').then(m => ({ default: m.QrScanner })))
@@ -476,7 +476,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
         throw error
       }
 
-      const errorMessage = error instanceof Error ? error.message : t('receipts.qrScanner.scanError')
+      const errorMessage = getErrorMessage(error, t('receipts.qrScanner.scanError'))
       setScanFlowState('failed_terminal')
       setScanError(errorMessage)
 
@@ -508,8 +508,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
       setIsPfrEntryOpen(false)
       if (navigateOnSuccess) navigate('/receipts')
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('receipts.qrScanner.scanError'), {
         description: errorMessage,
       })
@@ -550,7 +549,7 @@ export function useReceiptScanner(options: UseReceiptScannerOptions = {}) {
       } else if (isRecoverableScanError(error)) {
         toast.error(error.message)
       } else {
-        const errorMessage = error instanceof Error ? error.message : t('receipts.gallery.error')
+        const errorMessage = getErrorMessage(error, t('receipts.gallery.error'))
         toast.error(t('receipts.gallery.error'), { description: errorMessage })
       }
 

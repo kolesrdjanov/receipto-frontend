@@ -27,6 +27,17 @@ export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError
 }
 
+/**
+ * Normalize any thrown value to a user-facing message. Replaces the
+ * `error instanceof Error ? error.message : 'An error occurred'` idiom that was
+ * duplicated across ~60 catch blocks. `ApiError` already carries a normalized `.message`.
+ */
+export function getErrorMessage(error: unknown, fallback = 'An error occurred'): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string' && error.trim()) return error
+  return fallback
+}
+
 // Track ongoing refresh requests to prevent concurrent calls
 let refreshPromise: Promise<boolean> | null = null
 

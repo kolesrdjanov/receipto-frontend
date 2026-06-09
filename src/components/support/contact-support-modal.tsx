@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useSendSupportMessage } from '@/hooks/support/use-support'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 interface ContactSupportModalProps {
@@ -59,7 +60,7 @@ export function ContactSupportModal({ open, onOpenChange }: ContactSupportModalP
       toast.success(t('support.success'))
       close()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('support.error')
+      const errorMessage = getErrorMessage(error, t('support.error'))
       toast.error(t('support.error'), { description: errorMessage })
     }
   }

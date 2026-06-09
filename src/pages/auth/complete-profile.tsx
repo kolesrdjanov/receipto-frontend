@@ -8,6 +8,7 @@ import { Field, Alert } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
 import { useUpdateMe } from '@/hooks/users/use-me'
+import { getErrorMessage } from '@/lib/api'
 
 export default function CompleteProfile() {
   const { t } = useTranslation()
@@ -34,7 +35,7 @@ export default function CompleteProfile() {
       await updateMe.mutateAsync({ firstName: firstName.trim(), lastName: lastName.trim() })
       navigate(fallback, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.completeProfile.error'))
+      setError(getErrorMessage(err, t('auth.completeProfile.error')))
     }
   }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { api, getErrorMessage } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
 interface GoogleAuthResponse {
@@ -39,7 +39,7 @@ export function useGoogleAuth() {
       const from = (location.state as { from?: string })?.from || '/dashboard'
       navigate(from, { replace: true })
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.'
+      const message = getErrorMessage(err, 'Google sign-in failed. Please try again.')
       setError(message)
     } finally {
       setIsLoading(false)

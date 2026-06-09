@@ -28,6 +28,7 @@ import { useCategories } from '@/hooks/categories/use-categories'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { useSettingsStore } from '@/store/settings'
 import { cn } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 interface RecurringExpenseModalProps {
@@ -166,7 +167,7 @@ export function RecurringExpenseModal({
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(
         mode === 'create' ? t('recurring.modal.createError') : t('recurring.modal.updateError'),
         { description: errorMessage },

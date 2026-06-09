@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useJoinGroup } from '@/hooks/groups/use-join-group'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 import { Loader2, CircleAlert, Users } from 'lucide-react'
 
@@ -28,7 +29,7 @@ export default function JoinGroup() {
       })
       .catch((err) => {
         if (!active) return
-        setError(err instanceof Error ? err.message : t('groups.inviteLink.invalidLink'))
+        setError(getErrorMessage(err, t('groups.inviteLink.invalidLink')))
       })
 
     return () => { active = false }

@@ -15,6 +15,7 @@ import { CatTile } from '@/components/glass/primitives'
 import { DueBadge } from '@/components/recurring-expenses/primitives'
 import { relativeDueLabel, type RecurringStatus } from '@/components/recurring-expenses/status'
 import { useMarkAsPaid, type UpcomingExpense } from '@/hooks/recurring-expenses/use-recurring-expenses'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 interface MarkPaidModalProps {
@@ -87,7 +88,7 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('recurring.markPaid.error'), { description: errorMessage })
     }
   }

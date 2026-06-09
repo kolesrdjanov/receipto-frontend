@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useCreateUser, type CreateUserInput } from '@/hooks/admin/use-admin-users'
+import { getErrorMessage } from '@/lib/api'
 
 interface CreateUserModalProps {
   open: boolean
@@ -78,7 +79,7 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
       setSelectedRole('user')
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = getErrorMessage(error, 'Unknown error')
       toast.error(t('admin.users.createError'), {
         description: errorMessage,
       })

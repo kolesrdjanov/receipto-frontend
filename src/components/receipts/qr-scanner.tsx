@@ -25,6 +25,7 @@ import {
 import * as Sentry from '@sentry/react'
 import { useDevices } from '@yudiel/react-qr-scanner'
 import type { RetryMeta, ScanFlowState } from '@/hooks/receipts/scan-flow'
+import { getErrorMessage } from '@/lib/api'
 
 interface QrScannerProps {
   open: boolean
@@ -358,7 +359,7 @@ export function QrScanner({
           return
         }
 
-        const errorMessage = err instanceof Error ? err.message : t('receipts.qrScanner.scanError')
+        const errorMessage = getErrorMessage(err, t('receipts.qrScanner.scanError'))
         setLocalError(errorMessage)
         onFlowStateChange?.('failed_terminal')
         // Reset scanning refs so user can try again

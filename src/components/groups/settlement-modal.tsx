@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useCreateSettlement, type GroupMember } from '@/hooks/groups/use-groups'
+import { getErrorMessage } from '@/lib/api'
 import { formatMoney } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight } from 'lucide-react'
@@ -101,7 +102,7 @@ export function SettlementModal({
       toast.success(t('groups.settlements.success'))
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.settlements.error')
+      const errorMessage = getErrorMessage(error, t('groups.settlements.error'))
       toast.error(errorMessage)
     }
   }

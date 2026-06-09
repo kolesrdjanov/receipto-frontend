@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { StatusBadge } from '@/components/warranties/primitives'
 import { formatDate } from '@/lib/date-utils'
+import { getErrorMessage } from '@/lib/api'
 import {
   useCreateWarranty,
   useUpdateWarranty,
@@ -208,7 +209,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
       }
       handleOpenChange(false)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'An error occurred'
+      const msg = getErrorMessage(error)
       toast.error(mode === 'create' ? t('warranties.modal.createError') : t('warranties.modal.updateError'), {
         description: msg,
       })

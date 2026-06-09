@@ -21,6 +21,7 @@ import {
 } from '@/hooks/receipts/use-receipts'
 import { formatDateTime } from '@/lib/date-utils'
 import { formatMoney } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 import { Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Loader2, Receipt as ReceiptIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -101,7 +102,7 @@ export function GroupReceiptsTable({ groupId, isArchived }: GroupReceiptsTablePr
       toast.success(t('receipts.modal.deleteSuccess'))
       setReceiptToDelete(null)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('receipts.modal.deleteError'), { description: errorMessage })
     }
   }

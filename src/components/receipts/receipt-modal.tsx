@@ -33,6 +33,7 @@ import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
 import { CheckCircle2, Trash2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 
 interface ReceiptModalProps {
   open: boolean
@@ -263,8 +264,7 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(mode === 'create' ? t('receipts.modal.createError') : t('receipts.modal.updateError'), {
         description: errorMessage,
       })

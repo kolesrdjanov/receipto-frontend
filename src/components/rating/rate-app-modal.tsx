@@ -6,6 +6,7 @@ import { StarPicker } from '@/components/settings/primitives'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useMyRating, useSubmitRating } from '@/hooks/ratings/use-ratings'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 interface RateAppModalProps {
@@ -44,7 +45,7 @@ export function RateAppModal({ open, onOpenChange }: RateAppModalProps) {
       toast.success(existingRating ? t('rating.updated') : t('rating.success'))
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('rating.error')
+      const errorMessage = getErrorMessage(error, t('rating.error'))
       toast.error(t('rating.error'), { description: errorMessage })
     }
   }

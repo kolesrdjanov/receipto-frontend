@@ -10,6 +10,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { Button } from '@/components/ui/button'
 import { useRequestCode } from '@/hooks/auth/use-request-code'
 import { useVerifyCode } from '@/hooks/auth/use-verify-code'
+import { getErrorMessage } from '@/lib/api'
 
 const CODE_LENGTH = 6
 const RESEND_COOLDOWN = 30
@@ -50,7 +51,7 @@ export default function SignIn() {
       await requestCode.mutateAsync(email.trim().toLowerCase())
       return true
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.signIn.requestError'))
+      setError(getErrorMessage(err, t('auth.signIn.requestError')))
       return false
     }
   }
@@ -80,7 +81,7 @@ export default function SignIn() {
         navigate(from || '/dashboard', { replace: true })
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.signIn.invalidCode'))
+      setError(getErrorMessage(err, t('auth.signIn.invalidCode')))
       setCode('')
     }
   }

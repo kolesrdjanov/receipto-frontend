@@ -23,6 +23,7 @@ import {
 } from '@/hooks/templates/use-templates'
 import { useCategories } from '@/hooks/categories/use-categories'
 import { useSettingsStore } from '@/store/settings'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 
 const FORM_ID = 'template-form'
@@ -111,8 +112,7 @@ export function TemplateModal({ open, onOpenChange, template, mode }: TemplateMo
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(mode === 'create' ? t('templates.modal.createError') : t('templates.modal.updateError'), {
         description: errorMessage,
       })

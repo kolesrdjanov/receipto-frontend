@@ -24,6 +24,7 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
 import { formatMoney } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 import { GroupBalancesTab } from './group-balances-tab'
 import { toast } from 'sonner'
 import { Users, UserPlus, Trash2, LogOut, Crown, Loader2, Pencil, Wallet } from 'lucide-react'
@@ -67,7 +68,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
       toast.success(t('groups.detail.inviteSent'))
       setInviteEmail('')
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.inviteError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.inviteError'))
       toast.error(errorMessage)
     }
   }
@@ -86,7 +87,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
       setShowRemoveMemberConfirm(false)
       setMemberToRemove(null)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.removeMemberError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.removeMemberError'))
       toast.error(errorMessage)
     }
   }
@@ -98,7 +99,7 @@ export function GroupDetailModal({ open, onOpenChange, group, onEdit }: GroupDet
       setShowLeaveConfirm(false)
       onOpenChange(false)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('groups.detail.leaveError')
+      const errorMessage = getErrorMessage(error, t('groups.detail.leaveError'))
       toast.error(errorMessage)
     }
   }

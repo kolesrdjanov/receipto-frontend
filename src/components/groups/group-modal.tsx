@@ -35,6 +35,7 @@ import {
   type Group,
   type CreateGroupInput,
 } from '@/hooks/groups/use-groups'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 
@@ -122,8 +123,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(mode === 'create' ? t('groups.modal.createError') : t('groups.modal.updateError'), {
         description: errorMessage,
       })
@@ -140,8 +140,7 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
       onOpenChange(false)
       reset()
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('groups.modal.deleteError'), {
         description: errorMessage,
       })

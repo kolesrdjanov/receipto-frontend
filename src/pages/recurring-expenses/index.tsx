@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info, X, CalendarClock, ArrowDownWideNarrow } from 'lucide-react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
@@ -106,7 +107,7 @@ export default function RecurringExpenses() {
       toast.success(t('recurring.deleteSuccess'))
       setExpenseToDelete(null)
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      const errorMessage = getErrorMessage(error)
       toast.error(t('recurring.deleteError'), { description: errorMessage })
     }
   }

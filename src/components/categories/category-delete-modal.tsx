@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Info, CircleSlash, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Alert } from '@/components/glass/glass'
@@ -116,7 +117,7 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
       onOpenChange(false)
       onDeleted()
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred'
+      const message = getErrorMessage(err)
       setError(message)
       toast.error(hasReceipts ? t('categories.modal.reassignError') : t('categories.modal.deleteError'), {
         description: message,

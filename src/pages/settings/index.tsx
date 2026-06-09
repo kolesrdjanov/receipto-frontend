@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
@@ -152,7 +153,7 @@ export default function Settings() {
       })
       toast.success(t('settings.profile.saved'))
     } catch (err) {
-      toast.error(t('settings.profile.saveError'), { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error(t('settings.profile.saveError'), { description: getErrorMessage(err) })
     }
   }
 
@@ -162,7 +163,7 @@ export default function Settings() {
       await updateMe.mutateAsync({ removeProfileImage: true })
       toast.success(t('settings.profile.pictureRemoved'))
     } catch (err) {
-      toast.error(t('settings.profile.saveError'), { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error(t('settings.profile.saveError'), { description: getErrorMessage(err) })
     }
   }
 
@@ -185,7 +186,7 @@ export default function Settings() {
       toast.success(t('settings.profile.pictureUploaded'))
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err) {
-      toast.error(t('settings.profile.uploadError'), { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error(t('settings.profile.uploadError'), { description: getErrorMessage(err) })
     }
   }
 
@@ -195,7 +196,7 @@ export default function Settings() {
       await deleteMyAccount.mutateAsync()
       toast.success(t('settings.dangerZone.accountDeleted'))
     } catch (err) {
-      toast.error(t('settings.dangerZone.deleteError'), { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error(t('settings.dangerZone.deleteError'), { description: getErrorMessage(err) })
     }
   }
 

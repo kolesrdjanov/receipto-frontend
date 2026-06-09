@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { SmilePlus, Lock, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/api'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
@@ -134,7 +135,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
       }
       close()
     } catch (error) {
-      const description = error instanceof Error ? error.message : 'An error occurred'
+      const description = getErrorMessage(error)
       toast.error(
         mode === 'create' ? t('categories.modal.createError') : t('categories.modal.updateError'),
         { description },

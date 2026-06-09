@@ -4,6 +4,7 @@ import { Loader2, Plus, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { useTemplates, type Template } from '@/hooks/templates/use-templates'
+import { getErrorMessage } from '@/lib/api'
 
 interface TemplateSelectorModalProps {
   open: boolean
@@ -54,7 +55,7 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
         </div>
       ) : error ? (
         <div className="py-8 text-center text-sm text-destructive">
-          {t('receipts.templateSelector.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
+          {t('receipts.templateSelector.loadError', { message: getErrorMessage(error, 'Unknown error') })}
         </div>
       ) : !hasTemplates ? (
         <div className="py-8 text-center">

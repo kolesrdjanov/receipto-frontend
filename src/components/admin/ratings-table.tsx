@@ -16,6 +16,7 @@ import { formatDateTime } from '@/lib/date-utils'
 import { EmptyState } from '@/components/glass/empty-state'
 import { AdminCard, AdminCardHead, Pill } from '@/components/admin/primitives'
 import { Loader2, Star, Globe, Check, X, MessageSquare, Send, Sparkles } from 'lucide-react'
+import { getErrorMessage } from '@/lib/api'
 
 interface RatingsTableProps {
   page: number
@@ -126,7 +127,7 @@ export function RatingsTable({ page, onPageChange }: RatingsTableProps) {
       {/* Error State */}
       {error && (
         <AdminCard className="p-8">
-          <p className="text-center text-destructive">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          <p className="text-center text-destructive">{getErrorMessage(error, 'Unknown error')}</p>
         </AdminCard>
       )}
 

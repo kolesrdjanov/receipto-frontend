@@ -8,6 +8,7 @@ import {
   useGenerateInviteLink,
   useUpdateInviteLink,
 } from '@/hooks/groups/use-groups'
+import { getErrorMessage } from '@/lib/api'
 import { toast } from 'sonner'
 import { Link, Copy, Check, RefreshCw, Share2, Loader2 } from 'lucide-react'
 
@@ -27,7 +28,7 @@ export function InviteLinkCard({ groupId }: InviteLinkCardProps) {
     try {
       await updateLink.mutateAsync({ groupId, enabled })
     } catch (error) {
-      const msg = error instanceof Error ? error.message : t('common.error')
+      const msg = getErrorMessage(error, t('common.error'))
       toast.error(msg)
     }
   }
@@ -38,7 +39,7 @@ export function InviteLinkCard({ groupId }: InviteLinkCardProps) {
       setShowRegenerateConfirm(false)
       toast.success(t('groups.inviteLink.regenerated'))
     } catch (error) {
-      const msg = error instanceof Error ? error.message : t('common.error')
+      const msg = getErrorMessage(error, t('common.error'))
       toast.error(msg)
     }
   }

@@ -15,6 +15,7 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
 import { cn, formatMoney } from '@/lib/utils'
+import { getErrorMessage } from '@/lib/api'
 
 function OverviewStat({ icon: Icon, iconClass, label, value }: { icon: LucideIcon; iconClass?: string; label: string; value: React.ReactNode }) {
   return (
@@ -150,7 +151,7 @@ export default function Categories() {
         ) : error ? (
           <div className="mt-4 grid place-items-center rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-glass-1 md:mt-0">
             <p className="text-sm text-destructive">
-              {t('categories.loadError', { message: error instanceof Error ? error.message : 'Unknown error' })}
+              {t('categories.loadError', { message: getErrorMessage(error, 'Unknown error') })}
             </p>
           </div>
         ) : list.length === 0 ? (

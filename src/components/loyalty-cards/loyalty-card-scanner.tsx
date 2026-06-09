@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Camera, Loader2, CameraOff, X } from 'lucide-react'
+import { getErrorMessage } from '@/lib/api'
 
 interface LoyaltyCardScannerProps {
   open: boolean
@@ -89,7 +90,7 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
         timeoutRef.current = null
       }
       setIsLoading(false)
-      setError(err instanceof Error ? err.message : t('loyaltyCards.cameraError'))
+      setError(getErrorMessage(err, t('loyaltyCards.cameraError')))
     }
   }, [onScan, onOpenChange, t])
 
