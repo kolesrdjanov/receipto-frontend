@@ -23,7 +23,7 @@ export function FrequentItems() {
     } else if (diff > 0) {
       return { icon: TrendingUp, color: 'text-destructive', label: `+${percentChange.toFixed(0)}%` }
     } else {
-      return { icon: TrendingDown, color: 'text-green-500', label: `${percentChange.toFixed(0)}%` }
+      return { icon: TrendingDown, color: 'text-success', label: `${percentChange.toFixed(0)}%` }
     }
   }
 

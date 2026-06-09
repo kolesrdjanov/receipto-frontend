@@ -5,9 +5,9 @@ import { AlertTriangle, CheckCircle2, Info, X, ExternalLink } from 'lucide-react
 import { cn } from '@/lib/utils'
 
 const typeStyles: Record<Announcement['type'], string> = {
-  alert: 'bg-red-500/10 text-red-800 border-red-500/20 dark:text-red-200 dark:bg-red-500/15',
-  success: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20 dark:text-emerald-200 dark:bg-emerald-500/15',
-  info: 'bg-blue-500/10 text-blue-800 border-blue-500/20 dark:text-blue-200 dark:bg-blue-500/15',
+  alert: 'bg-destructive/10 text-destructive border-destructive/20',
+  success: 'bg-success-soft text-success-foreground border-success/25',
+  info: 'bg-info-soft text-info-foreground border-info/25',
 }
 
 const typeIcons: Record<Announcement['type'], React.ReactNode> = {

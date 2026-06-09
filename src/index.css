@@ -240,50 +240,6 @@ body {
 }
 
 /* ============================================
-   UI UTILITIES
-   ============================================ */
-
-/* ============================================
-   TABLE ENHANCEMENTS
-   ============================================ */
-
-.table-modern {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--card);
-}
-
-.table-modern thead {
-  background: var(--muted);
-}
-
-.table-modern thead th {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-  color: var(--muted-foreground);
-  border-bottom: 1px solid var(--border);
-}
-
-.table-modern tbody tr {
-  transition: all 0.2s ease;
-}
-
-.table-modern tbody tr:hover {
-  background: color-mix(in oklch, var(--primary) 5%, transparent);
-}
-
-.table-modern tbody tr:not(:last-child) {
-  border-bottom: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
-}
-
-.dark .table-modern thead {
-  background: var(--muted);
-}
-
-/* ============================================
    MODAL / DIALOG ENHANCEMENTS
    ============================================ */
 
@@ -303,35 +259,8 @@ body {
 }
 
 /* ============================================
-   INPUT ENHANCEMENTS
-   ============================================ */
-
-.input-modern {
-  transition: all 0.2s ease;
-  border: 1px solid var(--border);
-  background: var(--background);
-}
-
-.input-modern:focus {
-  border-color: var(--primary);
-  box-shadow:
-    0 0 0 3px color-mix(in oklch, var(--primary) 15%, transparent),
-    0 2px 8px color-mix(in oklch, var(--primary) 10%, transparent);
-}
-
-.input-modern:hover:not(:focus) {
-  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
-}
-
-/* ============================================
    LAYOUT ENHANCEMENTS
    ============================================ */
-
-/* Main content area */
-.main-content-area {
-  position: relative;
-  min-height: 100vh;
-}
 
 /* Scrollbar styling */
 .custom-scrollbar {
@@ -361,12 +290,6 @@ body {
 ::selection {
   background: color-mix(in oklch, var(--primary) 30%, transparent);
   color: var(--foreground);
-}
-
-/* Focus ring enhancement */
-.focus-ring-primary:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
 }
 
 /* ============================================

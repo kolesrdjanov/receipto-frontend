@@ -15,14 +15,14 @@ export function CategoryInsights() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
+            <Sparkles className="h-5 w-5 text-brand-violet" />
             {t('categorization.insights.title', 'AI Categorization Insights')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="h-16 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />
-            <div className="h-16 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />
+            <div className="h-16 bg-muted animate-pulse rounded" />
+            <div className="h-16 bg-muted animate-pulse rounded" />
           </div>
         </CardContent>
       </Card>
@@ -34,7 +34,7 @@ export function CategoryInsights() {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
+            <Sparkles className="h-5 w-5 text-brand-violet" />
             {t('categorization.insights.title', 'AI Categorization Insights')}
           </CardTitle>
           <CardDescription>
@@ -45,8 +45,8 @@ export function CategoryInsights() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-8">
-          <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
-            <Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+          <div className="p-4 bg-brand-violet-soft rounded-full mb-4">
+            <Sparkles className="h-8 w-8 text-brand-violet" />
           </div>
           <p className="text-sm text-muted-foreground text-center max-w-sm">
             {t(
@@ -63,7 +63,7 @@ export function CategoryInsights() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
+          <Sparkles className="h-5 w-5 text-brand-violet" />
           {t('categorization.insights.title', 'AI Categorization Insights')}
         </CardTitle>
         <CardDescription>
@@ -78,7 +78,7 @@ export function CategoryInsights() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-4 w-4 text-success" />
               <span className="text-sm font-medium">
                 {t('categorization.insights.acceptanceRate', 'Acceptance Rate')}
               </span>
@@ -104,7 +104,7 @@ export function CategoryInsights() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-blue-600" />
+              <Target className="h-4 w-4 text-info" />
               <span className="text-sm font-medium">
                 {t('categorization.insights.avgConfidence', 'Average Confidence')}
               </span>
@@ -126,7 +126,7 @@ export function CategoryInsights() {
         {data.topPerformingCategories.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-purple-600" />
+              <TrendingUp className="h-4 w-4 text-brand-violet" />
               <span className="text-sm font-medium">
                 {t('categorization.insights.topCategories', 'Top Performing Categories')}
               </span>
@@ -140,10 +140,10 @@ export function CategoryInsights() {
               }) => (
                 <div
                   key={category.categoryId}
-                  className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                  className="flex items-center justify-between p-2 rounded-lg bg-bg-subtle"
                 >
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-sm font-medium text-foreground">
                       {category.categoryName}
                     </p>
                     <p className="text-xs text-muted-foreground">

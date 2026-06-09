@@ -161,11 +161,11 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
         {/* PFR Manual Entry Form */}
         <div className="space-y-4 py-4">
           {/* Coming Soon Notice */}
-          <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <Info className="h-4 w-4 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-start gap-2 p-3 bg-info-soft border border-info/20 rounded-lg">
+            <Info className="h-4 w-4 mt-0.5 shrink-0 text-info" />
             <div className="text-sm">
-              <p className="font-medium text-blue-900 dark:text-blue-100">{t('receipts.pfrEntry.comingSoon')}</p>
-              <p className="text-blue-700 dark:text-blue-300 mt-1">{t('receipts.pfrEntry.apiNotReady')}</p>
+              <p className="font-medium text-info-foreground">{t('receipts.pfrEntry.comingSoon')}</p>
+              <p className="text-info-foreground/80 mt-1">{t('receipts.pfrEntry.apiNotReady')}</p>
             </div>
           </div>
 

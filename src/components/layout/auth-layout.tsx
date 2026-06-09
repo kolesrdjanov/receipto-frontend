@@ -26,7 +26,7 @@ function MiniDashboard() {
         <div className="glass-card -rotate-3 p-[18px]">
           <div className="mb-2.5 flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground">This month</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[11.5px] font-semibold text-primary">
               <TrendingDown className="size-3" /> 12%
             </span>
           </div>
@@ -39,7 +39,7 @@ function MiniDashboard() {
           <div className="mt-2 text-[12px] font-medium text-muted-foreground">€1,284 of €2,000 budget · 32 receipts</div>
         </div>
         <div className="glass-card flex translate-x-7 rotate-2 items-center gap-3 px-3.5 py-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <span className="grid size-9 shrink-0 place-items-center rounded-[11px] bg-primary/10 text-primary">
             <ShoppingCart className="size-4" />
           </span>
           <div className="flex-1">
