@@ -17,18 +17,18 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Amount, CatTile, CatName } from '@/components/glass/primitives'
+import { Amount, CatTile, CatName, StatusBadge as GlassStatusBadge, type Tone } from '@/components/glass/primitives'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { relativeDueLabel, type RecurringStatus, type RecurringRowData } from '@/components/recurring-expenses/status'
 import type { RecurringExpense } from '@/hooks/recurring-expenses/use-recurring-expenses'
 
-const TONE: Record<RecurringStatus, string> = {
-  overdue: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
-  duesoon: 'bg-warning-soft text-warning-foreground',
-  upcoming: 'bg-bg-subtle text-muted-foreground',
-  paid: 'bg-success-soft text-success-foreground',
-  paused: 'bg-bg-subtle text-fg-faint',
-  ended: 'border border-border text-fg-faint',
+const STATUS_TONE: Record<RecurringStatus, Tone> = {
+  overdue: 'danger',
+  duesoon: 'warn',
+  upcoming: 'neutral',
+  paid: 'ok',
+  paused: 'muted',
+  ended: 'outline',
 }
 const STATUS_ICON: Record<RecurringStatus, LucideIcon> = {
   overdue: CircleAlert,
@@ -51,19 +51,10 @@ export function DueBadge({
   small?: boolean
   className?: string
 }) {
-  const Icon = STATUS_ICON[status]
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full font-semibold',
-        small ? 'px-2 py-0.5 text-[10.5px]' : 'px-2.5 py-0.5 text-[11px]',
-        TONE[status],
-        className,
-      )}
-    >
-      <Icon className={small ? 'size-[10px]' : 'size-3'} />
+    <GlassStatusBadge tone={STATUS_TONE[status]} icon={STATUS_ICON[status]} small={small} className={className}>
       {label}
-    </span>
+    </GlassStatusBadge>
   )
 }
 

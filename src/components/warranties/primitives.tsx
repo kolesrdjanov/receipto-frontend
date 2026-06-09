@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/date-utils'
+import { StatusBadge as GlassStatusBadge, type Tone } from '@/components/glass/primitives'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -41,10 +42,10 @@ const STATUS_ICON: Record<WarrantyStatus, LucideIcon> = {
   expiring: ShieldAlert,
   expired: ShieldX,
 }
-const STATUS_TONE: Record<WarrantyStatus, string> = {
-  active: 'bg-success-soft text-success-foreground',
-  expiring: 'bg-warning-soft text-warning-foreground',
-  expired: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
+const STATUS_TONE: Record<WarrantyStatus, Tone> = {
+  active: 'ok',
+  expiring: 'warn',
+  expired: 'danger',
 }
 const STATUS_TEXT: Record<WarrantyStatus, string> = {
   active: 'text-success-foreground',
@@ -73,23 +74,14 @@ function deliverImg(url: string): string {
 export function StatusBadge({ w, small, className }: { w: Warranty; small?: boolean; className?: string }) {
   const { t } = useTranslation()
   const status = getWarrantyStatus(w)
-  const Icon = STATUS_ICON[status]
   const label =
     status === 'expiring'
       ? `${getRemainingDays(w)} ${t('warranties.status.daysLeft')}`
       : t(`warranties.status.${status}`)
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full font-semibold',
-        small ? 'px-2 py-0.5 text-[10.5px]' : 'px-2.5 py-0.5 text-[11px]',
-        STATUS_TONE[status],
-        className,
-      )}
-    >
-      <Icon className={small ? 'size-[11px]' : 'size-3'} />
+    <GlassStatusBadge tone={STATUS_TONE[status]} icon={STATUS_ICON[status]} small={small} className={className}>
       {label}
-    </span>
+    </GlassStatusBadge>
   )
 }
 

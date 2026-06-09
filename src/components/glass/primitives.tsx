@@ -1,5 +1,6 @@
+import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Receipt as ReceiptIcon, Check } from 'lucide-react'
+import { Receipt as ReceiptIcon, Check, type LucideIcon } from 'lucide-react'
 import { cn, formatMoney } from '@/lib/utils'
 
 /**
@@ -20,6 +21,55 @@ export function Amount({
       style={{ fontSize: size, fontWeight: weight, lineHeight: 1 }}
     >
       {formatMoney(value, currency)}
+    </span>
+  )
+}
+
+/** Shared tone vocabulary for status pills/badges. Features map their own statuses to a Tone. */
+export type Tone = 'ok' | 'info' | 'warn' | 'danger' | 'violet' | 'primary' | 'neutral' | 'muted' | 'outline'
+
+export const TONE_CLASS: Record<Tone, string> = {
+  ok: 'bg-success-soft text-success-foreground',
+  info: 'bg-info-soft text-info-foreground',
+  warn: 'bg-warning-soft text-warning-foreground',
+  danger: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
+  violet: 'bg-brand-violet-soft text-brand-violet-foreground',
+  primary: 'bg-primary-soft text-primary',
+  neutral: 'bg-bg-subtle text-muted-foreground',
+  muted: 'bg-bg-subtle text-fg-faint',
+  outline: 'border border-border text-fg-faint',
+}
+
+/**
+ * Canonical status/urgency pill — tone carries the meaning. The single shared shell behind
+ * every feature's badge (receipts status, recurring due, warranty urgency, …); features keep
+ * their own status→{tone,icon,label} map and render through this instead of re-deriving the
+ * pill markup + tone→class table.
+ */
+export function StatusBadge({
+  tone = 'neutral',
+  icon: Icon,
+  small,
+  className,
+  children,
+}: {
+  tone?: Tone
+  icon?: LucideIcon
+  small?: boolean
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1 rounded-full font-semibold',
+        small ? 'px-2 py-0.5 text-[10.5px]' : 'px-2.5 py-0.5 text-[11px]',
+        TONE_CLASS[tone],
+        className,
+      )}
+    >
+      {Icon && <Icon className={small ? 'size-[10px]' : 'size-3'} />}
+      {children}
     </span>
   )
 }
