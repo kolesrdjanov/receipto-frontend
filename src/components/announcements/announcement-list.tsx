@@ -40,7 +40,6 @@ export function AnnouncementDrawer({ open, onOpenChange }: AnnouncementDrawerPro
       desktopWidth={452}
       header={
         <div className="flex items-center gap-2">
-          <Megaphone className="h-5 w-5" />
           <span className="t-h3">{t('announcements.title')}</span>
         </div>
       }

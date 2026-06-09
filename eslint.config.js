@@ -41,6 +41,38 @@ export default defineConfig([
     },
   },
   {
+    // Steer app form inputs to the shared 40px <Input> (@/components/ui/input).
+    // The glass <Field>/<PasswordField> are the 50px AUTH-only inputs — using them in
+    // app form modals creates the height inconsistency this rule prevents (the
+    // warranty/category/loyalty bug). Other glass exports (Alert, IconTile, Badge…)
+    // stay allowed. The glass layer itself and auth screens are exempt (overrides below).
+    // Paired with the PostToolUse hook (.claude/hooks/no-glass-field.sh).
+    files: ['**/*.{ts,tsx}'],
+    ignores: ['**/components/glass/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/components/glass/glass',
+              importNames: ['Field', 'PasswordField'],
+              message:
+                'The glass <Field>/<PasswordField> are the 50px AUTH-only inputs. App forms must use the shared 40px <Input> from @/components/ui/input + a `fieldLabel` label (see receipts/receipt-modal.tsx) — this keeps every form modal at one height. Only src/pages/auth and src/components/auth may use the glass field.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Auth screens legitimately use the tall glass <Field>/<PasswordField>.
+    files: ['src/pages/auth/**', 'src/components/auth/**'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
+  {
     // Grandfathered files with pre-existing raw <button> (mostly legitimate bespoke
     // controls — scanners, lightbox toolbars, table kebabs, filter chips). Downgraded
     // to `warn` so the baseline stays green; migrate + delete entries over time.

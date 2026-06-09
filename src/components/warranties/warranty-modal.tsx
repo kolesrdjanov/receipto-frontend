@@ -3,11 +3,13 @@ import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Package, Store, Shield, UploadCloud, FileText, X, Info, Trash2, Plus } from 'lucide-react'
+import { Shield, UploadCloud, FileText, X, Info, Trash2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
 import { StatusBadge } from '@/components/warranties/primitives'
 import { formatDate } from '@/lib/date-utils'
@@ -21,6 +23,8 @@ import {
 } from '@/hooks/warranties/use-warranties'
 
 const FORM_ID = 'warranty-form'
+// Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
 interface WarrantyModalProps {
   open: boolean
@@ -274,45 +278,60 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
       }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <Field
-          label={t('warranties.modal.productName')}
-          icon={Package}
-          error={errors.productName?.message}
-          placeholder={t('warranties.modal.productNamePlaceholder')}
-          {...register('productName')}
-        />
+        <div>
+          <Label htmlFor="productName" className={fieldLabel}>
+            {t('warranties.modal.productName')}
+          </Label>
+          <Input
+            id="productName"
+            placeholder={t('warranties.modal.productNamePlaceholder')}
+            {...register('productName')}
+          />
+          {errors.productName?.message && (
+            <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.productName.message}</p>
+          )}
+        </div>
 
-        <Field
-          label={t('warranties.modal.storeName')}
-          icon={Store}
-          placeholder={t('warranties.modal.storeNamePlaceholder')}
-          {...register('storeName')}
-        />
+        <div>
+          <Label htmlFor="storeName" className={fieldLabel}>
+            {t('warranties.modal.storeName')}
+          </Label>
+          <Input
+            id="storeName"
+            placeholder={t('warranties.modal.storeNamePlaceholder')}
+            {...register('storeName')}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="min-w-0">
-            <label htmlFor="purchaseDate" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+          <div>
+            <Label htmlFor="purchaseDate" className={fieldLabel}>
               {t('warranties.modal.purchaseDate')}
-            </label>
+            </Label>
             <Controller
               name="purchaseDate"
               control={control}
               render={({ field }) => (
-                <DatePicker id="purchaseDate" value={field.value} onChange={field.onChange} className="h-[50px] rounded-[14px]" />
+                <DatePicker id="purchaseDate" value={field.value} onChange={field.onChange} />
               )}
             />
             {errors.purchaseDate?.message && (
-              <p className="mt-1.5 ml-0.5 text-xs font-medium text-destructive">{errors.purchaseDate.message}</p>
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.purchaseDate.message}</p>
             )}
           </div>
 
-          <Field
-            label={t('warranties.modal.duration')}
-            type="number"
-            min={1}
-            placeholder="24"
-            {...register('warrantyDuration')}
-          />
+          <div>
+            <Label htmlFor="warrantyDuration" className={fieldLabel}>
+              {t('warranties.modal.duration')}
+            </Label>
+            <Input
+              id="warrantyDuration"
+              type="number"
+              min={1}
+              placeholder="24"
+              {...register('warrantyDuration')}
+            />
+          </div>
         </div>
 
         {mode === 'edit' && warranty && (
@@ -324,14 +343,13 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
         )}
 
         <div>
-          <label htmlFor="notes" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+          <Label htmlFor="notes" className={fieldLabel}>
             {t('warranties.modal.notes')}
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             id="notes"
             rows={2}
             placeholder={t('warranties.modal.notesPlaceholder')}
-            className="min-h-[76px] w-full rounded-[14px] border border-border bg-muted/60 px-3.5 py-3 text-[15px] font-medium text-foreground outline-none transition-[border-color,box-shadow] placeholder:font-normal placeholder:text-fg-faint focus:border-primary focus:ring-4 focus:ring-primary/15"
             {...register('notes')}
           />
         </div>
@@ -339,7 +357,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
         {/* Files */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <label className="ml-0.5 text-xs font-semibold text-muted-foreground">{t('warranties.modal.files')}</label>
+            <label className="ml-0.5 text-[12px] font-semibold text-fg-2">{t('warranties.modal.files')}</label>
             <span className="text-xs font-medium text-fg-faint">
               {totalFileCount}/{MAX_WARRANTY_FILES}
             </span>
@@ -393,7 +411,7 @@ export function WarrantyModal({ open, onOpenChange, warranty, mode, onRequestDel
               {canAddMore && (
                 <label
                   htmlFor="warranty-files"
-                  className="grid aspect-square cursor-pointer place-items-center gap-1 rounded-xl border-2 border-dashed border-border text-fg-faint transition-colors hover:border-primary/50 hover:text-primary"
+                  className="flex flex-col gap-2 items-center justify-center aspect-square cursor-pointer rounded-xl border-2 border-dashed border-border text-fg-faint transition-colors hover:border-primary/50 hover:text-primary"
                 >
                   <Plus className="size-5" />
                   <span className="text-[11px] font-medium">{t('warranties.modal.addFile')}</span>

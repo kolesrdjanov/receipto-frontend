@@ -223,7 +223,7 @@ export function StarPicker({ value, onChange }: { value: number; onChange: (n: n
           onMouseLeave={() => setHover(0)}
           className="p-1 transition-transform hover:scale-110"
         >
-          <Star className={cn('size-[34px] transition-colors', n <= shown ? 'fill-warning text-warning' : 'text-border')} />
+          <Star className={cn('size-[34px] transition-colors', n <= shown ? 'fill-warning text-warning' : 'text-dark')} />
         </button>
       ))}
     </div>

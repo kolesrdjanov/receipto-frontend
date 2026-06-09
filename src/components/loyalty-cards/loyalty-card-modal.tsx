@@ -3,11 +3,11 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { CreditCard, Barcode, Camera, Loader2, ImagePlus, Trash2 } from 'lucide-react'
+import { Camera, Loader2, ImagePlus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ColorSwatches, CodeGlyph, FormatBadge } from '@/components/loyalty-cards/primitives'
 import { CARD_COLORS, QR_FORMATS, randomCardColor } from '@/components/loyalty-cards/format'
 import {
@@ -24,6 +24,8 @@ const LoyaltyCardScanner = lazy(() =>
 const FORM_ID = 'loyalty-card-form'
 // Hidden element ID for html5-qrcode file scanning (needs a DOM element)
 const FILE_SCANNER_ID = 'loyalty-file-scanner'
+// Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
 const createLoyaltyCardSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
@@ -230,24 +232,34 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
       >
         <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Card name */}
-          <Field
-            label={t('loyaltyCards.cardName')}
-            icon={CreditCard}
-            error={errors.cardName?.message}
-            placeholder={t('loyaltyCards.cardNamePlaceholder')}
-            {...register('cardName')}
-          />
+          <div>
+            <label htmlFor="loyalty-card-name" className={fieldLabel}>
+              {t('loyaltyCards.cardName')}
+            </label>
+            <Input
+              id="loyalty-card-name"
+              placeholder={t('loyaltyCards.cardNamePlaceholder')}
+              {...register('cardName')}
+            />
+            {errors.cardName?.message && (
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.cardName.message}</p>
+            )}
+          </div>
 
           {/* Card code + scan affordances */}
           <div>
-            <Field
-              label={t('loyaltyCards.codeValue')}
-              icon={Barcode}
-              error={errors.codeValue?.message}
-              placeholder={t('loyaltyCards.codeValuePlaceholder')}
+            <label htmlFor="loyalty-code-value" className={fieldLabel}>
+              {t('loyaltyCards.codeValue')}
+            </label>
+            <Input
+              id="loyalty-code-value"
               className="font-mono"
+              placeholder={t('loyaltyCards.codeValuePlaceholder')}
               {...register('codeValue')}
             />
+            {errors.codeValue?.message && (
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.codeValue.message}</p>
+            )}
             <div className="mt-2.5 flex gap-2">
               <Button
                 type="button"
@@ -279,7 +291,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
 
           {/* Card colour */}
           <div>
-            <label className="mb-2 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label className={fieldLabel}>
               {t('loyaltyCards.cardColor')}
             </label>
             <ColorSwatches value={color} onChange={(c) => setValue('color', c)} />
@@ -288,7 +300,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
           {/* Live preview */}
           {cardName.trim() && codeValue.trim() && (
             <div>
-              <label className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+              <label className={fieldLabel}>
                 {t('loyaltyCards.preview')}
               </label>
               <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1">

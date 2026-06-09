@@ -184,7 +184,7 @@ export function CardGrid({
   onOpenActions,
 }: { cards: LoyaltyCard[]; onOpenActions?: (c: LoyaltyCard) => void } & CardActions) {
   return (
-    <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(150px,1fr))] md:gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
+    <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(100%,1fr))] md:gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
       {cards.map((card) => (
         <LoyaltyCardItem
           key={card.id}

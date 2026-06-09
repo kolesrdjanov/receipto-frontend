@@ -175,7 +175,7 @@ export function GlassDialog({
                   {(actions || footer) && (
                     <div
                       className={cn(
-                        'shrink-0 border-t border-hairline-soft px-6 pt-4',
+                        'shrink-0 px-6 pt-4',
                         isMobile ? 'pb-[calc(18px+env(safe-area-inset-bottom))]' : 'pb-6',
                       )}
                     >

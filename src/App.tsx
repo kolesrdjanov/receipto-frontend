@@ -5,6 +5,7 @@ import { Toaster } from 'sonner'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { routes, prefetchLazyRoutes } from './routes'
+import { ScrollToTop } from '@/components/scroll-to-top'
 import { useSettingsStore } from './store/settings'
 
 const queryClient = new QueryClient({
@@ -60,6 +61,7 @@ function App() {
         <BrowserRouter>
           <TooltipProvider delayDuration={300}>
             <ThemeInitializer />
+            <ScrollToTop />
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
               <AppRoutes />
             </Suspense>

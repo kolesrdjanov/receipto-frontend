@@ -68,8 +68,12 @@ const navItem = cn(
   'hover:bg-bg-subtle hover:text-foreground',
   'group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!rounded-xl group-data-[collapsible=icon]:!p-0',
 )
+// `data-[active=true]:text-primary` is required to beat the primitive's
+// `data-[active=true]:text-sidebar-accent-foreground` (same specificity, but tailwind-merge
+// only overrides it when our class carries the matching variant) — otherwise the label text
+// stays neutral instead of going accent. Mirrors the admin sub-item rule below.
 const navItemActive =
-  'bg-primary-soft text-primary [&>svg]:text-primary hover:bg-primary-soft hover:text-primary'
+  'bg-primary-soft text-primary data-[active=true]:text-primary [&>svg]:text-primary hover:bg-primary-soft hover:text-primary'
 
 const groupLabel = 'px-3 text-[11px] font-bold uppercase tracking-[0.07em] text-fg-faint'
 

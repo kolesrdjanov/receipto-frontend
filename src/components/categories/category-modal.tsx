@@ -7,8 +7,9 @@ import { SmilePlus, Lock, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { Field } from '@/components/glass/glass'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   EmojiPicker,
@@ -28,6 +29,8 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { cn, formatMoney } from '@/lib/utils'
 
 const FORM_ID = 'category-form'
+// Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
+const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
 interface CategoryModalProps {
   open: boolean
@@ -38,7 +41,7 @@ interface CategoryModalProps {
   onRequestDelete?: (category: Category) => void
 }
 
-const createCategorySchema = (t: (k: string, o?: any) => string) =>
+const createCategorySchema = (t: (k: string, o?: Record<string, unknown>) => string) =>
   z.object({
     name: z.string().min(1, t('categories.modal.nameRequired')),
     color: z.string().optional(),
@@ -53,11 +56,6 @@ const createCategorySchema = (t: (k: string, o?: any) => string) =>
 type CategorySchema = ReturnType<typeof createCategorySchema>
 type CategoryFormInput = z.input<CategorySchema>
 type CategoryFormData = z.output<CategorySchema>
-
-const fieldShell =
-  'flex h-[50px] items-center gap-2.5 rounded-[14px] border border-border bg-muted/60 px-3.5 transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/15'
-const inputCls =
-  'min-w-0 flex-1 border-0 bg-transparent text-[15px] font-medium text-foreground outline-none placeholder:font-normal placeholder:text-fg-faint'
 
 export function CategoryModal({ open, onOpenChange, category, mode, onRequestDelete }: CategoryModalProps) {
   const { t } = useTranslation()
@@ -176,10 +174,10 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
     <button
       type="button"
       onClick={isMobile ? () => setEmojiOpen(true) : undefined}
-      className="flex h-14 w-full items-center gap-3 rounded-[14px] border border-border bg-bg-subtle/70 pl-2.5 pr-3 text-left transition-colors hover:border-primary/50 dark:bg-muted/40"
+      className="flex h-10 w-full items-center gap-2.5 rounded-xl border border-border bg-bg-subtle/70 pl-1.5 pr-3 text-left transition-colors hover:border-primary/50 dark:bg-muted/40"
       data-testid="category-icon-input"
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-[11px] bg-card text-[22px] leading-none shadow-glass-1">
+      <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-card text-[17px] leading-none shadow-glass-1">
         {iconValue || '😀'}
       </span>
       <span className={cn('flex-1 text-[13.5px] font-medium', iconValue ? 'text-fg-2' : 'text-fg-faint')}>
@@ -228,7 +226,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
         <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" data-testid="category-form">
           {/* Live preview pill */}
           <div>
-            <label className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label className={fieldLabel}>
               {t('categories.modal.preview')}
             </label>
             <div className="flex items-center gap-3 rounded-[14px] border border-hairline-soft bg-bg-subtle/70 px-3.5 py-3 dark:bg-muted/40">
@@ -249,17 +247,24 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
           </div>
 
           {/* Name */}
-          <Field
-            label={<>{t('categories.modal.name')} <span className="text-destructive">*</span></>}
-            placeholder={t('categories.modal.namePlaceholder')}
-            error={errors.name?.message}
-            data-testid="category-name-input"
-            {...register('name')}
-          />
+          <div>
+            <label htmlFor="category-name" className={fieldLabel}>
+              {t('categories.modal.name')} <span className="text-destructive">*</span>
+            </label>
+            <Input
+              id="category-name"
+              placeholder={t('categories.modal.namePlaceholder')}
+              data-testid="category-name-input"
+              {...register('name')}
+            />
+            {errors.name?.message && (
+              <p className="mt-1 ml-0.5 text-[13px] text-destructive">{errors.name.message}</p>
+            )}
+          </div>
 
           {/* Color */}
           <div>
-            <label className="mb-2 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label className={fieldLabel}>
               {t('categories.modal.color')}
             </label>
             <ColorSwatches value={colorValue} onChange={(hex) => setValue('color', hex, { shouldDirty: true })} />
@@ -267,7 +272,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
 
           {/* Icon (emoji) */}
           <div>
-            <label className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label className={fieldLabel}>
               {t('categories.modal.icon')}
             </label>
             {isMobile ? (
@@ -284,14 +289,13 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
 
           {/* Description */}
           <div>
-            <label htmlFor="cat-description" className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label htmlFor="cat-description" className={fieldLabel}>
               {t('categories.modal.description')}
             </label>
-            <textarea
+            <Textarea
               id="cat-description"
               rows={3}
               placeholder={t('categories.modal.descriptionPlaceholder')}
-              className="min-h-[84px] w-full resize-none rounded-[14px] border border-border bg-muted/60 px-3.5 py-3 text-[15px] font-medium leading-relaxed text-foreground outline-none transition-[border-color,box-shadow] placeholder:font-normal placeholder:text-fg-faint focus:border-primary focus:ring-4 focus:ring-primary/15"
               data-testid="category-description-input"
               {...register('description')}
             />
@@ -299,25 +303,23 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
 
           {/* Monthly budget + currency lock */}
           <div>
-            <label className="mb-1.5 ml-0.5 block text-xs font-semibold text-muted-foreground">
+            <label className={fieldLabel}>
               {t('categories.modal.monthlyBudget')}
               {lockedCurrency && <span className="ml-1.5 font-medium text-fg-faint">({lockedCurrency})</span>}
             </label>
             <div className="flex items-stretch gap-3">
-              <div className={cn(fieldShell, 'flex-1')}>
-                <input
-                  type="number"
-                  min={0}
-                  step="1"
-                  inputMode="numeric"
-                  placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
-                  className={cn(inputCls, '')}
-                  data-testid="category-budget-input"
-                  {...register('monthlyBudget')}
-                />
-              </div>
+              <Input
+                type="number"
+                min={0}
+                step="1"
+                inputMode="numeric"
+                placeholder={t('categories.modal.monthlyBudgetPlaceholder')}
+                className="flex-1"
+                data-testid="category-budget-input"
+                {...register('monthlyBudget')}
+              />
               <div
-                className="flex h-[50px] shrink-0 items-center gap-1.5 rounded-[14px] bg-bg-subtle px-3.5 text-muted-foreground"
+                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-bg-subtle px-3.5 text-muted-foreground"
                 data-testid="category-budget-currency"
               >
                 <span className="text-[14px] font-semibold">{displayCurrency}</span>
