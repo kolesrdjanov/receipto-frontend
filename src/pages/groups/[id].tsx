@@ -13,6 +13,7 @@ import { useFabStore } from '@/store/fab'
 import { useIsMobile } from '@/hooks/use-mobile'
 import {
   useGroup,
+  useGroupStats,
   useRemoveMember,
   useLeaveGroup,
   useArchiveGroup,
@@ -30,12 +31,11 @@ import { SettlementModal } from '@/components/groups/settlement-modal'
 import { ExpenseDetailDialog } from '@/components/groups/expense-detail-dialog'
 import { GroupMenuDialog } from '@/components/groups/group-menu-dialog'
 import { InviteDialog } from '@/components/groups/invite-dialog'
-import { GroupOverview } from '@/components/groups/group-overview'
+import { GroupHistoryDialog } from '@/components/groups/group-history-dialog'
+import { GroupHero } from '@/components/groups/group-hero'
 import { GroupExpensesList } from '@/components/groups/group-expenses-list'
-import { GroupBalancePanel } from '@/components/groups/group-balance-panel'
 import { GroupActivityTimeline } from '@/components/groups/group-activity-timeline'
 import { GroupMembersPanel } from '@/components/groups/group-members-panel'
-import { GroupHistoryList } from '@/components/groups/group-history-list'
 import { GAvatarStack, GroupTabs } from '@/components/groups/primitives'
 import { toast } from 'sonner'
 import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Plus, Loader2 } from 'lucide-react'
@@ -44,7 +44,8 @@ const ReceiptModal = lazy(() =>
   import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
 )
 
-type Screen = 'overview' | 'expenses' | 'balances' | 'activity' | 'members' | 'history'
+type Tab = 'expenses' | 'activity'
+type Screen = 'detail' | 'members'
 
 export default function GroupDetail() {
   const { t } = useTranslation()
@@ -55,6 +56,7 @@ export default function GroupDetail() {
   const { currency: preferredCurrency } = useSettingsStore()
 
   const { data: group, isLoading } = useGroup(id)
+  const { data: stats } = useGroupStats(id)
   useGroupPolling(id)
   const { data: settlementHistory = [] } = useSettlementHistory(id)
   const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
@@ -67,8 +69,8 @@ export default function GroupDetail() {
   const deleteReceipt = useDeleteReceipt()
   const { openQrScannerWithContext, scannerModals } = useReceiptScanner()
 
-  const [screen, setScreen] = useState<Screen>('overview')
-  const [returnScreen, setReturnScreen] = useState<Screen>('overview')
+  const [screen, setScreen] = useState<Screen>('detail')
+  const [tab, setTab] = useState<Tab>('expenses')
 
   // Overlays
   const [receiptModalOpen, setReceiptModalOpen] = useState(false)
@@ -81,6 +83,7 @@ export default function GroupDetail() {
   const [editGroupOpen, setEditGroupOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   // Confirm dialogs
   const [leaveOpen, setLeaveOpen] = useState(false)
@@ -122,19 +125,14 @@ export default function GroupDetail() {
     setSettlePrefill({ fromUserId: s.from.userId, toUserId: s.to.userId, amount: s.amount })
     setSettleOpen(true)
   }
-  const goScreen = (s: Screen) => {
-    if ((s === 'members' || s === 'history') && screen !== 'members' && screen !== 'history') setReturnScreen(screen)
-    setScreen(s)
-  }
 
-  // Mobile FAB → add expense (when on a group surface, not archived)
+  // Mobile FAB → add expense (when not archived)
   const setFab = useFabStore((s) => s.setFab)
   const clearFab = useFabStore((s) => s.clearFab)
   useEffect(() => {
     if (isArchived) return
     setFab(openAdd)
     return () => clearFab()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isArchived, setFab, clearFab])
 
   // Confirm handlers ------------------------------------------------------
@@ -208,72 +206,12 @@ export default function GroupDetail() {
     )
   }
 
-  const settleHandler = isArchived ? undefined : onSettle
-
-  // Tab bodies ------------------------------------------------------------
-  const renderBody = (s: Screen) => {
-    switch (s) {
-      case 'overview':
-        return (
-          <GroupOverview
-            groupId={id}
-            members={acceptedMembers}
-            displayCurrency={displayCurrency}
-            currentUserId={user?.id}
-            isArchived={isArchived}
-            onAdd={openAdd}
-            onGoBalances={() => setScreen('balances')}
-            onSeeAllExpenses={() => setScreen('expenses')}
-            onOpenExpense={openExpenseDetail}
-            onSettle={onSettle}
-          />
-        )
-      case 'expenses':
-        return (
-          <GroupExpensesList
-            groupId={id}
-            members={acceptedMembers}
-            currentUserId={user?.id}
-            displayCurrency={displayCurrency}
-            isArchived={isArchived}
-            onOpenExpense={openExpenseDetail}
-            onAdd={openAdd}
-          />
-        )
-      case 'balances':
-        return (
-          <GroupBalancePanel
-            groupId={id}
-            displayCurrency={displayCurrency}
-            currentUserId={user?.id}
-            settlementsCount={settlementHistory.length}
-            onSettle={settleHandler ?? (() => {})}
-            onOpenHistory={() => goScreen('history')}
-          />
-        )
-      case 'activity':
-        return <GroupActivityTimeline groupId={id} />
-      case 'members':
-        return (
-          <GroupMembersPanel
-            group={group}
-            isAdmin={isAdmin}
-            isArchived={isArchived}
-            currentUserId={user?.id}
-            onInvite={() => setInviteOpen(true)}
-            onRemoveMember={setMemberToRemove}
-          />
-        )
-      case 'history':
-        return <GroupHistoryList groupId={id} displayCurrency={displayCurrency} />
-    }
-  }
-
+  // Shared pieces ---------------------------------------------------------
   const membersButton = (
     <button
       type="button"
-      onClick={() => goScreen('members')}
-      className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground"
+      onClick={() => setScreen('members')}
+      className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground transition-colors hover:text-fg-2"
     >
       {/* raw-button-ok: tappable members summary (avatar stack → members screen) */}
       <GAvatarStack members={acceptedMembers.map((m) => m.user)} max={5} size={24} currentUserId={user?.id} />
@@ -287,6 +225,56 @@ export default function GroupDetail() {
       value={displayCurrency}
       onValueChange={setDisplayCurrency}
       triggerClassName="h-9 w-auto min-w-[90px] text-[13px]"
+    />
+  )
+
+  const hero = (
+    <GroupHero
+      groupId={id}
+      displayCurrency={displayCurrency}
+      currentUserId={user?.id}
+      settlementsCount={settlementHistory.length}
+      isArchived={isArchived}
+      onSettle={onSettle}
+      onOpenHistory={() => setHistoryOpen(true)}
+    />
+  )
+
+  const tabsNav = (
+    <GroupTabs
+      tabs={[
+        { id: 'expenses', label: t('groups.tabsNav.expenses'), badge: stats?.totalReceipts },
+        { id: 'activity', label: t('groups.tabsNav.activity') },
+      ]}
+      active={tab}
+      onChange={(s) => setTab(s as Tab)}
+    />
+  )
+
+  const tabBody = (
+    <div key={tab}>
+      {tab === 'activity' ? (
+        <GroupActivityTimeline groupId={id} />
+      ) : (
+        <GroupExpensesList
+          groupId={id}
+          members={acceptedMembers}
+          currentUserId={user?.id}
+          displayCurrency={displayCurrency}
+          onOpenExpense={openExpenseDetail}
+        />
+      )}
+    </div>
+  )
+
+  const membersView = (
+    <GroupMembersPanel
+      group={group}
+      isAdmin={isAdmin}
+      isArchived={isArchived}
+      currentUserId={user?.id}
+      onInvite={() => setInviteOpen(true)}
+      onRemoveMember={setMemberToRemove}
     />
   )
 
@@ -326,6 +314,13 @@ export default function GroupDetail() {
         prefillData={settlePrefill}
       />
 
+      <GroupHistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        groupId={id}
+        displayCurrency={displayCurrency}
+      />
+
       <GroupModal open={editGroupOpen} onOpenChange={setEditGroupOpen} group={group} mode="edit" />
 
       <GroupMenuDialog
@@ -336,7 +331,7 @@ export default function GroupDetail() {
         isAdmin={isAdmin}
         onEdit={() => setEditGroupOpen(true)}
         onInvite={() => setInviteOpen(true)}
-        onManageMembers={() => goScreen('members')}
+        onManageMembers={() => setScreen('members')}
         onScan={openScan}
         onArchiveToggle={() => setArchiveOpen(true)}
         onLeave={() => setLeaveOpen(true)}
@@ -402,35 +397,75 @@ export default function GroupDetail() {
     </>
   )
 
-  // ----------------------------------------------------------------------
-  // MOBILE
-  // ----------------------------------------------------------------------
-  if (isMobile) {
-    if (screen === 'members' || screen === 'history') {
+  // MEMBERS (pushed sub-screen, both layouts) -----------------------------
+  if (screen === 'members') {
+    if (isMobile) {
       return (
         <AppLayout>
-          <PushedHeader
-            title={
-              screen === 'members'
-                ? `${t('groups.tabsNav.members')} · ${group.name}`
-                : t('groups.settlements.history')
-            }
-            onBack={() => setScreen(returnScreen)}
-          />
-          {renderBody(screen)}
+          <div className="-mt-2 mb-4 flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-9"
+              onClick={() => setScreen('detail')}
+              aria-label={t('common.back')}
+            >
+              <ArrowLeft className="size-5" />
+            </Button>
+            <div className="truncate text-[16px] font-bold">{`${t('groups.tabsNav.members')} · ${group.name}`}</div>
+          </div>
+          {membersView}
           {overlays}
         </AppLayout>
       )
     }
     return (
       <AppLayout>
+        <PageToolbar
+          className="md:-mx-8 md:-mt-8 md:mb-6"
+          title={group.name}
+          subtitle={t('groups.tabsNav.members')}
+        />
+        <div className="mx-auto max-w-[640px]">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-3 -ml-2 text-muted-foreground"
+            onClick={() => setScreen('detail')}
+          >
+            <ArrowLeft className="size-4" />
+            {group.name}
+          </Button>
+          {membersView}
+        </div>
+        {overlays}
+      </AppLayout>
+    )
+  }
+
+  // MOBILE detail ---------------------------------------------------------
+  if (isMobile) {
+    return (
+      <AppLayout>
         <div className="-mt-2 mb-2 flex items-center justify-between">
-          <Button variant="ghost" size="icon" className="size-9" onClick={() => navigate('/groups')} aria-label={t('common.back')}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-9"
+            onClick={() => navigate('/groups')}
+            aria-label={t('common.back')}
+          >
             <ArrowLeft className="size-5" />
           </Button>
           <div className="flex items-center gap-1">
             {currencyControl}
-            <Button variant="ghost" size="icon" className="size-9" onClick={() => setMenuOpen(true)} aria-label={t('groups.menu.title')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-9"
+              onClick={() => setMenuOpen(true)}
+              aria-label={t('groups.menu.title')}
+            >
               <MoreHorizontal className="size-5" />
             </Button>
           </div>
@@ -444,33 +479,17 @@ export default function GroupDetail() {
             <div className="mt-1">{membersButton}</div>
           </div>
         </div>
-        <div className="mb-4">
-          <GroupTabs
-            tabs={[
-              { id: 'overview', label: t('groups.tabsNav.overview') },
-              { id: 'expenses', label: t('groups.tabsNav.expenses') },
-              { id: 'balances', label: t('groups.tabsNav.balances') },
-              { id: 'activity', label: t('groups.tabsNav.activity') },
-            ]}
-            active={screen}
-            onChange={(s) => setScreen(s as Screen)}
-          />
+        <div className="flex flex-col gap-3.5">
+          {hero}
+          {tabsNav}
+          {tabBody}
         </div>
-        {renderBody(screen)}
         {overlays}
       </AppLayout>
     )
   }
 
-  // ----------------------------------------------------------------------
-  // DESKTOP — two columns (left tabs + content, right persistent balance rail)
-  // ----------------------------------------------------------------------
-  const leftTab: Screen = (['expenses', 'activity', 'members'] as Screen[]).includes(screen)
-    ? screen
-    : screen === 'history'
-      ? 'history'
-      : 'expenses'
-
+  // DESKTOP detail — sticky hero aside + Expenses/Activity tabs body -------
   return (
     <AppLayout>
       <PageToolbar
@@ -505,60 +524,26 @@ export default function GroupDetail() {
         </Button>
 
         <div className="flex items-center gap-3.5">
-          <span className="grid size-[52px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[28px]">
+          <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[29px]">
             {group.icon || '👥'}
           </span>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[24px] font-extrabold tracking-[-0.02em]">{group.name}</div>
-            <div className="mt-1">{membersButton}</div>
-          </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.55fr_1fr]">
-          {/* Left: tabbed content */}
-          <div className="flex flex-col">
-            {screen === 'history' ? (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mb-3 -ml-2 w-fit text-muted-foreground"
-                  onClick={() => setScreen(returnScreen === 'history' ? 'expenses' : returnScreen)}
-                >
-                  <ArrowLeft className="size-4" />
-                  {t('groups.settlements.history')}
-                </Button>
-                {renderBody('history')}
-              </>
-            ) : (
-              <>
-                <div className="mb-4 max-w-[460px]">
-                  <GroupTabs
-                    tabs={[
-                      { id: 'expenses', label: t('groups.tabsNav.expenses') },
-                      { id: 'activity', label: t('groups.tabsNav.activity') },
-                      { id: 'members', label: t('groups.tabsNav.members') },
-                    ]}
-                    active={leftTab}
-                    onChange={(s) => setScreen(s as Screen)}
-                  />
-                </div>
-                {renderBody(leftTab)}
-              </>
+            <div className="truncate text-[25px] font-extrabold tracking-[-0.02em]">{group.name}</div>
+            {group.description && (
+              <div className="mt-0.5 truncate text-[13px] text-muted-foreground">{group.description}</div>
             )}
           </div>
+          {membersButton}
+        </div>
 
-          {/* Right: persistent balance rail */}
-          <div className="lg:sticky lg:top-24">
-            <GroupBalancePanel
-              groupId={id}
-              displayCurrency={displayCurrency}
-              currentUserId={user?.id}
-              settlementsCount={settlementHistory.length}
-              compactHeadline
-              onSettle={settleHandler ?? (() => {})}
-              onOpenHistory={() => goScreen('history')}
-            />
+        <div className="mt-5 grid grid-cols-1 items-start gap-[22px] lg:grid-cols-[360px_1fr]">
+          {/* Left: pinned balance + settle hero */}
+          <div className="lg:sticky lg:top-24">{hero}</div>
+
+          {/* Right: Expenses / Activity tabs */}
+          <div className="flex min-w-0 flex-col gap-3.5">
+            <div className="max-w-[460px]">{tabsNav}</div>
+            {tabBody}
           </div>
         </div>
       </div>
@@ -566,16 +551,4 @@ export default function GroupDetail() {
       {overlays}
     </AppLayout>
   )
-
-  // Shared overlays (declared after render branches so every layout includes them) -----------
-  function PushedHeader({ title, onBack }: { title: string; onBack: () => void }) {
-    return (
-      <div className="-mt-2 mb-4 flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="size-9" onClick={onBack} aria-label={t('common.back')}>
-          <ArrowLeft className="size-5" />
-        </Button>
-        <div className="truncate text-[16px] font-bold">{title}</div>
-      </div>
-    )
-  }
 }

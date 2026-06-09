@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDownLeft, ArrowUpRight, ArrowRight, Check, type LucideIcon } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { cn, formatMoney } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -179,77 +179,6 @@ export function SectionLabel({ children, action }: { children: ReactNode; action
     <div className="mb-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.06em] text-fg-faint">
       <span>{children}</span>
       {action}
-    </div>
-  )
-}
-
-const HEADLINE: Record<
-  BalanceState,
-  { wrap: string; icon: string; amt: string; glyph: LucideIcon; labelKey: string }
-> = {
-  owed: {
-    wrap: 'bg-success-soft border-success/20',
-    icon: 'bg-success text-white',
-    amt: 'text-success-foreground',
-    glyph: ArrowDownLeft,
-    labelKey: 'groups.headline.owed',
-  },
-  owe: {
-    wrap: 'bg-destructive-soft border-destructive/20',
-    icon: 'bg-destructive text-white',
-    amt: 'text-[color:var(--destructive-foreground-on-soft)]',
-    glyph: ArrowUpRight,
-    labelKey: 'groups.headline.owe',
-  },
-  settled: {
-    wrap: 'bg-bg-subtle border-border',
-    icon: 'bg-success-soft text-success',
-    amt: 'text-foreground',
-    glyph: Check,
-    labelKey: 'groups.headline.settled',
-  },
-}
-
-/** The glanceable owed / owe / settled hero — the single truth on every group surface. */
-export function BalanceHeadline({
-  state,
-  amount,
-  currency = 'RSD',
-  compact = false,
-}: {
-  state: BalanceState
-  amount: number
-  currency?: string
-  compact?: boolean
-}) {
-  const { t } = useTranslation()
-  const cfg = HEADLINE[state]
-  const Glyph = cfg.glyph
-  const iconSize = compact ? 38 : 46
-  return (
-    <div
-      className={cn('flex items-center gap-3.5 rounded-[18px] border', cfg.wrap, compact ? 'p-3.5' : 'p-[18px]')}
-    >
-      <span
-        className={cn('grid shrink-0 place-items-center rounded-full', cfg.icon)}
-        style={{ width: iconSize, height: iconSize }}
-      >
-        <Glyph className={compact ? 'size-[18px]' : 'size-[22px]'} strokeWidth={2.4} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="text-[12.5px] font-semibold uppercase tracking-[0.05em] opacity-75">{t(cfg.labelKey)}</div>
-        {state === 'settled' ? (
-          <div className={cn('mt-1 font-extrabold', cfg.amt, compact ? 'text-[16px]' : 'text-[18px]')}>
-            {t('groups.headline.settledLong')}
-          </div>
-        ) : (
-          <div
-            className={cn('t-num mt-1 font-extrabold tracking-[-0.025em]', cfg.amt, compact ? 'text-[22px]' : 'text-[28px]')}
-          >
-            {formatMoney(Math.abs(amount), currency)}
-          </div>
-        )}
-      </div>
     </div>
   )
 }

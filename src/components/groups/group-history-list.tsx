@@ -9,8 +9,17 @@ import { memberFirstName } from '@/lib/groups'
 import { formatMoney } from '@/lib/utils'
 import { HandCoins, Loader2 } from 'lucide-react'
 
-/** Settlement-history view — recorded payments, newest first. */
-export function GroupHistoryList({ groupId, displayCurrency }: { groupId: string; displayCurrency: string }) {
+/** Settlement-history view — recorded payments, newest first. `flush` drops the card wrapper
+ *  (for rendering inside the history sheet, which already provides the surface). */
+export function GroupHistoryList({
+  groupId,
+  displayCurrency,
+  flush,
+}: {
+  groupId: string
+  displayCurrency: string
+  flush?: boolean
+}) {
   const { t } = useTranslation()
   const { data: settlements = [], isLoading } = useSettlementHistory(groupId)
 
@@ -29,10 +38,9 @@ export function GroupHistoryList({ groupId, displayCurrency }: { groupId: string
     return <EmptyState compact icon={HandCoins} title={t('groups.settlements.noHistory')} />
   }
 
-  return (
-    <SoftCard>
-      <div className="flex flex-col gap-2">
-        {settlements.map((s: SettlementRecord) => (
+  const rows = (
+    <div className="flex flex-col gap-2">
+      {settlements.map((s: SettlementRecord) => (
           <div key={s.id} className="flex items-center gap-3 py-1.5">
             <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-success-soft">
               <HandCoins className="size-[17px] text-success" />
@@ -49,8 +57,9 @@ export function GroupHistoryList({ groupId, displayCurrency }: { groupId: string
             </div>
             <span className="t-num shrink-0 font-bold">{formatMoney(s.amount, s.currency || displayCurrency)}</span>
           </div>
-        ))}
-      </div>
-    </SoftCard>
+      ))}
+    </div>
   )
+
+  return flush ? rows : <SoftCard>{rows}</SoftCard>
 }

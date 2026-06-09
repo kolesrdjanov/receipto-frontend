@@ -10,27 +10,24 @@ import { useGroupStats, type GroupMember } from '@/hooks/groups/use-groups'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { convertAmount } from '@/lib/groups'
 import { formatMoney } from '@/lib/utils'
-import { Plus, Receipt as ReceiptIcon, Loader2 } from 'lucide-react'
+import { Receipt as ReceiptIcon, Loader2 } from 'lucide-react'
 
 interface GroupExpensesListProps {
   groupId: string
   members: GroupMember[]
   currentUserId?: string
   displayCurrency: string
-  isArchived?: boolean
   onOpenExpense: (receipt: Receipt) => void
-  onAdd: () => void
 }
 
-/** The Expenses tab: a "Group total" strip + expenses grouped by month into Glass cards. */
+/** The Expenses tab: a slim "N expenses · group total" lead, then expenses grouped by month
+ *  into Glass cards. Adding lives on the mobile FAB / desktop toolbar. */
 export function GroupExpensesList({
   groupId,
   members,
   currentUserId,
   displayCurrency,
-  isArchived,
   onOpenExpense,
-  onAdd,
 }: GroupExpensesListProps) {
   const { t } = useTranslation()
   const [limit, setLimit] = useState(50)
@@ -45,7 +42,7 @@ export function GroupExpensesList({
   const { data: stats } = useGroupStats(groupId)
   const { data: exchangeRates } = useExchangeRates(displayCurrency)
 
-  const receipts = response?.data ?? []
+  const receipts = useMemo(() => response?.data ?? [], [response])
   const total = response?.meta?.total ?? receipts.length
 
   const groupTotal = useMemo(() => {
@@ -80,23 +77,6 @@ export function GroupExpensesList({
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 shadow-glass-1">
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
-            {t('groups.expense.groupTotal')}
-          </div>
-          <div className="t-num mt-1 text-[19px] font-extrabold tracking-[-0.02em]">
-            {formatMoney(groupTotal, displayCurrency)}
-          </div>
-        </div>
-        {!isArchived && (
-          <Button type="button" variant="brand" size="sm" onClick={onAdd}>
-            <Plus className="size-4" />
-            {t('groups.expense.add')}
-          </Button>
-        )}
-      </div>
-
       {receipts.length === 0 ? (
         <EmptyState
           compact
@@ -106,6 +86,14 @@ export function GroupExpensesList({
         />
       ) : (
         <>
+          <div className="flex items-baseline justify-between gap-2.5 px-0.5">
+            <span className="text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
+              {t('groups.expense.count', { count: total })}
+            </span>
+            <span className="t-num text-[18px] font-extrabold tracking-[-0.02em]">
+              {formatMoney(groupTotal, displayCurrency)}
+            </span>
+          </div>
           {byMonth.map((m) => (
             <SoftCard key={m.label}>
               <SectionLabel>{m.label}</SectionLabel>

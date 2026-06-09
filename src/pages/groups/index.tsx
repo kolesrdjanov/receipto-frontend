@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { GroupModal } from '@/components/groups/group-modal'
+import { HubMenuDialog } from '@/components/groups/hub-menu-dialog'
 import { GAvatarStack, BalancePill } from '@/components/groups/primitives'
 import {
   useGroups,
@@ -19,10 +19,31 @@ import { useGroupsNet } from '@/hooks/groups/use-group-balance-model'
 import { useAuthStore } from '@/store/auth'
 import { useSettingsStore } from '@/store/settings'
 import { useFabStore } from '@/store/fab'
-import { getBalanceState } from '@/lib/groups'
+import { getBalanceState, type BalanceState } from '@/lib/groups'
 import { formatMoney } from '@/lib/utils'
-import { Plus, Users, UserPlus, Receipt, HandCoins, ChevronRight, Loader2, X, Archive } from 'lucide-react'
+import {
+  Plus,
+  Users,
+  UserPlus,
+  Receipt,
+  HandCoins,
+  ChevronRight,
+  Loader2,
+  X,
+  Archive,
+  MoreHorizontal,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Check,
+  type LucideIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
+
+const NET_ICON: Record<BalanceState, LucideIcon> = {
+  owed: ArrowDownLeft,
+  owe: ArrowUpRight,
+  settled: Check,
+}
 
 export default function Groups() {
   const { t } = useTranslation()
@@ -31,13 +52,25 @@ export default function Groups() {
   const displayCurrency = preferredCurrency || 'RSD'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
 
-  const { data: groups = [], isLoading } = useGroups(showArchived)
+  // Always fetch everything (incl. archived) so the overall-net meta can show both counts;
+  // archived cards are hidden unless toggled on via the ⋯ menu.
+  const { data: allGroups = [], isLoading } = useGroups(true)
   const { data: pendingInvites = [] } = usePendingInvites()
   const acceptInvite = useAcceptInvite()
   const declineInvite = useDeclineInvite()
-  const { byGroup, overall } = useGroupsNet(groups, displayCurrency)
+  const { byGroup } = useGroupsNet(allGroups, displayCurrency)
+
+  const active = useMemo(() => allGroups.filter((g) => !g.isArchived), [allGroups])
+  const archived = useMemo(() => allGroups.filter((g) => g.isArchived), [allGroups])
+  const overall = useMemo(
+    () => active.reduce((sum, g) => sum + (byGroup[g.id]?.balance ?? 0), 0),
+    [active, byGroup],
+  )
+  const overallState = getBalanceState(overall)
+  const NetIcon = NET_ICON[overallState]
 
   const openCreate = () => setIsModalOpen(true)
 
@@ -68,15 +101,55 @@ export default function Groups() {
     }
   }
 
-  const archivedToggle = (
-    <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-      <Switch checked={showArchived} onCheckedChange={setShowArchived} />
-      <Archive className="size-4" />
-      <span className="hidden sm:inline">{t('groups.archive.showArchived')}</span>
-    </label>
-  )
+  const renderCard = (g: Group, isArchivedCard = false) => {
+    const net = byGroup[g.id]
+    const members = acceptedMembers(g)
+    return (
+      <Link
+        key={g.id}
+        to={`/groups/${g.id}`}
+        className={`flex flex-col gap-3.5 rounded-[18px] border border-border bg-card p-4 shadow-glass-1 transition-shadow hover:shadow-glass-2 ${
+          isArchivedCard ? 'opacity-[0.66]' : ''
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <span className="grid size-[50px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[26px]">
+            {g.icon || '👥'}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate text-[16.5px] font-bold tracking-[-0.01em]">{g.name}</span>
+              {isArchivedCard && (
+                <span className="shrink-0 rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                  {t('groups.archive.archivedBadge')}
+                </span>
+              )}
+            </div>
+            <div className="mt-0.5 truncate text-[12.5px] text-muted-foreground">
+              {g.description || t('groups.membersCount', { count: members.length })}
+            </div>
+          </div>
+          <ChevronRight className="size-[18px] shrink-0 text-fg-faint" />
+        </div>
+        <div className="flex items-center justify-between gap-2.5">
+          <GAvatarStack members={members.map((m) => m.user)} max={4} size={28} currentUserId={user?.id} />
+          {net && <BalancePill state={net.state} amount={net.balance} currency={displayCurrency} />}
+        </div>
+      </Link>
+    )
+  }
 
-  const overallState = getBalanceState(overall)
+  const optionsButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      onClick={() => setMenuOpen(true)}
+      aria-label={t('groups.hub.options')}
+    >
+      <MoreHorizontal className="size-4" />
+    </Button>
+  )
 
   return (
     <AppLayout>
@@ -86,7 +159,7 @@ export default function Groups() {
         subtitle={t('groups.subtitle')}
         actions={
           <>
-            {archivedToggle}
+            {optionsButton}
             <AddButton onClick={openCreate} label={t('groups.newGroup')} />
           </>
         }
@@ -98,40 +171,54 @@ export default function Groups() {
           <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em]">{t('groups.title')}</h1>
           <p className="mt-0.5 text-[13.5px] font-medium text-muted-foreground">{t('groups.subtitle')}</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="size-[42px] shrink-0 rounded-full"
-          onClick={openCreate}
-          aria-label={t('groups.newGroup')}
-        >
-          <Plus className="size-5" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-[42px] rounded-full"
+            onClick={() => setMenuOpen(true)}
+            aria-label={t('groups.hub.options')}
+          >
+            <MoreHorizontal className="size-5" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-[42px] rounded-full"
+            onClick={openCreate}
+            aria-label={t('groups.newGroup')}
+          >
+            <Plus className="size-5" />
+          </Button>
+        </div>
       </div>
-      <div className="mb-4 flex justify-end md:hidden">{archivedToggle}</div>
 
       <div className="mx-auto flex max-w-[1080px] flex-col gap-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>
-        ) : groups.length === 0 && pendingInvites.length === 0 ? (
+        ) : allGroups.length === 0 && pendingInvites.length === 0 ? (
           <HubEmpty onCreate={openCreate} />
         ) : (
           <>
-            {/* Overall net */}
-            {groups.length > 0 && (
-              <div
-                className={`flex items-center justify-between rounded-2xl border px-[18px] py-4 shadow-glass-1 ${
-                  overallState === 'owed'
-                    ? 'border-success/20 bg-success-soft'
-                    : overallState === 'owe'
-                      ? 'border-destructive/20 bg-destructive-soft'
-                      : 'border-border bg-card'
-                }`}
-              >
-                <div>
+            {/* Overall net — neutral band with a state-tinted icon tile + amount */}
+            {active.length > 0 && (
+              <div className="flex items-center gap-3.5 rounded-2xl border border-border bg-card px-[18px] py-4 shadow-glass-1">
+                <span
+                  className={`grid size-[42px] shrink-0 place-items-center rounded-xl ${
+                    overallState === 'owed'
+                      ? 'bg-success-soft text-success-foreground'
+                      : overallState === 'owe'
+                        ? 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]'
+                        : 'bg-bg-subtle text-muted-foreground'
+                  }`}
+                >
+                  <NetIcon className="size-5" strokeWidth={2.4} />
+                </span>
+                <div className="min-w-0">
                   <div className="text-[12px] font-semibold text-muted-foreground">
                     {overallState === 'owed'
                       ? t('groups.hub.overallOwed')
@@ -140,7 +227,7 @@ export default function Groups() {
                         : t('groups.hub.acrossAll')}
                   </div>
                   <div
-                    className={`t-num mt-1.5 text-[24px] font-extrabold tracking-[-0.02em] ${
+                    className={`t-num mt-1 whitespace-nowrap text-[23px] font-extrabold tracking-[-0.02em] ${
                       overallState === 'owed'
                         ? 'text-success-foreground'
                         : overallState === 'owe'
@@ -153,8 +240,10 @@ export default function Groups() {
                       : formatMoney(Math.abs(overall), displayCurrency)}
                   </div>
                 </div>
-                <div className="text-[12px] font-semibold text-fg-faint">
-                  {t('groups.hub.groupsCount', { count: groups.length })}
+                <div className="ml-auto shrink-0 text-right text-[12px] font-semibold text-fg-faint">
+                  {archived.length > 0
+                    ? t('groups.hub.activeArchived', { active: active.length, archived: archived.length })
+                    : t('groups.hub.activeOnly', { count: active.length })}
                 </div>
               </div>
             )}
@@ -200,49 +289,35 @@ export default function Groups() {
               </div>
             ))}
 
-            {/* Group cards */}
+            {/* Active groups */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {groups.map((g) => {
-                const net = byGroup[g.id]
-                const members = acceptedMembers(g)
-                return (
-                  <Link
-                    key={g.id}
-                    to={`/groups/${g.id}`}
-                    className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-card p-4 shadow-glass-1 transition-shadow hover:shadow-glass-2"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-[50px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[26px]">
-                        {g.icon || '👥'}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-[16.5px] font-bold tracking-[-0.01em]">{g.name}</span>
-                          {g.isArchived && (
-                            <span className="shrink-0 rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                              {t('groups.archive.archivedBadge')}
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-0.5 truncate text-[12.5px] text-muted-foreground">
-                          {g.description || t('groups.membersCount', { count: members.length })}
-                        </div>
-                      </div>
-                      <ChevronRight className="size-[18px] shrink-0 text-fg-faint" />
-                    </div>
-                    <div className="flex items-center justify-between gap-2.5">
-                      <GAvatarStack members={members.map((m) => m.user)} max={4} size={28} currentUserId={user?.id} />
-                      {net && <BalancePill state={net.state} amount={net.balance} currency={displayCurrency} />}
-                    </div>
-                  </Link>
-                )
-              })}
+              {active.map((g) => renderCard(g))}
             </div>
+
+            {/* Archived — surfaced only via the ⋯ menu */}
+            {showArchived && archived.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 px-0.5 pt-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-fg-faint">
+                  <Archive className="size-3.5" />
+                  {t('groups.archive.archivedBadge')}
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {archived.map((g) => renderCard(g, true))}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
 
       <GroupModal open={isModalOpen} onOpenChange={setIsModalOpen} group={null} mode="create" />
+      <HubMenuDialog
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        showArchived={showArchived}
+        onToggleArchived={setShowArchived}
+        onNewGroup={openCreate}
+      />
     </AppLayout>
   )
 }

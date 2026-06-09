@@ -994,7 +994,17 @@
       "allSettled": "All settled",
       "groupsCount": "{{count}} groups",
       "invitedYou": "{{name}} invited you · {{count}} members",
-      "join": "Join"
+      "join": "Join",
+      "options": "Group options",
+      "showArchivedGroups": "Show archived groups",
+      "activeArchived": "{{active}} active · {{archived}} archived",
+      "activeOnly": "{{count}} active",
+      "activeOnly_one": "{{count}} active",
+      "activeOnly_other": "{{count}} active"
+    },
+    "hero": {
+      "balances": "Balances",
+      "history": "History"
     },
     "empty": {
       "title": "Split your first expense",
@@ -1058,7 +1068,10 @@
       "groupTotal": "Group total",
       "add": "Add",
       "addExpense": "Add expense",
-      "undated": "Undated"
+      "undated": "Undated",
+      "count": "{{count}} expenses",
+      "count_one": "{{count}} expense",
+      "count_other": "{{count}} expenses"
     },
     "menu": {
       "title": "Group menu",

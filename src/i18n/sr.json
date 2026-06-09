@@ -994,7 +994,18 @@
       "allSettled": "Sve izmireno",
       "groupsCount": "{{count}} grupa",
       "invitedYou": "{{name}} vas je pozvao/la · {{count}} članova",
-      "join": "Pridruži se"
+      "join": "Pridruži se",
+      "options": "Opcije grupa",
+      "showArchivedGroups": "Prikaži arhivirane grupe",
+      "activeArchived": "{{active}} aktivnih · {{archived}} arhiviranih",
+      "activeOnly": "{{count}} aktivnih",
+      "activeOnly_one": "{{count}} aktivna",
+      "activeOnly_few": "{{count}} aktivne",
+      "activeOnly_other": "{{count}} aktivnih"
+    },
+    "hero": {
+      "balances": "Stanja",
+      "history": "Istorija"
     },
     "empty": {
       "title": "Podelite svoj prvi trošak",
@@ -1059,7 +1070,11 @@
       "groupTotal": "Ukupno u grupi",
       "add": "Dodaj",
       "addExpense": "Dodaj trošak",
-      "undated": "Bez datuma"
+      "undated": "Bez datuma",
+      "count": "{{count}} troškova",
+      "count_one": "{{count}} trošak",
+      "count_few": "{{count}} troška",
+      "count_other": "{{count}} troškova"
     },
     "menu": {
       "title": "Meni grupe",
