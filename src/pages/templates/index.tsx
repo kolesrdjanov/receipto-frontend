@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
@@ -75,21 +75,11 @@ export default function Templates() {
   const list = templates ?? []
 
   const header = (
-    <>
-      <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
-        title={t('templates.title')}
-        subtitle={t('templates.subtitle')}
-        actions={<AddButton onClick={handleAdd} label={t('templates.addTemplate')} data-testid="templates-add-button" />}
-      />
-      <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
-        <div className="min-w-0">
-          <h1 className="t-h1 text-[28px]">{t('templates.title')}</h1>
-          <p className="mt-1 text-[12.5px] text-muted-foreground">{t('templates.subtitle')}</p>
-        </div>
-        <AddButton onClick={handleAdd} label={t('templates.addTemplate')} className="h-[38px] px-3.5" />
-      </div>
-    </>
+    <PageHeader
+      title={t('templates.title')}
+      subtitle={t('templates.subtitle')}
+      action={{ onClick: handleAdd, label: t('templates.addTemplate'), 'data-testid': 'templates-add-button' }}
+    />
   )
 
   return (

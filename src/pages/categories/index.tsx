@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wallet, Tag, CircleDollarSign, type LucideIcon } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
@@ -109,21 +109,12 @@ export default function Categories() {
   const mixedCurrencies = new Set(budgeted.map((c) => c.budgetCurrency || 'RSD')).size > 1
 
   const header = (
-    <>
-      <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
-        title={t('categories.title')}
-        subtitle={t('categories.desktopSubtitle')}
-        actions={<AddButton onClick={handleAdd} label={t('categories.addCategory')} data-testid="categories-add-button" />}
-      />
-      <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
-        <div className="min-w-0">
-          <h1 className="t-h1 text-[28px]">{t('categories.title')}</h1>
-          <p className="mt-1 text-[12.5px] text-muted-foreground">{t('categories.mobileSubtitle')}</p>
-        </div>
-        <AddButton onClick={handleAdd} label={t('categories.addCategory')} className="h-[38px] px-3.5" />
-      </div>
-    </>
+    <PageHeader
+      title={t('categories.title')}
+      desktopSubtitle={t('categories.desktopSubtitle')}
+      mobileSubtitle={t('categories.mobileSubtitle')}
+      action={{ onClick: handleAdd, label: t('categories.addCategory'), 'data-testid': 'categories-add-button' }}
+    />
   )
 
   return (

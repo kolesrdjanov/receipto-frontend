@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -255,22 +255,15 @@ export default function WarrantiesPage() {
   return (
     <AppLayout>
       <PageTransition>
-        {/* Desktop sticky toolbar (full-bleed) */}
-        <PageToolbar
-          className="md:-mx-8 md:-mt-8 md:mb-6"
+        <PageHeader
           title={t('warranties.title')}
-          subtitle={t('warranties.desktopSubtitle')}
+          desktopSubtitle={t('warranties.desktopSubtitle')}
+          mobileSubtitle={t('warranties.mobileSubtitle')}
           actions={desktopActions}
+          mobileActions={
+            <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
+          }
         />
-
-        {/* Mobile header */}
-        <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
-          <div className="min-w-0">
-            <h1 className="t-h1 text-[28px]">{t('warranties.title')}</h1>
-            <p className="t-sm mt-1 text-muted-foreground">{t('warranties.mobileSubtitle')}</p>
-          </div>
-          <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
-        </div>
 
         {isLoading ? (
           <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">

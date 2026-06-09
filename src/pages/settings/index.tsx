@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { ThemeSegmented } from '@/components/layout/theme-segmented'
 import {
@@ -228,13 +228,7 @@ export default function Settings() {
   return (
     <AppLayout>
       <PageTransition>
-        <PageToolbar className="md:-mx-8 md:-mt-8 md:mb-6" title={t('settings.title')} subtitle={t('settings.subtitle')} />
-
-        {/* Mobile header */}
-        <div className="mb-5 md:hidden">
-          <h1 className="t-h1 text-[28px]">{t('settings.title')}</h1>
-          <p className="t-sm mt-1 text-muted-foreground">{t('settings.subtitle')}</p>
-        </div>
+        <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
         <div className="mx-auto max-w-3xl space-y-5" key={profileKey}>
           {/* ===================== PROFILE ===================== */}

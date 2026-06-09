@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
-import { PageToolbar } from '@/components/layout/page-toolbar'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
@@ -86,21 +86,12 @@ export default function LoyaltyCards() {
   const list = cards ?? []
 
   const header = (
-    <>
-      <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
-        title={t('loyaltyCards.title')}
-        subtitle={t('loyaltyCards.subtitle')}
-        actions={<AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} data-testid="loyalty-add-button" />}
-      />
-      <div className="mb-5 flex items-start justify-between gap-3 md:hidden">
-        <div className="min-w-0">
-          <h1 className="t-h1 text-[28px]">{t('loyaltyCards.title')}</h1>
-          <p className="mt-1 text-[12.5px] text-muted-foreground">{t('loyaltyCards.mobileSubtitle')}</p>
-        </div>
-        <AddButton onClick={handleAdd} label={t('loyaltyCards.addCard')} className="h-[38px] px-3.5" />
-      </div>
-    </>
+    <PageHeader
+      title={t('loyaltyCards.title')}
+      desktopSubtitle={t('loyaltyCards.subtitle')}
+      mobileSubtitle={t('loyaltyCards.mobileSubtitle')}
+      action={{ onClick: handleAdd, label: t('loyaltyCards.addCard'), 'data-testid': 'loyalty-add-button' }}
+    />
   )
 
   return (
