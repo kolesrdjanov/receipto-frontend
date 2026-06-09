@@ -274,7 +274,7 @@ export function SettingsNavRail<Id extends string>({
   onJump: (id: Id) => void
 }) {
   return (
-    <aside className="sticky top-[84px] flex w-[212px] shrink-0 flex-col gap-0.5">
+    <aside className="sticky top-[112px] flex w-[212px] shrink-0 flex-col gap-0.5">
       {items.map((item) => {
         const on = active === item.id
         const Icon = item.icon

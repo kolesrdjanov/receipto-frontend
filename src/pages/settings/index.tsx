@@ -25,8 +25,6 @@ import { Input } from '@/components/ui/input'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import {
   Mail,
-  ImagePlus,
-  Upload,
   Trash2,
   MapPin,
   Wallet,
@@ -43,7 +41,6 @@ import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage, useDeleteMyAccount } from '@/hooks/users/use-me'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { normalizeRank, getNextRank, type ReceiptRank } from '@/lib/rank'
-import { cn } from '@/lib/utils'
 
 const languages: { value: Language; labelKey: string }[] = [
   { value: 'en', labelKey: 'settings.language.en' },
@@ -157,7 +154,6 @@ export default function Settings() {
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
 
   // Desktop section-nav scroll-spy + click-to-jump (page scrolls at the window level).
   const [activeSection, setActiveSection] = useState<SectionId>('profile')
@@ -236,13 +232,6 @@ export default function Settings() {
     const file = event.target.files?.[0]
     if (file) await uploadFile(file)
     if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault()
-    setDragActive(false)
-    const file = event.dataTransfer.files?.[0]
-    if (file) void uploadFile(file)
   }
 
   const handleDeleteAccount = async () => {
@@ -325,56 +314,22 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Avatar upload dropzone */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={openFilePicker}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            openFilePicker()
-          }
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragActive(true)
-        }}
-        onDragLeave={() => setDragActive(false)}
-        onDrop={handleDrop}
-        className={cn(
-          'mt-[18px] flex cursor-pointer items-center gap-3.5 rounded-xl border-[1.5px] border-dashed p-[15px] transition-colors',
-          dragActive ? 'border-primary/50 bg-primary-soft/40' : 'border-border bg-bg-subtle/45 hover:border-primary/50 hover:bg-primary-soft/30',
-        )}
-      >
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-card text-muted-foreground shadow-glass-1">
-          <ImagePlus className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[13.5px] font-semibold leading-snug text-fg-2">
-            {t('settings.profile.dropText')}{' '}
-            <span className="text-primary">{t('settings.profile.dropBrowse')}</span>
-          </div>
-          <p className="mt-0.5 text-[12.5px] text-muted-foreground">{t('settings.profile.dropHelp')}</p>
-        </div>
-        <div className="flex shrink-0 gap-2" onClick={(e) => e.stopPropagation()}>
-          <Button type="button" variant="outline" size="sm" className="h-10" onClick={openFilePicker} disabled={uploadProfileImage.isPending}>
-            <Upload className="size-4" />
-            <span className="hidden sm:inline">{uploadProfileImage.isPending ? t('common.uploading') : t('settings.profile.upload')}</span>
-          </Button>
+      {/* Upload is the avatar camera button; show a Remove action only when a photo exists. */}
+      {effectiveUser.profileImageUrl && (
+        <div className="mt-3">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-10 text-destructive hover:text-destructive"
+            className="-ml-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={handleRemoveProfileImage}
-            disabled={!effectiveUser.profileImageUrl || updateMe.isPending}
+            disabled={updateMe.isPending}
           >
             <Trash2 className="size-4" />
-            <span className="hidden sm:inline">{t('settings.profile.remove')}</span>
+            {t('settings.profile.remove')}
           </Button>
         </div>
-      </div>
+      )}
 
       <div className="my-[18px] h-px bg-hairline-soft" />
 
@@ -463,8 +418,10 @@ export default function Settings() {
           }}
         >
           <SelectTrigger id="language" className="w-full sm:w-[208px]">
-            <Globe className="size-4 shrink-0 text-muted-foreground" />
-            <SelectValue placeholder={t('settings.language.label')} />
+            <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+              <Globe className="size-4 shrink-0 text-muted-foreground" />
+              <SelectValue placeholder={t('settings.language.label')} />
+            </span>
           </SelectTrigger>
           <SelectContent>
             {languages.map((lang) => (
