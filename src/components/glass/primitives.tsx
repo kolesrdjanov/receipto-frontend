@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Receipt as ReceiptIcon, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatMoney } from '@/lib/utils'
 
 /**
  * Cross-feature Glass list primitives. These are shared by every list feature
@@ -9,17 +9,17 @@ import { cn } from '@/lib/utils'
  * feature's own `primitives.tsx`.
  */
 
-/** Tabular formatted amount (sr-RS dinar style, rounded). */
+/** Tabular formatted amount. Delegates to the canonical `formatMoney` so rows, totals and
+ *  detail screens never disagree on how a currency renders (single source of truth). */
 export function Amount({
   value, currency = 'RSD', size = 15.5, weight = 700, muted = false, className,
 }: { value: number | string; currency?: string; size?: number; weight?: number; muted?: boolean; className?: string }) {
-  const n = Math.round(Number(value) || 0).toLocaleString('sr-RS')
   return (
     <span
       className={cn('shrink-0', muted ? 'text-muted-foreground' : 'text-foreground', className)}
       style={{ fontSize: size, fontWeight: weight, lineHeight: 1 }}
     >
-      {n} {currency}
+      {formatMoney(value, currency)}
     </span>
   )
 }
