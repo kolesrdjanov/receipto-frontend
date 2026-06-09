@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Avatar } from '@/components/ui/avatar'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import {
@@ -74,7 +75,6 @@ export default function GroupDetail() {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const [prefillData, setPrefillData] = useState<Partial<Receipt> | null>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const queryClient = useQueryClient()
   const { data: group, isLoading: groupLoading } = useGroup(id || '')
@@ -93,23 +93,6 @@ export default function GroupDetail() {
       setDisplayCurrency(group.currency)
     }
   }, [group?.currency])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowAddDropdown(false)
-      }
-    }
-
-    if (showAddDropdown) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showAddDropdown])
 
   if (groupLoading) {
     return (
@@ -436,27 +419,28 @@ export default function GroupDetail() {
 
             {!group.isArchived && (
               <div className="flex gap-2">
-                <div className="relative flex-1 sm:flex-initial" ref={dropdownRef}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() => setShowAddDropdown(!showAddDropdown)}
-                  >
-                    <Plus className="h-4 w-4" />
-                    {t('receipts.addManually')}
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                  {showAddDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-md z-50 p-1.5 animate-in fade-in-0 zoom-in-95">
-                      <button
-                        onClick={handleAddManually}
-                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-primary-soft rounded-lg transition-colors"
+                <div className="flex-1 sm:flex-initial">
+                  <Popover open={showAddDropdown} onOpenChange={setShowAddDropdown}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Plus className="h-4 w-4" />
+                        {t('receipts.addManually')}
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-48 p-1.5">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          handleAddManually()
+                          setShowAddDropdown(false)
+                        }}
+                        className="h-auto w-full justify-start px-3 py-2.5 text-sm font-normal hover:bg-primary-soft"
                       >
                         {t('receipts.addBlank')}
-                      </button>
-                    </div>
-                  )}
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <Button
                   size="sm"

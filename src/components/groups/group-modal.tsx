@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,14 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-const mediaQuery = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)') : null
-function useIsMobile() {
-  return useSyncExternalStore(
-    (cb) => { mediaQuery?.addEventListener('change', cb); return () => mediaQuery?.removeEventListener('change', cb) },
-    () => mediaQuery?.matches ?? false,
-    () => false,
-  )
-}
+import { useIsMobile } from '@/hooks/use-mobile'
 import {
   useCreateGroup,
   useUpdateGroup,
