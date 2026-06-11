@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Loader2, Plus, ChevronRight } from 'lucide-react'
+import { Loader2, Plus, ChevronRight, LayoutTemplate } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { ModalEmptyState } from '@/components/glass/empty-state'
 import { useTemplates, type Template } from '@/hooks/templates/use-templates'
 import { getErrorMessage } from '@/lib/api'
 
@@ -58,14 +59,17 @@ export function TemplateSelectorModal({ open, onOpenChange, onSelect }: Template
           {t('receipts.templateSelector.loadError', { message: getErrorMessage(error, 'Unknown error') })}
         </div>
       ) : !hasTemplates ? (
-        <div className="py-8 text-center">
-          <p className="mb-2 text-muted-foreground">{t('receipts.templateSelector.noTemplates')}</p>
-          <p className="mb-6 text-sm text-muted-foreground">{t('receipts.templateSelector.noTemplatesText')}</p>
-          <Button onClick={handleCreateTemplate}>
-            <Plus className="size-4" />
-            {t('receipts.templateSelector.createTemplate')}
-          </Button>
-        </div>
+        <ModalEmptyState
+          icon={LayoutTemplate}
+          title={t('receipts.templateSelector.noTemplates')}
+          description={t('receipts.templateSelector.noTemplatesText')}
+          action={
+            <Button onClick={handleCreateTemplate}>
+              <Plus className="size-4" />
+              {t('receipts.templateSelector.createTemplate')}
+            </Button>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {templates!.map((template) => (

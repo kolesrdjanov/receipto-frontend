@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { ModalEmptyState } from '@/components/glass/empty-state'
 import { Amount } from '@/components/glass/primitives'
 import {
   usePaymentHistory,
@@ -43,12 +44,7 @@ export function PaymentHistoryModal({ open, onOpenChange, expense }: PaymentHist
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
       ) : !payments || payments.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <span className="grid size-12 place-items-center rounded-2xl bg-bg-subtle text-muted-foreground">
-            <Clock className="size-[22px]" />
-          </span>
-          <span className="text-[13px] text-muted-foreground">{t('recurring.payments.noPayments')}</span>
-        </div>
+        <ModalEmptyState icon={Clock} title={t('recurring.payments.noPayments')} />
       ) : (
         <div className="[&>div+div]:border-t [&>div+div]:border-hairline-soft">
           {payments.map((p) => {

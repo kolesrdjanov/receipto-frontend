@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { enUS, srLatn } from 'date-fns/locale'
 import i18n from 'i18next'
 import { SoftCard } from '@/components/groups/primitives'
-import { EmptyState } from '@/components/glass/empty-state'
+import { EmptyState, ModalEmptyState } from '@/components/glass/empty-state'
 import { useSettlementHistory, type SettlementRecord } from '@/hooks/groups/use-groups'
 import { memberFirstName } from '@/lib/groups'
 import { formatMoney } from '@/lib/utils'
@@ -35,7 +35,11 @@ export function GroupHistoryList({
   }
 
   if (settlements.length === 0) {
-    return <EmptyState compact icon={HandCoins} title={t('groups.settlements.noHistory')} />
+    return flush ? (
+      <ModalEmptyState icon={HandCoins} title={t('groups.settlements.noHistory')} />
+    ) : (
+      <EmptyState compact icon={HandCoins} title={t('groups.settlements.noHistory')} />
+    )
   }
 
   const rows = (
