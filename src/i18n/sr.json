@@ -1347,6 +1347,9 @@
         "purchaseDateRequired": "Datum kupovine je obavezan"
       }
     },
+    "importExport": "Uvoz / Izvoz",
+    "importCsv": "Uvezi CSV",
+    "exportCsv": "Izvezi CSV",
     "export": {
       "button": "Izvezi",
       "success": "Garancije uspešno izvezene",

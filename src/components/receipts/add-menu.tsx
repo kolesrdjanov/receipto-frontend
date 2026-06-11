@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { GlassDialog } from '@/components/glass/glass-dialog'
+import { GlassMenuItem as MenuItem } from '@/components/glass/import-export-menu'
 import { cn } from '@/lib/utils'
 
 /* ---------- desktop "+" popover menu ---------- */
@@ -14,19 +15,6 @@ interface AddMenuProps {
   onAddFromTemplate: () => void
   onImport: () => void
   onExport: () => void
-}
-
-function MenuItem({ icon: Icon, label, onClick }: { icon: LucideIcon; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[14px] font-semibold text-foreground transition-colors hover:bg-bg-subtle"
-    >
-      <Icon className="size-[17px] shrink-0 text-muted-foreground" />
-      <span>{label}</span>
-    </button>
-  )
 }
 
 /** Desktop `+` menu: Blank receipt / From template / — / Import CSV / Export CSV. */

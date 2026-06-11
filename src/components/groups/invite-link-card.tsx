@@ -81,7 +81,7 @@ export function InviteLinkCard({ groupId }: InviteLinkCardProps) {
   }
 
   return (
-    <div className="pt-3 border-t">
+    <div className="pt-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
           <Link className="h-3.5 w-3.5 text-muted-foreground" />

@@ -5,8 +5,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
-  Download,
-  Upload,
   type LucideIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -14,7 +12,6 @@ import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
-import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { WarrantyGrid, StatusTabs, CardActionList } from '@/components/warranties/primitives'
@@ -29,6 +26,7 @@ import {
 } from '@/hooks/warranties/use-warranties'
 import { WarrantyImportDialog } from '@/components/warranties/warranty-import-dialog'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
+import { ImportExportMenu } from '@/components/glass/import-export-menu'
 import { useFabStore } from '@/store/fab'
 import { cn } from '@/lib/utils'
 
@@ -238,16 +236,22 @@ export default function WarrantiesPage() {
     onOpenActions: openActions,
   }
 
+  const importExportMenu = (triggerClassName?: string) => (
+    <ImportExportMenu
+      onImport={() => setImportDialogOpen(true)}
+      onExport={handleExport}
+      importLabel={t('warranties.importCsv')}
+      exportLabel={t('warranties.exportCsv')}
+      ariaLabel={t('warranties.importExport')}
+      importDisabled={importWarranties.isPending}
+      exportDisabled={exportWarranties.isPending}
+      triggerClassName={triggerClassName}
+    />
+  )
+
   const desktopActions = (
     <>
-      <Button variant="outline" size="sm" className="h-10" onClick={handleExport} disabled={exportWarranties.isPending}>
-        <Download className="size-4" />
-        {t('warranties.export.button')}
-      </Button>
-      <Button variant="outline" size="sm" className="h-10" onClick={() => setImportDialogOpen(true)} disabled={importWarranties.isPending}>
-        <Upload className="size-4" />
-        {t('warranties.import.button')}
-      </Button>
+      {importExportMenu()}
       <AddButton onClick={handleAdd} label={t('warranties.addWarranty')} />
     </>
   )
@@ -261,7 +265,10 @@ export default function WarrantiesPage() {
           mobileSubtitle={t('warranties.mobileSubtitle')}
           actions={desktopActions}
           mobileActions={
-            <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
+            <>
+              {importExportMenu('size-[38px]')}
+              <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
+            </>
           }
         />
 

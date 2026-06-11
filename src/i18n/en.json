@@ -1344,6 +1344,9 @@
         "purchaseDateRequired": "Purchase date is required"
       }
     },
+    "importExport": "Import / Export",
+    "importCsv": "Import CSV",
+    "exportCsv": "Export CSV",
     "export": {
       "button": "Export",
       "success": "Warranties exported successfully",
