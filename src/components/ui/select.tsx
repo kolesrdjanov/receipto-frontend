@@ -18,7 +18,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       // Filled glass field — matches DatePicker/Input/Textarea for app-wide consistency.
-      "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-border bg-bg-subtle/70 px-3 py-2 text-sm transition-[border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/55 [&>span]:min-w-0 [&>span]:truncate [&>span]:text-left",
+      "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-border bg-bg-subtle/70 px-3 py-2 text-base md:text-sm transition-[border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/55 [&>span]:min-w-0 [&>span]:truncate [&>span]:text-left",
       className
     )}
     {...props}

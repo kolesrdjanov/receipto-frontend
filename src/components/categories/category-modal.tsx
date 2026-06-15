@@ -180,7 +180,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
       <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-card text-[17px] leading-none shadow-glass-1">
         {iconValue || '😀'}
       </span>
-      <span className={cn('flex-1 text-[13.5px] font-medium', iconValue ? 'text-fg-2' : 'text-fg-faint')}>
+      <span className={cn('flex-1 text-base font-medium md:text-sm', iconValue ? 'text-fg-2' : 'text-fg-faint')}>
         {iconValue ? t('categories.modal.iconChange') : t('categories.modal.iconChoose')}
       </span>
       <SmilePlus className="size-[18px] shrink-0 text-fg-faint" />

@@ -123,7 +123,7 @@ export function DatePicker({
           <CalendarIcon className="size-4 shrink-0 text-fg-faint" />
           <span
             className={cn(
-              "flex-1 truncate text-[13.5px] font-medium text-foreground",
+              "flex-1 truncate text-base font-medium text-foreground md:text-sm",
               !displayValue && "text-muted-foreground"
             )}
           >
