@@ -159,7 +159,7 @@ body {
   /* glass — depth tiers shadcn lacks */
   --bg-subtle: oklch(0.965 0.003 250);
   --hairline-soft: oklch(0.95 0.004 250);
-  --fg-faint: oklch(0.7 0.008 260);
+  --fg-faint: oklch(0.56 0.012 260); /* WCAG AA (~4.65:1 on white); was 0.7 (~2.3:1) */
   --fg-2: oklch(0.45 0.01 260);            /* mid-tone text (between fg & muted) */
   --destructive-soft: oklch(0.95 0.04 25);
   --destructive-foreground-on-soft: oklch(0.5 0.18 25);
@@ -221,7 +221,7 @@ body {
   /* glass — depth tiers (dark) */
   --bg-subtle: oklch(0.235 0.012 260);
   --hairline-soft: oklch(1 0 0 / 0.06);
-  --fg-faint: oklch(0.5 0.012 260);
+  --fg-faint: oklch(0.62 0.012 260); /* WCAG AA on dark bg; was 0.5 (~2.8:1) */
   --fg-2: oklch(0.78 0.01 260);
   --destructive-soft: oklch(0.3 0.08 25);
   --destructive-foreground-on-soft: oklch(0.82 0.12 25);
