@@ -61,7 +61,7 @@ function CategorySelect({
         {categories.map((cat) => (
           <SelectItem key={cat.id} value={cat.id}>
             <span className="inline-flex items-center gap-2">
-              <CategoryCircle color={cat.color} icon={cat.icon} size={20} font={11} />
+              <CategoryCircle color={cat.color} icon={cat.icon} size={26} font={14} />
               <span>{cat.name}</span>
             </span>
           </SelectItem>

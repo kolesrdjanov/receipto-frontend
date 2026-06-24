@@ -18,7 +18,7 @@ export function FilterChip({ label, icon, active, tone = 'dark', onClick, classN
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-semibold transition-colors',
+        'hit-area inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-semibold transition-colors',
         active
           ? tone === 'soft'
             ? 'border-transparent bg-primary-soft text-primary'

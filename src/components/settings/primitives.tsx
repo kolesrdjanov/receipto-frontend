@@ -253,7 +253,7 @@ export function ProfileAvatar({
         type="button"
         onClick={onPick}
         aria-label={label}
-        className="absolute -bottom-[3px] -right-[3px] grid size-8 place-items-center rounded-full border border-border bg-card text-fg-2 shadow-glass-2 transition-[transform,background-color] hover:scale-105 hover:bg-bg-subtle hover:text-foreground"
+        className="hit-area absolute -bottom-[3px] -right-[3px] grid size-8 place-items-center rounded-full border border-border bg-card text-fg-2 shadow-glass-2 transition-[transform,background-color] hover:scale-105 hover:bg-bg-subtle hover:text-foreground active:scale-95"
       >
         <Camera className="size-[15px]" />
       </button>

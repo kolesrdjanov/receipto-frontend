@@ -22,12 +22,13 @@ function Tab({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: s
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex flex-1 flex-col items-center gap-1 py-1.5 text-[10.5px] font-semibold transition-colors',
+          'flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 text-[10.5px] font-semibold transition-colors',
+          'outline-none focus-visible:ring-2 focus-visible:ring-ring',
           isActive ? 'text-primary' : 'text-fg-faint',
         )
       }
     >
-      <Icon className="size-[22px]" />
+      <Icon className="size-[22px]" aria-hidden="true" />
       {label}
     </NavLink>
   )
@@ -81,9 +82,10 @@ export function MobileTabBar({ onOpenAddSheet }: MobileTabBarProps) {
         <button
           type="button"
           onClick={() => setOpenMobile(true)}
-          className="flex flex-1 flex-col items-center gap-1 py-1.5 text-[10.5px] font-semibold text-fg-faint transition-colors"
+          aria-label={t('nav.more')}
+          className="flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 text-[10.5px] font-semibold text-fg-faint outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <MoreVertical className="size-[22px]" />
+          <MoreVertical className="size-[22px]" aria-hidden="true" />
           {t('nav.more')}
         </button>
       </div>

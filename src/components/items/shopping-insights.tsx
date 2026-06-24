@@ -91,7 +91,11 @@ export function ShoppingInsights() {
 
             if (hasValidProductId) {
               return (
-                <Link key={insight.id} to={`/items/${insight.productId}`}>
+                <Link
+                  key={insight.id}
+                  to={`/items/${insight.productId}`}
+                  className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   {content}
                 </Link>
               )
