@@ -116,10 +116,11 @@ export function MarkPaidModal({ open, onOpenChange, expense }: MarkPaidModalProp
           <Button
             type="submit"
             form={FORM_ID}
-            disabled={isSubmitting || markAsPaid.isPending}
+            loading={isSubmitting || markAsPaid.isPending}
+            loadingText={t('recurring.markPaid.paying')}
           >
             <Check className="size-4" />
-            {markAsPaid.isPending ? t('recurring.markPaid.paying') : t('recurring.markPaid.confirm')}
+            {t('recurring.markPaid.confirm')}
           </Button>
         ),
         secondary: (

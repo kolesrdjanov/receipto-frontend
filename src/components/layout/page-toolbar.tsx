@@ -19,7 +19,7 @@ export function PageToolbar({ title, subtitle, actions, className }: PageToolbar
       )}
     >
       <div className="min-w-0">
-        <h1 className="t-h2 truncate">{title}</h1>
+        <h1 className="t-h2 truncate" title={title}>{title}</h1>
         {subtitle && <div className="t-sm mt-0.5 text-muted-foreground">{subtitle}</div>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

@@ -103,8 +103,8 @@ export function GlassDialog({
                   className={cn(
                     'pointer-events-auto relative flex flex-col overflow-hidden',
                     isMobile
-                      ? 'max-h-[92vh] w-full rounded-t-[28px] border-t border-border bg-card shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]'
-                      : 'glass-card max-h-[88vh]',
+                      ? 'max-h-[92dvh] w-full rounded-t-[28px] border-t border-border bg-card shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]'
+                      : 'glass-card max-h-[88dvh]',
                     className,
                   )}
                   style={isMobile ? { width: '100%' } : { width: desktopWidth, maxWidth: 'calc(100% - 2rem)' }}

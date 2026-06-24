@@ -375,11 +375,11 @@ export default function Receipts() {
               type="button"
               variant="brand"
               onClick={openQrScanner}
-              disabled={isCreating || isGalleryProcessing}
+              loading={isCreating || isGalleryProcessing}
               className="h-10 rounded-full px-4 text-[15px] font-semibold disabled:opacity-60"
               data-testid="receipts-scan-button"
             >
-              {(isCreating || isGalleryProcessing) ? <Loader2 className="size-4 animate-spin" /> : <QrCode className="size-4" />}
+              <QrCode className="size-4" />
               {t('receipts.scanQr')}
             </Button>
           </>

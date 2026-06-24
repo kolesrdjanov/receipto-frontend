@@ -105,7 +105,7 @@ export function Pill({
   )
   const inner = (
     <>
-      {Icon && <Icon className="size-3" />}
+      {Icon && <Icon className="size-3" aria-hidden="true" />}
       {children}
     </>
   )
@@ -162,14 +162,14 @@ export function FeatureSwitchRow({
 }) {
   return (
     <div className="flex items-center gap-3.5 py-4 first:pt-0 last:pb-0">
-      <span className={cn('grid size-10 shrink-0 place-items-center rounded-xl', TILE_TONE[tone])}>
+      <span className={cn('grid size-10 shrink-0 place-items-center rounded-xl', TILE_TONE[tone])} aria-hidden="true">
         <Icon className="size-[18px]" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="text-[14px] font-semibold">{title}</div>
         <p className="mt-0.5 text-[12.5px] leading-relaxed text-muted-foreground">{desc}</p>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} className="shrink-0" />
+      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} aria-label={title} className="shrink-0" />
     </div>
   )
 }
