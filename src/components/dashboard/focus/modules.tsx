@@ -347,7 +347,13 @@ export function FocusDailyFlow({
       ) : (
         <>
           <div className="h-[190px]">
-            <svg viewBox="0 0 600 190" preserveAspectRatio="none" className="block h-full w-full">
+            <svg
+              viewBox="0 0 600 190"
+              preserveAspectRatio="none"
+              className="block h-full w-full"
+              role="img"
+              aria-label={`${t('dashboard.focus.dailyFlow')} — ${firstLabel} – ${lastLabel}, ${activeDays} ${t('dashboard.focus.activeDays')}`}
+            >
               <defs>
                 <linearGradient id="focFlowFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="var(--primary)" stopOpacity="0.24" />

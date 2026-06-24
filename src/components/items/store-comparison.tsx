@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Store, TrendingUp } from 'lucide-react'
+import { Check, Loader2, Store, TrendingUp } from 'lucide-react'
 import { EmptyState } from '@/components/glass/empty-state'
 import { useStorePriceComparison } from '@/hooks/items/use-items'
 import { useSettingsStore } from '@/store/settings'
@@ -88,15 +88,17 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
                     </span>
                     <span className="font-medium text-sm sm:text-base truncate">{store.storeName}</span>
                     {isCheapest && (
-                      <span className="hidden sm:inline px-2 py-0.5 bg-success-soft text-success text-xs font-medium rounded-full shrink-0">
+                      <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-success-soft text-success text-xs font-medium rounded-full shrink-0">
+                        <Check className="h-3 w-3" aria-hidden="true" />
                         {t('items.minPrice')}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {isCheapest && (
-                      <span className="sm:hidden px-1.5 py-0.5 bg-success-soft text-success text-[10px] font-medium rounded-full">
-                        Best
+                      <span className="sm:hidden inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-success-soft text-success text-[10px] font-medium rounded-full">
+                        <Check className="h-2.5 w-2.5" aria-hidden="true" />
+                        {t('items.minPrice')}
                       </span>
                     )}
                     {!isCheapest && priceDiff > 0 && (

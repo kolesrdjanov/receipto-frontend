@@ -160,6 +160,31 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="pl-0 pr-2 sm:pl-6 sm:pr-6">
+        {/* Screen-reader data table: charts alone aren't accessible (WCAG). */}
+        <table className="sr-only">
+          <caption>{t('items.priceHistory')}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t('items.date', { defaultValue: 'Date' })}</th>
+              {stores.map((store) => (
+                <th key={store} scope="col">{store}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {chartData.map((row) => (
+              <tr key={String(row.date)}>
+                <th scope="row">{String(row.date)}</th>
+                {stores.map((store) => (
+                  <td key={store}>
+                    {typeof row[store] === 'number' ? formatMoney(row[store] as number, currency) : '—'}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div role="img" aria-label={t('items.priceHistory') + ': ' + stores.join(', ')}>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={chartData} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
             <defs>
@@ -219,6 +244,7 @@ export function PriceHistoryChart({ productId }: PriceHistoryChartProps) {
             })}
           </AreaChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

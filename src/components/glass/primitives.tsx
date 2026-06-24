@@ -68,7 +68,7 @@ export function StatusBadge({
         className,
       )}
     >
-      {Icon && <Icon className={small ? 'size-[10px]' : 'size-3'} />}
+      {Icon && <Icon className={small ? 'size-[10px]' : 'size-3'} aria-hidden="true" />}
       {children}
     </span>
   )

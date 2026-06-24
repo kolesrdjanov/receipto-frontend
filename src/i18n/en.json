@@ -1676,6 +1676,7 @@
     "potential": "potential",
     "saveAmount": "Save {{amount}}",
     "priceHistory": "Price History",
+    "date": "Date",
     "storeComparison": "Store Comparison",
     "avgPrice": "Avg Price",
     "minPrice": "Min",

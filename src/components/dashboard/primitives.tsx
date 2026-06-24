@@ -161,18 +161,30 @@ export function HiddenDots() {
  * Up/down delta pill. Spending below the comparison reads positive (emerald,
  * down arrow); above reads cautionary (amber, up arrow).
  */
-export function TrendPill({ value, className }: { value: number; className?: string }) {
+export function TrendPill({
+  value,
+  className,
+  label,
+}: {
+  value: number
+  className?: string
+  /** Accessible direction phrasing, e.g. "3% above last month". Falls back to a
+   *  +/- prefixed value so screen readers still convey direction, not just color. */
+  label?: string
+}) {
   if (value === 0) return null
   const up = value > 0
   return (
     <span
+      role="img"
+      aria-label={label ?? `${up ? '+' : '-'}${Math.abs(value)}%`}
       className={cn(
         'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold',
         up ? 'bg-warning-soft text-warning-foreground' : 'bg-success-soft text-success-foreground',
         className,
       )}
     >
-      {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+      {up ? <ArrowUpRight className="size-3" aria-hidden="true" /> : <ArrowDownRight className="size-3" aria-hidden="true" />}
       {Math.abs(value)}%
     </span>
   )
