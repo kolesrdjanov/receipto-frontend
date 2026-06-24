@@ -76,6 +76,48 @@ type are kept (dead for theming) for safe migration — sweep later with product
 headings/labels instead of ad-hoc `text-2xl font-bold`. (Numbers/amounts render in the normal
 body font — **no** `tabular-nums`/`.t-num`; that utility was retired.)
 
+## Accessibility baseline (WCAG AA — enforced)
+
+The target is **WCAG AA**. These rules came out of the 2026-06-24 whole-app audit
+(`docs/ui-audit-2026-06-24.md`) and are the default for all new/changed UI — the audit
+found each of them violated repeatedly, so treat them as non-negotiable, not aspirational.
+
+**Touch targets.** Every interactive element ≥ 44×44px. Use `<Button size="icon">`
+(44px) or `size="icon-sm"` (dense). For bespoke raw buttons add `hit-area`. Never ship a
+`size-8`/`size-9` icon button without one of these.
+
+**Icon-only controls** carry an `aria-label` (i18n'd — both EN+SR). When a control already
+has visible text, mark its decorative icon `aria-hidden="true"` so it isn't double-read.
+
+**Color is never the only signal.** Status / trend / urgency / "best price" etc. must pair
+color with an icon **and/or** text. (Most Glass badges already do — `StatusBadge` always
+renders its label; keep it that way.)
+
+**Contrast.** Body/label text ≥ 4.5:1 on its background. `--fg-faint` is tuned to AA
+(~4.65:1 light / ~5.44:1 dark) — verify any new low-emphasis token the same way; don't
+eyeball OKLCH. Use `--fg-2` for mid-tone text that must stay readable, `--fg-faint` only
+for genuinely de-emphasized text.
+
+**Focus.** Visible `focus-visible:ring-2 focus-visible:ring-ring` on every custom
+interactive element (swatches, chips, nav tabs, link cards). Don't leave `outline-none`
+without a replacement ring.
+
+**Motion.** The global `@media (prefers-reduced-motion)` rule in `index.css` neutralizes
+CSS `animation`/`transition`. **Framer Motion is NOT covered** — guard Framer animations
+with `useReducedMotion()` (collapse to opacity/instant). `GlassDialog` already does this.
+
+**Charts** (recharts / hand-rolled SVG) aren't screen-reader accessible alone: wrap in
+`role="img"` with a summarizing `aria-label`, and provide an `sr-only` data table for the
+series (see `items/price-history-chart.tsx`).
+
+**Feedback & state.** Async actions use `<Button loading=>` (spinner + auto-disable +
+`aria-busy`). Form error/success alerts use `role="alert"`/`status` + `aria-live` (the
+glass `Alert` does this). Custom progress bars use `role="progressbar"` +
+`aria-valuenow/min/max` (the shared `Progress` does this).
+
+**Viewport.** Mobile sheets/overlays use `dvh` (not `vh`); sticky/fixed bars reserve
+`env(safe-area-inset-*)`.
+
 ## Component classes (`src/index.css`)
 
 - `.glass-card` — frosted floating surface (real `backdrop-filter` + opaque fallback;
@@ -86,6 +128,10 @@ body font — **no** `tabular-nums`/`.t-num`; that utility was retired.)
 - `.icon-tile-{emerald,cyan,violet,pink,info,primary}` — soft accent-tinted square
   backgrounds (light + dark), consumed by the `IconTile` primitive. Tints recompute
   L/C from the brand/semantic token via `oklch(from …)`.
+- `.hit-area` — guarantees a ≥44px tappable area via a centered pseudo-element while
+  keeping a small visual glyph. Apply to bespoke raw-`<button>` primitives (kebabs,
+  swatches, scanner/lightbox/settle controls). App-level icon buttons use
+  `<Button size="icon">` (already 44px) instead.
 
 ## Buttons (`src/components/ui/button.tsx`)
 
@@ -97,8 +143,13 @@ variant instead. Enforced by a PostToolUse hook + an ESLint `no-restricted-synta
 | | |
 |---|---|
 | **Variants** | `default` · `brand` (gradient CTA) · `glass` (neutral bordered pill) · `destructive` · `destructive-soft` · `outline` · `secondary` · `ghost` · `link` |
-| **Sizes** | `default` · `sm` · `lg` · `icon` · `pill` (rounded-full) |
-| **Props** | `loading` / `loadingText` (spinner + auto-disable) · `asChild` |
+| **Sizes** | `default` · `sm` · `lg` · `icon` (**44×44 touch target**) · `icon-sm` (36px visual + 44px hit area, for dense tables/toolbars) · `pill` (rounded-full) |
+| **Props** | `loading` / `loadingText` (spinner + auto-disable, sets `aria-busy`) · `asChild` |
+
+**Icon-only buttons must carry an `aria-label`** (the glyph is not an accessible name). For
+bespoke raw-`<button>` primitives that legitimately stay raw (kebabs, swatches, scanner /
+lightbox controls), add the `hit-area` utility class so the tap target reaches 44px without
+enlarging the visual — see the Accessibility baseline section.
 
 ## Primitives (`src/components/glass/glass.tsx`)
 
