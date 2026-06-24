@@ -118,6 +118,21 @@ glass `Alert` does this). Custom progress bars use `role="progressbar"` +
 **Viewport.** Mobile sheets/overlays use `dvh` (not `vh`); sticky/fixed bars reserve
 `env(safe-area-inset-*)`.
 
+### What's machine-enforced vs. human-reviewed
+Some of the above is checkable by tooling; the rest needs review. Both layers run:
+
+- **ESLint** (`eslint.config.js`): `eslint-plugin-jsx-a11y` recommended set as **warnings**
+  (alt-text, valid ARIA props/roles, label association, redundant roles, …); plus a custom
+  `no-restricted-syntax` rule that flags a `<Button>`/`<button>` with `size-8`/`size-9` and
+  no `hit-area`/`icon-sm` (the touch-target regression). Lint baseline is intentionally
+  dirty — the gate is **0 new errors in files you touch**.
+- **PostToolUse hook** (`.claude/hooks/no-small-touch-target.sh`): blocks AI edits that add a
+  small-touch-target icon button, mirroring `no-raw-button.sh` / `no-glass-field.sh`. Opt out
+  of either with a `touch-target-ok: <reason>` comment in the same edit (decorative-only).
+- **Human review only** (no reliable lint signal — enforce in PR review): icon-only
+  *needs aria-label*, color-not-only, contrast ratios, chart data-table, Framer
+  `useReducedMotion`. A className/AST rule can't judge these without heavy false positives.
+
 ## Component classes (`src/index.css`)
 
 - `.glass-card` — frosted floating surface (real `backdrop-filter` + opaque fallback;

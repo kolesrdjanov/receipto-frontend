@@ -66,8 +66,8 @@ export function GroupMembersPanel({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    className="size-8 shrink-0"
+                    size="icon-sm"
+                    className="shrink-0"
                     onClick={() => onRemoveMember(m)}
                     aria-label={t('common.delete')}
                   >
@@ -100,8 +100,8 @@ export function GroupMembersPanel({
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon"
-                      className="size-8 shrink-0"
+                      size="icon-sm"
+                      className="shrink-0"
                       onClick={() => onRemoveMember(m)}
                       aria-label={t('common.delete')}
                     >

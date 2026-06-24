@@ -278,8 +278,8 @@ export default function Groups() {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  className="size-8 shrink-0"
+                  size="icon-sm"
+                  className="shrink-0"
                   onClick={() => handleDecline(inv.group.id)}
                   disabled={declineInvite.isPending}
                   aria-label={t('groups.inviteDeclined')}

@@ -2,8 +2,17 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
+
+// jsx-a11y's recommended set, with every rule forced to `warn`. The repo lint
+// baseline is intentionally dirty (gate = 0 NEW errors in touched files), so a11y
+// findings ship as warnings — visible in editors/CI, never breaking the build.
+// Promote individual rules to `error` once the codebase is clean for them.
+const jsxA11yWarn = Object.fromEntries(
+  Object.keys(jsxA11y.flatConfigs.recommended.rules).map((rule) => [rule, 'warn']),
+)
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -18,6 +27,39 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+  },
+  {
+    // Accessibility baseline (docs/design-system.md → "Accessibility baseline").
+    // jsx-a11y recommended set, as warnings. Catches alt-text, invalid ARIA props/
+    // roles, redundant roles, label associations, etc. — the machine-checkable slice
+    // of the audit rules. (Touch targets, "icon-only needs aria-label", and
+    // color-not-only stay human-reviewed; see the custom rule + the doc.)
+    files: ['**/*.tsx'],
+    plugins: { 'jsx-a11y': jsxA11y },
+    rules: jsxA11yWarn,
+  },
+  {
+    // Touch-target guardrail: a 32/36px icon button (size-8 / size-9) must declare a
+    // 44px hit area — either the `hit-area` utility (raw buttons) or <Button size="icon"
+    // | "icon-sm">. Catches the single most-repeated finding from the 2026-06-24 audit.
+    // Primitive layer is NOT exempt (this is exactly where the small kebabs/swatches
+    // live and need hit-area). Add `// eslint-disable-next-line no-restricted-syntax --
+    // touch-target-ok: <reason>` for the rare legitimate exception (e.g. a decorative
+    // non-interactive box that merely happens to be size-8).
+    files: ['**/*.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'warn',
+        {
+          // className literal containing size-8 or size-9 but NOT hit-area.
+          // Matches both the standalone size and a trailing-space-delimited token.
+          selector:
+            "JSXElement[openingElement.name.name=/^(Button|button)$/]:has(JSXAttribute[name.name='className'] > Literal[value=/(^|\\s)size-[89]($|\\s)/]):not(:has(Literal[value=/hit-area/]))",
+          message:
+            'A size-8/size-9 element that is interactive needs a 44px touch target: add the `hit-area` utility (raw <button>) or use <Button size="icon"|"icon-sm">. See docs/design-system.md → Accessibility baseline. If this element is purely decorative/non-interactive, add `// eslint-disable-next-line no-restricted-syntax -- touch-target-ok: <reason>`.',
+        },
+      ],
     },
   },
   {
@@ -36,6 +78,12 @@ export default defineConfig([
           selector: "JSXOpeningElement[name.name='button']",
           message:
             'Use the shared <Button> from @/components/ui/button instead of a raw <button> (variants: brand/glass/destructive-soft/etc.). Raw <button> belongs only in the primitive layer (components/ui, components/glass, *primitives.tsx), or add `// eslint-disable-next-line no-restricted-syntax -- raw-button-ok: <reason>`.',
+        },
+        {
+          selector:
+            "JSXElement[openingElement.name.name=/^(Button|button)$/]:has(JSXAttribute[name.name='className'] > Literal[value=/(^|\\s)size-[89]($|\\s)/]):not(:has(Literal[value=/hit-area/]))",
+          message:
+            'A size-8/size-9 element that is interactive needs a 44px touch target: add the `hit-area` utility (raw <button>) or use <Button size="icon"|"icon-sm">. See docs/design-system.md → Accessibility baseline. If this element is purely decorative/non-interactive, add `// eslint-disable-next-line no-restricted-syntax -- touch-target-ok: <reason>`.',
         },
       ],
     },
@@ -76,6 +124,8 @@ export default defineConfig([
     // Grandfathered files with pre-existing raw <button> (mostly legitimate bespoke
     // controls — scanners, lightbox toolbars, table kebabs, filter chips). Downgraded
     // to `warn` so the baseline stays green; migrate + delete entries over time.
+    // NOTE: the touch-target selector is re-listed here as `warn` too, so these files
+    // keep both raw-button and touch-target findings at warn (not error).
     files: [
       'src/components/admin/announcements-table.tsx',
       'src/components/admin/ratings-table.tsx',
@@ -120,6 +170,12 @@ export default defineConfig([
           selector: "JSXOpeningElement[name.name='button']",
           message:
             'Use the shared <Button> from @/components/ui/button instead of a raw <button> (variants: brand/glass/destructive-soft/etc.). Raw <button> belongs only in the primitive layer (components/ui, components/glass, *primitives.tsx), or add `// eslint-disable-next-line no-restricted-syntax -- raw-button-ok: <reason>`.',
+        },
+        {
+          selector:
+            "JSXElement[openingElement.name.name=/^(Button|button)$/]:has(JSXAttribute[name.name='className'] > Literal[value=/(^|\\s)size-[89]($|\\s)/]):not(:has(Literal[value=/hit-area/]))",
+          message:
+            'A size-8/size-9 element that is interactive needs a 44px touch target: add the `hit-area` utility (raw <button>) or use <Button size="icon"|"icon-sm">. See docs/design-system.md → Accessibility baseline. If this element is purely decorative/non-interactive, add `// eslint-disable-next-line no-restricted-syntax -- touch-target-ok: <reason>`.',
         },
       ],
     },
