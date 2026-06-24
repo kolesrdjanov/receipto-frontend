@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -68,6 +69,7 @@ export function GlassDialog({
 }: GlassDialogProps) {
   const isMobile = useIsMobile(768)
   const reduce = useReducedMotion()
+  const { t } = useTranslation()
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -142,8 +144,8 @@ export function GlassDialog({
                     <button
                       type="button"
                       onClick={() => onOpenChange(false)}
-                      aria-label="Close"
-                      className="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+                      aria-label={t('common.close')}
+                      className="hit-area absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
                     >
                       <X className="size-[18px]" />
                     </button>

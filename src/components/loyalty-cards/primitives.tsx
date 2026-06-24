@@ -44,7 +44,8 @@ export function ColorSwatches({ value, onChange }: { value?: string; onChange: (
             aria-pressed={on}
             onClick={() => onChange(hex)}
             className={cn(
-              'grid size-[34px] place-items-center rounded-full outline-none transition-transform',
+              'grid size-[34px] place-items-center rounded-full transition-transform',
+              'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
               'hover:scale-[1.08] focus-visible:scale-[1.08]',
             )}
             style={{
@@ -143,7 +144,7 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
                 <button
                   type="button"
                   aria-label={t('loyaltyCards.actions')}
-                  className="grid size-8 place-items-center rounded-[9px] text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+                  className="hit-area grid size-8 place-items-center rounded-[9px] text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
                 >
                   <MoreVertical className="size-[18px]" />
                 </button>
@@ -165,7 +166,7 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
               e.stopPropagation()
               onOpenActions?.(card)
             }}
-            className="grid size-8 shrink-0 place-items-center rounded-[9px] text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground md:hidden"
+            className="hit-area grid size-8 shrink-0 place-items-center rounded-[9px] text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground md:hidden"
           >
             <MoreVertical className="size-[18px]" />
           </button>

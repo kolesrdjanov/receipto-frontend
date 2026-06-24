@@ -10,6 +10,28 @@ body {
   overscroll-behavior: none;
 }
 
+/* Touch-target helper: keeps a small visual glyph but guarantees a >=44px tappable
+   area (WCAG 2.5.5 / Apple HIG) via a centered pseudo-element. Apply to bespoke
+   raw-<button> primitives (kebabs, swatches, scanner/lightbox controls) that stay
+   raw by design; app-level icon buttons use <Button size="icon"> which is already
+   44px. The element must be `position: relative`. */
+@utility hit-area {
+  position: relative;
+}
+@utility hit-area {
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

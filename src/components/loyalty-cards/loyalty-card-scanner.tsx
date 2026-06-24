@@ -142,7 +142,7 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
                     type="button"
                     onClick={() => onOpenChange(false)}
                     aria-label={t('common.cancel')}
-                    className="grid size-9 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                    className="hit-area grid size-9 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
                   >
                     <X className="size-[18px]" />
                   </button>

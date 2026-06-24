@@ -372,10 +372,10 @@ export function UsersTable() {
                     <TableCell className="whitespace-nowrap text-muted-foreground">{formatDateTime(user.createdAt)}</TableCell>
                     <TableCell className="pr-5 sm:pr-[22px]">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="size-8" title={t('admin.users.viewDetails', { defaultValue: 'View details' })} onClick={() => handleViewDetails(user.id)}>
+                        <Button variant="ghost" size="icon-sm" aria-label={t('admin.users.viewDetails', { defaultValue: 'View details' })} title={t('admin.users.viewDetails', { defaultValue: 'View details' })} onClick={() => handleViewDetails(user.id)}>
                           <Eye className="size-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" title={t('admin.users.table.delete')} onClick={() => handleDeleteClick({ id: user.id, email: user.email })}>
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" aria-label={t('admin.users.table.delete')} title={t('admin.users.table.delete')} onClick={() => handleDeleteClick({ id: user.id, email: user.email })}>
                           <Trash2 className="size-4" />
                         </Button>
                       </div>

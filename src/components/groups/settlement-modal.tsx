@@ -94,7 +94,7 @@ export function SettlementModal({
               type="button"
               aria-label={memberFirstName(m.user)}
               onClick={() => onChange(m.userId)}
-              className={`rounded-full border-2 transition-opacity ${m.userId === value ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-80'}`}
+              className={`hit-area rounded-full border-2 transition-opacity ${m.userId === value ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-80'}`}
             >
               <GMemberAvatar user={m.user} self={m.userId === user?.id} size={22} />
             </button>

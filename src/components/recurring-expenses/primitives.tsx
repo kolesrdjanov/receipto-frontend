@@ -196,7 +196,7 @@ export function RecurringRow({
               <button
                 type="button"
                 aria-label={t('recurring.table.actions')}
-                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground hit-area"
               >
                 <MoreVertical className="size-[18px]" />
               </button>
@@ -222,7 +222,7 @@ export function RecurringRow({
             ev.stopPropagation()
             onOpenActions?.(e)
           }}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground hit-area"
         >
           <MoreVertical className="size-[18px]" />
         </button>

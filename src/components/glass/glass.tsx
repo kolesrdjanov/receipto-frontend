@@ -176,13 +176,17 @@ export function Alert({
 }) {
   return (
     <div
+      // Errors interrupt (assertive); success/info/warn announce politely. role=alert
+      // + aria-live ensures screen readers announce the message when it appears.
+      role={kind === 'err' ? 'alert' : 'status'}
+      aria-live={kind === 'err' ? 'assertive' : 'polite'}
       className={cn(
         'mb-4 flex items-start gap-2.5 rounded-[10px] px-3.5 py-3 text-[13px] font-medium leading-relaxed',
         ALERT_STYLES[kind],
         className,
       )}
     >
-      {Icon && <Icon className="mt-px size-4 shrink-0" />}
+      {Icon && <Icon className="mt-px size-4 shrink-0" aria-hidden="true" />}
       <div className="flex-1">{children}</div>
     </div>
   )

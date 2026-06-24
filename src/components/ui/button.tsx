@@ -40,7 +40,13 @@ const buttonVariants = cva(
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 px-8",
-        icon: "h-9 w-9",
+        // Icon button: 44x44 true touch target (WCAG 2.5.5 / Apple HIG). The glyph
+        // is sized by the global `[&_svg]:size-4` base; the box provides the tap area.
+        icon: "size-11",
+        // Dense icon button (toolbars / table rows): compact 36px visual but a >=44px
+        // hit area via a centered pseudo-element, so touch usability is preserved.
+        "icon-sm":
+          "size-9 relative after:absolute after:left-1/2 after:top-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-['']",
         // Rounded-full action pill used across the glass toolbars / bulk bars.
         pill: "h-9 rounded-full px-3.5",
       },

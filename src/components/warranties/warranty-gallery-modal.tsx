@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X, ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 interface WarrantyGalleryModalProps {
@@ -28,6 +29,7 @@ export function WarrantyGalleryModal({
   images,
   initialIndex = 0,
 }: WarrantyGalleryModalProps) {
+  const { t } = useTranslation()
   const safeImages = useMemo(() => images.filter(Boolean), [images])
 
   const clampIndex = useCallback(
@@ -109,7 +111,7 @@ export function WarrantyGalleryModal({
     return l.endsWith('.pdf') || l.includes('/raw/upload/')
   }
   const topBtn =
-    'grid size-[38px] place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:opacity-40'
+    'hit-area grid size-[38px] place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 disabled:opacity-60'
 
   // Full-bleed dark lightbox: raw Radix Dialog (no shadcn DialogContent) so there's no
   // default padding/rounded surface and no built-in close button — the only close is ours.
@@ -128,13 +130,13 @@ export function WarrantyGalleryModal({
                 {title}
               </DialogPrimitive.Title>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={handleOpenNewTab} disabled={!current} title="Open" className={topBtn}>
+                <button type="button" onClick={handleOpenNewTab} disabled={!current} aria-label={t('common.openInNewTab')} title={t('common.openInNewTab')} className={topBtn}>
                   <ExternalLink className="size-[18px]" />
                 </button>
-                <button type="button" onClick={handleDownload} disabled={!current} title="Download" className={topBtn}>
+                <button type="button" onClick={handleDownload} disabled={!current} aria-label={t('common.download')} title={t('common.download')} className={topBtn}>
                   <Download className="size-[18px]" />
                 </button>
-                <button type="button" onClick={() => onOpenChange(false)} title="Close" className={topBtn}>
+                <button type="button" onClick={() => onOpenChange(false)} aria-label={t('common.close')} title={t('common.close')} className={topBtn}>
                   <X className="size-[18px]" />
                 </button>
               </div>
@@ -159,7 +161,8 @@ export function WarrantyGalleryModal({
                 <button
                   type="button"
                   onClick={goPrev}
-                  title="Previous"
+                  aria-label={t('common.previous')}
+                  title={t('common.previous')}
                   className="absolute left-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
                 >
                   <ChevronLeft className="size-6" />
@@ -167,7 +170,8 @@ export function WarrantyGalleryModal({
                 <button
                   type="button"
                   onClick={goNext}
-                  title="Next"
+                  aria-label={t('common.next')}
+                  title={t('common.next')}
                   className="absolute right-4 top-1/2 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
                 >
                   <ChevronRight className="size-6" />
@@ -185,8 +189,9 @@ export function WarrantyGalleryModal({
                       type="button"
                       onClick={() => setIndex(i)}
                       aria-label={`${i + 1}`}
+                      aria-current={i === index}
                       className={cn(
-                        'grid size-[42px] place-items-center rounded-lg transition-colors',
+                        'grid size-12 place-items-center rounded-lg transition-colors',
                         i === index ? 'border-2 border-white bg-white/15 text-white' : 'bg-white/10 text-white/55 hover:bg-white/20',
                       )}
                     >
