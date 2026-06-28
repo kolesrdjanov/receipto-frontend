@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
-import { CurrencySelect } from '@/components/ui/currency-select'
+import { HeaderCurrencyPill, HeaderStepper } from '@/components/layout/header-actions'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/glass/empty-state'
 import { AnnouncementBanner } from '@/components/announcements/announcement-banner'
@@ -30,7 +30,7 @@ import {
 } from '@/hooks/dashboard/use-dashboard'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
-import { ChevronLeft, ChevronRight, Coins, QrCode } from 'lucide-react'
+import { QrCode } from 'lucide-react'
 import { getDaysInMonth } from 'date-fns'
 import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
 
@@ -55,39 +55,19 @@ function DashboardControls({
   const { t } = useTranslation()
   return (
     <div className="flex items-center gap-2">
-      <div className="inline-flex h-9 items-center gap-1 rounded-full border border-border bg-card pl-2.5 pr-1">
-        <Coins className="size-4 shrink-0 text-muted-foreground" />
-        <CurrencySelect
-          value={displayCurrency}
-          onValueChange={onCurrencyChange}
-          placeholder={t('dashboard.currency')}
-          triggerClassName="h-7 border-0 bg-transparent px-1 text-[13px] font-medium shadow-none focus:ring-0 focus:ring-offset-0"
-        />
-      </div>
-      <div className="inline-flex h-9 items-center rounded-full border border-border bg-card px-1">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onPrev}
-          aria-label={t('common.previous')}
-          className="size-7 rounded-full text-fg-2"
-        >
-          <ChevronLeft className="size-4" />
-        </Button>
-        <span className="min-w-[104px] text-center text-[13px] font-semibold">{monthLabel}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onNext}
-          disabled={nextDisabled}
-          aria-label={t('common.next')}
-          className="size-7 rounded-full text-fg-2"
-        >
-          <ChevronRight className="size-4" />
-        </Button>
-      </div>
+      <HeaderCurrencyPill
+        value={displayCurrency}
+        onValueChange={onCurrencyChange}
+        placeholder={t('dashboard.currency')}
+      />
+      <HeaderStepper
+        label={monthLabel}
+        onPrev={onPrev}
+        onNext={onNext}
+        nextDisabled={nextDisabled}
+        prevLabel={t('common.previous')}
+        nextLabel={t('common.next')}
+      />
     </div>
   )
 }

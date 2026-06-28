@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
+import { HeaderIconButton } from '@/components/layout/header-actions'
 import { GroupModal } from '@/components/groups/group-modal'
 import { HubMenuDialog } from '@/components/groups/hub-menu-dialog'
 import { GAvatarStack, BalancePill } from '@/components/groups/primitives'
@@ -140,15 +141,7 @@ export default function Groups() {
   }
 
   const optionsButton = (
-    <Button
-      type="button"
-      variant="outline"
-      size="icon"
-      onClick={() => setMenuOpen(true)}
-      aria-label={t('groups.hub.options')}
-    >
-      <MoreHorizontal className="size-4" />
-    </Button>
+    <HeaderIconButton icon={MoreHorizontal} label={t('groups.hub.options')} onClick={() => setMenuOpen(true)} />
   )
 
   return (
@@ -172,26 +165,8 @@ export default function Groups() {
           <p className="mt-0.5 text-[13.5px] font-medium text-muted-foreground">{t('groups.subtitle')}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-[42px] rounded-full"
-            onClick={() => setMenuOpen(true)}
-            aria-label={t('groups.hub.options')}
-          >
-            <MoreHorizontal className="size-5" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-[42px] rounded-full"
-            onClick={openCreate}
-            aria-label={t('groups.newGroup')}
-          >
-            <Plus className="size-5" />
-          </Button>
+          <HeaderIconButton icon={MoreHorizontal} label={t('groups.hub.options')} onClick={() => setMenuOpen(true)} />
+          <HeaderIconButton icon={Plus} label={t('groups.newGroup')} onClick={openCreate} />
         </div>
       </div>
 

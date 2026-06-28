@@ -5,7 +5,8 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { CurrencySelect } from '@/components/ui/currency-select'
+import { HeaderCurrencyPill, HeaderIconButton } from '@/components/layout/header-actions'
+import { AddButton } from '@/components/glass/empty-state'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
@@ -38,7 +39,7 @@ import { GroupActivityTimeline } from '@/components/groups/group-activity-timeli
 import { GroupMembersPanel } from '@/components/groups/group-members-panel'
 import { GAvatarStack, GroupTabs } from '@/components/groups/primitives'
 import { toast } from 'sonner'
-import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Plus, Loader2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Loader2 } from 'lucide-react'
 
 const ReceiptModal = lazy(() =>
   import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
@@ -221,11 +222,7 @@ export default function GroupDetail() {
   )
 
   const currencyControl = (
-    <CurrencySelect
-      value={displayCurrency}
-      onValueChange={setDisplayCurrency}
-      triggerClassName="h-9 w-auto min-w-[90px] text-[13px]"
-    />
+    <HeaderCurrencyPill value={displayCurrency} onValueChange={setDisplayCurrency} />
   )
 
   const hero = (
@@ -500,19 +497,12 @@ export default function GroupDetail() {
           <>
             {currencyControl}
             {!isArchived && (
-              <Button variant="outline" size="icon" onClick={openScan} aria-label={t('receipts.scanQr')}>
-                <Camera className="size-4" />
-              </Button>
+              <HeaderIconButton icon={Camera} label={t('receipts.scanQr')} onClick={openScan} />
             )}
             {!isArchived && (
-              <Button variant="brand" onClick={openAdd}>
-                <Plus className="size-[17px]" />
-                {t('groups.expense.addExpense')}
-              </Button>
+              <AddButton onClick={openAdd} label={t('groups.expense.addExpense')} />
             )}
-            <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label={t('groups.menu.title')}>
-              <MoreHorizontal className="size-4" />
-            </Button>
+            <HeaderIconButton icon={MoreHorizontal} label={t('groups.menu.title')} onClick={() => setMenuOpen(true)} />
           </>
         }
       />

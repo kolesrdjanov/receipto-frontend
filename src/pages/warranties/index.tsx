@@ -266,8 +266,8 @@ export default function WarrantiesPage() {
           actions={desktopActions}
           mobileActions={
             <>
-              {importExportMenu('size-[38px]')}
-              <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} className="h-[38px] px-3.5" />
+              {importExportMenu()}
+              <AddButton onClick={handleAdd} label={t('common.add', { defaultValue: 'Add' })} />
             </>
           }
         />

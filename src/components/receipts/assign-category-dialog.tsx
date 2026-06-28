@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { cn } from '@/lib/utils'
+import { Chip } from '@/components/glass/chip'
 import type { Category } from '@/hooks/categories/use-categories'
 
 interface AssignCategoryDialogProps {
@@ -56,25 +56,16 @@ export function AssignCategoryDialog({
       }}
     >
       <div className="flex flex-wrap gap-2">
-        {categories.map((c) => {
-          const on = selectedId === c.id
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setSelectedId(c.id)}
-              className={cn(
-                'inline-flex h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold transition-colors',
-                on
-                  ? 'border-transparent bg-primary-soft text-primary'
-                  : 'border-border bg-bg-subtle text-fg-2 hover:text-foreground',
-              )}
-            >
-              {c.icon && <span className="text-[14px] leading-none">{c.icon}</span>}
-              {c.name}
-            </button>
-          )
-        })}
+        {categories.map((c) => (
+          <Chip
+            key={c.id}
+            tone="soft"
+            active={selectedId === c.id}
+            onClick={() => setSelectedId(c.id)}
+            icon={c.icon ? <span className="text-[14px] leading-none">{c.icon}</span> : undefined}
+            label={c.name}
+          />
+        ))}
       </div>
     </GlassDialog>
   )

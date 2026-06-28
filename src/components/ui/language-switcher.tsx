@@ -53,7 +53,7 @@ export function LanguageSwitcher({
       <button
         onClick={handleToggle}
         className={cn(
-          'flex items-center justify-center size-8 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors',
+          'hit-area flex items-center justify-center size-8 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors',
           className
         )}
         aria-label="Switch language"

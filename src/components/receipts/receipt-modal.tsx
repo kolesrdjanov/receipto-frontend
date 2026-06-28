@@ -33,6 +33,7 @@ import { CategorySuggestionCard } from './category-suggestion-card'
 import { toast } from 'sonner'
 import { CheckCircle2, Trash2, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Chip } from '@/components/glass/chip'
 import { getErrorMessage } from '@/lib/api'
 
 interface ReceiptModalProps {
@@ -648,20 +649,14 @@ export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, o
                   : member.user?.firstName || member.user?.lastName || member.user?.email || 'Unknown'
                 const isSelected = effectiveSplitAmong.includes(member.userId)
                 return (
-                  <button
+                  <Chip
                     key={member.userId}
-                    type="button"
+                    tone="soft"
+                    active={isSelected}
                     onClick={() => toggleMember(member.userId)}
-                    className={cn(
-                      'inline-flex h-[34px] items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold transition-colors',
-                      isSelected
-                        ? 'border-transparent bg-primary-soft text-primary'
-                        : 'border-border bg-bg-subtle text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {isSelected && <Check className="size-3.5" />}
-                    {name}
-                  </button>
+                    icon={isSelected ? <Check className="size-3.5" /> : undefined}
+                    label={name}
+                  />
                 )
               })}
             </div>

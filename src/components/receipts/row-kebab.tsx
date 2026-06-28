@@ -53,7 +53,7 @@ export function RowKebab({ receipt: r, onView, onEdit, onDelete }: RowKebabProps
           aria-label={t('common.actions')}
           data-testid={`receipt-kebab-${r.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="grid size-[34px] shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+          className="hit-area grid size-[34px] shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
         >
           <MoreVertical className="size-[18px]" />
         </button>

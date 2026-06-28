@@ -56,7 +56,7 @@ export function PageHeader({
   const mobileAction =
     mobileActions ??
     (action ? (
-      <AddButton onClick={action.onClick} label={action.label} icon={action.icon} className="h-[38px] px-3.5" />
+      <AddButton onClick={action.onClick} label={action.label} icon={action.icon} />
     ) : undefined)
 
   const mSub = mobileSubtitle ?? subtitle

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Info, CheckSquare, X } from 'lucide-react'
 import { Amount } from '@/components/receipts/primitives'
+import { Button } from '@/components/ui/button'
 import { useCurrencyConverter } from '@/hooks/currencies/use-currency-converter'
 import type { CurrencyTotal } from '@/hooks/receipts/use-receipts'
 
@@ -40,13 +41,10 @@ export function ExpensesSummary({
           <span className="text-sm text-muted-foreground">·</span>
           <Amount value={selectedTotal} currency={preferredCurrency} size={15} muted />
         </div>
-        <button
-          onClick={onToggleSelectMode}
-          className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle hover:text-foreground"
-        >
+        <Button variant="glass" size="pill" onClick={onToggleSelectMode}>
           <X className="size-3.5" />
           {t('common.cancel')}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -72,13 +70,10 @@ export function ExpensesSummary({
             {t('common.pagination.showing', { from: rangeFrom, to: rangeTo, total })}
           </span>
         )}
-        <button
-          onClick={onToggleSelectMode}
-          className="inline-flex h-[30px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle hover:text-foreground"
-        >
+        <Button variant="glass" size="pill" onClick={onToggleSelectMode}>
           {selectMode ? <X className="size-3.5" /> : <CheckSquare className="size-3.5" />}
           {selectMode ? t('common.cancel') : t('receipts.select')}
-        </button>
+        </Button>
       </span>
     </div>
   )

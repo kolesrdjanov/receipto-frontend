@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowDownUp, Upload, Download, type LucideIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { HeaderIconButton } from '@/components/layout/header-actions'
 
 /**
  * Shared row for glass popover menus (the receipts `+` menu pattern), so
@@ -40,7 +40,7 @@ interface ImportExportMenuProps {
   ariaLabel: string
   importDisabled?: boolean
   exportDisabled?: boolean
-  /** Extra classes for the round trigger (e.g. `size-9` in compact headers). */
+  /** Extra classes for the round trigger. */
   triggerClassName?: string
 }
 
@@ -61,16 +61,7 @@ export function ImportExportMenu({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          className={cn(
-            'grid size-10 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground shadow-glass-1 transition-colors hover:bg-bg-subtle',
-            triggerClassName,
-          )}
-        >
-          <ArrowDownUp className="size-[18px]" />
-        </button>
+        <HeaderIconButton icon={ArrowDownUp} label={ariaLabel} className={triggerClassName} />
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-[210px] rounded-xl border-border bg-popover p-1.5 shadow-lg">
         <GlassMenuItem icon={Upload} label={importLabel} onClick={run(onImport)} disabled={importDisabled} />

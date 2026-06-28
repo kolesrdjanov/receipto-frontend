@@ -166,6 +166,33 @@ bespoke raw-`<button>` primitives that legitimately stay raw (kebabs, swatches, 
 lightbox controls), add the `hit-area` utility class so the tap target reaches 44px without
 enlarging the visual — see the Accessibility baseline section.
 
+## Header action rows (`src/components/layout/header-actions.tsx`)
+
+**One 40px pill language for every page toolbar + mobile header — never hand-roll toolbar
+controls.** Every control in a header row is exactly **40px tall**, `rounded-full`, with
+`gap-2` between them (the `PageToolbar` default). Compose from these — they're the single
+source of truth, so the row can't drift screen-to-screen (the bug this section fixed):
+
+| Control | Component | Notes |
+|---|---|---|
+| Brand CTA | `AddButton` (`glass/empty-state`) | `h-10 rounded-full` gradient pill — the only header CTA |
+| Icon button | `HeaderIconButton` | 40px circle (camera, overflow, `+`, import/export); 40px visual + ≥44px `hit-area`; requires `label` |
+| Currency switcher | `HeaderCurrencyPill` | the **single** currency control (dashboard, group detail, …) — wraps `CurrencySelect`; don't re-wrap it per screen |
+| Period stepper | `HeaderStepper` | 40px `‹ label ›` pill (dashboard month switcher) |
+
+`ImportExportMenu` and the receipts `AddMenu` `+` trigger both compose `HeaderIconButton`.
+Do **not** reintroduce `h-9`/`size-11`/`size-10`/`h-[38px]` header controls — they were the
+mismatched heights this system replaced.
+
+## Chips (`src/components/glass/chip.tsx`)
+
+`Chip` is the **one** chip/pill toggle for the whole app — a 36px `rounded-full` bordered
+pill with a ≥44px tap target, `tone` `dark` (high-contrast page chips) / `soft`
+(primary-tinted, for cards/dialogs/sheets). Use it for every filter / category / member
+picker. `receipts/filter-chip` is a thin re-export of it. Don't hand-roll
+`h-[3Npx] … rounded-full … px-3.5` chips per screen. For a **non-toggle** action pill use
+`<Button variant="glass" size="pill">` (e.g. the receipts Select/Cancel buttons).
+
 ## Primitives (`src/components/glass/glass.tsx`)
 
 Generic, reusable across the app:

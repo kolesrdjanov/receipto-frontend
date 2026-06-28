@@ -6,6 +6,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { GlassMenuItem as MenuItem } from '@/components/glass/import-export-menu'
+import { HeaderIconButton } from '@/components/layout/header-actions'
 import { cn } from '@/lib/utils'
 
 /* ---------- desktop "+" popover menu ---------- */
@@ -26,13 +27,7 @@ export function AddMenu({ onAddBlank, onAddFromTemplate, onImport, onExport }: A
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={t('receipts.addManually')}
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-border bg-card text-foreground shadow-glass-1 transition-colors hover:bg-bg-subtle"
-        >
-          <Plus className="size-[18px]" />
-        </button>
+        <HeaderIconButton icon={Plus} label={t('receipts.addManually')} />
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-[210px] rounded-xl border-border bg-popover p-1.5 shadow-lg">
         <MenuItem icon={Plus} label={t('receipts.addBlank')} onClick={run(onAddBlank)} />
