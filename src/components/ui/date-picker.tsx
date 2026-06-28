@@ -97,9 +97,9 @@ export function DatePicker({
     ? format(selectedDate, "dd.MM.yyyy")
     : null
 
-  // Generate years array (100 years back from current year)
+  // Generate years array (100 years back to 50 years forward from current year)
   const currentYear = getYear(new Date())
-  const years = Array.from({ length: 101 }, (_, i) => currentYear - 100 + i)
+  const years = Array.from({ length: 151 }, (_, i) => currentYear - 100 + i)
 
   const months = [
     "January", "February", "March", "April", "May", "June",
