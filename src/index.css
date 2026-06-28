@@ -14,10 +14,7 @@ body {
    area (WCAG 2.5.5 / Apple HIG) via a centered pseudo-element. Apply to bespoke
    raw-<button> primitives (kebabs, swatches, scanner/lightbox controls) that stay
    raw by design; app-level icon buttons use <Button size="icon"> which is already
-   44px. The element must be `position: relative`. */
-@utility hit-area {
-  position: relative;
-}
+   44px. */
 @utility hit-area {
   &::after {
     content: "";
@@ -29,6 +26,17 @@ body {
     min-height: 44px;
     width: 100%;
     height: 100%;
+  }
+}
+
+/* The ::after needs a positioned ancestor. Provide one at zero specificity via
+   :where() so an explicit positioning utility on the same element (e.g. the
+   `absolute` on a GlassDialog close button) always wins — otherwise a plain
+   `.hit-area { position: relative }` would override `absolute` (equal specificity,
+   later source order) and drop the element into normal flow. */
+@layer utilities {
+  :where(.hit-area) {
+    position: relative;
   }
 }
 
