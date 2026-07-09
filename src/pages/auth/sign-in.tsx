@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Mail, MailCheck, CircleAlert, CircleCheck, ArrowLeft, RotateCcw, Loader2 } from 'lucide-react'
+import { Mail, MailCheck, CircleAlert, CircleCheck, RotateCcw, Loader2 } from 'lucide-react'
 import { AuthLayout } from '@/components/layout/auth-layout'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { CardHead, EmailChip } from '@/components/auth/glass'
@@ -154,7 +154,7 @@ export default function SignIn() {
           <CardHead badge={MailCheck} title={t('auth.signIn.codeTitle')} subtitle={t('auth.signIn.codeSubtitle')} />
 
           <div className="-mt-1 mb-1 flex justify-center">
-            <EmailChip email={email} />
+            <EmailChip email={email} onChange={backToEmail} changeLabel={t('auth.signIn.changeEmail')} />
           </div>
 
           {error && (
@@ -219,17 +219,6 @@ export default function SignIn() {
             )}
           </Button>
 
-          <div className="mt-5">
-            <Button
-              type="button"
-              variant="link"
-              onClick={backToEmail}
-              className="h-auto gap-1.5 p-0 text-[13px] font-semibold text-primary"
-            >
-              <ArrowLeft className="size-3.5" />
-              {t('auth.signIn.changeEmail')}
-            </Button>
-          </div>
         </div>
       )}
     </AuthLayout>

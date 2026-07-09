@@ -1,85 +1,99 @@
 # Receipto "Luma" Design System
 
-> **Superseded — "Glass" → "Luma" (2026).** The app migrated from the old emerald **"Glass"**
-> system (frosted `backdrop-filter` surfaces, brand gradients, Plus Jakarta Sans) to flat,
-> monochrome **"Luma"**: neutral base, **near-black primary**, 1px hairline borders, minimal
-> shadow, **Geist / Geist Mono** typography, and **red reserved strictly for
-> destructive/expired/you-owe** states. Token *names* were kept (values remapped in
-> `src/index.css`), so the primitives below still apply — but read every "emerald / brand
-> gradient / frosted" mention as its Luma equivalent (monochrome / `bg-primary` / flat `.card`).
-> The authoritative migration record is `docs/luma-redesign-progress.md`. Category and
-> loyalty-card per-item colors are the one retained color exception.
+Luma is the app-wide visual system: **flat, monochrome, near-black primary** — neutral
+surfaces, 1px hairline borders, minimal shadow, **Geist / Geist Mono** typography, and
+**red (`--destructive`) as the only chromatic hue**, reserved for destructive, expired,
+overdue, and you-owe states. It replaced the emerald "Glass" system (frosted
+`backdrop-filter` surfaces, brand gradients, Plus Jakarta Sans) in 2026; the migration
+record lives in `docs/luma-redesign-progress.md` and the remediation plan in
+`docs/luma-remediation-plan.md`.
 
-This is the reference for the design system. **Compose from here — don't re-derive per screen.**
-The foundation is `src/index.css` (tokens, `.t-*` type scale, utilities) + `src/components/glass/`
-+ `src/components/ui/`.
+This is the reference. **Compose from here — don't re-derive per screen.** The
+foundation is `src/index.css` (tokens, `.t-*` type scale, utilities) +
+`src/components/glass/` (shared list/overlay primitives) + `src/components/ui/`
+(shadcn-derived controls).
 
 ## Principle
 
-Keep the **shadcn token base** (`--background`/`--foreground`/`--border`/`--radius`/…)
-untouched. The glass system is an **additive layer** on top of it, expressed through
-Tailwind utilities + a small number of component classes. No parallel token system, no
-mass renames.
+One locked set of primitives; every screen is a composition of them. The system exists
+to stop consistency drift — if a screen needs a new look for an input, chip, card, or
+badge, extend the shared primitive (new variant/prop), never redraw it locally. Token
+*names* kept the shadcn vocabulary (`--background`/`--card`/`--primary`/…), so shadcn
+components drop in unchanged; the *values* are Luma.
 
 ## Tokens (`src/index.css`)
 
 All tokens have light (`:root`) and dark (`.dark`) values and are registered in
-`@theme inline`, so they're available as Tailwind utilities.
+`@theme inline`, so each is available as a Tailwind utility (`bg-subtle`,
+`text-fg-faint`, …).
 
-### Brand (logo + primary CTA only)
-`--brand-emerald`, `--brand-cyan`, `--brand-violet`. Used by `.btn-brand` /
-`.bg-brand-gradient` and `BrandWash`. **Do not** use the gradient for anything else —
-that restraint is what makes the system feel calm/Apple-like.
+### Color
 
-`--brand-pink` is an extra brand hue (no dark variant, like the others — tints
-recompute L/C). It is **not** part of the gradient; it only feeds the `.icon-tile-pink`
-accent tile.
+Fully monochrome (chroma 0) except the destructive family:
 
-### Semantic colors (alerts, badges, strength meter)
-| Token | Utility | Use |
-|---|---|---|
-| `--success` / `--success-soft` / `--success-foreground` | `bg-success` / `bg-success-soft` / `text-success-foreground` | ok states |
-| `--warning` / `--warning-soft` / `--warning-foreground` | `bg-warning` / `bg-warning-soft` / `text-warning-foreground` | warn states |
-| `--info` / `--info-soft` / `--info-foreground` | `bg-info` / `bg-info-soft` / `text-info-foreground` | info states |
-| `--destructive` (shadcn) + `--destructive-soft` / `--destructive-foreground-on-soft` | `bg-destructive` / `bg-destructive-soft` / `text-[color:var(--destructive-foreground-on-soft)]` | danger/error; `*-soft` = tinted danger surfaces (failed status badge, delete confirm icon, mobile bulk Remove) |
-| `--brand-violet-soft` / `--brand-violet-foreground` | `bg-brand-violet-soft` / `text-brand-violet-foreground` | the recurring status badge (the one non-gradient use of the violet hue) |
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `--background` | `oklch(0.985 0 0)` | `oklch(0.165 0 0)` | page wash |
+| `--card` / `--popover` | `oklch(1 0 0)` | `oklch(0.205 0 0)` | elevated surfaces |
+| `--foreground` | `oklch(0.205 0 0)` | `oklch(0.985 0 0)` | primary text |
+| `--muted-foreground` | `oklch(0.556 0 0)` | `oklch(0.68 0 0)` | secondary text |
+| `--fg-2` | `oklch(0.45 0 0)` | `oklch(0.78 0 0)` | mid-tone text |
+| `--fg-faint` | `oklch(0.65 0 0)` | `oklch(0.6 0 0)` | tertiary / placeholder (AA-tuned) |
+| `--border` | `oklch(0.922 0 0)` | `oklch(1 0 0 / .10)` | hairlines + dividers |
+| `--border-strong` | `oklch(0.87 0 0)` | `oklch(1 0 0 / .18)` | switch track, scrollbar, grab handle |
+| `--subtle` / `--bg-subtle` | `oklch(0.968 0 0)` | `oklch(0.255 0 0)` | tiles, tracks, hover fill |
+| `--primary` | `oklch(0.205 0 0)` | `oklch(0.985 0 0)` | buttons/active (inverts in dark) |
+| `--ring` | `oklch(0.708 0 0)` | `oklch(0.556 0 0)` | focus ring |
+| `--destructive` | `oklch(0.55 0.2 27)` | `oklch(0.68 0.19 25)` | destructive fill |
+| `--destructive-soft` | `oklch(0.955 0.03 25)` | `oklch(0.3 0.07 25)` | danger-soft bg |
+| `--destructive-foreground-on-soft` | `oklch(0.5 0.2 27)` | `oklch(0.82 0.12 25)` | text on danger-soft |
 
-`*-soft` = tinted background; `*-foreground` = readable text **on** that soft
-background (darker in light mode, lighter in dark).
+- `--success`/`--warning`/`--info` (+ `-soft`/`-foreground`) and the `--brand-*` stops
+  are **neutralized to zero-chroma greys** — legacy call sites render monochrome. Don't
+  build new UI on them; use the neutral tiers or `--destructive` explicitly.
+- **Never re-inject chroma** onto a neutralized token (`oklch(from var(--success) L C h)`
+  was a real bug — it rendered pink). Grep for `oklch(from` if a status tint ever looks
+  colored.
+- Charts are monochrome: `--chart-1…5` is a grey ramp; the near-black tier marks the
+  peak/emphasis. Per-category and per-loyalty-card **data colors are the one retained
+  exception** (user-owned hex, independent of tokens; neutral fallbacks
+  `DEFAULT_CATEGORY_COLOR = #6B7280`, grey ramps for colorless categories).
 
-### Depth tiers (additive to shadcn)
-`--bg-subtle` (`bg-bg-subtle`), `--hairline-soft` (`border-hairline-soft`),
-`--fg-faint` (`text-fg-faint`, for placeholders/faint icons), `--fg-2`
-(`text-fg-2`, mid-tone text between `--foreground` and `--muted-foreground`),
-`--primary-soft` (`bg-primary-soft`, tinted primary; **accent-aware** — derived from `--primary`).
+### Elevation & radii
 
-### Shadow scale
-`--sh-1..4` → `shadow-glass-1 … shadow-glass-4` (heavier in dark).
+Flat by default — borders do the work.
 
-### Radii (reuse shadcn — no new scale)
-The handoff's `--r-1..6` map onto the existing shadcn radius utilities to avoid
-colliding with Tailwind's `rounded-r-*` (right-side) utilities:
-`r-2`=`rounded-lg` (10) · `r-3`=`rounded-xl` (14, glass fields) ·
-`r-4`=`rounded-2xl` (18, badges) · `r-5`=`rounded-3xl` (22) · `r-pill`=`rounded-full`.
-The glass card uses a literal `28px` inside `.glass-card`.
+- `--shadow-1` resting (`0 1px 2px / .05`), `--shadow-2` floating (popovers, sheets,
+  toasts, modals; `0 8px 30px / .12` light, `/ .5` dark). Legacy `--sh-*` /
+  `shadow-glass-*` aliases collapse onto these two tiers.
+- Radius base `--radius: 0.625rem` (10px) → controls are `rounded-lg`; tiles 12px
+  (`rounded-xl`); cards/sheets 16px (`rounded-2xl`); pills/chips/avatars/FAB
+  `rounded-full`. Mobile sheets: 24px top corners.
+- Spacing on a 4px grid; **44px minimum touch target** (see a11y baseline).
 
-### Accent lock — now app-wide (accent picker retired)
-The 6-swatch accent picker was **retired** in the settings redesign: base `:root`/`.dark`
-`--primary` (+ `--ring`) point directly at brand emerald, `--primary-soft` auto-derives via
-`oklch(from var(--primary) …)`, the six `.accent-*` blocks were removed from `index.css`, and
-`applyAccentColor()` in `store/settings.ts` (+ the `ThemeInitializer` in `App.tsx`) only strip
-stale `accent-*` classes — they add none. So the whole app renders emerald; the accent-aware
-sidebar active state (`bg-primary-soft text-primary`) simply reads emerald now. `.auth-emerald`
-/ `.onboarding-emerald` remain (redundant but harmless). The `accentColor` store field + setter +
-type are kept (dead for theming) for safe migration — sweep later with product sign-off.
+### Legacy Glass aliases
+
+`.glass-card` (→ flat card: `bg-card` + hairline + 16px radius + `--shadow-2`),
+`.btn-brand`/`.btn-violet` (→ primary fill), `.bg-brand-gradient` (→ solid primary),
+`.icon-tile-*` (→ neutral subtle tile) are kept as thin flat aliases in `index.css` so
+stragglers render monochrome. Don't use them in new code — write plain tokens.
 
 ## Type scale (`.t-*`)
 
-`.t-display` (44/800) · `.t-h1` (32/700) · `.t-h2` (24/700) · `.t-h3` (20/600) ·
-`.t-title` (17/600) · `.t-body` (15/400) · `.t-body-strong` (15/600) · `.t-sm` (13/500) ·
-`.t-xs` (11/600, uppercase, tracked). Use these for
-headings/labels instead of ad-hoc `text-2xl font-bold`. (Numbers/amounts render in the normal
-body font — **no** `tabular-nums`/`.t-num`; that utility was retired.)
+Geist everywhere; Geist Mono (`font-mono`) only for codes, invite URLs, receipt IDs.
+`.t-num` is retired — amounts render in normal Geist.
+
+| Class | Spec | Use |
+|---|---|---|
+| `.t-display` | 38/600, −0.03em | rare page hero |
+| `.t-h1` | 26/600, −0.02em | page title |
+| `.t-h2` | 21/600 | section title |
+| `.t-h3` | 17/600 | dialog titles |
+| `.t-title` | 16/600 | card titles, store names |
+| `.t-body` | 15/400 | default |
+| `.t-body-strong` | 15/600 | amounts, emphasis |
+| `.t-sm` | 13/500 | meta, muted labels |
+| `.t-xs` | 11/600, +0.06em, UPPERCASE | section eyebrows, table headers |
 
 ## Accessibility baseline (WCAG AA — enforced)
 
@@ -95,8 +109,8 @@ found each of them violated repeatedly, so treat them as non-negotiable, not asp
 has visible text, mark its decorative icon `aria-hidden="true"` so it isn't double-read.
 
 **Color is never the only signal.** Status / trend / urgency / "best price" etc. must pair
-color with an icon **and/or** text. (Most Glass badges already do — `StatusBadge` always
-renders its label; keep it that way.)
+color with an icon **and/or** text. (`StatusBadge` always renders its label; keep it
+that way.)
 
 **Contrast.** Body/label text ≥ 4.5:1 on its background. `--fg-faint` is tuned to AA
 (~4.65:1 light / ~5.44:1 dark) — verify any new low-emphasis token the same way; don't
@@ -109,7 +123,8 @@ without a replacement ring.
 
 **Motion.** The global `@media (prefers-reduced-motion)` rule in `index.css` neutralizes
 CSS `animation`/`transition`. **Framer Motion is NOT covered** — guard Framer animations
-with `useReducedMotion()` (collapse to opacity/instant). `GlassDialog` already does this.
+with `useReducedMotion()` (collapse to opacity/instant). `GlassDialog` and the
+onboarding tour already do this.
 
 **Charts** (recharts / hand-rolled SVG) aren't screen-reader accessible alone: wrap in
 `role="img"` with a summarizing `aria-label`, and provide an `sr-only` data table for the
@@ -124,6 +139,7 @@ glass `Alert` does this). Custom progress bars use `role="progressbar"` +
 `env(safe-area-inset-*)`.
 
 ### What's machine-enforced vs. human-reviewed
+
 Some of the above is checkable by tooling; the rest needs review. Both layers run:
 
 - **ESLint** (`eslint.config.js`): `eslint-plugin-jsx-a11y` recommended set as **warnings**
@@ -137,197 +153,103 @@ Some of the above is checkable by tooling; the rest needs review. Both layers ru
 - **Human review only** (no reliable lint signal — enforce in PR review): icon-only
   *needs aria-label*, color-not-only, contrast ratios, chart data-table, Framer
   `useReducedMotion`. A className/AST rule can't judge these without heavy false positives.
+- **Monochrome guardrail** (ESLint `no-restricted-syntax`, `eslint.config.js`): errors on
+  legacy chromatic palette hexes and on `oklch(from var(--…))` chroma re-injection in
+  `src/` (approved exception files — category/card palettes, Price Tracker, Admin — are
+  exempt). Opt out with a `chroma-ok: <reason>` disable comment (e.g. a brand asset).
 
-## Component classes (`src/index.css`)
+## Components
 
-- `.glass-card` — frosted floating surface (real `backdrop-filter` + opaque fallback;
-  dark gets a top highlight).
-- `.btn-brand` — brand-gradient primary CTA. **Not applied by hand** — it's the internal
-  stylesheet of `<Button variant="brand">`. Use that variant, never the class directly.
-- `.bg-brand-gradient` — soft gradient fill (progress bars, blobs).
-- `.icon-tile-{emerald,cyan,violet,pink,info,primary}` — soft accent-tinted square
-  backgrounds (light + dark), consumed by the `IconTile` primitive. Tints recompute
-  L/C from the brand/semantic token via `oklch(from …)`.
-- `.hit-area` — guarantees a ≥44px tappable area via a centered pseudo-element while
-  keeping a small visual glyph. Apply to bespoke raw-`<button>` primitives (kebabs,
-  swatches, scanner/lightbox/settle controls). App-level icon buttons use
-  `<Button size="icon">` (already 44px) instead.
+Every shared primitive below already exists — change its styling only there, never
+per-screen. (Hooks/ESLint enforce the button/input/overlay rules; see `CLAUDE.md`.)
 
-## Buttons (`src/components/ui/button.tsx`)
+- **Button** (`ui/button.tsx`) — 36px default, `rounded-lg`, `gap-2`, 14/500.
+  `default` = primary fill (hover opacity .88); `outline` = card bg + hairline (hover
+  subtle); `ghost`; `destructive` (red fill). Sizes `sm` 32 / `default` 36 / `lg` 44 /
+  `icon` 44 / `icon-sm` 36 visual with 44 hit-area / `pill`. Disabled opacity .45;
+  `loading` renders a leading spinner. Legacy `brand`/`brand-violet` alias `default`.
+- **Input / Textarea** (`ui/input.tsx`, `ui/textarea.tsx`) — 36px, `rounded-lg`, 1px
+  `--border`, `bg-card`, placeholder `--fg-faint`; focus `border-ring` + 3px `ring/25`.
+  Field label class: `fieldLabel` (12/600 `--fg-2`). Select + DatePicker triggers reuse
+  the same outline look. Auth pages (only) use the 50px glass `Field`.
+- **SelectCheck** (`glass/primitives.tsx`) — the app's checkbox: 20px, 6px radius, 2px
+  `--border-strong`; checked inverts to primary with a stroke-3 check. There is no
+  shadcn Checkbox.
+- **Switch** (`ui/switch.tsx`) — 40×23 full-radius track; off `--border-strong`, on
+  `--primary`; 18px white knob.
+- **Segmented** (`layout/theme-segmented.tsx` + inline mirrors in Settings/Loyalty) —
+  track `bg-bg-subtle p-[3px] rounded-[10px]`; options 30px `rounded-[7px]`; active
+  `bg-card + shadow-glass-1 + text-foreground`.
+- **Chip** (`glass/chip.tsx`) — 34px pill, hairline, card bg, 13/500 muted; hover
+  subtle; selected inverts to primary.
+- **StatusBadge** (`glass/primitives.tsx`) — the single status pill. Four tones:
+  `neutral` (subtle bg), `outline` (hairline, transparent), `solid` (primary), `danger`
+  (destructive-soft). Legacy tone keys (`ok`/`info` → neutral, `warn`/`violet`/`primary`
+  → solid) are remapped. Feature maps: receipts `completed·scraped·manual → neutral`,
+  `pending → outline`, `recurring → solid`, `failed → danger`; warranties `active →
+  neutral`, `expiring → solid`, `expired → danger`; recurring `overdue → danger`,
+  `duesoon → solid`, `upcoming·paid → neutral`, `paused·ended → outline` (row dimmed).
+- **ListCard + rows** (`glass/primitives.tsx`) — one rounded-2xl card whose direct
+  children are hairline-divided rows; rows hover `bg-subtle`, tap = smart-open, kebab on
+  desktop. `RowActionItem` is the shared action row (supports `danger`, and
+  `disabled`+`hint` for gated-not-hidden actions).
+- **CatTile / emoji tiles** — square `rounded-xl` `bg-subtle` tiles; uncategorized =
+  dashed hairline + receipt glyph. Category color (when set) tints at ~12% alpha.
+- **Table** (`ui/table.tsx`) — th `.t-xs`-style 11/600 uppercase `--fg-faint`, hairline
+  row dividers, last row borderless.
+- **Progress** (`ui/progress.tsx`) — 6px full-radius `bg-subtle` track, `bg-foreground`
+  fill; pass `indicatorColor: var(--destructive)` for expired/danger.
+- **Pagination** (`ui/pagination.tsx`) — 32px buttons; current = primary fill; others
+  ghost; prev/next arrows = outline.
+- **Skeleton** (`ui/skeleton.tsx`) — `bg-subtle`, 6px radius, 1.4s left-to-right
+  shimmer (`.skeleton-shimmer`).
+- **EmptyState** (`glass/empty-state.tsx`) — 56px outlined icon tile, title, muted
+  description, one primary CTA (`AddButton`).
+- **Toast** (Sonner, configured in `App.tsx`) — flat popover card, hairline, 12px
+  radius, 22px status circle (success = primary + check; error = destructive-soft + ✕);
+  bottom-right on desktop.
+- **GlassDialog** (`glass/glass-dialog.tsx`) — the one overlay shell. Desktop: centered
+  flat card, `--shadow-2`, 16px radius, hairline-separated header/footer, plain dim
+  scrim (no blur). Mobile: opaque `bg-card` bottom sheet, 24px top corners, 40×4
+  `--border-strong` grab handle (tap-to-dismiss), stacked full-width `actions`. Prefer
+  the `actions` API (TD-9). `ConfirmDialog` wraps it for destructive confirms
+  (destructive-soft icon tile, Cancel ghost + destructive fill).
 
-**One component for every button.** Never hand-roll a `<button>` with button styling — add a
-variant instead. Enforced by a PostToolUse hook + an ESLint `no-restricted-syntax` rule; raw
-`<button>` is allowed only in the primitive layer (`components/ui`, `components/glass`,
-`*primitives.tsx`) for bespoke surfaces (swatches, segmented controls, kebab triggers).
+## Brand
 
-| | |
-|---|---|
-| **Variants** | `default` · `brand` (gradient CTA) · `glass` (neutral bordered pill) · `destructive` · `destructive-soft` · `outline` · `secondary` · `ghost` · `link` |
-| **Sizes** | `default` · `sm` · `lg` · `icon` (**44×44 touch target**) · `icon-sm` (36px visual + 44px hit area, for dense tables/toolbars) · `pill` (rounded-full) |
-| **Props** | `loading` / `loadingText` (spinner + auto-disable, sets `aria-busy`) · `asChild` |
+The mark is a charcoal `#343434` rounded square with a white "R" monogram
+(`public/brand/receipto-icon.svg` + lockup; masters checked in). In-app it renders via
+the inline `LogoMark` (`ui/logo.tsx`) — brand-constant colors that do **not** invert
+with the theme, plus an `onPrimary` variant (token-driven inverse) for `--primary`
+surfaces like the auth brand panel. Favicon + PWA icon set (`public/icons/`) are
+generated from the same master: 72–152 transparent-rounded (`purpose: any`), 192/384/512
+full-bleed (`purpose: maskable any`), plus an opaque `apple-touch-icon.png`.
+Transactional emails embed `https://receipto.io/img-logo-full.png` from the marketing
+site — replace that asset there when rebranding.
 
-**Icon-only buttons must carry an `aria-label`** (the glyph is not an accessible name). For
-bespoke raw-`<button>` primitives that legitimately stay raw (kebabs, swatches, scanner /
-lightbox controls), add the `hit-area` utility class so the tap target reaches 44px without
-enlarging the visual — see the Accessibility baseline section.
+## Navigation shell (`components/layout/`)
 
-## Header action rows (`src/components/layout/header-actions.tsx`)
+- **Sidebar** (`app-sidebar.tsx`) — card bg, hairline right border; logo row (30px
+  `LogoMark` + wordmark + version); MONEY / WALLET groups with 11px uppercase faint
+  labels; items 40px `rounded-lg`, muted + 19px Lucide icons, hover subtle, **active =
+  `bg-subtle` + foreground + semibold** (monochrome — never a tinted active state);
+  footer avatar + rank + kebab popover.
+- **Page toolbar** (`page-toolbar.tsx` / `page-header.tsx`) — card bg, hairline bottom
+  border; title + 13px muted subtitle; right-side actions per page (primary CTA hidden
+  when a screen has no add action). Content is capped at **1180px** by the `<main>`
+  wrapper in `app-layout.tsx` (some pages use tighter inner caps: groups 1080,
+  settings 1000, categories 880).
+- **Mobile tab bar** (`mobile-tab-bar.tsx`) — card bg, hairline top border; Home ·
+  Expenses · **center FAB** (50px primary circle) · Warranties · More. The FAB is a
+  global context-action slot (`store/fab.ts`) each page rebinds: Expenses → scan/add,
+  Warranties → add warranty, Group detail → add expense, Hub → new group, ….
+- **Manageable pattern** — desktop kebab menu AND tappable row body; mobile row tap →
+  bottom-sheet action list that includes Delete; destructive always routes through
+  `ConfirmDialog`; disallowed actions are **gated (disabled + reason), not hidden**.
 
-**One 40px pill language for every page toolbar + mobile header — never hand-roll toolbar
-controls.** Every control in a header row is exactly **40px tall**, `rounded-full`, with
-`gap-2` between them (the `PageToolbar` default). Compose from these — they're the single
-source of truth, so the row can't drift screen-to-screen (the bug this section fixed):
+## Money & i18n
 
-| Control | Component | Notes |
-|---|---|---|
-| Brand CTA | `AddButton` (`glass/empty-state`) | `h-10 rounded-full` gradient pill — the only header CTA |
-| Icon button | `HeaderIconButton` | 40px circle (camera, overflow, `+`, import/export); 40px visual + ≥44px `hit-area`; requires `label` |
-| Currency switcher | `HeaderCurrencyPill` | the **single** currency control (dashboard, group detail, …) — wraps `CurrencySelect`; don't re-wrap it per screen |
-| Period stepper | `HeaderStepper` | 40px `‹ label ›` pill (dashboard month switcher) |
-
-`ImportExportMenu` and the receipts `AddMenu` `+` trigger both compose `HeaderIconButton`.
-Do **not** reintroduce `h-9`/`size-11`/`size-10`/`h-[38px]` header controls — they were the
-mismatched heights this system replaced.
-
-## Chips (`src/components/glass/chip.tsx`)
-
-`Chip` is the **one** chip/pill toggle for the whole app — a 36px `rounded-full` bordered
-pill with a ≥44px tap target, `tone` `dark` (high-contrast page chips) / `soft`
-(primary-tinted, for cards/dialogs/sheets). Use it for every filter / category / member
-picker. `receipts/filter-chip` is a thin re-export of it. Don't hand-roll
-`h-[3Npx] … rounded-full … px-3.5` chips per screen. For a **non-toggle** action pill use
-`<Button variant="glass" size="pill">` (e.g. the receipts Select/Cancel buttons).
-
-## Primitives (`src/components/glass/glass.tsx`)
-
-Generic, reusable across the app:
-
-| Component | Notes |
-|---|---|
-| `Field` | floating-label glass input; props `label`, `icon`, `error`, `invalid` (border-only), `trailing` |
-| `PasswordField` | `Field` + built-in eye toggle |
-| `PasswordStrengthMeter` + `scorePassword` | 4-segment meter; scoring mirrors the sign-up zod rule |
-| `Alert` | `kind`: `err`/`warn`/`ok`/`info` + leading icon |
-| `Badge` | round icon badge; `kind`: `primary`/`ok`/`danger` |
-| `Checkbox` | custom 20px control (no shadcn Checkbox in this app) |
-| `Divider` | "or" divider with hairline rules |
-| `BrandWash` | decorative blurred brand blobs |
-| `GoogleGIcon` | official 4-color Google "G" |
-| `IconTile` | 72×72 accent-tinted square; props `icon`, `accent` (`emerald`/`cyan`/`violet`/`pink`/`info`/`primary`), `size` (default 34); pairs with the `.icon-tile-*` classes |
-
-Auth-specific helpers live in `src/components/auth/glass.tsx`: `CardHead`, `EmailChip`,
-`BackLink`.
-
-`src/components/glass/glass-dialog.tsx` holds **`GlassDialog`** — the shared responsive
-overlay shell: a centered **frosted** modal on desktop (≥ md) and a slide-up bottom sheet on
-mobile, composing Radix Dialog primitives (scrim/focus-trap/Esc) + Framer Motion +
-`useReducedMotion`. Layout is header / scrollable body / pinned footer.
-
-- **Mobile sheet = opaque white** (`bg-card`), *not* the frosted desktop glass — frosted reads
-  as grey on a phone. Rounded top, top hairline, upward shadow. (Dark mode = the dark card.)
-- **Notch**: the grab handle is a `motion.button` — **tap it to dismiss** (with a `whileTap`
-  bounce). Drag-to-dismiss was intentionally dropped: tap + scrim + Esc cover it, and a plain
-  `onClick` is reliable where drag-vs-tap on one handle was not.
-- **Footer `actions` API** (preferred over the raw `footer` prop): `{ primary, secondary,
-  destructive }` → **desktop right-aligned** (destructive far-left) / **mobile full-width
-  stacked big buttons** (primary → secondary → destructive). Pass plain `<Button>`s; the shell
-  lays them out + sizes them per breakpoint. Raw `footer` stays as a legacy escape hatch (the
-  remaining modals migrate to `actions` under tech-debt TD-9).
-
-The shared `ConfirmDialog`, all Recurring overlays, the **announcements panel**, and the
-**mobile FAB Add/Scan sheet** compose from it. Use it for any new mobile-sheet/desktop-modal
-surface instead of re-deriving the pattern.
-
-### Form fields — one filled style
-`Input`, `Textarea`, and the `Select`/`CurrencySelect` triggers all share the **DatePicker's
-filled look**: `h-10 rounded-xl border-border bg-bg-subtle/70 dark:bg-input/55`, focus
-`border-primary` + `ring-4 ring-primary/15`. This is the single field appearance across every
-form — don't reintroduce `bg-transparent` / `bg-background` / `rounded-md` per field. Money &
-number amounts render in the normal body font — the `.t-num` / `tabular-nums` utility was
-**retired** (do not reintroduce it).
-
-## App navigation shell (`src/components/layout/`)
-
-The chrome that wraps every page, restyled to Glass and composed from the shadcn
-`Sidebar` primitive — **don't re-derive nav chrome per screen**:
-
-- `app-sidebar.tsx` — desktop sidebar (280px expanded / 76px icon-rail) + mobile drawer
-  (same component, rendered in the shadcn mobile `Sheet`). Data-driven `MONEY` / `WALLET`
-  nav arrays; active state = `bg-primary-soft text-primary` (accent-aware; sidebar is
-  gradient-free). Footer is a profile **popover** on desktop and an inline block in the
-  mobile drawer (`isMobile` branch). Holds the `ThemeSegmented` Light/Dark/System control
-  (now a shared component at `components/layout/theme-segmented.tsx` — icon-only here, `labeled`
-  on the App settings row).
-- `mobile-tab-bar.tsx` — Home · Expenses · gradient FAB · Warranties · More; the Warranties
-  slot falls back through the Wallet group when flag-gated off; the FAB defers to a
-  page-registered `useFabStore` action, else opens `FabActionSheet`.
-- `fab-action-sheet.tsx` — global "Add expense" `GlassDialog` (Scan / Add manually →
-  `/receipts?action=scan|add`, consumed by the Receipts page).
-- `app-layout.tsx` — **no global mobile top bar** (removed; the bottom-bar **More** tab is the
-  single mobile-nav entry — it already carries language · profile · account · theme · support).
-  Content frame carries `env(safe-area-inset-top)` so page content clears the notch; + tab bar
-  + shared modals.
-- Language toggle is `LanguageSwitcher`: desktop sidebar = `pill fullWidth` (`compact` globe on
-  the rail); **mobile = the `chip` variant in the More-drawer footer, on a 50/50 row next to
-  Contact support** (matches the `footChip` style).
-
-> Sidebar widths live on the shadcn primitive (`ui/sidebar.tsx`):
-> `SIDEBAR_WIDTH=17.5rem`, `SIDEBAR_WIDTH_ICON=4.75rem`, `SIDEBAR_WIDTH_MOBILE=min(88vw,21rem)`.
-
-## Deferred (port on first use)
-
-The handoff's `foundations.css` also defines: switch, pill. These are **not** ported yet —
-add each (here + in `index.css`/`components/glass`) when the first screen that needs it is
-migrated. Keep this list current.
-
-**Ported:** sheet/modal (`GlassDialog`), list rows + status badges
-(`receipts/primitives.tsx`, `recurring-expenses/primitives.tsx`), card grid + coverage
-bar + derived emoji tile (`warranties/primitives.tsx`), segmented control (Recurring add/edit
-form + the shell `ThemeSegmented`), tab-bar + side-nav + avatar (the navigation shell),
-widget card + head + empty/stat tiles + trend pill (`dashboard/primitives.tsx`),
-skeleton + empty state (inline per screen).
-
-## Migration order (indicative)
-
-Foundation → screen by screen. Each is its own cycle. Spec/plan templates live under
-`docs/superpowers/`.
-
-**Migrated so far:** auth (Phase 1), onboarding modal (centered glass Dialog on desktop /
-Framer-Motion slide-up bottom sheet on mobile; reuses `glass-card` + `IconTile` + the
-`.onboarding-emerald` lock), **expenses/receipts** (the full page — glass filter
-rail + mobile filter sheet, day-grouped feed with per-day subtotals [desktop numbered
-pages / mobile infinite Load-more], list primitives `StatusBadge`/`CatTile`/`CatName`/
-`Amount`/`SelectCheck` in `receipts/primitives.tsx`, `+`-menu / FAB Add sheet / glass
-template picker + CSV import guide, selection mode + glass bulk bars + desktop row kebab
-with archived/recurring gating + `GlassDialog` assign-category, and the glass scan flow
-`qr-scanner.tsx` → `GlassDialog` across all camera/processing/retry/error states; plus
-the glass shared comps confirm-dialog / pagination / date-picker / receipt-viewer),
-recurring expenses (flat urgency-sorted list, status
-scale, `GlassDialog` overlays, global mobile-FAB takeover via `store/fab.ts`), warranties
-(coverage-bar-hero cards, urgency status language, derived emoji tiles, zod-validated
-`GlassDialog` form, restyled gallery lightbox), loyalty cards (wallet-card grid),
-**navigation shell** (`app-layout`: sidebar + mobile drawer + frosted mobile header + tab
-bar/FAB + profile popover w/ theme toggle + announcements modal) — the shared chrome every
-page adopts, **settings & account** (App settings / Profile / Account / Rate modal — shared
-`components/settings/primitives.tsx`: `SettingsCard`/`SettingRow`/`AccentRetired`/`NotifList`/
-`RankCard` tier crest/`SaveBar`/`StarPicker`; labeled `ThemeSegmented`; auth-style password
-card + strength meter; responsive danger zone [desktop inline / mobile `GlassDialog` sheet];
-rate modal on `GlassDialog`; **accent picker retired → emerald locked app-wide**),
-**dashboard** ("Focus" direction — the customizable 9-widget grid was **replaced** by a fixed,
-curated two-column layout, so the drag/reorder/visibility plumbing was deleted: `widget-renderer`/
-`widget-wrapper`/`widget-registry` + the `store/dashboard.ts` Zustand store are gone, along with the
-`monthly-forecast`/`category-budget-progress`/`upcoming-recurring`/`coach-card` widgets it distilled.
-Sticky `PageToolbar` still owns currency + month (mobile greeting header below it). New components in
-`dashboard/focus/` — `primitives.tsx` [`FocusCard` frosted module, `FocusTrailing`, `AmountsEyeToggle`]
-+ `modules.tsx` [`FocusHero`, `FocusSafeToSpend`, `FocusRankRibbon`, `FocusDailyFlow`, `FocusCategories`,
-`FocusCoach`, `FocusBills`, `FocusRecent`]. Top band: a **hero** on `.glass-card` (28px) with the new
-`.dash-hero-sheen` brand glow + the month budget **baked in** as a spent-of-budget meter with a
-projected-pace tick, paired with a **Safe-to-spend** card (`bg-primary-soft`) that revives the forecast
-(safe-per-day / projected month-end / daily avg). Then a slim amber **rank ribbon**, then two
-independent columns: daily-flow **SVG area sparkline** (recharts dropped on the dashboard) + distilled
-coach (`<Trans>` prose line + real insight chips) + recent on the left; share-bar category list +
-compact bills on the right. **Monthly budget = sum of per-category budgets** (converted to the display
-currency); when 0, the meter hides and Safe-to-spend shows a "set a budget" CTA. Reuses `WidgetHead`/
-`WidgetEmpty`/`Shimmer`/`TrendPill`/`HiddenDots` from `dashboard/primitives.tsx`, `EmptyState`, and the
-existing aggregated/coach/recurring data hooks. Still no `t-num`. `WidgetCard`/`StatTile` remain in
-`primitives.tsx` (now unused by the dashboard).
+`formatMoney` (`lib/utils.ts`) is the single money formatter — locale-aware (`sr` →
+`sr-Latn-RS` → `2.450 RSD`; `en` → `en-US` → `RSD 2,450`; an accepted deviation from the
+handoff's fixed de-DE style). Every user-facing string exists in BOTH `en.json` and
+`sr.json`.

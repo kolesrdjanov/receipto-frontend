@@ -83,11 +83,6 @@
       "title": "Split Expenses Together",
       "description": "Create groups for family, roommates, or trips. Track who paid, see balances, and settle up easily - like popular expense sharing apps.",
       "tip": ""
-    },
-    "step5": {
-      "title": "Track Prices",
-      "description": "See price history for products across different stores. Find where you can save money on your regular purchases.",
-      "tip": "The more receipts you scan, the better your price insights become!"
     }
   },
   "nav": {
@@ -163,14 +158,15 @@
     "showHint": "Hold up to the scanner at checkout · screen brightened",
     "deleteTitle": "Delete card",
     "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
-    "preview": "Preview"
+    "preview": "Preview",
+    "codeType": "Code type"
   },
   "auth": {
-    "brandTagline": "Your smart receipt companion",
+    "brandTagline": "Every receipt, in order.",
     "brandFeature1": "Scan & track receipts instantly",
     "brandFeature2": "Budget insights & spending analysis",
     "brandFeature3": "Warranty tracking & reminders",
-    "orContinueWith": "or",
+    "orContinueWith": "or continue with email",
     "continueWithGoogle": "Continue with Google",
     "googleSignInFailed": "Google sign-in was cancelled or failed. Please try again.",
     "passwordStrength": {
@@ -189,14 +185,14 @@
       "sendCode": "Send code",
       "sending": "Sending...",
       "passwordlessNote": "No password needed — we'll email you a 6-digit code.",
-      "codeTitle": "Enter your code",
+      "codeTitle": "Check your inbox",
       "codeSubtitle": "We sent a 6-digit code to your email",
       "codeResent": "A new code is on its way.",
       "verify": "Verify & continue",
       "verifying": "Verifying...",
       "resendCode": "Resend code",
       "resendCooldown": "Resend code in {{time}}",
-      "changeEmail": "Use a different email",
+      "changeEmail": "Change",
       "requestError": "Couldn't send the code. Please try again.",
       "invalidCode": "That code isn't right. Please try again."
     },
@@ -385,21 +381,14 @@
       "recentActivity": "Recent Activity"
     },
     "focus": {
-      "subtitle": "A focused look at your month",
       "spentLabel": "Spent in {{month}}",
-      "vsBelow": "{{percent}}% below last month",
-      "vsAbove": "{{percent}}% above last month",
-      "daysElapsed": "{{elapsed}} of {{total}} days elapsed",
       "budgetOf": "{{spent}} of {{budget}} budget",
       "budgetLeft": "{{amount}} left",
-      "budgetOverPace": "{{amount}} over pace",
       "safeToSpend": "Safe to spend",
       "perDay": "/day",
       "safeCaption": "for the last {{days}} days of {{month}} to stay on budget",
-      "safeCaptionLastDay": "for the rest of {{month}} to stay on budget",
       "projectedMonthEnd": "Projected month-end",
       "dailyAverage": "Daily average",
-      "monthTotal": "Month total",
       "avgPerDayCaption": "spent on average per day in {{month}}",
       "noBudgetTitle": "Set a monthly budget",
       "noBudgetBody": "Add budgets to your categories to unlock safe-to-spend and pacing.",
@@ -408,10 +397,8 @@
       "topTierTag": "Top tier",
       "toGoTag": "{{count}} to go",
       "dailyFlow": "Daily flow",
-      "avgDay": "Avg / day",
       "highestDay": "Highest day",
       "activeDays": "Active days",
-      "today": "today",
       "whereItGoes": "Where it goes",
       "viewAll": "All",
       "coachLine": "You've spent <0>{{amount}}</0> this week — <1>{{change}}</1> than last week, mostly on <2>{{category}}</2>.",
@@ -424,7 +411,11 @@
       "dueThisWeek": "{{count}} due this week",
       "overduePrefix": "Overdue",
       "recent": "Recent",
-      "allExpenses": "All expenses"
+      "allExpenses": "All expenses",
+      "overBy": "Over by {{amount}}",
+      "kpiBudgetLeft": "Budget left",
+      "kpiDaysLeft": "Days left",
+      "kpiReceipts": "Receipts"
     }
   },
   "receipts": {
@@ -490,7 +481,6 @@
     "select": "Select",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "count": "{{count}} total",
     "unknownStore": "Unknown Store",
     "modal": {
       "addTitle": "Add Receipt",
@@ -672,7 +662,9 @@
       "shareError": "Failed to share receipt",
       "copiedToClipboard": "Receipt copied to clipboard",
       "viewReceipt": "View Receipt"
-    }
+    },
+    "count_one": "{{count}} receipt",
+    "count_other": "{{count}} receipts"
   },
   "templates": {
     "title": "Templates",
@@ -856,7 +848,8 @@
       "deleteSuccess": "Group deleted successfully",
       "createError": "Failed to create group",
       "updateError": "Failed to update group",
-      "deleteError": "Failed to delete group"
+      "deleteError": "Failed to delete group",
+      "inviteAfterCreate": "You'll get an invite link to share as soon as the group is created."
     },
     "detail": {
       "displayCurrency": "Display currency:",
@@ -949,28 +942,6 @@
       "showArchived": "Show Archived",
       "archivedBadge": "Archived"
     },
-    "activities": {
-      "title": "Activity",
-      "noActivities": "No activity yet",
-      "loadMore": "Load more",
-      "betweenAllMembers": "between all members",
-      "betweenMembers": "between {{names}}",
-      "types": {
-        "group_created": "created the group",
-        "group_updated": "updated group settings",
-        "group_archived": "archived the group",
-        "group_unarchived": "unarchived the group",
-        "member_invited": "invited {{email}}",
-        "member_joined": "joined the group",
-        "member_left": "left the group",
-        "member_removed": "was removed from the group",
-        "receipt_added": "added a receipt",
-        "receipt_updated": "updated a receipt",
-        "receipt_deleted": "deleted a receipt",
-        "settlement_created": "recorded a settlement",
-        "member_joined_via_link": "joined via invite link"
-      }
-    },
     "inviteLink": {
       "title": "Invite Link",
       "description": "Share this link to let anyone join the group instantly.",
@@ -1048,7 +1019,8 @@
     "manage": {
       "title": "Manage group",
       "editDetails": "Edit group details",
-      "deleteGroup": "Delete group"
+      "deleteGroup": "Delete group",
+      "ownerCannotLeave": "Transfer ownership or delete the group first"
     },
     "tabsNav": {
       "overview": "Overview",
@@ -1077,7 +1049,20 @@
       "undated": "Undated",
       "count": "{{count}} expenses",
       "count_one": "{{count}} expense",
-      "count_other": "{{count}} expenses"
+      "count_other": "{{count}} expenses",
+      "whatFor": "What for",
+      "whatForPlaceholder": "e.g. Groceries, dinner, fuel…",
+      "whatForRequired": "Tell the group what this was for",
+      "amountRequired": "Enter an amount",
+      "paidBy": "Paid by",
+      "split": "Split",
+      "splitEqually": "Equally",
+      "splitByAmount": "By amount",
+      "splitByAmountSoon": "Splitting by custom amounts is coming soon",
+      "splitRequired": "Pick at least one person",
+      "added": "Expense added",
+      "addError": "Could not add the expense",
+      "loadMore": "Load more"
     },
     "menu": {
       "title": "Group menu",
@@ -1122,7 +1107,7 @@
       "appearance": "Appearance",
       "region": "Language & currency",
       "notifications": "Notifications",
-      "danger": "Danger zone"
+      "danger": "Account"
     },
     "region": {
       "title": "Language & currency",
@@ -1148,7 +1133,7 @@
       "rose": "Rose",
       "retiredTag": "Retired",
       "retiredTitle": "Accent color",
-      "retiredHelp": "The Glass redesign uses one fixed brand accent — emerald — so surfaces stay calm and legible across light and dark. The six-color picker is being removed."
+      "retiredHelp": "Luma is fully monochrome — a near-black primary with no accent color — so surfaces stay calm and legible across light and dark. Red is reserved for destructive actions."
     },
     "currency": {
       "title": "Currency",
@@ -1220,7 +1205,8 @@
           "statusB": "You earned this by scanning at least 75 receipts. Your tracking discipline is elite.",
           "statusA": "You earned this for scanning 100+ receipts. This is the highest rank."
         }
-      }
+      },
+      "discard": "Discard"
     },
     "security": {
       "title": "Security",
@@ -1252,6 +1238,10 @@
       "confirmDelete": "Delete My Account",
       "accountDeleted": "Your account has been deleted",
       "deleteError": "Failed to delete account"
+    },
+    "account": {
+      "signOutTitle": "Sign out",
+      "signOutDescription": "Sign out of Receipto on this device."
     }
   },
   "warranties": {
@@ -1887,6 +1877,9 @@
       "dueSoon": "Due Soon",
       "upcoming": "Upcoming",
       "more": "more"
+    },
+    "summary": {
+      "caption": "per month · {{annual}} a year"
     }
   },
   "announcements": {

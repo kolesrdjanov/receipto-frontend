@@ -19,10 +19,10 @@ import {
   SettingsTabStrip,
 } from '@/components/settings/primitives'
 import { GlassDialog } from '@/components/glass/glass-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { Progress } from '@/components/ui/progress'
 import {
   Mail,
   Trash2,
@@ -33,11 +33,13 @@ import {
   Globe,
   AlertTriangle,
   User,
+  LogOut,
   type LucideIcon,
 } from 'lucide-react'
 import { useSettingsStore, type Language } from '@/store/settings'
 import { useAuthStore } from '@/store/auth'
 import { useMe, useUpdateMe, useUploadProfileImage, useDeleteMyAccount } from '@/hooks/users/use-me'
+import { useLogout } from '@/hooks/auth/use-logout'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { normalizeRank, getNextRank, type ReceiptRank } from '@/lib/rank'
 
@@ -49,7 +51,7 @@ const languages: { value: Language; labelKey: string }[] = [
 // Shared label style — matches the form-modal labels used app-wide.
 const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
 
-// Desktop section-nav items (scroll-spy targets) + the mobile tab strip.
+// Desktop section-nav items (one visible section at a time) + the mobile tab strip.
 type SectionId = 'profile' | 'appearance' | 'region' | 'notifications' | 'danger'
 const NAV: { id: SectionId; labelKey: string; icon: LucideIcon; danger?: boolean }[] = [
   { id: 'profile', labelKey: 'settings.nav.profile', icon: User },
@@ -75,6 +77,7 @@ export default function Settings() {
   const updateMe = useUpdateMe()
   const uploadProfileImage = useUploadProfileImage()
   const deleteMyAccount = useDeleteMyAccount()
+  const handleLogout = useLogout()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const effectiveUser = me ?? authUser
@@ -268,6 +271,14 @@ export default function Settings() {
             <RankChip rank={receiptRank} name={rank.name} />
             <span className="text-[12px] font-semibold text-fg-faint">{trackedLine}</span>
           </div>
+          {rank.receiptsToNextRank > 0 && (
+            <div className="mt-3 max-w-[340px]">
+              <Progress
+                value={(receiptCount / (receiptCount + rank.receiptsToNextRank)) * 100}
+                aria-label={t('settings.profile.rank.progress')}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -330,7 +341,21 @@ export default function Settings() {
     <>
       {profileHero}
       {incomeCard}
-      {effectiveUser && <SaveBar dirty={isDirty} saving={updateMe.isPending} onSave={handleSaveProfile} />}
+      {effectiveUser && (
+        <SaveBar
+          dirty={isDirty}
+          saving={updateMe.isPending}
+          onSave={handleSaveProfile}
+          onDiscard={() =>
+            setDraft({
+              firstName: initial.firstName,
+              lastName: initial.lastName,
+              monthlyIncome: initial.monthlyIncome,
+              incomeCurrency: initial.incomeCurrency,
+            })
+          }
+        />
+      )}
     </>
   )
 
@@ -347,27 +372,29 @@ export default function Settings() {
   const regionCard = (
     <SettingsCard icon={Languages} title={t('settings.region.title')} desc={t('settings.region.description')}>
       <SettingRow label={t('settings.language.label')} help={t('settings.language.help')} htmlFor="language">
-        <Select
-          value={language}
-          onValueChange={(value: Language) => {
-            setLanguage(value)
-            updateMe.mutate({ preferredLanguage: value })
-          }}
-        >
-          <SelectTrigger id="language" className="w-full sm:w-[208px]">
-            <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-              <Globe className="size-4 shrink-0 text-muted-foreground" />
-              <SelectValue placeholder={t('settings.language.label')} />
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map((lang) => (
-              <SelectItem key={lang.value} value={lang.value}>
+        <div className="inline-flex rounded-[10px] bg-bg-subtle p-[3px]" role="group" aria-label={t('settings.language.label')}>
+          {languages.map((lang) => {
+            const active = language === lang.value
+            return (
+              /* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: segmented control option (mirrors ThemeSegmented) */
+              <button
+                key={lang.value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => {
+                  setLanguage(lang.value as Language)
+                  updateMe.mutate({ preferredLanguage: lang.value })
+                }}
+                className={
+                  'flex h-[30px] items-center gap-1.5 rounded-[7px] px-3.5 text-[13px] font-semibold transition-colors ' +
+                  (active ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground hover:text-foreground')
+                }
+              >
                 {t(lang.labelKey)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              </button>
+            )
+          })}
+        </div>
       </SettingRow>
       <div className="my-4 h-px bg-hairline-soft" />
       <SettingRow label={t('settings.currency.label')} help={t('settings.currency.help')} htmlFor="currency">
@@ -383,6 +410,15 @@ export default function Settings() {
         <NotifRow title={t('settings.notifications.warrantyReminders')} help={t('settings.notifications.warrantyRemindersHelp')} checked={effectiveUser?.warrantyReminderEnabled ?? true} onCheckedChange={(checked) => updateMe.mutate({ warrantyReminderEnabled: checked })} disabled={updateMe.isPending} />
         <NotifRow title={t('settings.notifications.budgetAlerts')} help={t('settings.notifications.budgetAlertsHelp')} checked={effectiveUser?.budgetAlertEnabled ?? true} onCheckedChange={(checked) => updateMe.mutate({ budgetAlertEnabled: checked })} disabled={updateMe.isPending} />
       </NotifList>
+    </SettingsCard>
+  )
+
+  const signOutCard = (
+    <SettingsCard icon={LogOut} title={t('settings.account.signOutTitle')} desc={t('settings.account.signOutDescription')}>
+      <Button type="button" variant="outline" onClick={handleLogout}>
+        <LogOut className="size-4" />
+        {t('nav.logout')}
+      </Button>
     </SettingsCard>
   )
 
@@ -440,7 +476,12 @@ export default function Settings() {
                   {notificationsCard}
                 </>
               )}
-              {activeTab === 'account' && dangerCard}
+              {activeTab === 'account' && (
+                <>
+                  {signOutCard}
+                  {dangerCard}
+                </>
+              )}
             </div>
           </div>
         ) : (
@@ -457,7 +498,12 @@ export default function Settings() {
               {activeSection === 'appearance' && appearanceCard}
               {activeSection === 'region' && regionCard}
               {activeSection === 'notifications' && notificationsCard}
-              {activeSection === 'danger' && dangerCard}
+              {activeSection === 'danger' && (
+                <>
+                  {signOutCard}
+                  {dangerCard}
+                </>
+              )}
             </div>
           </div>
         )}

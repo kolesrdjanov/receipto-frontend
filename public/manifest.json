@@ -4,8 +4,8 @@
   "description": "Track and manage your receipts",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#18181b",
+  "background_color": "#fbfbfb",
+  "theme_color": "#343434",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

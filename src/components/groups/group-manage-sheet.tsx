@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from '@/components/ui/emoji-picker'
 import { RowActionItem } from '@/components/glass/primitives'
 import { GMemberAvatar, RolePill } from '@/components/groups/primitives'
 import {
@@ -11,6 +13,7 @@ import {
   useInviteLink,
   useGenerateInviteLink,
   useUpdateInviteLink,
+  useUpdateGroup,
   type Group,
   type GroupMember,
 } from '@/hooks/groups/use-groups'
@@ -18,7 +21,6 @@ import { getErrorMessage } from '@/lib/api'
 import { memberName } from '@/lib/groups'
 import { toast } from 'sonner'
 import {
-  Pencil,
   UserPlus,
   UserMinus,
   Link as LinkIcon,
@@ -42,8 +44,6 @@ interface GroupManageSheetProps {
   isOwner: boolean
   isArchived: boolean
   currentUserId?: string
-  /** Opens the identity form (GroupModal, edit mode) — kept as the single rich edit surface. */
-  onEditDetails: () => void
   onRemoveMember: (member: GroupMember) => void
   onArchiveToggle: () => void
   onLeave: () => void
@@ -55,9 +55,9 @@ const sectionLabel = 'mb-2 block text-[11px] font-bold uppercase tracking-[0.05e
 
 /**
  * The single **Manage** sheet for a group — folds the old kebab menu, members sub-screen, invite
- * dialog and invite-link card into one surface. Owner-gated bits (edit / email-invite / remove /
- * archive / delete) hide for members; the shareable invite link is available to everyone (matches
- * the backend's member-level invite-link access). Rich identity edits defer to GroupModal.
+ * dialog and invite-link card into one surface. Owner-gated bits (identity edit / email-invite /
+ * remove / archive / delete) hide for members; the shareable invite link is available to everyone
+ * (matches the backend's member-level invite-link access). Name + icon edit inline in the header.
  */
 export function GroupManageSheet({
   open,
@@ -66,7 +66,6 @@ export function GroupManageSheet({
   isOwner,
   isArchived,
   currentUserId,
-  onEditDetails,
   onRemoveMember,
   onArchiveToggle,
   onLeave,
@@ -75,11 +74,37 @@ export function GroupManageSheet({
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [copied, setCopied] = useState(false)
+  const [nameDraft, setNameDraft] = useState(group.name)
+  const [iconDraft, setIconDraft] = useState(group.icon || '👥')
+  const [emojiOpen, setEmojiOpen] = useState(false)
 
   const inviteMember = useInviteMember()
   const { data: linkData } = useInviteLink(group.id)
   const generateLink = useGenerateInviteLink()
   const updateLink = useUpdateInviteLink()
+  const updateGroup = useUpdateGroup()
+
+  // Re-sync drafts each time the sheet opens (or the group changes underneath it).
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- draft reset on open (mirrors settings profile draft)
+      setNameDraft(group.name)
+      setIconDraft(group.icon || '👥')
+    }
+  }, [open, group.name, group.icon])
+
+  const identityDirty = nameDraft.trim() !== group.name || iconDraft !== (group.icon || '👥')
+  const canEditIdentity = isOwner && !isArchived
+
+  const saveIdentity = async () => {
+    if (!identityDirty || !nameDraft.trim()) return
+    try {
+      await updateGroup.mutateAsync({ id: group.id, data: { name: nameDraft.trim(), icon: iconDraft } })
+      toast.success(t('groups.modal.updateSuccess'))
+    } catch (error) {
+      toast.error(getErrorMessage(error, t('common.error')))
+    }
+  }
 
   const inviteUrl = linkData?.inviteCodeEnabled ? linkData?.inviteUrl ?? null : null
   const shareTitle = t('groups.inviteLink.shareTitle')
@@ -161,26 +186,68 @@ export function GroupManageSheet({
       onOpenChange={onOpenChange}
       title={group.name}
       header={
-        <div className="flex items-center gap-3">
-          <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-bg-subtle text-[20px]">
-            {group.icon || '👥'}
-          </span>
-          <div className="min-w-0">
-            <div className="t-h3 truncate">{group.name}</div>
-            <div className="text-[12px] text-muted-foreground">{t('groups.manage.title')}</div>
+        canEditIdentity ? (
+          /* Inline identity editor — name + icon live here; no separate edit dialog. */
+          <div className="flex items-center gap-2.5">
+            <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="size-[42px] shrink-0 p-0 text-[21px]"
+                  aria-label={t('groups.modal.icon')}
+                >
+                  {iconDraft}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit p-0" align="start" collisionPadding={16}>
+                <EmojiPicker
+                  className="h-[340px]"
+                  onEmojiSelect={(emoji) => {
+                    setIconDraft(emoji.emoji)
+                    setEmojiOpen(false)
+                  }}
+                >
+                  <EmojiPickerSearch placeholder={t('groups.modal.iconSearchPlaceholder')} />
+                  <EmojiPickerContent />
+                  <EmojiPickerFooter />
+                </EmojiPicker>
+              </PopoverContent>
+            </Popover>
+            <Input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && saveIdentity()}
+              aria-label={t('groups.modal.name')}
+              className="h-[42px] flex-1 text-[15px] font-semibold"
+            />
+            {identityDirty && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={saveIdentity}
+                disabled={!nameDraft.trim()}
+                loading={updateGroup.isPending}
+              >
+                {t('common.save')}
+              </Button>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-bg-subtle text-[20px]">
+              {group.icon || '👥'}
+            </span>
+            <div className="min-w-0">
+              <div className="t-h3 truncate">{group.name}</div>
+              <div className="text-[12px] text-muted-foreground">{t('groups.manage.title')}</div>
+            </div>
+          </div>
+        )
       }
       desktopWidth={452}
     >
       <div className="flex flex-col gap-5">
-        {/* Edit identity (owner) */}
-        {canManage && (
-          <div className="-mt-1 flex flex-col gap-0.5">
-            <RowActionItem icon={Pencil} label={t('groups.manage.editDetails')} onClick={onEditDetails} />
-          </div>
-        )}
-
         {/* Members */}
         <div>
           <span className={sectionLabel}>{t('groups.membersCount', { count: accepted.length })}</span>
@@ -289,7 +356,7 @@ export function GroupManageSheet({
             {inviteUrl && (
               <>
                 <div className="mt-2.5 flex h-[46px] items-center gap-2.5 rounded-xl border border-border bg-bg-subtle pl-3 pr-2">
-                  <span className="t-num min-w-0 flex-1 truncate text-[13px] font-semibold">{inviteUrl}</span>
+                  <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] font-medium">{inviteUrl}</span>
                   <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
                     {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                     {copied ? t('groups.inviteLink.copied') : t('groups.inviteLink.copy')}
@@ -335,7 +402,17 @@ export function GroupManageSheet({
               onClick={onArchiveToggle}
             />
           )}
-          {!isOwner && (
+          {isOwner ? (
+            /* Everyone can leave per the rework — but the API blocks the owner until they
+               hand the group off, so the action is gated with the reason, not hidden. */
+            <RowActionItem
+              icon={LogOut}
+              label={t('groups.detail.leaveGroup')}
+              disabled
+              hint={t('groups.manage.ownerCannotLeave')}
+              danger
+            />
+          ) : (
             <RowActionItem icon={LogOut} label={t('groups.detail.leaveGroup')} onClick={onLeave} danger />
           )}
           {isOwner && (

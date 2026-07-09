@@ -10,7 +10,6 @@ import { AnnouncementBanner } from '@/components/announcements/announcement-bann
 import { Shimmer } from '@/components/dashboard/primitives'
 import {
   FocusHero,
-  FocusSafeToSpend,
   FocusDailyFlow,
   FocusCategories,
   FocusCoach,
@@ -31,6 +30,7 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { QrCode } from 'lucide-react'
 import { getDaysInMonth } from 'date-fns'
+import { formatMoney } from '@/lib/utils'
 import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 
 // Neutral fallbacks for categories with no assigned color (Luma monochrome ramp).
@@ -202,6 +202,15 @@ export default function Dashboard() {
   const isEmpty = !isLoading && totalReceipts === 0
   const recentReceipts = aggStats?.recentReceipts ?? []
 
+  // Receipts scanned in the selected month (currency-independent count).
+  const monthReceipts = useMemo(() => {
+    if (!aggDailyStats) return 0
+    return aggDailyStats.reduce(
+      (sum, day) => sum + day.byCurrency.reduce((s, c) => s + (c.receiptCount || 0), 0),
+      0,
+    )
+  }, [aggDailyStats])
+
   // ── Rank ──
   const rankReceiptCount = me?.receiptCount ?? totalReceipts
   const rankCode = normalizeRank(me?.receiptRank as ReceiptRank | undefined, rankReceiptCount)
@@ -239,8 +248,8 @@ export default function Dashboard() {
       <PageTransition>
         <PageToolbar
           className="md:-mx-8 md:-mt-8 md:mb-6"
-          title={t('dashboard.title')}
-          subtitle={t('dashboard.focus.subtitle')}
+          title={greeting}
+          subtitle={t('dashboard.greetingSubtitle', { month: monthLong })}
           actions={controls}
         />
 
@@ -278,34 +287,43 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
-            {/* Top band — hero + safe-to-spend (equal height on desktop) */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr] md:items-stretch">
-              <FocusHero
-                monthLabel={monthLong}
-                spent={forecast.spentSoFar}
-                budget={budget}
-                projected={forecast.projected}
-                vsLastMonth={forecast.vsLastMonth}
-                daysElapsed={forecast.daysSoFar}
-                daysTotal={forecast.totalDaysInMonth}
-                displayCurrency={displayCurrency}
-                amountsVisible={amountsVisible}
-                onToggleAmounts={toggleAmountsVisible}
-                isCurrentMonth={isCurrentMonth}
-                rankLabel={rankName}
+            {/* "This month" hero — one card, two zones */}
+            <FocusHero
+              monthLabel={monthLong}
+              spent={forecast.spentSoFar}
+              budget={budget}
+              projected={forecast.projected}
+              vsLastMonth={forecast.vsLastMonth}
+              daysLeft={daysLeft}
+              dailyAvg={forecast.dailyAvg}
+              displayCurrency={displayCurrency}
+              amountsVisible={amountsVisible}
+              onToggleAmounts={toggleAmountsVisible}
+              isCurrentMonth={isCurrentMonth}
+              rankLabel={rankName}
+            />
+
+            {/* KPI strip — each number appears exactly once on the page */}
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <KpiTile
+                label={t('dashboard.focus.dailyAverage')}
+                value={amountsVisible ? formatMoney(forecast.dailyAvg, displayCurrency) : '••••'}
               />
-              <FocusSafeToSpend
-                budget={budget}
-                spent={forecast.spentSoFar}
-                projected={forecast.projected}
-                dailyAvg={forecast.dailyAvg}
-                vsLastMonth={forecast.vsLastMonth}
-                daysLeft={daysLeft}
-                monthLabel={monthLong}
-                displayCurrency={displayCurrency}
-                amountsVisible={amountsVisible}
-                isCurrentMonth={isCurrentMonth}
+              <KpiTile
+                label={t('dashboard.focus.kpiBudgetLeft')}
+                value={
+                  budget > 0
+                    ? amountsVisible
+                      ? formatMoney(Math.max(budget - forecast.spentSoFar, 0), displayCurrency)
+                      : '••••'
+                    : '—'
+                }
               />
+              <KpiTile
+                label={t('dashboard.focus.kpiDaysLeft')}
+                value={isCurrentMonth ? String(daysLeft) : '—'}
+              />
+              <KpiTile label={t('dashboard.focus.kpiReceipts')} value={String(monthReceipts)} />
             </div>
 
             {/* Body — two independent columns (stack on mobile) */}
@@ -313,7 +331,6 @@ export default function Dashboard() {
               <div className="flex min-w-0 flex-col gap-4">
                 <FocusDailyFlow
                   series={flowSeries}
-                  avgPerDay={forecast.dailyAvg}
                   monthYearLabel={monthYear}
                   displayCurrency={displayCurrency}
                   amountsVisible={amountsVisible}
@@ -343,22 +360,34 @@ export default function Dashboard() {
   )
 }
 
+/** One KPI tile — flat card, 13px muted label over a single bold value. */
+function KpiTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card p-[18px] shadow-glass-1">
+      <span className="truncate text-[13px] font-medium text-muted-foreground">{label}</span>
+      <span className="truncate text-[24px] font-bold leading-none tracking-[-0.02em]">{value}</span>
+    </div>
+  )
+}
+
 /** Skeleton mirroring the Focus layout so it doesn't jump on load. */
 function FocusSkeleton() {
   return (
     <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr]">
-        <Shimmer className="h-[230px] rounded-2xl" />
-        <Shimmer className="h-[230px] rounded-2xl" />
+      <Shimmer className="h-[230px] rounded-2xl" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Shimmer key={i} className="h-[84px] rounded-2xl" />
+        ))}
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr]">
         <div className="flex flex-col gap-4">
-          <Shimmer className="h-[320px] rounded-3xl" />
-          <Shimmer className="h-[180px] rounded-3xl" />
+          <Shimmer className="h-[320px] rounded-2xl" />
+          <Shimmer className="h-[180px] rounded-2xl" />
         </div>
         <div className="flex flex-col gap-4">
-          <Shimmer className="h-[260px] rounded-3xl" />
-          <Shimmer className="h-[200px] rounded-3xl" />
+          <Shimmer className="h-[260px] rounded-2xl" />
+          <Shimmer className="h-[200px] rounded-2xl" />
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ import {
 import { getErrorMessage } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Link as LinkIcon } from 'lucide-react'
 
 interface GroupModalProps {
   open: boolean
@@ -245,6 +245,16 @@ export function GroupModal({ open, onOpenChange, group, mode }: GroupModalProps)
               rows={2}
             />
           </div>
+
+          {/* Invite-after-creating hint (handoff §3) — members come next, via the Manage sheet. */}
+          {mode === 'create' && (
+            <div className="flex items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3">
+              <LinkIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <span className="text-[12.5px] leading-[1.45] text-muted-foreground">
+                {t('groups.modal.inviteAfterCreate')}
+              </span>
+            </div>
+          )}
         </form>
       </GlassDialog>
 

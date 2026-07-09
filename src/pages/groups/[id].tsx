@@ -28,9 +28,9 @@ import { useReceiptScanner } from '@/hooks/receipts/use-receipt-scanner'
 import { useDeleteReceipt, type Receipt } from '@/hooks/receipts/use-receipts'
 import { getErrorMessage } from '@/lib/api'
 import { memberName, type ComputedSettlement } from '@/lib/groups'
-import { GroupModal } from '@/components/groups/group-modal'
 import { SettlementModal } from '@/components/groups/settlement-modal'
 import { ExpenseDetailDialog } from '@/components/groups/expense-detail-dialog'
+import { GroupExpenseSheet } from '@/components/groups/group-expense-sheet'
 import { GroupManageSheet } from '@/components/groups/group-manage-sheet'
 import { GroupHero } from '@/components/groups/group-hero'
 import { GroupExpensesList } from '@/components/groups/group-expenses-list'
@@ -70,16 +70,15 @@ export default function GroupDetail() {
   const deleteReceipt = useDeleteReceipt()
   const { openQrScannerWithContext, scannerModals } = useReceiptScanner()
 
-  // Overlays — collapsed to three feature surfaces: Manage, Settle, and the expense editor/detail.
-  const [receiptModalOpen, setReceiptModalOpen] = useState(false)
-  const [receiptModalMode, setReceiptModalMode] = useState<'create' | 'edit'>('create')
+  // Overlays — collapsed to three feature surfaces: Manage, Settle, and Add expense
+  // (plus the read-only expense detail and the receipt editor for existing entries).
+  const [expenseSheetOpen, setExpenseSheetOpen] = useState(false)
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
   const [detailReceipt, setDetailReceipt] = useState<Receipt | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [settleOpen, setSettleOpen] = useState(false)
   const [settlePrefill, setSettlePrefill] = useState<{ fromUserId?: string; toUserId?: string; amount?: number }>({})
   const [manageOpen, setManageOpen] = useState(false)
-  const [editGroupOpen, setEditGroupOpen] = useState(false)
 
   // Confirm dialogs
   const [leaveOpen, setLeaveOpen] = useState(false)
@@ -99,17 +98,9 @@ export default function GroupDetail() {
   const isMultiCurrency = (stats?.byCurrency?.length ?? 0) > 1
 
   // Actions ---------------------------------------------------------------
-  const openAdd = () => {
-    setReceiptModalMode('create')
-    setEditingReceipt(null)
-    setReceiptModalOpen(true)
-  }
+  const openAdd = () => setExpenseSheetOpen(true)
   const openScan = () => openQrScannerWithContext({ groupId: id, paidById: user?.id })
-  const openEditExpense = (receipt: Receipt) => {
-    setReceiptModalMode('edit')
-    setEditingReceipt(receipt)
-    setReceiptModalOpen(true)
-  }
+  const openEditExpense = (receipt: Receipt) => setEditingReceipt(receipt)
   const openExpenseDetail = (receipt: Receipt) => {
     setDetailReceipt(receipt)
     setDetailOpen(true)
@@ -234,7 +225,6 @@ export default function GroupDetail() {
       groupId={id}
       displayCurrency={displayCurrency}
       currentUserId={user?.id}
-      settlementsCount={settlementHistory.length}
       isArchived={isArchived}
       onSettle={onSettle}
     />
@@ -271,16 +261,24 @@ export default function GroupDetail() {
 
   const overlays = (
     <>
+      {/* Bespoke group-native Add-expense sheet (handoff §3). */}
+      <GroupExpenseSheet
+        open={expenseSheetOpen}
+        onOpenChange={setExpenseSheetOpen}
+        groupId={id}
+        groupCurrency={group.currency || 'RSD'}
+        members={acceptedMembers}
+        currentUserId={user?.id}
+      />
+
+      {/* Existing entries keep the full receipt editor (scanned receipts carry receipt fields). */}
       <Suspense fallback={null}>
-        {receiptModalOpen && (
+        {editingReceipt && (
           <ReceiptModal
-            open={receiptModalOpen}
-            onOpenChange={setReceiptModalOpen}
+            open={!!editingReceipt}
+            onOpenChange={(o) => !o && setEditingReceipt(null)}
             receipt={editingReceipt}
-            mode={receiptModalMode}
-            prefillData={
-              receiptModalMode === 'create' ? { groupId: id, currency: group.currency || 'RSD' } : undefined
-            }
+            mode="edit"
             onRequestDelete={(r) => setReceiptToDelete(r)}
           />
         )}
@@ -312,10 +310,6 @@ export default function GroupDetail() {
         isOwner={isOwner}
         isArchived={isArchived}
         currentUserId={user?.id}
-        onEditDetails={() => {
-          setManageOpen(false)
-          setEditGroupOpen(true)
-        }}
         onRemoveMember={setMemberToRemove}
         onArchiveToggle={() => {
           setManageOpen(false)
@@ -330,8 +324,6 @@ export default function GroupDetail() {
           setDeleteOpen(true)
         }}
       />
-
-      <GroupModal open={editGroupOpen} onOpenChange={setEditGroupOpen} group={group} mode="edit" />
 
       <ConfirmDialog
         open={leaveOpen}

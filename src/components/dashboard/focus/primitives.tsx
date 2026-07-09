@@ -6,15 +6,13 @@ import { WidgetHead } from '@/components/dashboard/primitives'
 import { cn } from '@/lib/utils'
 
 /* ============================================================
-   Dashboard "Focus" primitives.
-   The Focus direction layers a slightly lighter frosted surface
-   than the canonical `.glass-card` (used for the hero): translucent
-   card + blur, hairline border, soft shadow. Module cards compose
-   `FocusCard`; the hero / safe-to-spend cards style their own
-   bespoke surfaces in `modules.tsx`.
+   Dashboard "Focus" primitives — flat Luma cards (16px radius,
+   hairline border, resting shadow). Module cards compose
+   `FocusCard`; the two-zone hero styles its own surface in
+   `modules.tsx`.
    ============================================================ */
 
-/** Frosted module card with the standard icon + title + trailing header. */
+/** Flat module card with the standard icon + title + trailing header. */
 export function FocusCard({
   icon,
   title,
@@ -33,7 +31,7 @@ export function FocusCard({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border bg-card px-[22px] py-5 shadow-glass-1',
+        'rounded-2xl border border-border bg-card px-[22px] py-5 shadow-glass-1',
         className,
       )}
     >

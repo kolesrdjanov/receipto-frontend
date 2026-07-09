@@ -27,7 +27,7 @@ const STATUS_TONE: Record<RecurringStatus, Tone> = {
   duesoon: 'warn',
   upcoming: 'neutral',
   paid: 'ok',
-  paused: 'muted',
+  paused: 'outline',
   ended: 'outline',
 }
 const STATUS_ICON: Record<RecurringStatus, LucideIcon> = {
@@ -141,7 +141,9 @@ export function RecurringRow({
     setMenuOpen(false)
     fn?.(e)
   }
-  const rowClick = !wide && onOpenActions ? () => onOpenActions(e) : undefined
+  // Row body is tappable at both breakpoints (manageable rule): mobile opens the
+  // action sheet, desktop smart-opens the editor (the kebab still carries the menu).
+  const rowClick = !wide && onOpenActions ? () => onOpenActions(e) : wide && onEdit ? () => onEdit(e) : undefined
 
   return (
     <div

@@ -89,6 +89,40 @@ export default defineConfig([
     },
   },
   {
+    // Luma monochrome guardrail. The app is monochrome — red (--destructive) is the only
+    // chromatic hue; per-category / per-loyalty-card data colors are the one approved
+    // exception (their palette files are exempt below, as are the out-of-scope Price
+    // Tracker + Admin screens). This blocks the two regression patterns the redesign
+    // audit actually found: (1) re-introducing legacy palette hexes, (2) `oklch(from
+    // var(--…))` expressions that re-inject chroma onto neutralized tokens (rendered
+    // pink once). For a deliberate exception add
+    // `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      'src/components/categories/primitives.tsx', // approved: category color palette
+      'src/components/loyalty-cards/format.ts', // approved: card color presets
+      'src/pages/items/**', // out of scope: Price Tracker
+      'src/components/items/**',
+      'src/pages/admin/**', // low-priority admin charts
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value=/oklch\\(from var\\(--/i]",
+          message:
+            'Never re-inject chroma onto a neutralized token (`oklch(from var(--…) L C h)` rendered pink once). Use --destructive for danger or the neutral tiers. Deliberate exception: `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.',
+        },
+        {
+          selector:
+            'Literal[value=/#(0ea5e9|8b5cf6|06b6d4|10b981|22c55e|34d399|16a34a|059669|f59e0b|d97706|ec4899|f43f5e|6366f1|3b82f6|14b8a6|f97316|a855f7|eab308|08a373)/i]',
+          message:
+            'Luma is monochrome — red (--destructive) is the only chromatic hue. Legacy palette hexes are retired; use tokens (or the per-category/per-card data color, which flows from data, not literals). Deliberate exception: `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.',
+        },
+      ],
+    },
+  },
+  {
     // Steer app form inputs to the shared 40px <Input> (@/components/ui/input).
     // The glass <Field>/<PasswordField> are the 50px AUTH-only inputs — using them in
     // app form modals creates the height inconsistency this rule prevents (the

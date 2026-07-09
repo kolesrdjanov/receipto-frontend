@@ -54,7 +54,12 @@ export function ExpensesSummary({
       <span className="text-sm font-medium text-muted-foreground">
         {filtersActive ? t('receipts.filteredTotal') : t('receipts.total')}:
       </span>
-      <Amount value={convertedTotal} currency={preferredCurrency} size={15} />
+      <Amount value={convertedTotal} currency={preferredCurrency} size={22} weight={600} className="whitespace-nowrap tracking-[-0.015em]" />
+      {total > 0 && (
+        <span className="inline-flex items-center rounded-full bg-subtle px-2.5 py-1 text-[11.5px] font-medium leading-none text-muted-foreground">
+          {t('receipts.count', { count: total })}
+        </span>
+      )}
       {mixed && (
         <span
           className="inline-flex items-center gap-1 text-xs text-muted-foreground"

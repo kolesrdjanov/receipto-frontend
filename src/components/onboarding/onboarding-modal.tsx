@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -12,89 +12,213 @@ import {
   ChevronLeft,
   Sparkles,
   Check,
-  Globe,
+  Share,
+  SquarePlus,
+  ShieldCheck,
+  ArrowLeftRight,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { IconTile, type IconTileAccent } from '@/components/glass/glass'
+import { Logo, LogoMark } from '@/components/ui/logo'
 import { useSettingsStore, type Language } from '@/store/settings'
 
 interface OnboardingModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Tour layout — `spotlight` centers the preview with the copy beneath it;
+   *  `side` places preview and copy side-by-side on desktop. */
+  variant?: 'spotlight' | 'side'
 }
 
-interface StepDef {
-  key: string
-  icon: LucideIcon
-  accent: IconTileAccent
-}
+/* ------------------------------------------------------------------ */
+/* Step previews — large monochrome illustrations composed from Luma   */
+/* primitives. Decorative sample data only (numbers + proper nouns),   */
+/* so nothing here needs translation.                                  */
+/* ------------------------------------------------------------------ */
 
-const STEPS: StepDef[] = [
-  { key: 'installApp', icon: Smartphone, accent: 'violet' },
-  { key: 'step1', icon: QrCode, accent: 'emerald' },
-  { key: 'step2', icon: FolderOpen, accent: 'cyan' },
-  { key: 'step3', icon: Shield, accent: 'info' },
-  { key: 'step4', icon: Users, accent: 'pink' },
-]
-
-const TOTAL_STEPS = STEPS.length + 1 // + language step
-const SHEET_EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1]
-
-// Shared nav-button geometry/type (handoff `.btn`): ghost Back/Skip and the
-// gradient Next/Get-Started match in size/weight/shape — only the fill differs.
-const NAV_BTN = 'h-11 gap-2 rounded-full px-[18px] text-[15px] font-semibold'
-
-/** Desktop = centered glass dialog; mobile = bottom sheet. */
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 640px)')
-    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return isDesktop
-}
-
-function StepDots({ active }: { active: number }) {
+function PreviewShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className="mb-[22px] flex items-center justify-center gap-1.5">
-      {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            'h-1.5 rounded-full transition-all duration-300',
-            i === active ? 'w-6 bg-primary' : i < active ? 'w-1.5 bg-primary/55' : 'w-1.5 bg-border',
-          )}
-        />
-      ))}
+    <div
+      aria-hidden
+      className={cn(
+        'pointer-events-none mx-auto w-full select-none rounded-2xl border border-border bg-card p-5 text-left shadow-glass-2',
+        className,
+      )}
+    >
+      {children}
     </div>
   )
 }
 
-function FeatureStep({ def }: { def: StepDef }) {
-  const { t } = useTranslation()
-  const tip = t(`onboarding.${def.key}.tip`, { defaultValue: '' })
+/** Install — a phone frame with the app icon on the home screen. */
+function InstallPreview() {
   return (
-    <>
-      <IconTile icon={def.icon} accent={def.accent} className="mb-5" />
-      <h2 className="t-h2">{t(`onboarding.${def.key}.title`)}</h2>
-      <p className="t-body mt-2.5 max-w-[304px] text-muted-foreground">
-        {t(`onboarding.${def.key}.description`)}
-      </p>
-      {tip && (
-        <div className="mt-[18px] flex w-full items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3 text-left">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-foreground" />
-          <span className="text-[12.5px] leading-[1.45] text-muted-foreground">{tip}</span>
+    <div
+      aria-hidden
+      className="pointer-events-none mx-auto w-[228px] select-none rounded-[36px] border border-border bg-card p-3 shadow-glass-2"
+    >
+      <div className="flex flex-col items-center rounded-[26px] bg-bg-subtle px-4 pb-7 pt-4">
+        <div className="h-1.5 w-14 rounded-full bg-border-strong" />
+        <LogoMark className="mt-9 size-16" />
+        <span className="mt-3 text-[13px] font-semibold text-foreground">Receipto</span>
+        <div className="mt-9 flex w-full items-center justify-center gap-5 rounded-xl border border-border bg-card py-2.5 text-muted-foreground">
+          <Share className="size-4" />
+          <SquarePlus className="size-4" />
+          <Smartphone className="size-4" />
         </div>
-      )}
-    </>
+      </div>
+    </div>
   )
 }
+
+/** Track expenses — a QR-scanned expense with line items and the total. */
+function ExpensePreview({ totalLabel }: { totalLabel: string }) {
+  const items = [
+    { emoji: '🥛', name: 'Mleko 2.8%', amount: '179' },
+    { emoji: '🍞', name: 'Hleb beli', amount: '89' },
+    { emoji: '☕', name: 'Kafa mlevena', amount: '549' },
+  ]
+  return (
+    <PreviewShell className="max-w-[340px]">
+      <div className="flex items-center gap-3">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-bg-subtle text-[20px]">🛒</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold text-foreground">Maxi</div>
+          <div className="text-[12.5px] text-muted-foreground">QR · 09:41</div>
+        </div>
+        <QrCode className="size-4 shrink-0 text-fg-faint" />
+      </div>
+      <div className="my-4 border-t border-dashed border-border" />
+      <div className="flex flex-col gap-2.5">
+        {items.map((item) => (
+          <div key={item.name} className="flex items-center gap-2.5">
+            <span className="text-[15px] leading-none">{item.emoji}</span>
+            <span className="flex-1 truncate text-[13px] text-muted-foreground">{item.name}</span>
+            <span className="text-[13px] font-semibold text-foreground">{item.amount}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex items-baseline justify-between border-t border-border pt-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+          {totalLabel}
+        </span>
+        <span className="text-[20px] font-bold tracking-[-0.01em] text-foreground">RSD 1.240</span>
+      </div>
+    </PreviewShell>
+  )
+}
+
+/** Categories — monthly budget bars. */
+function CategoriesPreview() {
+  const rows = [
+    { emoji: '🛒', name: 'Namirnice', amount: 'RSD 14.280', pct: 74 },
+    { emoji: '🚌', name: 'Prevoz', amount: 'RSD 8.890', pct: 48 },
+    { emoji: '🍽️', name: 'Restorani', amount: 'RSD 6.250', pct: 31 },
+  ]
+  return (
+    <PreviewShell className="flex max-w-[340px] flex-col gap-4">
+      {rows.map((row) => (
+        <div key={row.name} className="flex items-center gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-bg-subtle text-[17px]">
+            {row.emoji}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <span className="truncate text-[13.5px] font-semibold text-foreground">{row.name}</span>
+              <span className="shrink-0 text-[12px] font-semibold text-muted-foreground">{row.amount}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-bg-subtle">
+              <div className="h-full rounded-full bg-foreground" style={{ width: `${row.pct}%` }} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </PreviewShell>
+  )
+}
+
+/** Warranties — a warranty card with its coverage bar. */
+function WarrantyPreview() {
+  return (
+    <PreviewShell className="max-w-[340px]">
+      <div className="flex items-center gap-3">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-bg-subtle text-[20px]">📺</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold text-foreground">Samsung TV 55&quot;</div>
+          <div className="text-[12.5px] text-muted-foreground">Tehnomanija</div>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-primary-foreground">
+          <ShieldCheck className="size-3" />
+          2027
+        </span>
+      </div>
+      <div className="mt-5">
+        <div className="mb-1.5 flex items-center justify-between text-[11.5px] text-fg-faint">
+          <span>03/2025</span>
+          <span className="font-bold text-foreground">68%</span>
+          <span>03/2027</span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-bg-subtle">
+          <div className="h-full rounded-full bg-foreground" style={{ width: '68%' }} />
+        </div>
+      </div>
+    </PreviewShell>
+  )
+}
+
+/** Groups — the balance card with settle rows. */
+function GroupsPreview({ settleLabel }: { settleLabel: string }) {
+  const rows = [
+    { initials: 'JP', name: 'Jelena', amount: 'RSD 700' },
+    { initials: 'SM', name: 'Stefan', amount: 'RSD 700' },
+  ]
+  return (
+    <PreviewShell className="max-w-[340px]">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+          Weekend Trip
+        </span>
+        <span className="text-[22px] font-bold tracking-[-0.02em] text-foreground">+ RSD 1.400</span>
+      </div>
+      <div className="mt-4 flex flex-col">
+        {rows.map((row) => (
+          <div key={row.name} className="flex items-center gap-2.5 border-t border-border py-2.5">
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-bg-subtle text-[11px] font-bold text-foreground">
+              {row.initials}
+            </span>
+            <span className="flex-1 truncate text-[13.5px] font-semibold text-foreground">{row.name}</span>
+            <span className="text-[13px] font-bold text-foreground">{row.amount}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground">
+        <ArrowLeftRight className="size-3.5" />
+        {settleLabel}
+      </div>
+    </PreviewShell>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Steps                                                               */
+/* ------------------------------------------------------------------ */
+
+interface StepDef {
+  key: string
+  icon: LucideIcon
+  preview: (t: (k: string) => string) => ReactNode
+}
+
+const STEPS: StepDef[] = [
+  { key: 'installApp', icon: Smartphone, preview: () => <InstallPreview /> },
+  { key: 'step1', icon: QrCode, preview: (t) => <ExpensePreview totalLabel={t('receipts.total')} /> },
+  { key: 'step2', icon: FolderOpen, preview: () => <CategoriesPreview /> },
+  { key: 'step3', icon: Shield, preview: () => <WarrantyPreview /> },
+  { key: 'step4', icon: Users, preview: (t) => <GroupsPreview settleLabel={t('groups.settlements.title')} /> },
+]
+
+const TOTAL_STEPS = STEPS.length + 1 // + language step
 
 function LangCard({
   primary,
@@ -128,39 +252,31 @@ function LangCard({
   )
 }
 
-function LanguageStep({ language, onSelect }: { language: Language; onSelect: (l: Language) => void }) {
+function LanguagePicker({ language, onSelect }: { language: Language; onSelect: (l: Language) => void }) {
   return (
-    <>
-      <IconTile icon={Globe} accent="primary" size={32} className="mb-[18px]" />
-      <h2 className="t-h2">Choose Your Language</h2>
-      <p className="t-sm mt-1 text-muted-foreground">Izaberite jezik</p>
-      <div className="mt-[22px] grid w-full grid-cols-2 gap-3">
-        <LangCard primary="English" secondary="Engleski" selected={language === 'en'} onClick={() => onSelect('en')} />
-        <LangCard primary="Srpski" secondary="Serbian" selected={language === 'sr'} onClick={() => onSelect('sr')} />
-      </div>
-    </>
+    <div className="mx-auto grid w-full max-w-[420px] grid-cols-2 gap-3">
+      <LangCard primary="English" secondary="Engleski" selected={language === 'en'} onClick={() => onSelect('en')} />
+      <LangCard primary="Srpski" secondary="Serbian" selected={language === 'sr'} onClick={() => onSelect('sr')} />
+    </div>
   )
 }
 
-/** Primary nav CTA — auto-width pill preset of the shared `<Button>` (Luma primary fill). */
-function GradientPill({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return (
-    <Button type="button" variant="default" onClick={onClick} className={NAV_BTN}>
-      {children}
-    </Button>
-  )
-}
+/* ------------------------------------------------------------------ */
+/* Full-screen guided tour                                             */
+/* ------------------------------------------------------------------ */
 
-export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
+export function OnboardingModal({ open, onOpenChange, variant = 'spotlight' }: OnboardingModalProps) {
   const { t } = useTranslation()
   const language = useSettingsStore((s) => s.language)
   const setLanguage = useSettingsStore((s) => s.setLanguage)
   const [step, setStep] = useState(0)
-  const isDesktop = useIsDesktop()
   const reduceMotion = useReducedMotion()
 
   const isLast = step === TOTAL_STEPS - 1
-  const a11yTitle = step === 0 ? 'Choose Your Language' : t(`onboarding.${STEPS[step - 1].key}.title`)
+  const isLanguage = step === 0
+  const def = isLanguage ? null : STEPS[step - 1]
+  const a11yTitle = isLanguage ? 'Choose Your Language' : t(`onboarding.${def!.key}.title`)
+  const tip = def ? t(`onboarding.${def.key}.tip`, { defaultValue: '' }) : ''
 
   const handleNext = () => {
     if (step < TOTAL_STEPS - 1) setStep(step + 1)
@@ -173,43 +289,34 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
     onOpenChange(false)
   }
 
-  const body = (
-    <div className="flex flex-col items-center text-center">
-      <StepDots active={step} />
-      {step === 0 ? (
-        <LanguageStep language={language} onSelect={setLanguage} />
+  const copy = (
+    <div className={cn('flex flex-col', variant === 'side' ? 'items-start text-left' : 'items-center text-center')}>
+      {isLanguage ? (
+        <>
+          <h2 className="t-h1">Choose Your Language</h2>
+          <p className="t-sm mt-1.5 text-muted-foreground">Izaberite jezik</p>
+        </>
       ) : (
-        <FeatureStep def={STEPS[step - 1]} />
+        <>
+          <h2 className="t-h1 text-balance">{t(`onboarding.${def!.key}.title`)}</h2>
+          <p className="t-body mt-3 max-w-[42ch] text-muted-foreground">
+            {t(`onboarding.${def!.key}.description`)}
+          </p>
+          {tip && (
+            <div className="mt-5 flex w-full max-w-[420px] items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3 text-left">
+              <Sparkles className="mt-0.5 size-4 shrink-0 text-foreground" />
+              <span className="text-[12.5px] leading-[1.45] text-muted-foreground">{tip}</span>
+            </div>
+          )}
+        </>
       )}
-      <div className="mt-6 flex w-full items-center justify-between gap-3">
-        {step === 0 ? (
-          <Button
-            variant="ghost"
-            onClick={complete}
-            className={cn(NAV_BTN, 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground')}
-          >
-            {t('onboarding.skip')}
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            onClick={handlePrev}
-            className={cn(NAV_BTN, 'text-foreground hover:bg-bg-subtle')}
-          >
-            <ChevronLeft className="size-4" />
-            {t('common.back')}
-          </Button>
-        )}
-        {isLast ? (
-          <GradientPill onClick={complete}>{t('onboarding.getStarted')}</GradientPill>
-        ) : (
-          <GradientPill onClick={handleNext}>
-            {t('common.next')}
-            <ChevronRight className="size-4" />
-          </GradientPill>
-        )}
-      </div>
     </div>
+  )
+
+  const preview = isLanguage ? (
+    <LanguagePicker language={language} onSelect={setLanguage} />
+  ) : (
+    def!.preview(t)
   )
 
   return (
@@ -217,55 +324,117 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
       <AnimatePresence onExitComplete={() => setStep(0)}>
         {open && (
           <DialogPrimitive.Portal forceMount key="onboarding">
-            <DialogPrimitive.Overlay asChild forceMount>
-              <motion.div
-                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.4)] dark:bg-[oklch(0_0_0/0.55)]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.2 }}
-              />
-            </DialogPrimitive.Overlay>
             <DialogPrimitive.Content
               asChild
               forceMount
               aria-describedby={undefined}
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
-              <div
-                className={cn(
-                  'onboarding-emerald pointer-events-none fixed inset-0 z-50 flex',
-                  isDesktop ? 'items-center justify-center p-4' : 'items-end justify-center',
-                )}
+              <motion.div
+                className="fixed inset-0 z-50 flex flex-col bg-background"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.2 }}
               >
-                {isDesktop ? (
-                  <motion.div
-                    key="desktop"
-                    className="glass-card pointer-events-auto w-[432px] max-w-[calc(100%-2rem)] px-[26px] py-[30px]"
-                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
-                    transition={{ duration: reduceMotion ? 0 : 0.2, ease: 'easeOut' }}
+                <DialogPrimitive.Title className="sr-only">{a11yTitle}</DialogPrimitive.Title>
+
+                {/* Top bar — logo · step counter · persistent Skip */}
+                <header className="mx-auto flex w-full max-w-[1080px] items-center justify-between px-5 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8">
+                  <Logo size="sm" />
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-[13px] font-semibold tabular-nums text-muted-foreground">
+                      {step + 1} / {TOTAL_STEPS}
+                    </span>
+                    {!isLast && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={complete}
+                        className="rounded-full text-muted-foreground hover:text-foreground"
+                      >
+                        {t('onboarding.skip')}
+                      </Button>
+                    )}
+                  </div>
+                </header>
+
+                {/* Progress bar */}
+                <div className="mx-auto mt-4 w-full max-w-[1080px] px-5 sm:px-8">
+                  <div
+                    role="progressbar"
+                    aria-valuemin={1}
+                    aria-valuemax={TOTAL_STEPS}
+                    aria-valuenow={step + 1}
+                    className="h-1 overflow-hidden rounded-full bg-subtle"
                   >
-                    <DialogPrimitive.Title className="sr-only">{a11yTitle}</DialogPrimitive.Title>
-                    {body}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="mobile"
-                    className="glass-card pointer-events-auto w-full px-[26px] pt-3 pb-[calc(30px+env(safe-area-inset-bottom))]"
-                    style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ duration: reduceMotion ? 0 : 0.3, ease: SHEET_EASE }}
-                  >
-                    <DialogPrimitive.Title className="sr-only">{a11yTitle}</DialogPrimitive.Title>
-                    <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-strong" />
-                    {body}
-                  </motion.div>
-                )}
-              </div>
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width] duration-300"
+                      style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Step content */}
+                <main className="grid flex-1 place-items-center overflow-y-auto px-5 py-8 sm:px-8">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={step}
+                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 28 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -28 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeOut' }}
+                      className={cn(
+                        'w-full',
+                        variant === 'side' && !isLanguage
+                          ? 'grid max-w-[880px] items-center gap-10 md:grid-cols-2 md:gap-14'
+                          : 'flex max-w-[560px] flex-col items-center gap-8',
+                      )}
+                    >
+                      <div className="w-full">{preview}</div>
+                      {copy}
+                    </motion.div>
+                  </AnimatePresence>
+                </main>
+
+                {/* Footer — Back · Next / Get started */}
+                <footer className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-8">
+                  <div>
+                    {step > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handlePrev}
+                        className="h-11 gap-2 rounded-full px-[18px] text-[15px] font-semibold text-foreground hover:bg-bg-subtle"
+                      >
+                        <ChevronLeft className="size-4" />
+                        {t('common.back')}
+                      </Button>
+                    )}
+                  </div>
+                  {isLast ? (
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={complete}
+                      className="h-11 gap-2 rounded-full px-[22px] text-[15px] font-semibold"
+                    >
+                      {t('onboarding.getStarted')}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={handleNext}
+                      className="h-11 gap-2 rounded-full px-[22px] text-[15px] font-semibold"
+                    >
+                      {t('common.next')}
+                      <ChevronRight className="size-4" />
+                    </Button>
+                  )}
+                </footer>
+              </motion.div>
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>
         )}

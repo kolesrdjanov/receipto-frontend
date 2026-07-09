@@ -58,10 +58,10 @@ src/
 
 1. **Buttons:** always the shared `<Button>` (`components/ui/button.tsx`); never a
    hand-rolled `<button>` with button styling or a parallel button component. Add a
-   variant (`brand`/`glass`/`destructive-soft`/…) instead. The radius default is
-   `rounded-xl` — never add `className="rounded-xl"` to a Button. (PostToolUse hook +
-   ESLint rule.)
-2. **Form inputs:** app forms use the 40px shadcn `<Input>`/`<Textarea>` from
+   variant instead (`default`/`outline`/`ghost`/`destructive`/…; the legacy `brand`/
+   `brand-violet` names alias to `default`). The radius default is `rounded-lg` (10px)
+   — never add a radius class to a Button. (PostToolUse hook + ESLint rule.)
+2. **Form inputs:** app forms use the 36px shadcn `<Input>`/`<Textarea>` from
    `@/components/ui` with the `fieldLabel` label class. The glass `<Field>`/
    `<PasswordField>` (`@/components/glass/glass`) are the 50px **AUTH-only** inputs
    (`src/pages/auth` + `src/components/auth`); never use them in feature code.
@@ -76,7 +76,8 @@ src/
    `z.coerce`/`z.preprocess` schemas need `useForm<z.input<S>, unknown, z.output<S>>`.
 6. **i18n:** every user-facing string is keyed in BOTH `en.json` and `sr.json` —
    never skip Serbian.
-7. There is **no Checkbox component** — use toggleable button chips for multi-select.
+7. There is **no shadcn Checkbox** — selection rows use the shared `SelectCheck`
+   (`components/glass/primitives.tsx`); multi-select filters use toggleable button chips.
 
 ## Design system — "Luma" (the whole app is on it)
 
@@ -89,12 +90,14 @@ src/
   are the retained per-item color exception (data-driven hex, independent of tokens). Charts
   are monochrome (grey + near-black peak), not emerald.
 - OKLCH tokens via CSS variables; all Tailwind v4 config lives in `index.css`.
-  **Geist** display/body + **Geist Mono** (`--font-mono`, `.t-num`); radius base 0.625rem;
-  two-tier shadow (`--shadow-1`/`--shadow-2`). See `docs/luma-redesign-progress.md` for the
-  full migration record.
-- Dashboard is the fixed two-column **"Focus"** layout
-  (`components/dashboard/focus/`) — the customizable widget grid was retired; don't
-  re-add widget plumbing.
+  **Geist** display/body + **Geist Mono** (`--font-mono`, codes/URLs only — `.t-num` is
+  retired); radius base 0.625rem; two-tier shadow (`--shadow-1`/`--shadow-2`). See
+  `docs/luma-redesign-progress.md` for the full migration record.
+- Dashboard is the fixed **"Focus"** layout (`components/dashboard/focus/`): a
+  two-zone hero (spend + budget meter | safe-to-spend panel), a 4-tile KPI strip, then
+  two columns — the customizable widget grid was retired; don't re-add widget plumbing.
+- Brand mark is the charcoal **"R" monogram** (`public/brand/`, inlined in
+  `components/ui/logo.tsx` as `LogoMark`; favicon + PWA icons generated from it).
 - Mobile: PWA safe areas, no top bar (the language switcher lives in the More-drawer
   footer), global FAB takeover via `store/fab.ts`, row-tap = smart-open.
 - Theme: light/dark/system via the shared `ThemeSegmented` → settings store,

@@ -13,8 +13,8 @@ interface LoyaltyCardScannerProps {
 
 const READER_ID = 'loyalty-card-reader'
 const CAMERA_TIMEOUT_MS = 10_000
-/** Emerald scan laser (matches the handoff; a focal brand moment, kept literal). */
-const LASER = 'oklch(0.78 0.15 165)'
+/** Scan laser — white over the camera feed (Luma is monochrome; no brand hue). */
+const LASER = 'oklch(1 0 0)'
 
 export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardScannerProps) {
   const { t } = useTranslation()

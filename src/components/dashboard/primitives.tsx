@@ -1,34 +1,13 @@
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Eye, EyeOff, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /* ============================================================
-   Shared "Glass" dashboard primitives.
-   Frosted floating surfaces over the app wash; brand gradient
-   reserved for the logo + primary CTA / FAB only. Composed by
-   every dashboard widget so the cards stay consistent.
+   Shared Luma dashboard primitives — flat cards, hairline
+   borders, monochrome text tiers. Composed by the dashboard
+   modules so the cards stay consistent.
    ============================================================ */
-
-/** Frosted content card — the surface every widget sits on. */
-export function WidgetCard({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <section
-      className={cn(
-        'flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-glass-1',
-        className,
-      )}
-    >
-      {children}
-    </section>
-  )
-}
 
 /** Card header — leading icon + title, optional trailing slot. */
 export function WidgetHead({
@@ -90,76 +69,14 @@ export function WidgetEmpty({
   )
 }
 
-/**
- * A single stat tile (its own glass surface): uppercase kicker + a trailing
- * icon or amounts eye toggle, then a big tabular value.
- */
-export function StatTile({
-  label,
-  value,
-  icon: Icon,
-  iconAccent,
-  eye,
-  hidden,
-  onToggleHidden,
-  big,
-  hero,
-  primary,
-  className,
-}: {
-  label: ReactNode
-  value: ReactNode
-  icon?: LucideIcon
-  iconAccent?: boolean
-  /** Render the trailing slot as the amounts eye toggle. */
-  eye?: boolean
-  hidden?: boolean
-  onToggleHidden?: () => void
-  /** 32px desktop hero value. */
-  big?: boolean
-  /** 36px full-width mobile hero value. */
-  hero?: boolean
-  primary?: boolean
-  className?: string
-}) {
-  return (
-    <div className={cn('flex flex-col rounded-2xl border border-border bg-card p-5 shadow-glass-1', className)}>
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="t-xs truncate text-muted-foreground">{label}</span>
-        {eye && onToggleHidden ? (
-          <button
-            type="button"
-            onClick={onToggleHidden}
-            className="-m-1 rounded-md p-1 text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
-            aria-label={hidden ? 'Show amounts' : 'Hide amounts'}
-          >
-            {hidden ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
-          </button>
-        ) : Icon ? (
-          <Icon className={cn('size-[15px] shrink-0', iconAccent ? 'text-primary' : 'text-muted-foreground')} />
-        ) : null}
-      </div>
-      <div
-        className={cn(
-          'font-display font-extrabold leading-[1.05] tracking-[-0.02em]',
-          hero ? 'text-[36px]' : big ? 'text-[32px]' : 'text-[22px]',
-          primary && 'text-primary',
-        )}
-      >
-        {value}
-      </div>
-    </div>
-  )
-}
-
 /** Masked amount placeholder. */
 export function HiddenDots() {
   return <span className="tracking-[0.12em]">••••••</span>
 }
 
 /**
- * Up/down delta pill. Spending below the comparison reads positive (emerald,
- * down arrow); above reads cautionary (amber, up arrow).
+ * Up/down delta pill — neutral in both directions (Luma reserves red for
+ * over-budget pace and overdue bills); the arrow + aria-label carry direction.
  */
 export function TrendPill({
   value,
@@ -179,8 +96,7 @@ export function TrendPill({
       role="img"
       aria-label={label ?? `${up ? '+' : '-'}${Math.abs(value)}%`}
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold',
-        up ? 'bg-warning-soft text-warning-foreground' : 'bg-success-soft text-success-foreground',
+        'inline-flex items-center gap-0.5 rounded-full bg-subtle px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground',
         className,
       )}
     >

@@ -37,11 +37,20 @@ export function CardHead({
   )
 }
 
-/* Pill chip showing the destination email address */
-export function EmailChip({ email }: { email: string }) {
+/* Pill chip showing the destination email address, with an inline Change affordance */
+export function EmailChip({ email, onChange, changeLabel }: { email: string; onChange?: () => void; changeLabel?: string }) {
   return (
-    <div className="mt-3.5 inline-block rounded-full border border-border bg-muted px-4 py-2.5 text-sm font-bold text-foreground">
-      {email}
+    <div className="mt-3.5 inline-flex items-center gap-2.5 rounded-full border border-border bg-muted py-2 pl-4 pr-2 text-sm font-bold text-foreground">
+      <span className="truncate">{email}</span>
+      {onChange && (
+        <button
+          type="button"
+          onClick={onChange}
+          className="hit-area shrink-0 rounded-full bg-card px-2.5 py-1 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {changeLabel}
+        </button>
+      )}
     </div>
   )
 }

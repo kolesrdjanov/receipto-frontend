@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Wallet, Tag, CircleDollarSign, type LucideIcon } from 'lucide-react'
+import { Tag } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
@@ -14,22 +14,8 @@ import { useSettingsStore } from '@/store/settings'
 import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
-import { cn, formatMoney } from '@/lib/utils'
+import { formatMoney } from '@/lib/utils'
 import { getErrorMessage } from '@/lib/api'
-
-function OverviewStat({ icon: Icon, iconClass, label, value }: { icon: LucideIcon; iconClass?: string; label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex min-w-[180px] flex-1 items-center gap-3">
-      <span className={cn('grid size-[42px] shrink-0 place-items-center rounded-xl', iconClass || 'bg-bg-subtle text-fg-2')}>
-        <Icon className="size-[19px]" />
-      </span>
-      <div className="min-w-0">
-        <div className="text-[12px] font-semibold text-muted-foreground">{label}</div>
-        <div className="text-[21px] font-extrabold tracking-[-0.01em]">{value}</div>
-      </div>
-    </div>
-  )
-}
 
 function SummaryPill({ count, label }: { count: number; label: string }) {
   return (
@@ -104,7 +90,6 @@ export default function Categories() {
 
   const list = categories ?? []
   const budgeted = list.filter((c) => c.monthlyBudget && c.monthlyBudget > 0)
-  const unbudgeted = list.length - budgeted.length
   const monthlyTotal = budgeted.reduce((sum, c) => sum + convertAmount(c.monthlyBudget!, c.budgetCurrency || 'RSD'), 0)
   const mixedCurrencies = new Set(budgeted.map((c) => c.budgetCurrency || 'RSD')).size > 1
 
@@ -156,22 +141,18 @@ export default function Categories() {
           />
         ) : (
           <>
-            {/* Budget overview — desktop */}
-            <div className="mb-5 hidden items-center gap-2 rounded-2xl border border-border bg-card p-[18px] shadow-glass-1 md:flex">
-              <OverviewStat
-                icon={Wallet}
-                iconClass="bg-primary-soft text-primary"
-                label={t('categories.summary.monthlyBudget')}
-                value={fmtTotal(monthlyTotal)}
-              />
-              <div className="mx-2 my-1 w-px self-stretch bg-hairline-soft" />
-              <OverviewStat icon={Tag} label={t('categories.summary.categoriesLabel')} value={list.length} />
-              <div className="mx-2 my-1 w-px self-stretch bg-hairline-soft" />
-              <OverviewStat
-                icon={CircleDollarSign}
-                label={t('categories.summary.budgetedNoBudget')}
-                value={<>{budgeted.length} <span className="text-fg-faint">· {unbudgeted}</span></>}
-              />
+            {/* Budget overview — desktop: slim summary line, not stat cards (Luma §4) */}
+            <div className="mb-5 hidden items-end justify-between gap-4 px-1 md:flex">
+              <div className="flex items-baseline gap-2.5">
+                <span className="text-[28px] font-bold leading-none tracking-[-0.02em]">{fmtTotal(monthlyTotal)}</span>
+                <span className="text-[13px] font-medium text-muted-foreground">
+                  {t('categories.summary.monthlyBudget')}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <SummaryPill count={list.length} label={t('categories.summary.categoriesPill')} />
+                <SummaryPill count={budgeted.length} label={t('categories.summary.budgetedPill')} />
+              </div>
             </div>
 
             {/* Summary strip — mobile */}

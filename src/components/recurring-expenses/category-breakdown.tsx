@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import type { RecurringExpense, RecurringFrequency } from '@/hooks/recurring-expenses/use-recurring-expenses'
 
-const FALLBACK_COLORS = [
-  '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6',
-  '#8b5cf6', '#ef4444', '#14b8a6', '#f97316', '#06b6d4',
-]
+// Neutral fallbacks for categories with no assigned color (Luma monochrome ramp).
+// Categories that DO carry a color still render it (per-category color is retained).
+const FALLBACK_COLORS = ['#6b7280', '#9ca3af', '#4b5563', '#a1a1aa', '#71717a', '#52525b', '#818181', '#3f3f46']
 
 function getMonthlyEquivalent(amount: number, frequency: RecurringFrequency): number {
   switch (frequency) {

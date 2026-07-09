@@ -83,11 +83,6 @@
       "title": "Podelite troškove zajedno",
       "description": "Kreirajte grupe za porodicu, cimere ili putovanja. Pratite ko je platio, vidite stanje i lako poravnajte dugove - kao popularne aplikacije za deljenje troškova.",
       "tip": ""
-    },
-    "step5": {
-      "title": "Pratite cene",
-      "description": "Pogledajte istoriju cena proizvoda u različitim prodavnicama. Saznajte gde možete uštedeti na redovnim kupovinama.",
-      "tip": "Što više računa skenirate, bolji uvid u cene ćete imati!"
     }
   },
   "nav": {
@@ -163,14 +158,15 @@
     "showHint": "Prinesite skeneru na kasi · ekran je posvetljen",
     "deleteTitle": "Obriši karticu",
     "deleteConfirm": "Da li ste sigurni da želite da obrišete „{{name}}“? Ova radnja se ne može poništiti.",
-    "preview": "Pregled"
+    "preview": "Pregled",
+    "codeType": "Vrsta koda"
   },
   "auth": {
-    "brandTagline": "Vaš pametni pratilac za račune",
+    "brandTagline": "Svaki račun, na svom mestu.",
     "brandFeature1": "Skenirajte i pratite račune odmah",
     "brandFeature2": "Uvid u budžet i analiza potrošnje",
     "brandFeature3": "Praćenje garancija i podsetnici",
-    "orContinueWith": "ili",
+    "orContinueWith": "ili nastavite putem imejla",
     "continueWithGoogle": "Nastavi sa Google nalogom",
     "googleSignInFailed": "Google prijava je otkazana ili nije uspela. Pokušajte ponovo.",
     "passwordStrength": {
@@ -189,14 +185,14 @@
       "sendCode": "Pošalji kod",
       "sending": "Slanje...",
       "passwordlessNote": "Bez lozinke — poslaćemo vam šestocifreni kod na email.",
-      "codeTitle": "Unesite kod",
+      "codeTitle": "Proverite svoj inbox",
       "codeSubtitle": "Poslali smo šestocifreni kod na vaš email",
       "codeResent": "Novi kod je na putu.",
       "verify": "Potvrdi i nastavi",
       "verifying": "Provera...",
       "resendCode": "Pošalji ponovo",
       "resendCooldown": "Pošalji ponovo za {{time}}",
-      "changeEmail": "Koristi drugu email adresu",
+      "changeEmail": "Promeni",
       "requestError": "Slanje koda nije uspelo. Pokušajte ponovo.",
       "invalidCode": "Kod nije ispravan. Pokušajte ponovo."
     },
@@ -385,21 +381,14 @@
       "recentActivity": "Nedavne aktivnosti"
     },
     "focus": {
-      "subtitle": "Fokusiran pregled vašeg meseca",
       "spentLabel": "Potrošeno u {{month}}",
-      "vsBelow": "{{percent}}% manje nego prošlog meseca",
-      "vsAbove": "{{percent}}% više nego prošlog meseca",
-      "daysElapsed": "prošlo {{elapsed}} od {{total}} dana",
       "budgetOf": "{{spent}} od {{budget}} budžeta",
       "budgetLeft": "preostalo {{amount}}",
-      "budgetOverPace": "{{amount}} preko plana",
       "safeToSpend": "Slobodno za potrošnju",
       "perDay": "/dan",
       "safeCaption": "za poslednjih {{days}} dana u mesecu da ostanete u budžetu",
-      "safeCaptionLastDay": "do kraja meseca da ostanete u budžetu",
       "projectedMonthEnd": "Projekcija za kraj meseca",
       "dailyAverage": "Dnevni prosek",
-      "monthTotal": "Ukupno za mesec",
       "avgPerDayCaption": "prosečno dnevno potrošeno ovog meseca",
       "noBudgetTitle": "Postavite mesečni budžet",
       "noBudgetBody": "Dodajte budžete kategorijama da otključate predviđanje i praćenje tempa potrošnje.",
@@ -408,10 +397,8 @@
       "topTierTag": "Najviši nivo",
       "toGoTag": "još {{count}}",
       "dailyFlow": "Dnevni tok",
-      "avgDay": "Prosek / dan",
       "highestDay": "Najviši dan",
       "activeDays": "Aktivnih dana",
-      "today": "danas",
       "whereItGoes": "Gde odlazi",
       "viewAll": "Sve",
       "coachLine": "Ove nedelje ste potrošili <0>{{amount}}</0> — <1>{{change}}</1> nego prošle, najviše na <2>{{category}}</2>.",
@@ -424,7 +411,11 @@
       "dueThisWeek": "{{count}} ove nedelje",
       "overduePrefix": "Kasni",
       "recent": "Nedavno",
-      "allExpenses": "Svi troškovi"
+      "allExpenses": "Svi troškovi",
+      "overBy": "Prekoračeno za {{amount}}",
+      "kpiBudgetLeft": "Preostali budžet",
+      "kpiDaysLeft": "Preostalo dana",
+      "kpiReceipts": "Računi"
     }
   },
   "receipts": {
@@ -490,7 +481,6 @@
     "select": "Izaberi",
     "selectAll": "Izaberi sve",
     "deselectAll": "Poništi izbor",
-    "count": "{{count}} ukupno",
     "unknownStore": "Nepoznata prodavnica",
     "modal": {
       "addTitle": "Dodaj račun",
@@ -672,7 +662,10 @@
       "shareError": "Greška pri deljenju računa",
       "copiedToClipboard": "Račun kopiran u clipboard",
       "viewReceipt": "Prikaži račun"
-    }
+    },
+    "count_one": "{{count}} račun",
+    "count_few": "{{count}} računa",
+    "count_other": "{{count}} računa"
   },
   "templates": {
     "title": "Šabloni",
@@ -856,7 +849,8 @@
       "deleteSuccess": "Grupa uspešno obrisana",
       "createError": "Greška pri kreiranju grupe",
       "updateError": "Greška pri ažuriranju grupe",
-      "deleteError": "Greška pri brisanju grupe"
+      "deleteError": "Greška pri brisanju grupe",
+      "inviteAfterCreate": "Dobićete link za pozivanje čim grupa bude napravljena."
     },
     "detail": {
       "displayCurrency": "Valuta prikaza:",
@@ -949,28 +943,6 @@
       "showArchived": "Prikaži arhivirane",
       "archivedBadge": "Arhivirana"
     },
-    "activities": {
-      "title": "Aktivnost",
-      "noActivities": "Nema aktivnosti",
-      "loadMore": "Učitaj više",
-      "betweenAllMembers": "između svih članova",
-      "betweenMembers": "između {{names}}",
-      "types": {
-        "group_created": "je kreirao/la grupu",
-        "group_updated": "je ažurirao/la podešavanja grupe",
-        "group_archived": "je arhivirao/la grupu",
-        "group_unarchived": "je vratio/la grupu iz arhive",
-        "member_invited": "je pozvao/la {{email}}",
-        "member_joined": "se pridružio/la grupi",
-        "member_left": "je napustio/la grupu",
-        "member_removed": "je uklonjen/a iz grupe",
-        "receipt_added": "je dodao/la račun",
-        "receipt_updated": "je ažurirao/la račun",
-        "receipt_deleted": "je obrisao/la račun",
-        "settlement_created": "je zabeležio/la poravnanje",
-        "member_joined_via_link": "se pridružio/la putem linka"
-      }
-    },
     "inviteLink": {
       "title": "Link za pozivnicu",
       "description": "Podelite ovaj link da se bilo ko odmah pridruži grupi.",
@@ -1050,7 +1022,8 @@
     "manage": {
       "title": "Upravljaj grupom",
       "editDetails": "Izmeni detalje grupe",
-      "deleteGroup": "Obriši grupu"
+      "deleteGroup": "Obriši grupu",
+      "ownerCannotLeave": "Prvo prenesite vlasništvo ili obrišite grupu"
     },
     "tabsNav": {
       "overview": "Pregled",
@@ -1080,7 +1053,20 @@
       "count": "{{count}} troškova",
       "count_one": "{{count}} trošak",
       "count_few": "{{count}} troška",
-      "count_other": "{{count}} troškova"
+      "count_other": "{{count}} troškova",
+      "whatFor": "Za šta",
+      "whatForPlaceholder": "npr. namirnice, večera, gorivo…",
+      "whatForRequired": "Napišite grupi za šta je ovaj trošak",
+      "amountRequired": "Unesite iznos",
+      "paidBy": "Platio/la",
+      "split": "Podela",
+      "splitEqually": "Podjednako",
+      "splitByAmount": "Po iznosu",
+      "splitByAmountSoon": "Podela po iznosima uskoro stiže",
+      "splitRequired": "Izaberite bar jednu osobu",
+      "added": "Trošak je dodat",
+      "addError": "Dodavanje troška nije uspelo",
+      "loadMore": "Učitaj više"
     },
     "menu": {
       "title": "Meni grupe",
@@ -1125,7 +1111,7 @@
       "appearance": "Izgled",
       "region": "Jezik i valuta",
       "notifications": "Obaveštenja",
-      "danger": "Opasna zona"
+      "danger": "Nalog"
     },
     "region": {
       "title": "Jezik i valuta",
@@ -1151,7 +1137,7 @@
       "rose": "Roze",
       "retiredTag": "Povučeno",
       "retiredTitle": "Akcentna boja",
-      "retiredHelp": "Glass redizajn koristi jednu fiksnu brend boju — smaragdnu — kako bi površine ostale mirne i čitljive u svetlom i tamnom režimu. Birač sa šest boja se uklanja."
+      "retiredHelp": "Luma je potpuno monohromatska — skoro crna primarna boja bez akcentne boje — kako bi površine ostale mirne i čitljive u svetlom i tamnom režimu. Crvena je rezervisana za destruktivne akcije."
     },
     "currency": {
       "title": "Valuta",
@@ -1223,7 +1209,8 @@
           "statusB": "Ovaj rang ste dobili jer ste skenirali najmanje 75 računa. Vaša disciplina praćenja je vrhunska.",
           "statusA": "Ovaj rang ste dobili jer ste skenirali 100+ računa. Ovo je najviši rang."
         }
-      }
+      },
+      "discard": "Odbaci"
     },
     "security": {
       "title": "Bezbednost",
@@ -1255,6 +1242,10 @@
       "confirmDelete": "Obriši moj nalog",
       "accountDeleted": "Vaš nalog je obrisan",
       "deleteError": "Greška pri brisanju naloga"
+    },
+    "account": {
+      "signOutTitle": "Odjava",
+      "signOutDescription": "Odjavite se sa Receipta na ovom uređaju."
     }
   },
   "warranties": {
@@ -1889,6 +1880,9 @@
       "dueSoon": "Uskoro dospeva",
       "upcoming": "Predstojeće",
       "more": "još"
+    },
+    "summary": {
+      "caption": "mesečno · {{annual}} godišnje"
     }
   },
   "announcements": {

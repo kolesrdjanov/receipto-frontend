@@ -90,7 +90,7 @@ export function GroupExpensesList({
             <span className="text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
               {t('groups.expense.count', { count: total })}
             </span>
-            <span className="t-num text-[18px] font-extrabold tracking-[-0.02em]">
+            <span className="text-[18px] font-extrabold tracking-[-0.02em]">
               {formatMoney(groupTotal, displayCurrency)}
             </span>
           </div>
@@ -112,7 +112,7 @@ export function GroupExpensesList({
           ))}
           {receipts.length < total && (
             <Button type="button" variant="outline" className="w-full" onClick={() => setLimit((l) => l + 50)}>
-              {t('groups.activities.loadMore')}
+              {t('groups.expense.loadMore')}
             </Button>
           )}
         </>

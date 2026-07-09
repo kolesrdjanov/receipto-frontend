@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Printer, Share2, X } from 'lucide-react'
+import { Printer, Share2, X, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface ReceiptViewerModalProps {
@@ -17,6 +17,12 @@ interface ReceiptViewerModalProps {
   onOpenChange: (open: boolean) => void
   journalText: string | null
   receiptNumber?: string
+  /** Manage actions (the "everything is manageable" rule) — journal receipts opened on
+   *  mobile have no kebab, so the viewer carries Edit/Delete. Locked rows pass
+   *  `lockReason` and get the actions gated (disabled + reason), not hidden. */
+  onEdit?: () => void
+  onDelete?: () => void
+  lockReason?: string
 }
 
 export function ReceiptViewerModal({
@@ -24,6 +30,9 @@ export function ReceiptViewerModal({
   onOpenChange,
   journalText,
   receiptNumber,
+  onEdit,
+  onDelete,
+  lockReason,
 }: ReceiptViewerModalProps) {
   const { t } = useTranslation()
   const receiptRef = useRef<HTMLPreElement>(null)
@@ -134,6 +143,40 @@ export function ReceiptViewerModal({
             </div>
           )}
         </div>
+
+        {(onEdit || onDelete) && (
+          <div className="flex items-center gap-2 border-t border-border pt-3">
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                disabled={!!lockReason}
+                title={lockReason}
+                className="flex-1 sm:flex-none"
+              >
+                <Pencil className="h-4 w-4" />
+                {t('common.edit')}
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                disabled={!!lockReason}
+                title={lockReason}
+                className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive sm:flex-none"
+              >
+                <Trash2 className="h-4 w-4" />
+                {t('common.delete')}
+              </Button>
+            )}
+            {lockReason && (
+              <span className="ml-auto hidden text-[11.5px] text-muted-foreground sm:block">{lockReason}</span>
+            )}
+          </div>
+        )}
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button

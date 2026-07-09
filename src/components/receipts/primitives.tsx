@@ -10,7 +10,7 @@ const STATUS: Record<string, { tone: Tone; icon: LucideIcon; key: string }> = {
   scraped:   { tone: 'ok',     icon: QrCode, key: 'receipts.status.completed' },
   completed: { tone: 'ok',     icon: QrCode, key: 'receipts.status.completed' },
   manual:    { tone: 'info',   icon: Pencil, key: 'receipts.status.manual' },
-  pending:   { tone: 'warn',   icon: Clock,  key: 'receipts.status.pending' },
+  pending:   { tone: 'outline', icon: Clock,  key: 'receipts.status.pending' },
   failed:    { tone: 'danger', icon: X,      key: 'receipts.status.failed' },
   recurring: { tone: 'violet', icon: Repeat, key: 'receipts.status.recurring' },
 }

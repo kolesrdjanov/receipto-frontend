@@ -26,12 +26,15 @@ function getPageList(page: number, totalPages: number): (number | '…')[] {
 function PageBtn({
   children,
   on,
+  edge,
   disabled,
   onClick,
   label,
 }: {
   children: React.ReactNode
   on?: boolean
+  /** Prev/next arrows render as outline buttons (Luma pagination anatomy). */
+  edge?: boolean
   disabled?: boolean
   onClick?: () => void
   label?: string
@@ -45,7 +48,11 @@ function PageBtn({
       onClick={onClick}
       className={cn(
         'grid h-8 min-w-8 place-items-center rounded-[9px] px-2 text-[13px] font-semibold transition-colors',
-        on ? 'bg-foreground text-background' : 'text-fg-2 hover:bg-bg-subtle',
+        on
+          ? 'bg-primary text-primary-foreground'
+          : edge
+            ? 'border border-border bg-card text-fg-2 hover:bg-bg-subtle'
+            : 'text-fg-2 hover:bg-bg-subtle',
         'disabled:pointer-events-none disabled:opacity-40',
       )}
     >
@@ -70,6 +77,7 @@ export function Pagination({ page, totalPages, total, limit, onPageChange }: Pag
           label={t('common.pagination.previous')}
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
+          edge
         >
           <ChevronLeft className="size-[15px]" />
         </PageBtn>
@@ -88,6 +96,7 @@ export function Pagination({ page, totalPages, total, limit, onPageChange }: Pag
           label={t('common.pagination.next')}
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
+          edge
         >
           <ChevronRight className="size-[15px]" />
         </PageBtn>

@@ -15,11 +15,29 @@ work on any machine. **Keep it updated as phases land.**
 ---
 
 ## NEXT UP (resume here)
-**The redesign is COMPLETE — full app migrated + data-QA'd (2026-07-09).** All phases done incl.
-Groups 3b, backend verification, docs, and a full-polish pass. No known Luma residuals remain.
-Screens data-QA'd against a live seeded stack (light+dark): Dashboard (mono bar chart), Warranties
-(mono coverage bars — fixed a pink leak), Categories, Groups (hub/detail/Manage/balances), Loyalty
-(opaque cards, white show-code panel), Admin Users.
+**Status (2026-07-09, post-remediation): the redesign is complete against the handoff, with
+documented exceptions.** An independent audit (see `docs/luma-remediation-plan.md`) found the
+earlier "COMPLETE" claim overstated — four structural gaps and live emerald residue remained. A
+remediation pass then closed them: **new "R" brand rollout** (favicon/PWA icons, LogoMark),
+**residue purge** (settings copy, recurring fallback palette, scanner laser, avatar gradients,
+dead chromatic code), **Dashboard restructure finished** (one-card two-zone hero, KPI strip,
+de-duped numbers, red pace marker, in-chart day ticks), **Auth brand panel** (near-black
+`--primary` panel, specced copy, decoration removed), **Onboarding full-screen tour** (spotlight/
+side variants, composed previews, N/6 progress), **Groups finishers** (bespoke add-expense sheet
+[Equally-only — by-amount needs API work], always-shown balances, inline Manage identity edit,
+invite-after-create hint), and the **drift fix list** (1180px content cap, pending/paused →
+outline badges, toasts bottom-right, dialog hairlines, skeleton shimmer, SelectCheck 6px,
+Settings Account section [Sign out, rank progress bar, Discard, language segmented], loyalty
+manual QR/barcode toggle, slim summary lines, journal-viewer manage actions, recurring desktop
+row tap). Verified against the live seeded stack (add-expense E2E: create → balance recompute).
+**Accepted deviations (recorded, not tracked):** locale-aware money format (`sr` matches the
+handoff's `2.450 RSD`; `en` renders `RSD 2,450`), dimensional batch (sidebar 280 / tab bar 72 /
+avatar 92 / confirm tile 48 / rail 240 / coverage track 8px / expired dim 0.72 / warranty grid
+320), warranty per-status queries, categories mobile row-tap = edit, richer warranty file
+thumbnails, real `react-barcode` render, underline-tabs variant deferred until a screen needs it,
+mobile dashboard Overview/Insights split descoped. **Coordination item:** transactional emails
+embed `https://receipto.io/img-logo-full.png` (marketing site) — still the old brand until that
+asset is replaced.
 
 **Full-polish pass (this session):**
 - Removed every frosted `backdrop-filter` (Luma = opaque): bulk-bar, expenses-mobile-header,

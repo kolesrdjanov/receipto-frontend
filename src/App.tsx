@@ -9,10 +9,10 @@ import { routes, prefetchLazyRoutes } from './routes'
 import { ScrollToTop } from '@/components/scroll-to-top'
 import { useSettingsStore } from './store/settings'
 
-// Glass toast styling — a clean white (popover) card with a soft border + lifted
-// shadow, and a tinted rounded "icon chip" per status (emerald-soft for success,
-// red-soft for error, etc.) holding a strong status-colored glyph. Token-driven,
-// so it adapts to dark mode. No dismiss button — toasts auto-dismiss.
+// Luma toast styling — a flat card with a hairline border and floating shadow,
+// plus a 22px status circle per kind (primary check for success, danger-soft ✕
+// for error). Token-driven, so it adapts to dark mode. No dismiss button —
+// toasts auto-dismiss.
 const toasterIcons = {
   success: <Check className="size-3" strokeWidth={3} />,
   error: <X className="size-3" strokeWidth={3} />,
@@ -94,7 +94,7 @@ function App() {
               <AppRoutes />
             </Suspense>
             <Toaster
-              position="top-right"
+              position="bottom-right"
               icons={toasterIcons}
               toastOptions={{ classNames: toasterClassNames }}
             />

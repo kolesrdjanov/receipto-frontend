@@ -73,7 +73,7 @@ export function ConfirmDialog({
         secondary: (
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >

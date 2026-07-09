@@ -121,7 +121,7 @@ export function SelectCheck({ on, className }: { on?: boolean; className?: strin
   return (
     <span
       className={cn(
-        'grid size-5 shrink-0 place-items-center rounded-md border-2 transition-colors',
+        'grid size-5 shrink-0 place-items-center rounded-[6px] border-2 transition-colors',
         on ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong bg-card',
         className,
       )}
@@ -164,6 +164,8 @@ export function RowActionItem({
   label,
   onClick,
   danger,
+  disabled,
+  hint,
   className,
   'data-testid': testId,
 }: {
@@ -171,21 +173,35 @@ export function RowActionItem({
   label: ReactNode
   onClick?: () => void
   danger?: boolean
+  /** Gated-not-hidden: renders the action inert; pair with `hint` to say why. */
+  disabled?: boolean
+  /** Small muted reason line under the label (shown for gated actions). */
+  hint?: ReactNode
   className?: string
   'data-testid'?: string
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       data-testid={testId}
       className={cn(
         'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors hover:bg-bg-subtle',
         danger && 'text-destructive hover:bg-destructive/10',
+        disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent',
         className,
       )}
     >
-      <Icon className="size-[18px] shrink-0" /> {label}
+      <Icon className="size-[18px] shrink-0" />{' '}
+      {hint ? (
+        <span className="min-w-0 flex-1">
+          <span className="block">{label}</span>
+          <span className="mt-0.5 block text-[11.5px] font-normal text-muted-foreground">{hint}</span>
+        </span>
+      ) : (
+        label
+      )}
     </button>
   )
 }

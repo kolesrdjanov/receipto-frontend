@@ -334,6 +334,18 @@ body {
   background: var(--fg-faint);
 }
 
+/* Skeleton shimmer — left-to-right sweep, ~6% white overlay (Luma spec).
+   The global prefers-reduced-motion rule already collapses the animation. */
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.skeleton-shimmer {
+  background-image: linear-gradient(90deg, transparent 30%, oklch(1 0 0 / 0.06) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
 /* Selection styling */
 ::selection {
   background: oklch(0.205 0 0 / 0.12);
@@ -476,6 +488,4 @@ body {
 .icon-tile-info { background: var(--subtle); color: var(--muted-foreground); }
 .icon-tile-primary { background: var(--subtle); color: var(--foreground); }
 
-/* dashboard hero sheen retired (flat). */
-.dash-hero-sheen { display: none; }
 

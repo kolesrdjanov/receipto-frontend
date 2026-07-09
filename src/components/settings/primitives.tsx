@@ -90,7 +90,7 @@ export function SettingRow({
 }
 
 /* ------------------------------------------------------------------ */
-/* Accent color — retired note (the picker is gone; app is emerald-locked) */
+/* Accent color — retired note (the picker is gone; Luma is monochrome) */
 /* ------------------------------------------------------------------ */
 export function AccentRetired() {
   const { t } = useTranslation()
@@ -184,10 +184,12 @@ export function SaveBar({
   dirty,
   saving,
   onSave,
+  onDiscard,
 }: {
   dirty: boolean
   saving: boolean
   onSave: () => void
+  onDiscard?: () => void
 }) {
   const { t } = useTranslation()
   return (
@@ -197,6 +199,11 @@ export function SaveBar({
           <span className="size-1.5 rounded-full bg-warning" />
           {t('settings.profile.unsavedChanges')}
         </span>
+      )}
+      {dirty && !saving && onDiscard && (
+        <Button type="button" variant="ghost" onClick={onDiscard}>
+          {t('settings.profile.discard')}
+        </Button>
       )}
       <Button type="button" onClick={onSave} disabled={!dirty || saving}>
         {saving ? t('common.saving') : t('common.save')}

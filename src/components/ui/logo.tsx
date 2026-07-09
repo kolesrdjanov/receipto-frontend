@@ -7,42 +7,45 @@ interface LogoProps {
 }
 
 const sizeConfig = {
-  sm: { box: 'size-8 rounded-[9px]', glyph: 'size-[18px]', text: 'text-[15px]' },
-  md: { box: 'size-10 rounded-xl', glyph: 'size-[22px]', text: 'text-[17px]' },
-  lg: { box: 'size-12 rounded-2xl', glyph: 'size-[26px]', text: 'text-[19px]' },
+  sm: { box: 'size-8', text: 'text-[15px]' },
+  md: { box: 'size-10', text: 'text-[17px]' },
+  lg: { box: 'size-12', text: 'text-[19px]' },
 }
 
-/** Luma receipt mark — a near-black rounded square with a white receipt glyph.
- *  Monochrome by design (the old gradient asset is retired). */
-export function LogoMark({ className, glyphClassName }: { className?: string; glyphClassName?: string }) {
+const R_MONOGRAM =
+  'M60.06 0L22.12 0L22.12-210.94L114.11-210.94Q188.67-210.94 188.67-152.05L188.67-152.05Q188.67-103.56 136.23-94.78L136.23-94.78L190.72 0L147.95 0L94.92-92.87L60.06-92.87L60.06 0ZM60.06-181.05L60.06-122.90L112.50-122.90Q130.81-122.90 140.70-130.30Q150.59-137.70 150.59-151.76Q150.59-165.82 140.55-173.44Q130.52-181.05 112.06-181.05L112.06-181.05L60.06-181.05Z'
+
+/** Receipto brand mark — charcoal rounded square + white "R" monogram.
+ *  Inlined from public/brand/receipto-icon.svg so it scales crisply at nav sizes.
+ *  Colors are brand constants: the mark does not invert with the theme.
+ *  `onPrimary` renders a token-driven inverse (primary-foreground square + primary
+ *  glyph) for surfaces filled with `--primary`, e.g. the auth brand panel. */
+export function LogoMark({ className, onPrimary = false }: { className?: string; onPrimary?: boolean }) {
   return (
-    <span className={cn('grid shrink-0 place-items-center bg-primary text-primary-foreground', className)}>
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={glyphClassName}
-        aria-hidden
-      >
-        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-        <path d="M8 8h8" />
-        <path d="M8 12h8" />
-        <path d="M8 16h5" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 512 512" className={cn('shrink-0', className)} aria-hidden>
+      <rect width="512" height="512" rx="115.2" fill={onPrimary ? 'var(--primary-foreground)' : '#343434'} />
+      <g transform="translate(149.58,361.47)">
+        <path d={R_MONOGRAM} fill={onPrimary ? 'var(--primary)' : '#fbfbfb'} />
+      </g>
+    </svg>
   )
 }
 
-export function Logo({ size = 'md', showText = true, className }: LogoProps) {
+export function Logo({ size = 'md', showText = true, className, onPrimary = false }: LogoProps & { onPrimary?: boolean }) {
   const c = sizeConfig[size]
   return (
     <div className={cn('flex items-center gap-2.5', className)}>
-      <LogoMark className={c.box} glyphClassName={c.glyph} />
+      <LogoMark className={c.box} onPrimary={onPrimary} />
       {showText && (
-        <span className={cn('font-semibold tracking-[-0.01em] text-foreground', c.text)}>Receipto</span>
+        <span
+          className={cn(
+            'font-semibold tracking-[-0.01em]',
+            onPrimary ? 'text-primary-foreground' : 'text-foreground',
+            c.text,
+          )}
+        >
+          Receipto
+        </span>
       )}
     </div>
   )

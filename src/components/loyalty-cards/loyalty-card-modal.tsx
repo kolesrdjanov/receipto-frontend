@@ -281,6 +281,30 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
                 {t('loyaltyCards.scanCard')}
               </Button>
             </div>
+            {/* Manual code-type toggle — scans auto-detect the format; hand-typed values pick here. */}
+            <div className="mt-2.5 inline-flex rounded-[10px] bg-bg-subtle p-[3px]" role="group" aria-label={t('loyaltyCards.codeType')}>
+              {(['barcode', 'qr'] as const).map((kind) => {
+                const active = codeType === kind
+                return (
+                  /* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: segmented control option (mirrors ThemeSegmented) */
+                  <button
+                    key={kind}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      setValue('codeType', kind, { shouldDirty: true })
+                      setValue('codeFormat', kind === 'qr' ? 'qr' : 'code_128', { shouldDirty: true })
+                    }}
+                    className={
+                      'flex h-[30px] items-center rounded-[7px] px-3.5 text-[13px] font-semibold transition-colors ' +
+                      (active ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground hover:text-foreground')
+                    }
+                  >
+                    {kind === 'qr' ? 'QR' : t('loyaltyCards.barcode')}
+                  </button>
+                )
+              })}
+            </div>
             {codeValue && (
               <p className="ml-0.5 mt-2.5 text-[12px] font-medium text-muted-foreground">
                 {t('loyaltyCards.detectedFormat')}: <b className="text-fg-2">{codeFormat}</b>{' '}

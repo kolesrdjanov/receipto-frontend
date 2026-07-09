@@ -530,6 +530,29 @@ export default function Receipts() {
             onOpenChange={setViewerOpen}
             journalText={viewerReceiptFull?.scrapedData?.journal ?? null}
             receiptNumber={viewerReceiptFull?.receiptNumber}
+            lockReason={
+              viewerReceiptFull?.group?.isArchived
+                ? t('receipts.archivedGroupLocked')
+                : viewerReceiptFull?.status === 'recurring'
+                  ? t('receipts.recurringLocked')
+                  : undefined
+            }
+            onEdit={
+              viewerReceiptFull
+                ? () => {
+                    setViewerOpen(false)
+                    handleEditReceipt(viewerReceiptFull)
+                  }
+                : undefined
+            }
+            onDelete={
+              viewerReceiptFull
+                ? () => {
+                    setViewerOpen(false)
+                    setReceiptToDelete(viewerReceiptFull)
+                  }
+                : undefined
+            }
           />
         )}
       </Suspense>

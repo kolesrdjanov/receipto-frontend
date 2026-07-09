@@ -10,7 +10,7 @@ export function CategoryBars({
 }) {
   const total = data.reduce((sum, c) => sum + c.value, 0) || 1
   return (
-    <div className="flex flex-col gap-3">
+    <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
       {data.map((c) => {
         const pct = c.value / total
         return (

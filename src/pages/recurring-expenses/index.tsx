@@ -28,20 +28,9 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useFabStore } from '@/store/fab'
 import { cn, formatMoney } from '@/lib/utils'
+import { StatusBadge } from '@/components/glass/primitives'
 
 const INFO_KEY = 'recurring-info-dismissed'
-
-/** Small grey stat card (design `rec-statcell`) — number over label, left-aligned. */
-function StatCell({ value, label, tone }: { value: number; label: string; tone?: string }) {
-  return (
-    <div className="flex flex-col gap-0.5 rounded-xl bg-bg-subtle px-3 py-2.5">
-      <span className={cn('text-[19px] font-extrabold leading-none', tone ?? 'text-foreground')}>
-        {value}
-      </span>
-      <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
-    </div>
-  )
-}
 
 export default function RecurringExpenses() {
   const { t } = useTranslation()
@@ -250,43 +239,50 @@ export default function RecurringExpenses() {
           />
         ) : (
           <>
-            {/* Overview — desktop two-card row */}
-            <div className="mb-6 hidden gap-4 md:grid md:grid-cols-[1.4fr_1fr]">
-              <div className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-glass-1">
-                <p className="t-xs mb-3 text-fg-faint">{t('recurring.overview.title')}</p>
-                <div className="flex items-center gap-5">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[13px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                    <span className="text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
-                  </div>
-                  <div className="w-px self-stretch bg-hairline-soft" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[13px] text-muted-foreground">{t('recurring.stats.annualProjection')}</span>
-                    <span className="text-[18px] font-extrabold leading-none text-fg-2">{formatAmount(monthlyTotal * 12)}</span>
-                  </div>
-                </div>
-                <div className="mt-auto grid grid-cols-4 gap-2 pt-5">
-                  <StatCell value={overdueCount} label={t('recurring.overview.overdue')} tone={overdueCount ? 'text-destructive' : undefined} />
-                  <StatCell value={dueSoonCount} label={t('recurring.overview.dueSoon')} tone={dueSoonCount ? 'text-warning-foreground' : undefined} />
-                  <StatCell value={activeCount} label={t('recurring.overview.active')} />
-                  <StatCell value={summary?.paidThisMonth ?? 0} label={t('recurring.overview.paid')} tone={(summary?.paidThisMonth ?? 0) ? 'text-success-foreground' : undefined} />
+            {/* Overview — desktop: slim summary line + demoted category card (Luma §5) */}
+            <div className="mb-5 hidden items-end justify-between gap-4 px-1 md:flex">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-[28px] font-bold leading-none tracking-[-0.02em]">
+                    {formatAmount(monthlyTotal)}
+                  </span>
+                  <span className="text-[13px] font-medium text-muted-foreground">
+                    {t('recurring.summary.caption', { annual: formatAmount(monthlyTotal * 12) })}
+                  </span>
                 </div>
                 {mixedCurrencies && (
-                  <p className="mt-3 text-[11px] text-fg-faint">{t('receipts.convertedDisclaimer')}</p>
+                  <p className="text-[11px] text-fg-faint">{t('receipts.convertedDisclaimer')}</p>
                 )}
               </div>
-              {categoryData.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-5 shadow-glass-1">
-                  <p className="t-xs mb-4 text-fg-faint">
-                    {t('recurring.overview.spendingByCategory')}{' '}
-                    <span className="font-normal normal-case tracking-normal text-muted-foreground">
-                      {t('recurring.overview.monthlyEquivalent')}
-                    </span>
-                  </p>
-                  <CategoryBars data={categoryData} formatAmount={(v) => formatAmount(v)} />
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <StatusBadge tone="neutral">
+                  {activeCount} {t('recurring.overview.active').toLowerCase()}
+                </StatusBadge>
+                {dueSoonCount > 0 && (
+                  <StatusBadge tone="solid">
+                    {dueSoonCount} {t('recurring.overview.dueSoon').toLowerCase()}
+                  </StatusBadge>
+                )}
+                {overdueCount > 0 && (
+                  <StatusBadge tone="danger">
+                    <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
+                    {overdueCount} {t('recurring.overview.overdue').toLowerCase()}
+                  </StatusBadge>
+                )}
+              </div>
             </div>
+
+            {categoryData.length > 0 && (
+              <div className="mb-6 hidden rounded-2xl border border-border bg-card p-5 shadow-glass-1 md:block">
+                <p className="t-xs mb-4 text-fg-faint">
+                  {t('recurring.overview.spendingByCategory')}{' '}
+                  <span className="font-normal normal-case tracking-normal text-muted-foreground">
+                    {t('recurring.overview.monthlyEquivalent')}
+                  </span>
+                </p>
+                <CategoryBars data={categoryData} formatAmount={(v) => formatAmount(v)} />
+              </div>
+            )}
 
             {/* Slim summary — mobile */}
             <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">

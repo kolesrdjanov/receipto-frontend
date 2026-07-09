@@ -134,7 +134,7 @@ export function SettlementModal({
 
         <div className="flex items-baseline justify-center gap-2 py-3">
           <input
-            className="t-num w-auto min-w-[60px] max-w-[220px] border-none bg-transparent text-right text-[34px] font-extrabold tracking-[-0.03em] text-foreground outline-none placeholder:text-fg-faint"
+            className="w-auto min-w-[60px] max-w-[220px] border-none bg-transparent text-right text-[34px] font-extrabold tracking-[-0.03em] text-foreground outline-none placeholder:text-fg-faint"
             inputMode="decimal"
             placeholder="0"
             value={amount}
@@ -160,7 +160,7 @@ export function SettlementModal({
             <GMemberAvatar user={userOf(toUserId)} self={toUserId === user?.id} size={26} />
             <b className="font-bold">{memberFirstName(userOf(toUserId))}</b>
             <span className="flex-1" />
-            <span className="t-num font-bold text-foreground">{formatMoney(parsedAmount, currency)}</span>
+            <span className="font-bold text-foreground">{formatMoney(parsedAmount, currency)}</span>
           </div>
         )}
       </div>

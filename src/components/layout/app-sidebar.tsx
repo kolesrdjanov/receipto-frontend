@@ -187,7 +187,7 @@ export function AppSidebar({
             className="flex min-w-0 flex-1 items-center gap-2.5 group-data-[collapsible=icon]:flex-none"
             aria-label={t('common.appName')}
           >
-            <LogoMark className="size-[30px] rounded-[9px]" glyphClassName="size-[17px]" />
+            <LogoMark className="size-[30px]" />
             <span className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
               <span className="truncate text-[16px] font-semibold leading-none tracking-[-0.01em] text-foreground">
                 {t('common.appName')}

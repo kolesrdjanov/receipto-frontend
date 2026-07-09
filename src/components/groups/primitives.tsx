@@ -13,10 +13,10 @@ import {
 } from '@/lib/groups'
 
 /**
- * Group-spending Glass primitives. These carry the feature's own visual vocabulary
- * (balance headline, settle rows, member-hue avatars) and own the balance semantics
- * (owed = green, owe = red, settled = neutral). Shared by the Hub, the group tabs and
- * the desktop rail so they can't drift.
+ * Group-spending primitives. These carry the feature's own visual vocabulary
+ * (balance headline, settle rows, monochrome member avatars) and own the Luma balance
+ * semantics (owed = strong foreground, owe = danger, settled = muted). Shared by the
+ * Hub, the group detail and the desktop rail so they can't drift.
  */
 
 type AvatarUser = {
@@ -27,14 +27,6 @@ type AvatarUser = {
   profileImageUrl?: string
 } | null | undefined
 
-const HUES = [165, 190, 210, 290, 345]
-
-function hueFor(key: string): number {
-  let h = 0
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0
-  return HUES[h % HUES.length]
-}
-
 function initialsOf(user: AvatarUser): string {
   const a = user?.firstName?.trim()[0]
   const b = user?.lastName?.trim()[0]
@@ -42,8 +34,8 @@ function initialsOf(user: AvatarUser): string {
   return (a || b || user?.email?.trim()[0] || '?').toUpperCase()
 }
 
-/** Member avatar with a stable per-member brand-hue gradient (initials), the user's photo when
- *  present, or the cyan→violet "you" gradient for the signed-in user (matches the app avatar). */
+/** Member avatar — Luma monochrome: subtle circle + foreground initials; the signed-in user
+ *  inverts to primary. Shows the user's photo when present. */
 export function GMemberAvatar({
   user,
   self = false,
@@ -55,7 +47,7 @@ export function GMemberAvatar({
   size?: number
   ring?: boolean
 }) {
-  const ringShadow = ring ? '0 0 0 2px var(--bg-elev)' : undefined
+  const ringShadow = ring ? '0 0 0 2px var(--card)' : undefined
   if (user?.profileImageUrl) {
     return (
       <span
@@ -72,18 +64,16 @@ export function GMemberAvatar({
       </span>
     )
   }
-  const key = user?.id || user?.email || initialsOf(user)
-  const bg = self
-    ? 'linear-gradient(135deg, var(--brand-cyan), var(--brand-violet))'
-    : `linear-gradient(135deg, oklch(0.74 0.13 ${hueFor(key)}), oklch(0.62 0.16 ${hueFor(key)}))`
   return (
     <span
-      className="relative grid shrink-0 place-items-center rounded-full font-bold text-white"
+      className={cn(
+        'relative grid shrink-0 place-items-center rounded-full font-bold',
+        self ? 'bg-primary text-primary-foreground' : 'bg-subtle text-foreground',
+      )}
       style={{
         width: size,
         height: size,
         fontSize: Math.round(size * 0.36),
-        background: bg,
         boxShadow: ringShadow,
         fontFamily: 'var(--font-display)',
         letterSpacing: '-0.02em',
@@ -123,7 +113,7 @@ export function GAvatarStack({
             width: size,
             height: size,
             fontSize: Math.round(size * 0.34),
-            boxShadow: '0 0 0 2px var(--bg-elev)',
+            boxShadow: '0 0 0 2px var(--card)',
           }}
         >
           +{extra}
@@ -133,7 +123,7 @@ export function GAvatarStack({
   )
 }
 
-/** Tabular money text; `signed` colours + prefixes by sign (green +, red −, muted 0). */
+/** Money text; `signed` prefixes positives and tints by Luma balance semantics. */
 export function Money({
   value,
   currency = 'RSD',
@@ -161,7 +151,7 @@ export function Money({
         : 'text-muted-foreground'
     : 'text-foreground'
   return (
-    <span className={cn('t-num', color, className)} style={{ fontWeight: weight, fontSize: size }}>
+    <span className={cn(color, className)} style={{ fontWeight: weight, fontSize: size }}>
       {signed && pos ? '+' : ''}
       {formatMoney(value, currency)}
     </span>
@@ -185,8 +175,8 @@ export function SectionLabel({ children, action }: { children: ReactNode; action
   )
 }
 
-/** One minimal-transaction row. From your POV: "your" rows get a tint + a contextual CTA;
- *  other-to-other rows render a two-avatar flow with no action. */
+/** One minimal-transaction row. From your POV: "your" rows get a subtle highlight + a
+ *  contextual CTA; other-to-other rows render a plain two-avatar flow with no action. */
 export function SettleRow({
   settlement,
   currency,
@@ -207,7 +197,7 @@ export function SettleRow({
     <div
       className={cn(
         'flex items-center gap-3 rounded-[14px] p-2.5',
-        mine ? 'border border-primary/20 bg-primary-soft' : 'bg-bg-subtle',
+        mine && 'bg-subtle',
       )}
     >
       {mine ? (
@@ -241,7 +231,7 @@ export function SettleRow({
             </>
           )}
         </div>
-        <div className="t-num mt-0.5 text-[14.5px] font-extrabold text-foreground">
+        <div className="mt-0.5 text-[14.5px] font-extrabold text-foreground">
           {formatMoney(settlement.amount, currency)}
         </div>
       </div>
@@ -295,7 +285,7 @@ export function MemberBalanceRow({
             </div>
           </>
         ) : (
-          <span className="t-num text-[14px] font-bold text-muted-foreground">{t('groups.balances.settled')}</span>
+          <span className="text-[14px] font-bold text-muted-foreground">{t('groups.balances.settled')}</span>
         )}
       </div>
     </div>
@@ -325,12 +315,12 @@ export function BalancePill({
     >
       {state === 'owed' && (
         <>
-          {t('groups.pill.owed')} <b className="t-num font-extrabold">{formatMoney(amount, currency)}</b>
+          {t('groups.pill.owed')} <b className="font-extrabold">{formatMoney(amount, currency)}</b>
         </>
       )}
       {state === 'owe' && (
         <>
-          {t('groups.pill.owe')} <b className="t-num font-extrabold">{formatMoney(Math.abs(amount), currency)}</b>
+          {t('groups.pill.owe')} <b className="font-extrabold">{formatMoney(Math.abs(amount), currency)}</b>
         </>
       )}
       {state === 'settled' && (

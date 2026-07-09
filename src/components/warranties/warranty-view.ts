@@ -28,23 +28,6 @@ export function deriveKindEmoji(name?: string | null): string {
   return hit ? hit.emoji : '📦'
 }
 
-/** Kind tile tint — a stable accent colour keyed off the emoji bucket. */
-const KIND_COLOR: Record<string, string> = {
-  '📺': '#0ea5e9',
-  '📱': '#8b5cf6',
-  '💻': '#06b6d4',
-  '🧊': '#10b981',
-  '🧺': '#22c55e',
-  '☕': '#d97706',
-  '🎧': '#ec4899',
-  '🧹': '#f43f5e',
-  '📦': '#64748b',
-}
-
-export function kindColor(emoji: string): string {
-  return KIND_COLOR[emoji] || '#64748b'
-}
-
 /** 0..1 share of the warranty window that has elapsed (drives the coverage-bar fill). */
 export function coveragePercent(w: Warranty): number {
   const start = new Date(w.purchaseDate).getTime()

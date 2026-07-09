@@ -30,7 +30,9 @@ import { formatDate } from '@/lib/date-utils'
 const MASK = '••••'
 
 /* ============================================================
-   HERO — month spend + integrated budget meter
+   HERO — one card, two zones (Luma restructure):
+   left = spent + budget meter with a red pace marker;
+   right = tinted safe-to-spend panel + projected month-end.
    ============================================================ */
 export interface FocusHeroProps {
   monthLabel: string
@@ -38,8 +40,8 @@ export interface FocusHeroProps {
   budget: number
   projected: number
   vsLastMonth: number
-  daysElapsed: number
-  daysTotal: number
+  daysLeft: number
+  dailyAvg: number
   displayCurrency: string
   amountsVisible: boolean
   onToggleAmounts: () => void
@@ -54,8 +56,8 @@ export function FocusHero({
   budget,
   projected,
   vsLastMonth,
-  daysElapsed,
-  daysTotal,
+  daysLeft,
+  dailyAvg,
   displayCurrency,
   amountsVisible,
   onToggleAmounts,
@@ -63,16 +65,17 @@ export function FocusHero({
   rankLabel,
 }: FocusHeroProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const hasBudget = budget > 0
   const pct = hasBudget ? Math.min((spent / budget) * 100, 100) : 0
   const projPct = hasBudget ? Math.min((projected / budget) * 100, 100) : 0
   const remaining = budget - spent
   const overPace = projected - budget
+  const safePerDay = isCurrentMonth && daysLeft > 0 ? Math.max(Math.round(remaining / daysLeft), 0) : 0
+  const showSafe = isCurrentMonth && daysLeft > 0
 
   return (
-    <section className="glass-card relative flex flex-col overflow-hidden px-[26px] pb-[22px] pt-6">
-      <div className="dash-hero-sheen" aria-hidden />
-
+    <section className="glass-card relative grid overflow-hidden md:grid-cols-[1.6fr_1fr]">
       <div className="absolute right-[18px] top-[18px] z-[2] flex items-center gap-2">
         {rankLabel && (
           <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
@@ -83,174 +86,112 @@ export function FocusHero({
         <AmountsEyeToggle visible={amountsVisible} onToggle={onToggleAmounts} />
       </div>
 
-      <div className="relative z-[1] text-[12.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-        {t('dashboard.focus.spentLabel', { month: monthLabel })}
-      </div>
+      {/* Left zone — spent + budget meter */}
+      <div className="flex flex-col px-[26px] pb-[22px] pt-6">
+        <div className="text-[12.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+          {t('dashboard.focus.spentLabel', { month: monthLabel })}
+        </div>
 
-      <div className="relative z-[1] mt-2.5 flex flex-wrap items-baseline gap-x-3.5 gap-y-2">
-        <span className="font-display text-[42px] font-extrabold leading-none tracking-[-0.03em] text-foreground md:text-[52px]">
-          {amountsVisible ? formatMoney(spent, displayCurrency) : <HiddenDots />}
-        </span>
-        <TrendPill value={vsLastMonth} className="h-6 gap-1 px-2.5 text-[12.5px] [&_svg]:size-3.5" />
-      </div>
+        <div className="mt-2.5 flex flex-wrap items-baseline gap-x-3.5 gap-y-2">
+          <span className="font-display text-[42px] font-extrabold leading-none tracking-[-0.03em] text-foreground md:text-[52px]">
+            {amountsVisible ? formatMoney(spent, displayCurrency) : <HiddenDots />}
+          </span>
+          <TrendPill value={vsLastMonth} className="h-6 gap-1 px-2.5 text-[12.5px] [&_svg]:size-3.5" />
+        </div>
 
-      <div className="relative z-[1] mt-2.5 text-[12.5px] leading-snug text-muted-foreground">
-        {vsLastMonth !== 0 &&
-          `${t(vsLastMonth < 0 ? 'dashboard.focus.vsBelow' : 'dashboard.focus.vsAbove', {
-            percent: Math.abs(vsLastMonth),
-          })} · `}
-        {t('dashboard.focus.daysElapsed', { elapsed: daysElapsed, total: daysTotal })}
-      </div>
-
-      {hasBudget && (
-        <div className="relative z-[1] mt-auto pt-5">
-          <div className="relative h-2.5 rounded-full bg-bg-subtle/90 dark:bg-black/30">
-            <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-            {isCurrentMonth && (
-              <div
-                className="absolute -top-[3px] h-4 w-[3px] -translate-x-1/2 rounded-sm bg-foreground shadow-[0_0_0_2px_var(--card)]"
-                style={{ left: `${projPct}%` }}
-                title={t('dashboard.focus.projectedMonthEnd')}
-              />
-            )}
-          </div>
-          <div className="mt-2.5 flex items-center justify-between gap-3 text-[12.5px] text-muted-foreground">
-            <span>
-              <Trans
-                i18nKey="dashboard.focus.budgetOf"
-                values={{
-                  spent: amountsVisible ? formatMoney(spent, displayCurrency) : MASK,
-                  budget: formatMoney(budget, displayCurrency),
-                }}
-                components={[<b className="font-bold text-foreground" />]}
-              />
-            </span>
-            {isCurrentMonth && overPace > 0 ? (
-              <span className="rounded-full bg-destructive-soft px-2 py-0.5 font-bold text-[color:var(--destructive-foreground-on-soft)]">
-                {t('dashboard.focus.budgetOverPace', {
-                  amount: amountsVisible ? formatMoney(overPace, displayCurrency) : MASK,
-                })}
+        {hasBudget && (
+          <div className="mt-auto pt-6">
+            <div className="relative h-2.5 rounded-full bg-bg-subtle/90 dark:bg-black/30">
+              <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+              {isCurrentMonth && (
+                <div
+                  className="absolute -top-[3px] h-4 w-[3px] -translate-x-1/2 rounded-sm bg-destructive shadow-[0_0_0_2px_var(--card)]"
+                  style={{ left: `${projPct}%` }}
+                  title={t('dashboard.focus.projectedMonthEnd')}
+                />
+              )}
+            </div>
+            <div className="mt-2.5 flex items-center justify-between gap-3 text-[12.5px] text-muted-foreground">
+              <span>
+                <Trans
+                  i18nKey="dashboard.focus.budgetOf"
+                  values={{
+                    spent: amountsVisible ? formatMoney(spent, displayCurrency) : MASK,
+                    budget: formatMoney(budget, displayCurrency),
+                  }}
+                  components={[<b className="font-bold text-foreground" />]}
+                />
               </span>
-            ) : (
               <span className="font-bold text-foreground">
                 {t('dashboard.focus.budgetLeft', {
                   amount: amountsVisible ? formatMoney(Math.max(remaining, 0), displayCurrency) : MASK,
                 })}
               </span>
-            )}
+            </div>
           </div>
-        </div>
-      )}
-    </section>
-  )
-}
+        )}
+      </div>
 
-/* ============================================================
-   SAFE TO SPEND / FORECAST — the headline forward-looking card
-   ============================================================ */
-export interface FocusSafeToSpendProps {
-  budget: number
-  spent: number
-  projected: number
-  dailyAvg: number
-  vsLastMonth: number
-  daysLeft: number
-  monthLabel: string
-  displayCurrency: string
-  amountsVisible: boolean
-  isCurrentMonth: boolean
-}
-
-export function FocusSafeToSpend({
-  budget,
-  spent,
-  projected,
-  dailyAvg,
-  vsLastMonth,
-  daysLeft,
-  monthLabel,
-  displayCurrency,
-  amountsVisible,
-  isCurrentMonth,
-}: FocusSafeToSpendProps) {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-
-  // No global budget set (the app uses per-category budgets) → invite the user to set one.
-  if (budget <= 0) {
-    return (
-      <section className="flex flex-col rounded-[28px] border border-primary/20 bg-primary-soft p-[22px] shadow-glass-1">
-        <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.05em] text-primary">
-          <Wallet className="size-3.5" />
+      {/* Right zone — tinted safe-to-spend panel */}
+      <div className="flex flex-col border-t border-border bg-subtle px-[22px] pb-5 pt-6 md:border-l md:border-t-0">
+        <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.05em] text-muted-foreground">
+          <Wallet className="size-3.5" aria-hidden="true" />
           {t('dashboard.focus.safeToSpend')}
         </span>
-        <h3 className="mt-3 text-[18px] font-extrabold tracking-[-0.01em]">
-          {t('dashboard.focus.noBudgetTitle')}
-        </h3>
-        <p className="mt-1.5 text-[13px] text-muted-foreground">{t('dashboard.focus.noBudgetBody')}</p>
-        <Button
-          type="button"
-          variant="glass"
-          size="pill"
-          className="mt-auto self-start"
-          onClick={() => navigate('/categories')}
-        >
-          <Target className="size-4" />
-          {t('dashboard.focus.noBudgetCta')}
-        </Button>
-      </section>
-    )
-  }
 
-  const remaining = budget - spent
-  const safePerDay = isCurrentMonth && daysLeft > 0 ? Math.max(Math.round(remaining / daysLeft), 0) : 0
-  const showSafe = isCurrentMonth && daysLeft > 0
-
-  return (
-    <section className="flex flex-col rounded-[28px] border border-primary/20 bg-primary-soft p-[22px] shadow-glass-1">
-      <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.05em] text-primary">
-        <Wallet className="size-3.5" />
-        {t('dashboard.focus.safeToSpend')}
-      </span>
-
-      {showSafe ? (
-        <>
-          <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
-            {amountsVisible ? formatMoney(safePerDay, displayCurrency) : MASK}
-            <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
-          </div>
-          <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
-            {t('dashboard.focus.safeCaption', { days: daysLeft, month: monthLabel })}
-          </p>
-        </>
-      ) : (
-        <>
-          <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
-            {amountsVisible ? formatMoney(Math.round(dailyAvg), displayCurrency) : MASK}
-            <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
-          </div>
-          <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
-            {t('dashboard.focus.avgPerDayCaption', { month: monthLabel })}
-          </p>
-        </>
-      )}
-
-      <div className="mt-auto flex flex-col gap-3 pt-[18px]">
-        <div className="flex items-center justify-between gap-3 border-t border-primary/15 pt-3 dark:border-white/10">
-          <span className="text-[12.5px] font-semibold text-muted-foreground">
-            {isCurrentMonth ? t('dashboard.focus.projectedMonthEnd') : t('dashboard.focus.monthTotal')}
-          </span>
-          <span className="inline-flex items-center gap-2 text-[15px] font-bold">
-            {amountsVisible ? formatMoney(projected, displayCurrency) : MASK}
-            <TrendPill value={vsLastMonth} />
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-3 border-t border-primary/15 pt-3 dark:border-white/10">
-          <span className="text-[12.5px] font-semibold text-muted-foreground">{t('dashboard.focus.dailyAverage')}</span>
-          <span className="text-[15px] font-bold">
-            {amountsVisible ? formatMoney(dailyAvg, displayCurrency) : MASK}
-          </span>
-        </div>
+        {!hasBudget ? (
+          <>
+            <h3 className="mt-3 text-[18px] font-extrabold tracking-[-0.01em]">
+              {t('dashboard.focus.noBudgetTitle')}
+            </h3>
+            <p className="mt-1.5 text-[13px] text-muted-foreground">{t('dashboard.focus.noBudgetBody')}</p>
+            <Button
+              type="button"
+              variant="default"
+              size="pill"
+              className="mt-4 self-start md:mt-auto"
+              onClick={() => navigate('/categories')}
+            >
+              <Target className="size-4" />
+              {t('dashboard.focus.noBudgetCta')}
+            </Button>
+          </>
+        ) : showSafe ? (
+          <>
+            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
+              {amountsVisible ? formatMoney(safePerDay, displayCurrency) : MASK}
+              <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
+            </div>
+            <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
+              {t('dashboard.focus.safeCaption', { days: daysLeft, month: monthLabel })}
+            </p>
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3 md:mt-auto">
+              <span className="text-[12.5px] font-semibold text-muted-foreground">
+                {t('dashboard.focus.projectedMonthEnd')}
+              </span>
+              <span className="inline-flex items-center gap-2 text-[15px] font-bold">
+                {amountsVisible ? formatMoney(projected, displayCurrency) : MASK}
+                {overPace > 0 && (
+                  <span className="rounded-full bg-destructive-soft px-2 py-0.5 text-[11.5px] font-bold text-[color:var(--destructive-foreground-on-soft)]">
+                    {t('dashboard.focus.overBy', {
+                      amount: amountsVisible ? formatMoney(overPace, displayCurrency) : MASK,
+                    })}
+                  </span>
+                )}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
+              {amountsVisible ? formatMoney(Math.round(dailyAvg), displayCurrency) : MASK}
+              <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
+            </div>
+            <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
+              {t('dashboard.focus.avgPerDayCaption', { month: monthLabel })}
+            </p>
+          </>
+        )}
       </div>
     </section>
   )
@@ -261,7 +202,6 @@ export function FocusSafeToSpend({
    ============================================================ */
 export interface FocusDailyFlowProps {
   series: { date: string; amount: number }[]
-  avgPerDay: number
   monthYearLabel: string
   displayCurrency: string
   amountsVisible: boolean
@@ -271,7 +211,6 @@ export interface FocusDailyFlowProps {
 
 export function FocusDailyFlow({
   series,
-  avgPerDay,
   monthYearLabel,
   displayCurrency,
   amountsVisible,
@@ -292,7 +231,7 @@ export function FocusDailyFlow({
   const H = 190
   const padL = 34 // room for Y labels
   const padT = 10
-  const padB = 8
+  const padB = 22 // room for day ticks on the X axis
   const chartH = H - padT - padB
   const n = series.length
   const max = Math.max(...series.map((d) => d.amount), 1)
@@ -307,6 +246,13 @@ export function FocusDailyFlow({
   const firstLabel = series.length ? shortDate(series[0].date) : ''
   const lastLabel = series.length ? shortDate(series[series.length - 1].date) : ''
   const hovered = hover != null ? series[hover] : null
+  // Day ticks on the X axis: 1, every 5th, and the last plotted day.
+  const showTick = (i: number) => {
+    const day = i + 1
+    if (i === n - 1) return true
+    if (day === 1) return n < 8 || i !== n - 2
+    return day % 5 === 0 && i < n - 2
+  }
 
   return (
     <FocusCard
@@ -363,17 +309,24 @@ export function FocusDailyFlow({
                     {/* invisible hit target spanning the full slot height */}
                     <rect x={padL + i * slotW} y={padT} width={slotW} height={chartH} fill="transparent" />
                     <rect x={x} y={y} width={barW} height={h} rx={Math.min(barW / 2, 3)} fill={fill} />
+                    {showTick(i) && (
+                      <text
+                        x={padL + i * slotW + slotW / 2}
+                        y={H - 6}
+                        textAnchor="middle"
+                        fontSize="9"
+                        fontWeight={i === n - 1 && isCurrentMonth ? 700 : 400}
+                        fill={i === n - 1 && isCurrentMonth ? 'var(--muted-foreground)' : 'var(--fg-faint)'}
+                      >
+                        {i + 1}
+                      </text>
+                    )}
                   </g>
                 )
               })}
             </svg>
           </div>
-          <div className="mt-2 flex items-center justify-between pl-[34px] text-[11px] font-semibold text-fg-faint">
-            <span>{firstLabel}</span>
-            <span>{isCurrentMonth ? `${t('dashboard.focus.today')} · ${lastLabel}` : lastLabel}</span>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-hairline-soft pt-4">
-            <FlowStat label={t('dashboard.focus.avgDay')} value={amountsVisible ? formatMoney(avgPerDay, displayCurrency) : MASK} />
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-hairline-soft pt-4">
             <FlowStat label={t('dashboard.focus.highestDay')} value={amountsVisible ? formatMoney(highestDay, displayCurrency) : MASK} />
             <FlowStat label={t('dashboard.focus.activeDays')} value={String(activeDays)} />
           </div>
@@ -518,13 +471,7 @@ export function FocusCoach({ displayCurrency }: { displayCurrency: string }) {
       : 'coachLineFlatNoCat'
 
   return (
-    <FocusCard
-      icon={Bot}
-      iconTone="primary"
-      title={t('coach.title')}
-      trailing={trailing}
-      className="border-primary/25 bg-primary-soft"
-    >
+    <FocusCard icon={Bot} title={t('coach.title')} trailing={trailing}>
       {isLoading ? (
         <div className="space-y-3">
           <Shimmer className="h-4 w-3/4" />
@@ -548,7 +495,7 @@ export function FocusCoach({ displayCurrency }: { displayCurrency: string }) {
                 }}
                 components={[
                   <b className="font-bold" />,
-                  <span className={cn('font-bold', changeUp ? 'text-warning-foreground' : 'text-success-foreground')} />,
+                  <span className="font-bold text-foreground" />,
                   <b className="font-bold" />,
                 ]}
               />
@@ -577,8 +524,8 @@ function CoachChip({
   desc: string
 }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-xl bg-card px-3.5 py-3">
-      <Icon className="mt-0.5 size-[15px] shrink-0 text-warning-foreground" />
+    <div className="flex items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3">
+      <Icon className="mt-0.5 size-[15px] shrink-0 text-muted-foreground" />
       <div className="min-w-0">
         <p className="text-[13px] font-bold text-foreground">{title}</p>
         <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{desc}</p>
@@ -590,10 +537,11 @@ function CoachChip({
 /* ============================================================
    UPCOMING BILLS — compact recurring expense rows
    ============================================================ */
+/** Bill urgency dots — red only for overdue; other tiers read via foreground strength. */
 const BILL_DOT = {
   overdue: 'bg-destructive',
-  soon: 'bg-warning',
-  up: 'bg-info',
+  soon: 'bg-foreground',
+  up: 'bg-fg-faint',
 } as const
 
 export function FocusBills({

@@ -42,15 +42,15 @@ export interface GlassDialogProps {
 }
 
 /**
- * Responsive glass overlay shell — a centered frosted modal on desktop (≥ md) and a
+ * Responsive overlay shell — a centered flat Luma modal on desktop (≥ md) and a
  * slide-up bottom sheet on mobile. Composes Radix Dialog primitives directly (scrim,
  * focus trap, Esc, portal) + Framer Motion, mirroring the onboarding sheet. Honors
  * `prefers-reduced-motion`. Header / body (scrolls) / footer (pinned) are laid out in a
  * flex column capped to the viewport.
  *
- * Mobile sheet is an opaque **white** surface (not the frosted desktop glass); tapping its
- * grab handle dismisses it (with a little bounce). Footer `actions` stack full-width.
- * Desktop stays frosted glass with right-aligned actions.
+ * Mobile sheet is an opaque card surface; tapping its
+ * grab handle dismisses it (with a little bounce). Footer `actions` stack full-width;
+ * the desktop modal right-aligns them (destructive far-left).
  */
 export function GlassDialog({
   open,
@@ -131,7 +131,7 @@ export function GlassDialog({
                   {isMobile && (
                     <motion.button
                       type="button"
-                      aria-label="Close"
+                      aria-label={t('common.close')}
                       onClick={() => onOpenChange(false)}
                       whileTap={{ scale: 0.82 }}
                       className="mx-auto mb-1 mt-3 flex h-6 w-full max-w-[140px] shrink-0 items-center justify-center"
@@ -151,8 +151,14 @@ export function GlassDialog({
                     </button>
                   )}
 
-                  {/* Header */}
-                  <div className={cn('shrink-0 px-6', isMobile ? 'pt-2' : 'pt-6', showClose && !isMobile && 'pr-12')}>
+                  {/* Header — hairline-separated from the body (Luma dialog anatomy) */}
+                  <div
+                    className={cn(
+                      'shrink-0 border-b border-border px-6 pb-4',
+                      isMobile ? 'pt-2' : 'pt-6',
+                      showClose && !isMobile && 'pr-12',
+                    )}
+                  >
                     {header ?? (
                       <>
                         <DialogPrimitive.Title className="t-h3">{title}</DialogPrimitive.Title>
@@ -168,16 +174,16 @@ export function GlassDialog({
 
                   {/* Body (scrolls) */}
                   {children != null && (
-                    <div className={cn('min-h-0 flex-1 overflow-y-auto px-6 py-5 mt-4', bodyClassName)}>
+                    <div className={cn('min-h-0 flex-1 overflow-y-auto px-6 py-5', bodyClassName)}>
                       {children}
                     </div>
                   )}
 
-                  {/* Footer (pinned) */}
+                  {/* Footer (pinned) — hairline-separated */}
                   {(actions || footer) && (
                     <div
                       className={cn(
-                        'shrink-0 px-6 pt-4',
+                        'shrink-0 border-t border-border px-6 pt-4',
                         isMobile ? 'pb-[calc(18px+env(safe-area-inset-bottom))]' : 'pb-6',
                       )}
                     >

@@ -89,7 +89,7 @@ export function ExpenseDetailDialog({
         {/* Hero */}
         <div className="flex flex-col items-center pb-3.5 text-center">
           <span className="mb-3 grid size-14 place-items-center rounded-2xl bg-bg-subtle text-[28px]">{emoji}</span>
-          <div className="t-num text-[34px] font-extrabold tracking-[-0.03em]">{formatMoney(amount, currency)}</div>
+          <div className="text-[34px] font-extrabold tracking-[-0.03em]">{formatMoney(amount, currency)}</div>
           <div className="mt-1.5 text-[17px] font-bold">{receipt.storeName || t('receipts.unknownStore')}</div>
           <div className="mt-1 text-[13px] text-muted-foreground">
             {[receipt.category?.name, receipt.receiptDate ? formatDateTime(receipt.receiptDate) : null]
@@ -108,7 +108,7 @@ export function ExpenseDetailDialog({
               </b>{' '}
               {t('groups.expense.paidTheBill')}
             </div>
-            <span className="t-num font-bold">{formatMoney(amount, currency)}</span>
+            <span className="font-bold">{formatMoney(amount, currency)}</span>
           </div>
         )}
 
@@ -128,7 +128,7 @@ export function ExpenseDetailDialog({
                   </span>
                 )}
               </span>
-              <span className="t-num font-bold text-destructive">{formatMoney(share, currency)}</span>
+              <span className="font-bold text-destructive">{formatMoney(share, currency)}</span>
             </div>
           ))}
         </div>

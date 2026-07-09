@@ -60,7 +60,7 @@ export function ExpenseFeed({
           <StaggerItem key={g.key}>
             {showMonth && <div className="t-xs mb-1 px-1 text-fg-faint">{monthLabel}</div>}
             <div className="flex items-baseline justify-between px-1 py-2">
-              <span className="t-xs">
+              <span className="text-[12.5px] font-semibold text-muted-foreground">
                 {dayLabel(g.date)} · {format(g.date, 'd LLL', { locale })}
               </span>
               {subtotal(g.subtotalsByCurrency)}

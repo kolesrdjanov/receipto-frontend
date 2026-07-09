@@ -200,7 +200,7 @@ export default function Groups() {
                         : t('groups.hub.acrossAll')}
                   </div>
                   <div
-                    className={`t-num mt-1 whitespace-nowrap text-[23px] font-extrabold tracking-[-0.02em] ${
+                    className={`mt-1 whitespace-nowrap text-[23px] font-extrabold tracking-[-0.02em] ${
                       overallState === 'owe'
                         ? 'text-[color:var(--destructive-foreground-on-soft)]'
                         : 'text-foreground'
