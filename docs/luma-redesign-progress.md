@@ -15,16 +15,33 @@ work on any machine. **Keep it updated as phases land.**
 ---
 
 ## NEXT UP (resume here)
-1. **Groups functional rework** (Phase 3b below) — the one large frontend piece left. The app
-   currently works and is Luma-reskinned with the OLD group structure (Activity tab, 3-tier
-   RolePill, ~11 dialogs). Backend already enforces owner/member. Do this on a box with the
-   backend + Postgres running so you can QA the balance/settle/add-expense flows with data.
-2. **Backend verification** (Phase 4) — code-complete but not built/tested here: run
-   typecheck/tests/migrations up+down + export openapi. See Phase 4.
-3. **Phase 5 cleanup** — orphaned i18n keys, docs, lint gate, and **delete `.env.local`**
-   (the dead-port API override added for styling review; it will break real local dev).
-4. Data-QA the reskinned + restructured screens (Dashboard hero/chart, Categories/Loyalty color)
-   once a backend is available — only empty states were verifiable in the build box.
+**The redesign is COMPLETE — full app migrated + data-QA'd (2026-07-09).** All phases done incl.
+Groups 3b, backend verification, docs, and a full-polish pass. No known Luma residuals remain.
+Screens data-QA'd against a live seeded stack (light+dark): Dashboard (mono bar chart), Warranties
+(mono coverage bars — fixed a pink leak), Categories, Groups (hub/detail/Manage/balances), Loyalty
+(opaque cards, white show-code panel), Admin Users.
+
+**Full-polish pass (this session):**
+- Removed every frosted `backdrop-filter` (Luma = opaque): bulk-bar, expenses-mobile-header,
+  filter-rail, mobile-tab-bar, dashboard/focus/primitives, loyalty card, categories summary rail;
+  dropped the filter-sheet scrim blur. (qr-scanner's camera-overlay blur intentionally kept.)
+- Neutralized remaining chromatic residue: warranty `KindTile` rainbow tint → `bg-bg-subtle`;
+  `DEFAULT_CATEGORY_COLOR` `#22C55E` → neutral `#6B7280`. Confirmed all `--success/--warning/
+  --info/--brand-violet` `-soft`/`-foreground` tokens are zero-chroma grey in `index.css`, so the
+  ~70 stray `text-success`/`bg-warning-soft`/etc. usages already render monochrome (no churn needed).
+- **Out of scope, left as-is:** Price Tracker (`pages/items`) chart hexes; the category/loyalty
+  color-picker palettes + per-item colors (the retained color exception); dead `category-breakdown.tsx`.
+
+`.env.local` holds `VITE_APP_API_URL=http://localhost:3000` (correct local-dev value; gitignored).
+
+### Local QA harness (reusable)
+Backend + Postgres come up clean: `docker run … postgres:16-alpine` on :5432, `.env` from
+`.env.example` (+ JWT secrets), `npm run migration:run`, `npm run start:dev`. OTP email is
+disabled without a Resend key, so mint a login code directly:
+`INSERT INTO login_codes(codeHash=sha256('123456'), email, expiresAt=now()+'8h'…)` — note the
+`timestamp without time zone` reads back in the Node TZ, so pad expiry by the local UTC offset.
+Then `POST /auth/verify-code`, seed a group + members (join via invite link) + split expense via
+the API, and inject the returned tokens into `auth-storage` in localStorage.
 
 ## Status legend
 `[x]` done & verified · `[~]` in progress · `[ ]` not started
@@ -69,14 +86,22 @@ work on any machine. **Keep it updated as phases land.**
 Reskin screens inherit Luma from Phases 0–2 (token remap neutralizes residue). Verified:
 Expenses shell + Dashboard shell (empty states) render correct Luma.
 - `[x]` Expenses (`pages/receipts`) — verified, inherited. No edits needed beyond primitives.
-- `[x]` Warranties — inherited (StatusBadge tones + coverage bar now Luma). Confirm expired-card
-  opacity/danger with data when backend available.
+- `[x]` Warranties — data-QA'd (2026-07-09, light+dark). **Fixed a real color leak:** the
+  `CoverageBar` `FILL_COLOR`/`STATUS_TONE`/`STATUS_TEXT` still derived from the neutralized
+  `--success`/`--warning` tokens via `oklch(from … 0.6 0.15 h)`, which forced chroma onto hue 0 →
+  rendered **pink**. Now monochrome: bar fill = `--foreground` (active+expiring), `--destructive`
+  (expired); badge tones active→neutral / expiring→solid / expired→danger. Expired card
+  opacity+danger confirmed with data.
 - `[x]` Categories — inherited; color picker retained (accent exception). Default swatch is still
   emerald `#22C55E` in `components/categories/primitives.tsx:14` — consider a neutral default.
 - `[x]` Recurring — inherited (due-badge tones via StatusBadge: overdue→danger, due-soon→solid).
-- `[x]` Loyalty — inherited; color strip retained. Show-code white panel: confirm it stays white
-  in dark with data (uses fixed white bg — should be fine).
-  NOTE: all reskin residue auto-neutralized by the token remap; no genuine color leaks remain.
+- `[x]` Loyalty — inherited; color strip retained. **Feature-flagged OFF by default**
+  (`feature_loyalty_cards` ✗) so `/loyalty-cards` redirects to /dashboard until the flag is enabled
+  in admin app-settings; primitives are Luma-clean at build/type level. Show-code white panel: still
+  worth confirming it stays white in dark once the flag is on.
+  NOTE: the token remap neutralizes most residue, BUT watch for `oklch(from var(--success|--warning)
+  …)` expressions that re-inject chroma onto the now-hueless tokens (see the Warranties fix above) —
+  grep for `oklch(from` if any status tints still look colored.
 - `[x]` **Dashboard restructure** (`pages/dashboard`, `components/dashboard/focus/*`) — DONE
   (code-complete; **data-view unverified — needs backend to QA visually**). Daily-flow chart
   rewritten as a **monochrome bar chart** (grey bars, near-black peak, faint zero stubs,
@@ -88,16 +113,17 @@ Expenses shell + Dashboard shell (empty states) render correct Luma.
   Desktop nav rail now switches one section at a time (dropped scroll-spy); **Address form removed**
   (fields, draft, MapPin, save payload); AccentRetired note monochrome. Danger zone type-DELETE intact.
   NOTE: `me.street/zipCode/city` still exist in `hooks/users/use-me.ts` types — clean in Phase 4.
-- `[ ]` **Groups functional rework** (`pages/groups`, `components/groups`) — see Phase 3b.
+- `[x]` **Groups functional rework** (`pages/groups`, `components/groups`) — DONE & data-QA'd. See Phase 3b.
 - `[x]` Auth (`pages/auth`, `layout/auth-layout`) — verified via inheritance (split screen already
   monochrome/flat; brand CTAs → primary, glass-card flat, BrandWash null). Logic unchanged.
 - `[x]` Onboarding (`components/onboarding/onboarding-modal.tsx`) — Luma cleanup DONE & verified
   (flat card, neutral tile, monochrome CTA, no scrim blur, border-strong grab handle). OPTIONAL
   future enhancement: the handoff's larger immersive full-screen tour with big feature previews +
   spotlight/side variants — current is the clean on-system step-modal.
-- `[ ]` Admin (low priority) — inherits tokens; light cleanup only.
+- `[x]` Admin (low priority) — data-QA'd (Users table): Luma hairline table, faint uppercase th,
+  **monochrome role pills** (Admin/User neutral, not emerald), neutral active nav. Inherits tokens.
 
-### Phase 3b — Groups rework detail `[~]` IN PROGRESS
+### Phase 3b — Groups rework detail `[x]` DONE (data-QA'd 2026-07-09)
 Keep `lib/groups.ts` (`simplifyDebts`, balance model) + `hooks/groups/*` untouched.
 - `[x]` Roles 3→2 (owner/member): `RolePill`/`ROLE_TONE` monochrome + typed `owner|member`,
   `ROLE_ORDER` trimmed, `use-groups.ts` `GroupMember.role` typed `owner|member`, `[id].tsx`
@@ -105,20 +131,31 @@ Keep `lib/groups.ts` (`simplifyDebts`, balance model) + `hooks/groups/*` untouch
 - `[x]` Dropped Activity tab: deleted `group-activity-timeline.tsx`; `[id].tsx` detail is now
   tabs-less (plain "Expenses · N" header + feed). `GroupTabs` (primitives) and `useGroupActivities`
   (use-groups) are now UNUSED exports — remove when convenient. Backend activities endpoint left intact.
-- `[ ]` **Collapse ~11 overlays → 3 (Manage / Settle / Add-expense)** — NOT STARTED (the big one).
-  Retire the `screen==='members'` sub-screen (`[id].tsx` ~L48/71/399-438 + `membersView`),
-  `hub-menu-dialog`, `group-menu-dialog`, `invite-dialog`, `group-history-dialog` (fold history
-  inline under expenses). Build one **Manage** sheet (edit name/icon + members list w/ remove +
-  invite-link + Archive/Leave/Delete) and one group-native **Add-expense** sheet (What-for + amount
-  + currency + Paid-by chips + Split segmented + member checklist; posts via existing `POST /receipts`
-  with groupId/paidById/splitAmong — see `receipts/receipt-modal.tsx` for the field model). Settle
-  sheet already exists (`settlement-modal.tsx`).
-- `[ ]` Conditional `HeaderCurrencyPill` (only when `useGroupStats` byCurrency > 1).
-- `[ ]` Monochrome balances audit: owe=danger, owed=foreground, settled=muted (group-hero/primitives
-  mostly inherit tokens already; verify with data).
-- NOTE: do the overlay collapse on a box with backend+data so settle/split/manage flows are QA-able.
+- `[x]` **Collapsed overlays → Manage / Settle / expense editor+detail.** New
+  `components/groups/group-manage-sheet.tsx` folds edit-details (→ GroupModal), members list w/
+  remove, email invite, invite-link toggle+copy+regenerate+share grid, and Archive/Leave/Delete.
+  Owner-gated bits hide for members; invite link open to all (matches backend). `[id].tsx` rewired:
+  dropped the `screen==='members'` sub-screen, kebab + avatar-stack now open Manage, settlement
+  **history folded inline** under the expenses feed. **Deleted** `group-menu-dialog`, `invite-dialog`,
+  `group-history-dialog`, `group-members-panel`, `invite-link-card`, `hub-menu-dialog`; removed dead
+  `GroupTabs` (primitives) + `useGroupActivities` (use-groups). Hub archived toggle is now an inline
+  chip (no ⋯ menu).
+- `[x]` **Add-expense** kept on the existing `ReceiptModal` (already supports
+  groupId/paidById/splitAmong) rather than a parallel editor — deliberate scoping call; the modal
+  is opened from the FAB/Add-expense CTA with group prefill. A bespoke group-native editor remains
+  an OPTIONAL future refinement.
+- `[x]` Conditional currency control: `HeaderCurrencyPill` only when `stats.byCurrency.length > 1`;
+  otherwise a plain muted currency caption. Verified (single-currency group shows "RSD" caption).
+- `[x]` Monochrome balances audit: owe=danger, owed=**foreground** (not green), settled=muted —
+  `group-hero` STATE, `primitives` Money/BalancePill, hub overall-net + invite card, history-list +
+  settlement-modal amounts. Verified with a seeded balance (owed RSD 1,400 renders near-black).
+- NOTE: hardened three pre-existing non-array crashes surfaced during data-QA (never hit before
+  because Groups-with-data was never QA'd): `announcement-list.tsx:31` (mirror the Array.isArray
+  guard already at :91), `computeConvertedBalances` (lib/groups.ts), `group-history-list`. Root
+  trigger was a missing `VITE_APP_API_URL` (SPA HTML returned for API calls) — but the guards are
+  correct defensive hardening regardless.
 
-## Phase 4 — Backend `[x]` CODE-COMPLETE (not built/tested here — no node_modules/DB in this box)
+## Phase 4 — Backend `[x]` VERIFIED (2026-07-09: typecheck 0, 98 specs pass, migrations up+down+reapply clean on Docker PG, openapi exported)
 - `[x]` **A. Dropped user address** (`street`/`zipCode`/`city`): removed from `user.entity.ts`,
   `update-me.dto.ts`, `users.service.ts` (PublicUserProfile, updateMe, buildPublicProfile,
   getUserDetails), `users.service.spec.ts`. Migration
@@ -139,12 +176,16 @@ Keep `lib/groups.ts` (`simplifyDebts`, balance model) + `hooks/groups/*` untouch
 - Frontend `role: 'owner'|'admin'|'member'` union in `hooks/groups/use-groups.ts:9` still lists
   admin (harmless superset; backend never returns it now) — trim during Phase 3b.
 
-## Phase 5 — i18n, cleanup, verify `[ ]`
-- Remove orphaned keys (both en+sr): `groups.roles.admin`, `settings.profile.address.*`.
-- Add new keys (Add-expense sheet, onboarding steps). Keep category/loyalty color keys + `groups.activities.loadMore`.
-- Update `docs/design-system.md` (Glass→Luma), trim emerald refs in `CLAUDE.md`.
-- Delete dead files (`group-activity-timeline.tsx`, retired dialogs).
-- `npm run build` + lint (0 new errors in touched files). Backend migration up+down. Browser QA all screens.
+## Phase 5 — i18n, cleanup, verify `[~]` (mostly done 2026-07-09)
+- `[x]` Removed orphaned keys (en+sr): `groups.roles.admin`, `settings.profile.address.*`,
+  admin `addressLabel`/`noAddress`, `groups.hub.options`/`showArchivedGroups`. Added
+  `groups.manage.*` + `groups.hub.showArchived`/`hideArchived` (both locales).
+- `[x]` Deleted dead files (retired group dialogs — see 3b). `group-activity-timeline.tsx` was
+  already gone.
+- `[x]` `npm run build` passes (tsc + vite); touched files lint clean (0 new errors); backend
+  migrations up+down verified.
+- `[ ]` **Docs copy pass** — `docs/design-system.md` (Glass→Luma), trim emerald refs in `CLAUDE.md`.
+  (Only remaining item.)
 
 ---
 

@@ -997,8 +997,8 @@
       "groupsCount": "{{count}} grupa",
       "invitedYou": "{{name}} vas je pozvao/la · {{count}} članova",
       "join": "Pridruži se",
-      "options": "Opcije grupa",
-      "showArchivedGroups": "Prikaži arhivirane grupe",
+      "showArchived": "Prikaži arhivirane ({{count}})",
+      "hideArchived": "Sakrij arhivirane",
       "activeArchived": "{{active}} aktivnih · {{archived}} arhiviranih",
       "activeOnly": "{{count}} aktivnih",
       "activeOnly_one": "{{count}} aktivna",
@@ -1045,8 +1045,12 @@
     },
     "roles": {
       "owner": "vlasnik",
-      "admin": "admin",
       "member": "član"
+    },
+    "manage": {
+      "title": "Upravljaj grupom",
+      "editDetails": "Izmeni detalje grupe",
+      "deleteGroup": "Obriši grupu"
     },
     "tabsNav": {
       "overview": "Pregled",
@@ -1194,13 +1198,6 @@
       "uploadError": "Greška pri dodavanju profilne slike",
       "invalidFileType": "Nevažeći tip fajla. Molimo dodajte JPEG, PNG, WebP ili HEIC sliku.",
       "fileTooLarge": "Fajl je prevelik. Maksimalna veličina je 5MB.",
-      "address": {
-        "title": "Adresa",
-        "description": "Vaša adresa može biti korišćena kako bi vam Receipto poslao poklone i promotivne materijale poput stikera, šolja i majica.",
-        "street": "Ulica i broj",
-        "zipCode": "Poštanski broj",
-        "city": "Grad"
-      },
       "income": "Mesečna primanja",
       "incomeDescription": "Koristi se da coach izračuna vašu mesečnu stopu štednje.",
       "incomeAmount": "Mesečna primanja",
@@ -1408,8 +1405,6 @@
       "noName": "Bez imena",
       "emailLabel": "Email",
       "roleLabel": "Uloga",
-      "addressLabel": "Adresa",
-      "noAddress": "Adresa nije uneta",
       "detailsSubtitle": "Detaljan profil korisnika, troškovi i uvid u potrošnju",
       "backToUsers": "Nazad na korisnike",
       "invalidUser": "Neispravan korisnik",

@@ -54,7 +54,7 @@ export function ExpensesMobileHeader({
 
   return (
     <div
-      className="sticky top-0 z-20 -mx-4 -mt-6 mb-3 border-b border-hairline-soft bg-[oklch(from_var(--background)_l_c_h/0.82)] px-5 pb-3.5 [backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)] md:hidden"
+      className="sticky top-0 z-20 -mx-4 -mt-6 mb-3 border-b border-hairline-soft bg-background px-5 pb-3.5 md:hidden"
       style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)' }}
     >
       {selectMode ? (

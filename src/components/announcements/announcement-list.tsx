@@ -28,7 +28,7 @@ export function AnnouncementDrawer({ open, onOpenChange }: AnnouncementDrawerPro
   const { t } = useTranslation()
   const { data: announcements } = useActiveAnnouncements()
 
-  const listItems = (announcements ?? []).filter(
+  const listItems = (Array.isArray(announcements) ? announcements : []).filter(
     (a) => a.displayMode === 'list' || a.displayMode === 'both',
   )
 

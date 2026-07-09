@@ -157,7 +157,7 @@ export default function Categories() {
         ) : (
           <>
             {/* Budget overview — desktop */}
-            <div className="mb-5 hidden items-center gap-2 rounded-2xl border border-border bg-card/[0.74] p-[18px] shadow-glass-1 [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] md:flex">
+            <div className="mb-5 hidden items-center gap-2 rounded-2xl border border-border bg-card p-[18px] shadow-glass-1 md:flex">
               <OverviewStat
                 icon={Wallet}
                 iconClass="bg-primary-soft text-primary"

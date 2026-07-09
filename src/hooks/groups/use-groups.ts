@@ -174,21 +174,6 @@ export interface CreateSettlementInput {
   settledAt?: string
 }
 
-export interface GroupActivity {
-  id: string
-  groupId: string
-  userId?: string
-  user?: {
-    id: string
-    firstName?: string
-    lastName?: string
-    email: string
-  }
-  type: string
-  metadata?: Record<string, any>
-  createdAt: string
-}
-
 export interface InviteLinkResponse {
   inviteCode: string | null
   inviteCodeEnabled: boolean
@@ -222,10 +207,6 @@ const fetchSuggestedSettlements = async (id: string): Promise<SuggestedSettlemen
 
 const fetchSettlementHistory = async (id: string): Promise<SettlementRecord[]> => {
   return api.get<SettlementRecord[]>(`/groups/${id}/settlement-history`)
-}
-
-const fetchActivities = async (id: string, limit = 50, offset = 0): Promise<{ data: GroupActivity[]; total: number }> => {
-  return api.get<{ data: GroupActivity[]; total: number }>(`/groups/${id}/activities?limit=${limit}&offset=${offset}`)
 }
 
 const fetchPendingInvites = async (): Promise<GroupInvite[]> => {
@@ -336,14 +317,6 @@ export function useSettlementHistory(id: string) {
   return useQuery({
     queryKey: [...queryKeys.groups.detail(id), 'settlement-history'],
     queryFn: () => fetchSettlementHistory(id),
-    enabled: !!id,
-  })
-}
-
-export function useGroupActivities(id: string, limit = 50, offset = 0) {
-  return useQuery({
-    queryKey: [...queryKeys.groups.detail(id), 'activities', { limit, offset }],
-    queryFn: () => fetchActivities(id, limit, offset),
     enabled: !!id,
   })
 }

@@ -36,7 +36,7 @@ export function FilterRail({ filters, categories, onFiltersChange, className }: 
     <aside
       className={cn(
         'sticky top-8 flex w-60 shrink-0 flex-col gap-4 rounded-2xl border border-border p-[18px] shadow-glass-1',
-        'bg-card/74 [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)]',
+        'bg-card',
         className,
       )}
     >

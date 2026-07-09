@@ -108,8 +108,7 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
   return (
     <div
       className={cn(
-        'group cursor-pointer overflow-hidden rounded-2xl border border-border bg-card/[0.82] shadow-glass-1',
-        '[backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)]',
+        'group cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1',
         'transition-[box-shadow,border-color] duration-150 hover:shadow-glass-2',
         'hover:[border-color:color-mix(in_srgb,var(--primary)_35%,transparent)]',
       )}

@@ -1,13 +1,18 @@
-# Receipto Glass Design System
+# Receipto "Luma" Design System
 
-The app is migrating to the **"Glass"** design system (frosted surfaces over a soft
-brand wash; brand gradient reserved for logo + primary CTA; calm neutral everywhere
-else). This is the reference for that system. **Compose from here — don't re-derive
-per screen.**
+> **Superseded — "Glass" → "Luma" (2026).** The app migrated from the old emerald **"Glass"**
+> system (frosted `backdrop-filter` surfaces, brand gradients, Plus Jakarta Sans) to flat,
+> monochrome **"Luma"**: neutral base, **near-black primary**, 1px hairline borders, minimal
+> shadow, **Geist / Geist Mono** typography, and **red reserved strictly for
+> destructive/expired/you-owe** states. Token *names* were kept (values remapped in
+> `src/index.css`), so the primitives below still apply — but read every "emerald / brand
+> gradient / frosted" mention as its Luma equivalent (monochrome / `bg-primary` / flat `.card`).
+> The authoritative migration record is `docs/luma-redesign-progress.md`. Category and
+> loyalty-card per-item colors are the one retained color exception.
 
-Rollout is **foundation-first, then screen by screen**. This doc + `src/index.css` +
-`src/components/glass/` are the foundation. Each screen migration is its own
-spec → plan → implement cycle.
+This is the reference for the design system. **Compose from here — don't re-derive per screen.**
+The foundation is `src/index.css` (tokens, `.t-*` type scale, utilities) + `src/components/glass/`
++ `src/components/ui/`.
 
 ## Principle
 

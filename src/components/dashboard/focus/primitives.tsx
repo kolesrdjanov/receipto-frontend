@@ -33,8 +33,7 @@ export function FocusCard({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border bg-card/80 px-[22px] py-5 shadow-glass-1',
-        '[backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)]',
+        'rounded-3xl border border-border bg-card px-[22px] py-5 shadow-glass-1',
         className,
       )}
     >

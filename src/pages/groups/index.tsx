@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { HeaderIconButton } from '@/components/layout/header-actions'
 import { GroupModal } from '@/components/groups/group-modal'
-import { HubMenuDialog } from '@/components/groups/hub-menu-dialog'
 import { GAvatarStack, BalancePill } from '@/components/groups/primitives'
 import {
   useGroups,
@@ -32,7 +31,6 @@ import {
   Loader2,
   X,
   Archive,
-  MoreHorizontal,
   ArrowDownLeft,
   ArrowUpRight,
   Check,
@@ -53,7 +51,6 @@ export default function Groups() {
   const displayCurrency = preferredCurrency || 'RSD'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
 
   // Always fetch everything (incl. archived) so the overall-net meta can show both counts;
@@ -140,8 +137,17 @@ export default function Groups() {
     )
   }
 
-  const optionsButton = (
-    <HeaderIconButton icon={MoreHorizontal} label={t('groups.hub.options')} onClick={() => setMenuOpen(true)} />
+  // Archived groups are surfaced by an inline chip toggle (no ⋯ menu) — only when some exist.
+  const archivedToggle = archived.length > 0 && (
+    <Button
+      type="button"
+      variant={showArchived ? 'secondary' : 'outline'}
+      size="sm"
+      onClick={() => setShowArchived((v) => !v)}
+    >
+      <Archive className="size-4" />
+      {showArchived ? t('groups.hub.hideArchived') : t('groups.hub.showArchived', { count: archived.length })}
+    </Button>
   )
 
   return (
@@ -150,12 +156,7 @@ export default function Groups() {
         className="md:-mx-8 md:-mt-8 md:mb-6"
         title={t('groups.title')}
         subtitle={t('groups.subtitle')}
-        actions={
-          <>
-            {optionsButton}
-            <AddButton onClick={openCreate} label={t('groups.newGroup')} />
-          </>
-        }
+        actions={<AddButton onClick={openCreate} label={t('groups.newGroup')} />}
       />
 
       {/* Mobile header */}
@@ -165,7 +166,6 @@ export default function Groups() {
           <p className="mt-0.5 text-[13.5px] font-medium text-muted-foreground">{t('groups.subtitle')}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <HeaderIconButton icon={MoreHorizontal} label={t('groups.hub.options')} onClick={() => setMenuOpen(true)} />
           <HeaderIconButton icon={Plus} label={t('groups.newGroup')} onClick={openCreate} />
         </div>
       </div>
@@ -184,11 +184,9 @@ export default function Groups() {
               <div className="flex items-center gap-3.5 rounded-2xl border border-border bg-card px-[18px] py-4 shadow-glass-1">
                 <span
                   className={`grid size-[42px] shrink-0 place-items-center rounded-xl ${
-                    overallState === 'owed'
-                      ? 'bg-success-soft text-success-foreground'
-                      : overallState === 'owe'
-                        ? 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]'
-                        : 'bg-bg-subtle text-muted-foreground'
+                    overallState === 'owe'
+                      ? 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]'
+                      : 'bg-bg-subtle text-foreground'
                   }`}
                 >
                   <NetIcon className="size-5" strokeWidth={2.4} />
@@ -203,11 +201,9 @@ export default function Groups() {
                   </div>
                   <div
                     className={`t-num mt-1 whitespace-nowrap text-[23px] font-extrabold tracking-[-0.02em] ${
-                      overallState === 'owed'
-                        ? 'text-success-foreground'
-                        : overallState === 'owe'
-                          ? 'text-[color:var(--destructive-foreground-on-soft)]'
-                          : 'text-foreground'
+                      overallState === 'owe'
+                        ? 'text-[color:var(--destructive-foreground-on-soft)]'
+                        : 'text-foreground'
                     }`}
                   >
                     {overallState === 'settled'
@@ -227,7 +223,7 @@ export default function Groups() {
             {pendingInvites.map((inv) => (
               <div
                 key={inv.id}
-                className="flex items-center gap-3 rounded-2xl border border-brand-violet/25 bg-brand-violet-soft px-3.5 py-3"
+                className="flex items-center gap-3 rounded-2xl border border-border bg-bg-subtle px-3.5 py-3"
               >
                 <span className="grid size-[42px] shrink-0 place-items-center rounded-xl bg-card text-[22px] shadow-glass-1">
                   {inv.group.icon || '👥'}
@@ -269,7 +265,8 @@ export default function Groups() {
               {active.map((g) => renderCard(g))}
             </div>
 
-            {/* Archived — surfaced only via the ⋯ menu */}
+            {/* Archived — surfaced by an inline chip toggle */}
+            {archivedToggle && <div className="flex justify-center pt-1">{archivedToggle}</div>}
             {showArchived && archived.length > 0 && (
               <>
                 <div className="flex items-center gap-2 px-0.5 pt-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-fg-faint">
@@ -286,13 +283,6 @@ export default function Groups() {
       </div>
 
       <GroupModal open={isModalOpen} onOpenChange={setIsModalOpen} group={null} mode="create" />
-      <HubMenuDialog
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
-        showArchived={showArchived}
-        onToggleArchived={setShowArchived}
-        onNewGroup={openCreate}
-      />
     </AppLayout>
   )
 }

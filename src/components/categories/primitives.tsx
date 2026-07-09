@@ -11,7 +11,7 @@ const PALETTE = [
   '#EF4444', '#F97316', '#F59E0B', '#EAB308', '#22C55E',
   '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899', '#6B7280',
 ]
-export const DEFAULT_CATEGORY_COLOR = '#22C55E'
+export const DEFAULT_CATEGORY_COLOR = '#6B7280'
 
 /**
  * The color circle — the visual anchor of every category. Round, filled with the

@@ -65,7 +65,7 @@ export function FilterSheet({ open, onOpenChange, filters, categories, onFilters
           <DialogPrimitive.Portal forceMount>
             <DialogPrimitive.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.45)] backdrop-blur-[5px] dark:bg-[oklch(0_0_0/0.55)]"
+                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.45)] dark:bg-[oklch(0_0_0/0.55)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

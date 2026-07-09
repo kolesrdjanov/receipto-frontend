@@ -88,7 +88,7 @@ export function SettlementModal({
         {accepted
           .filter((m) => m.userId !== exclude)
           .map((m) => (
-            // raw-button-ok: bespoke avatar-selector dot (tappable avatar swatch)
+            // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: bespoke avatar-selector dot (tappable avatar swatch)
             <button
               key={m.userId}
               type="button"
@@ -160,7 +160,7 @@ export function SettlementModal({
             <GMemberAvatar user={userOf(toUserId)} self={toUserId === user?.id} size={26} />
             <b className="font-bold">{memberFirstName(userOf(toUserId))}</b>
             <span className="flex-1" />
-            <span className="t-num font-bold text-success">{formatMoney(parsedAmount, currency)}</span>
+            <span className="t-num font-bold text-foreground">{formatMoney(parsedAmount, currency)}</span>
           </div>
         )}
       </div>

@@ -31,7 +31,7 @@ export function BulkBar({
   if (isMobile) {
     return (
       <div
-        className="fixed inset-x-3 z-30 flex items-center gap-2.5 rounded-2xl border border-border bg-card/92 px-3.5 py-2.5 shadow-glass-3 [backdrop-filter:blur(20px)] [-webkit-backdrop-filter:blur(20px)]"
+        className="fixed inset-x-3 z-30 flex items-center gap-2.5 rounded-2xl border border-border bg-card px-3.5 py-2.5 shadow-glass-2"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
         data-testid="bulk-bar-mobile"
       >
@@ -68,8 +68,7 @@ export function BulkBar({
     <div
       className={cn(
         'fixed bottom-7 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full',
-        'border border-border bg-card/92 px-[18px] py-3 shadow-glass-3',
-        '[backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)]',
+        'border border-border bg-card px-[18px] py-3 shadow-glass-2',
         'min-w-[540px] max-w-[calc(100vw-2rem)]',
       )}
       data-testid="bulk-bar-desktop"

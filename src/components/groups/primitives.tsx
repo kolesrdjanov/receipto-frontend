@@ -151,9 +151,11 @@ export function Money({
 }) {
   const pos = value > 0.5
   const neg = value < -0.5
+  // Luma monochrome: positive (you're owed / get back) reads as strong foreground, only a
+  // negative balance (you owe) is tinted danger; zero is muted.
   const color = signed
     ? pos
-      ? 'text-success'
+      ? 'text-foreground'
       : neg
         ? 'text-destructive'
         : 'text-muted-foreground'
@@ -313,7 +315,7 @@ export function BalancePill({
   const { t } = useTranslation()
   const tone =
     state === 'owed'
-      ? 'bg-success-soft text-success-foreground'
+      ? 'bg-bg-subtle text-foreground'
       : state === 'owe'
         ? 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]'
         : 'bg-bg-subtle text-muted-foreground'
@@ -337,51 +339,6 @@ export function BalancePill({
         </>
       )}
     </span>
-  )
-}
-
-/** Full-width segmented sub-nav for a group (Overview · Expenses · Balances · Activity). */
-export function GroupTabs({
-  tabs,
-  active,
-  onChange,
-}: {
-  tabs: { id: string; label: string; badge?: number }[]
-  active: string
-  onChange: (id: string) => void
-}) {
-  return (
-    <div className="flex w-full gap-1 rounded-full bg-bg-subtle p-1" role="tablist">
-      {tabs.map((tab) => {
-        const on = active === tab.id
-        return (
-          // raw-button-ok: segmented-control tab (bespoke toggle surface)
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            onClick={() => onChange(tab.id)}
-            className={cn(
-              'flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-[13px] font-semibold transition-colors',
-              on ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {tab.label}
-            {tab.badge != null && tab.badge > 0 && (
-              <span
-                className={cn(
-                  'rounded-full px-1.5 py-px text-[10.5px] font-bold',
-                  on ? 'bg-primary-soft text-primary' : 'bg-card text-fg-faint',
-                )}
-              >
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        )
-      })}
-    </div>
   )
 }
 

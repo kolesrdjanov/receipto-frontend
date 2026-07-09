@@ -997,8 +997,8 @@
       "groupsCount": "{{count}} groups",
       "invitedYou": "{{name}} invited you · {{count}} members",
       "join": "Join",
-      "options": "Group options",
-      "showArchivedGroups": "Show archived groups",
+      "showArchived": "Show archived ({{count}})",
+      "hideArchived": "Hide archived",
       "activeArchived": "{{active}} active · {{archived}} archived",
       "activeOnly": "{{count}} active",
       "activeOnly_one": "{{count}} active",
@@ -1043,8 +1043,12 @@
     },
     "roles": {
       "owner": "owner",
-      "admin": "admin",
       "member": "member"
+    },
+    "manage": {
+      "title": "Manage group",
+      "editDetails": "Edit group details",
+      "deleteGroup": "Delete group"
     },
     "tabsNav": {
       "overview": "Overview",
@@ -1191,13 +1195,6 @@
       "uploadError": "Failed to upload profile picture",
       "invalidFileType": "Invalid file type. Please upload JPEG, PNG, WebP, or HEIC image.",
       "fileTooLarge": "File is too large. Maximum size is 5MB.",
-      "address": {
-        "title": "Address",
-        "description": "Your address may be used so that Receipto can send you goodies and promotional materials such as stickers, cups, and t-shirts.",
-        "street": "Street and number",
-        "zipCode": "ZIP code",
-        "city": "City"
-      },
       "income": "Monthly Income",
       "incomeDescription": "Used by the coach to compute your monthly savings rate.",
       "incomeAmount": "Monthly income",
@@ -1406,8 +1403,6 @@
       "noName": "No name",
       "emailLabel": "Email",
       "roleLabel": "Role",
-      "addressLabel": "Address",
-      "noAddress": "No address provided",
       "detailsSubtitle": "Detailed user profile, expenses, and spending insights",
       "backToUsers": "Back to users",
       "invalidUser": "Invalid user",

@@ -25,14 +25,17 @@ interface GroupHeroProps {
   settlementsCount: number
   isArchived?: boolean
   onSettle: (s: ComputedSettlement) => void
-  onOpenHistory: () => void
+  /** Optional — when omitted, the hero drops its History footer link (history is shown inline). */
+  onOpenHistory?: () => void
 }
 
+// Luma monochrome balances: you're-owed reads as strong foreground (NOT green), you-owe is the
+// only tinted state (danger), settled is muted-neutral.
 const STATE: Record<BalanceState, { glyph: LucideIcon; icon: string; amount: string; labelKey: string }> = {
   owed: {
     glyph: ArrowDownLeft,
-    icon: 'bg-success-soft text-success-foreground',
-    amount: 'text-success-foreground',
+    icon: 'bg-bg-subtle text-foreground',
+    amount: 'text-foreground',
     labelKey: 'groups.headline.owed',
   },
   owe: {
@@ -43,7 +46,7 @@ const STATE: Record<BalanceState, { glyph: LucideIcon; icon: string; amount: str
   },
   settled: {
     glyph: Check,
-    icon: 'bg-success-soft text-success',
+    icon: 'bg-bg-subtle text-muted-foreground',
     amount: 'text-foreground',
     labelKey: 'groups.headline.settled',
   },
@@ -136,14 +139,14 @@ export function GroupHero({
             </div>
           </>
         ) : (
-          <div className="flex items-center gap-2 rounded-[14px] bg-success-soft px-3.5 py-3 text-[13.5px] font-semibold text-success-foreground">
+          <div className="flex items-center gap-2 rounded-[14px] bg-bg-subtle px-3.5 py-3 text-[13.5px] font-semibold text-foreground">
             <PartyPopper className="size-[17px] shrink-0" />
             {t('groups.overview.allSquared')}
           </div>
         )}
       </div>
 
-      {/* Footer — Balances expander + History link */}
+      {/* Footer — Balances expander (+ optional History link when history isn't shown inline) */}
       <div className="flex border-t border-hairline-soft">
         {/* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: bespoke hero footer toggle (inline balances expander) */}
         <button
@@ -156,20 +159,24 @@ export function GroupHero({
           {t('groups.hero.balances')}
           <ChevronDown className={cn('size-[15px] text-fg-faint transition-transform', showBalances && 'rotate-180')} />
         </button>
-        {/* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: bespoke hero footer link (opens history sheet) */}
-        <button
-          type="button"
-          onClick={onOpenHistory}
-          className="flex h-[46px] flex-1 items-center justify-center gap-1.5 border-l border-hairline-soft text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle"
-        >
-          <History className="size-[15px] text-muted-foreground" />
-          {t('groups.hero.history')}
-          {settlementsCount > 0 && (
-            <span className="rounded-full bg-bg-subtle px-1.5 py-px text-[10.5px] font-bold text-fg-faint">
-              {settlementsCount}
-            </span>
-          )}
-        </button>
+        {onOpenHistory && (
+          <>
+            {/* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: bespoke hero footer link (opens history sheet) */}
+            <button
+              type="button"
+              onClick={onOpenHistory}
+              className="flex h-[46px] flex-1 items-center justify-center gap-1.5 border-l border-hairline-soft text-[13px] font-semibold text-fg-2 transition-colors hover:bg-bg-subtle"
+            >
+              <History className="size-[15px] text-muted-foreground" />
+              {t('groups.hero.history')}
+              {settlementsCount > 0 && (
+                <span className="rounded-full bg-bg-subtle px-1.5 py-px text-[10.5px] font-bold text-fg-faint">
+                  {settlementsCount}
+                </span>
+              )}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Inline every-member-balances expander */}

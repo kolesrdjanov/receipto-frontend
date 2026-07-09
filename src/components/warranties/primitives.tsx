@@ -28,7 +28,6 @@ import {
 } from '@/hooks/warranties/use-warranties'
 import {
   deriveKindEmoji,
-  kindColor,
   coveragePercent,
   formatRemaining,
   type WarrantyStatus,
@@ -42,20 +41,23 @@ const STATUS_ICON: Record<WarrantyStatus, LucideIcon> = {
   expiring: ShieldAlert,
   expired: ShieldX,
 }
+// Luma: the coverage bar is monochrome (foreground fill), red reserved for expired only. Urgency
+// is carried by the status badge tone (active→neutral, expiring→solid near-black, expired→danger)
+// and the remaining-time text, not by tinting the bar.
 const STATUS_TONE: Record<WarrantyStatus, Tone> = {
-  active: 'ok',
-  expiring: 'warn',
+  active: 'neutral',
+  expiring: 'solid',
   expired: 'danger',
 }
 const STATUS_TEXT: Record<WarrantyStatus, string> = {
-  active: 'text-success-foreground',
-  expiring: 'text-warning-foreground',
+  active: 'text-muted-foreground',
+  expiring: 'text-foreground',
   expired: 'text-destructive',
 }
 const FILL_COLOR: Record<WarrantyStatus, string> = {
-  active: 'oklch(from var(--success) 0.60 0.15 h)',
-  expiring: 'oklch(from var(--warning) 0.72 0.16 h)',
-  expired: 'oklch(from var(--destructive) 0.62 0.20 h)',
+  active: 'var(--foreground)',
+  expiring: 'var(--foreground)',
+  expired: 'var(--destructive)',
 }
 
 function isPdfFile(file: WarrantyFile): boolean {
@@ -92,8 +94,8 @@ export function KindTile({ name, size = 46, className }: { name?: string | null;
   const emoji = deriveKindEmoji(name)
   return (
     <span
-      className={cn('grid shrink-0 place-items-center', className)}
-      style={{ width: size, height: size, borderRadius: 13, fontSize: size * 0.5, lineHeight: 1, background: kindColor(emoji) + '22' }}
+      className={cn('grid shrink-0 place-items-center bg-bg-subtle', className)}
+      style={{ width: size, height: size, borderRadius: 13, fontSize: size * 0.5, lineHeight: 1 }}
     >
       {emoji}
     </span>

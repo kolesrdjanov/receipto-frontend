@@ -21,7 +21,8 @@ export function GroupHistoryList({
   flush?: boolean
 }) {
   const { t } = useTranslation()
-  const { data: settlements = [], isLoading } = useSettlementHistory(groupId)
+  const { data, isLoading } = useSettlementHistory(groupId)
+  const settlements = Array.isArray(data) ? data : []
 
   const ago = (date: string) =>
     formatDistanceToNow(new Date(date), { addSuffix: true, locale: i18n.language === 'sr' ? srLatn : enUS })
@@ -46,8 +47,8 @@ export function GroupHistoryList({
     <div className="flex flex-col gap-2">
       {settlements.map((s: SettlementRecord) => (
           <div key={s.id} className="flex items-center gap-3 py-1.5">
-            <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-success-soft">
-              <HandCoins className="size-[17px] text-success" />
+            <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-bg-subtle">
+              <HandCoins className="size-[17px] text-foreground" />
             </span>
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] text-fg-2">

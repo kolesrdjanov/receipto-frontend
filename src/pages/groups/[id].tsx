@@ -19,6 +19,7 @@ import {
   useLeaveGroup,
   useArchiveGroup,
   useUnarchiveGroup,
+  useDeleteGroup,
   useSettlementHistory,
   type GroupMember,
 } from '@/hooks/groups/use-groups'
@@ -30,12 +31,10 @@ import { memberName, type ComputedSettlement } from '@/lib/groups'
 import { GroupModal } from '@/components/groups/group-modal'
 import { SettlementModal } from '@/components/groups/settlement-modal'
 import { ExpenseDetailDialog } from '@/components/groups/expense-detail-dialog'
-import { GroupMenuDialog } from '@/components/groups/group-menu-dialog'
-import { InviteDialog } from '@/components/groups/invite-dialog'
-import { GroupHistoryDialog } from '@/components/groups/group-history-dialog'
+import { GroupManageSheet } from '@/components/groups/group-manage-sheet'
 import { GroupHero } from '@/components/groups/group-hero'
 import { GroupExpensesList } from '@/components/groups/group-expenses-list'
-import { GroupMembersPanel } from '@/components/groups/group-members-panel'
+import { GroupHistoryList } from '@/components/groups/group-history-list'
 import { GAvatarStack, SectionLabel } from '@/components/groups/primitives'
 import { toast } from 'sonner'
 import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Loader2 } from 'lucide-react'
@@ -43,8 +42,6 @@ import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Loader2 } from 'lucide
 const ReceiptModal = lazy(() =>
   import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
 )
-
-type Screen = 'detail' | 'members'
 
 export default function GroupDetail() {
   const { t } = useTranslation()
@@ -58,19 +55,22 @@ export default function GroupDetail() {
   const { data: stats } = useGroupStats(id)
   useGroupPolling(id)
   const { data: settlementHistory = [] } = useSettlementHistory(id)
-  const [displayCurrency, setDisplayCurrency] = useState(preferredCurrency || 'RSD')
+  // Display currency defaults to the group's currency (then the user's preference), with an
+  // explicit override once the user picks one from the header pill — no state-syncing effect.
+  const [currencyOverride, setCurrencyOverride] = useState<string | null>(null)
+  const displayCurrency = currencyOverride || group?.currency || preferredCurrency || 'RSD'
+  const setDisplayCurrency = setCurrencyOverride
   useExchangeRates(displayCurrency)
 
   const removeMember = useRemoveMember()
   const leaveGroup = useLeaveGroup()
   const archiveGroup = useArchiveGroup()
   const unarchiveGroup = useUnarchiveGroup()
+  const deleteGroup = useDeleteGroup()
   const deleteReceipt = useDeleteReceipt()
   const { openQrScannerWithContext, scannerModals } = useReceiptScanner()
 
-  const [screen, setScreen] = useState<Screen>('detail')
-
-  // Overlays
+  // Overlays — collapsed to three feature surfaces: Manage, Settle, and the expense editor/detail.
   const [receiptModalOpen, setReceiptModalOpen] = useState(false)
   const [receiptModalMode, setReceiptModalMode] = useState<'create' | 'edit'>('create')
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
@@ -78,32 +78,25 @@ export default function GroupDetail() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [settleOpen, setSettleOpen] = useState(false)
   const [settlePrefill, setSettlePrefill] = useState<{ fromUserId?: string; toUserId?: string; amount?: number }>({})
+  const [manageOpen, setManageOpen] = useState(false)
   const [editGroupOpen, setEditGroupOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [inviteOpen, setInviteOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
 
   // Confirm dialogs
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [archiveOpen, setArchiveOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<GroupMember | null>(null)
   const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null)
 
-  // Default the display currency to the group's currency once loaded.
-  useEffect(() => {
-    if (group?.currency) setDisplayCurrency(group.currency)
-  }, [group?.currency])
-
   const currentMember = group?.members?.find((m) => m.userId === user?.id)
   const isOwner = currentMember?.role === 'owner'
-  // Admin tier retired (Luma): owner-gated actions use isOwner. Alias kept to minimize churn
-  // in this increment; the dialog-collapse rework will remove it.
-  const isAdmin = isOwner
   const isArchived = !!group?.isArchived
   const acceptedMembers = useMemo(
     () => group?.members?.filter((m) => m.status === 'accepted') || [],
     [group?.members],
   )
+  // The display-currency picker only earns its place when the group mixes currencies.
+  const isMultiCurrency = (stats?.byCurrency?.length ?? 0) > 1
 
   // Actions ---------------------------------------------------------------
   const openAdd = () => {
@@ -171,6 +164,16 @@ export default function GroupDetail() {
       toast.error(getErrorMessage(error, isArchived ? t('groups.archive.unarchiveError') : t('groups.archive.error')))
     }
   }
+  const confirmDelete = async () => {
+    try {
+      await deleteGroup.mutateAsync(id)
+      toast.success(t('groups.modal.deleteSuccess'))
+      setDeleteOpen(false)
+      navigate('/groups')
+    } catch (error) {
+      toast.error(t('groups.modal.deleteError'), { description: getErrorMessage(error) })
+    }
+  }
   const confirmDeleteExpense = async () => {
     if (!receiptToDelete) return
     try {
@@ -210,18 +213,20 @@ export default function GroupDetail() {
   const membersButton = (
     <button
       type="button"
-      onClick={() => setScreen('members')}
+      onClick={() => setManageOpen(true)}
       className="flex items-center gap-2 text-[12.5px] font-semibold text-muted-foreground transition-colors hover:text-fg-2"
     >
-      {/* raw-button-ok: tappable members summary (avatar stack → members screen) */}
+      {/* raw-button-ok: tappable members summary (avatar stack → Manage sheet) */}
       <GAvatarStack members={acceptedMembers.map((m) => m.user)} max={5} size={24} currentUserId={user?.id} />
       <span>{t('groups.membersCount', { count: acceptedMembers.length })}</span>
       <ChevronRight className="size-3.5 text-fg-faint" />
     </button>
   )
 
-  const currencyControl = (
+  const currencyControl = isMultiCurrency ? (
     <HeaderCurrencyPill value={displayCurrency} onValueChange={setDisplayCurrency} />
+  ) : (
+    <span className="px-1 text-[12.5px] font-semibold text-muted-foreground">{displayCurrency}</span>
   )
 
   const hero = (
@@ -232,12 +237,11 @@ export default function GroupDetail() {
       settlementsCount={settlementHistory.length}
       isArchived={isArchived}
       onSettle={onSettle}
-      onOpenHistory={() => setHistoryOpen(true)}
     />
   )
 
-  // Detail is tabs-less now (Activity tab retired): a plain expenses header + the feed.
-  const tabsNav = (
+  // Detail is tabs-less (Activity retired): a plain expenses header + the feed, then inline history.
+  const expensesHeader = (
     <div className="flex items-center justify-between px-1">
       <SectionLabel>{t('groups.tabsNav.expenses')}</SectionLabel>
       {stats?.totalReceipts != null && (
@@ -246,7 +250,7 @@ export default function GroupDetail() {
     </div>
   )
 
-  const tabBody = (
+  const expensesBody = (
     <GroupExpensesList
       groupId={id}
       members={acceptedMembers}
@@ -256,15 +260,13 @@ export default function GroupDetail() {
     />
   )
 
-  const membersView = (
-    <GroupMembersPanel
-      group={group}
-      isAdmin={isAdmin}
-      isArchived={isArchived}
-      currentUserId={user?.id}
-      onInvite={() => setInviteOpen(true)}
-      onRemoveMember={setMemberToRemove}
-    />
+  const historySection = Array.isArray(settlementHistory) && settlementHistory.length > 0 && (
+    <div className="mt-2">
+      <div className="px-1">
+        <SectionLabel>{t('groups.settlements.history')}</SectionLabel>
+      </div>
+      <GroupHistoryList groupId={id} displayCurrency={displayCurrency} />
+    </div>
   )
 
   const overlays = (
@@ -303,30 +305,33 @@ export default function GroupDetail() {
         prefillData={settlePrefill}
       />
 
-      <GroupHistoryDialog
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
-        groupId={id}
-        displayCurrency={displayCurrency}
+      <GroupManageSheet
+        open={manageOpen}
+        onOpenChange={setManageOpen}
+        group={group}
+        isOwner={isOwner}
+        isArchived={isArchived}
+        currentUserId={user?.id}
+        onEditDetails={() => {
+          setManageOpen(false)
+          setEditGroupOpen(true)
+        }}
+        onRemoveMember={setMemberToRemove}
+        onArchiveToggle={() => {
+          setManageOpen(false)
+          setArchiveOpen(true)
+        }}
+        onLeave={() => {
+          setManageOpen(false)
+          setLeaveOpen(true)
+        }}
+        onDelete={() => {
+          setManageOpen(false)
+          setDeleteOpen(true)
+        }}
       />
 
       <GroupModal open={editGroupOpen} onOpenChange={setEditGroupOpen} group={group} mode="edit" />
-
-      <GroupMenuDialog
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
-        group={group}
-        isOwner={isOwner}
-        isAdmin={isAdmin}
-        onEdit={() => setEditGroupOpen(true)}
-        onInvite={() => setInviteOpen(true)}
-        onManageMembers={() => setScreen('members')}
-        onScan={openScan}
-        onArchiveToggle={() => setArchiveOpen(true)}
-        onLeave={() => setLeaveOpen(true)}
-      />
-
-      <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} group={group} />
 
       <ConfirmDialog
         open={leaveOpen}
@@ -351,6 +356,17 @@ export default function GroupDetail() {
         onConfirm={confirmArchive}
         confirmText={isArchived ? t('groups.archive.unarchiveButton') : t('groups.archive.button')}
         isLoading={archiveGroup.isPending || unarchiveGroup.isPending}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={t('groups.modal.deleteTitle')}
+        description={t('groups.modal.deleteConfirmDescription', { name: group.name })}
+        onConfirm={confirmDelete}
+        confirmText={t('common.delete')}
+        variant="destructive"
+        isLoading={deleteGroup.isPending}
       />
 
       <ConfirmDialog
@@ -386,52 +402,6 @@ export default function GroupDetail() {
     </>
   )
 
-  // MEMBERS (pushed sub-screen, both layouts) -----------------------------
-  if (screen === 'members') {
-    if (isMobile) {
-      return (
-        <AppLayout>
-          <div className="-mt-2 mb-4 flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-9"
-              onClick={() => setScreen('detail')}
-              aria-label={t('common.back')}
-            >
-              <ArrowLeft className="size-5" />
-            </Button>
-            <div className="truncate text-[16px] font-bold">{`${t('groups.tabsNav.members')} · ${group.name}`}</div>
-          </div>
-          {membersView}
-          {overlays}
-        </AppLayout>
-      )
-    }
-    return (
-      <AppLayout>
-        <PageToolbar
-          className="md:-mx-8 md:-mt-8 md:mb-6"
-          title={group.name}
-          subtitle={t('groups.tabsNav.members')}
-        />
-        <div className="mx-auto max-w-[640px]">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mb-3 -ml-2 text-muted-foreground"
-            onClick={() => setScreen('detail')}
-          >
-            <ArrowLeft className="size-4" />
-            {group.name}
-          </Button>
-          {membersView}
-        </div>
-        {overlays}
-      </AppLayout>
-    )
-  }
-
   // MOBILE detail ---------------------------------------------------------
   if (isMobile) {
     return (
@@ -452,8 +422,8 @@ export default function GroupDetail() {
               variant="ghost"
               size="icon"
               className="size-9"
-              onClick={() => setMenuOpen(true)}
-              aria-label={t('groups.menu.title')}
+              onClick={() => setManageOpen(true)}
+              aria-label={t('groups.manage.title')}
             >
               <MoreHorizontal className="size-5" />
             </Button>
@@ -470,15 +440,16 @@ export default function GroupDetail() {
         </div>
         <div className="flex flex-col gap-3.5">
           {hero}
-          {tabsNav}
-          {tabBody}
+          {expensesHeader}
+          {expensesBody}
+          {historySection}
         </div>
         {overlays}
       </AppLayout>
     )
   }
 
-  // DESKTOP detail — sticky hero aside + Expenses/Activity tabs body -------
+  // DESKTOP detail — sticky hero aside + expenses feed + inline settlement history -------
   return (
     <AppLayout>
       <PageToolbar
@@ -494,7 +465,7 @@ export default function GroupDetail() {
             {!isArchived && (
               <AddButton onClick={openAdd} label={t('groups.expense.addExpense')} />
             )}
-            <HeaderIconButton icon={MoreHorizontal} label={t('groups.menu.title')} onClick={() => setMenuOpen(true)} />
+            <HeaderIconButton icon={MoreHorizontal} label={t('groups.manage.title')} onClick={() => setManageOpen(true)} />
           </>
         }
       />
@@ -522,10 +493,11 @@ export default function GroupDetail() {
           {/* Left: pinned balance + settle hero */}
           <div className="lg:sticky lg:top-24">{hero}</div>
 
-          {/* Right: Expenses / Activity tabs */}
+          {/* Right: expenses feed + inline settlement history */}
           <div className="flex min-w-0 flex-col gap-3.5">
-            <div className="max-w-[460px]">{tabsNav}</div>
-            {tabBody}
+            <div className="max-w-[460px]">{expensesHeader}</div>
+            {expensesBody}
+            <div className="max-w-[460px]">{historySection}</div>
           </div>
         </div>
       </div>

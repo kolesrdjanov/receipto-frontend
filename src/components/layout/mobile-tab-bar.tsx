@@ -63,7 +63,7 @@ export function MobileTabBar({ onOpenAddSheet }: MobileTabBarProps) {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/88 [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex w-full items-center justify-around px-2.5 pb-1.5 pt-2" style={{ minHeight: 72 }}>

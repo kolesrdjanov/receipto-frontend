@@ -57,6 +57,7 @@ export function computeConvertedBalances(
   displayCurrency: string,
   rates?: ExchangeRates,
 ): ConvertedBalance[] {
+  if (!Array.isArray(balances)) return []
   return balances.map((balance) => {
     let totalPaid = 0
     let totalOwed = 0

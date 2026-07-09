@@ -49,7 +49,8 @@ src/
 ## Read before writing code
 
 1. `docs/conventions.md` — patterns, naming, structure rules
-2. `docs/design-system.md` — the "Glass" design system (tokens, type scale, primitives)
+2. `docs/design-system.md` — the design system (tokens, type scale, primitives); now **"Luma"**
+   (monochrome/Geist) — see `docs/luma-redesign-progress.md` for the Glass→Luma migration
 3. `docs/tech-debt.md` — tracked debt (e.g. TD-1 RHF+Zod rollout, TD-9 GlassDialog
    `actions` migration); don't re-introduce solved problems
 
@@ -77,15 +78,20 @@ src/
    never skip Serbian.
 7. There is **no Checkbox component** — use toggleable button chips for multi-select.
 
-## Design system — "Glass" (the whole app is on it)
+## Design system — "Luma" (the whole app is on it)
 
-- **Emerald is locked app-wide.** The user accent picker was retired: base
-  `--primary`/`--ring` are emerald in `index.css`, the `.accent-*` classes were
-  deleted, and `applyAccentColor` is a no-op — don't resurrect per-user accents.
-  (Loyalty cards are the one place per-item color is intentional.) Chart colors use
-  the emerald `--primary` hexes (`#008d59` / `#37d59f`), not any accent map.
+- **Monochrome, near-black primary — no accent color.** The app migrated from the old
+  emerald **"Glass"** system to flat, monochrome **"Luma"** (Geist type, 1px hairlines,
+  minimal shadow). Base `--primary`/`--ring` are neutral near-black (light) / near-white
+  (dark); `--success`/`--warning`/`--info` and the `--brand-*` stops are neutralized. **Red
+  (`--destructive`) is the only chromatic accent, reserved for destructive/expired/you-owe
+  states.** Don't resurrect per-user accents or emerald. Category **and** loyalty-card colors
+  are the retained per-item color exception (data-driven hex, independent of tokens). Charts
+  are monochrome (grey + near-black peak), not emerald.
 - OKLCH tokens via CSS variables; all Tailwind v4 config lives in `index.css`.
-  Plus Jakarta Sans display font; `.t-num` for numerals; radius base 0.625rem.
+  **Geist** display/body + **Geist Mono** (`--font-mono`, `.t-num`); radius base 0.625rem;
+  two-tier shadow (`--shadow-1`/`--shadow-2`). See `docs/luma-redesign-progress.md` for the
+  full migration record.
 - Dashboard is the fixed two-column **"Focus"** layout
   (`components/dashboard/focus/`) — the customizable widget grid was retired; don't
   re-add widget plumbing.
