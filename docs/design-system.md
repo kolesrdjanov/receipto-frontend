@@ -153,7 +153,10 @@ Some of the above is checkable by tooling; the rest needs review. Both layers ru
 - **Human review only** (no reliable lint signal — enforce in PR review): icon-only
   *needs aria-label*, color-not-only, contrast ratios, chart data-table, Framer
   `useReducedMotion`. A className/AST rule can't judge these without heavy false positives.
-- **Monochrome guardrail** (ESLint `no-restricted-syntax`, `eslint.config.js`): errors on
+- **Monochrome guardrail** (ESLint `luma/no-chroma`, a local plugin rule in
+  `eslint.config.js` — deliberately not `no-restricted-syntax`, which the touch-target/
+  raw-button blocks already own; sharing one rule name makes flat config drop whichever
+  block loses the last-write-wins merge): errors on
   legacy chromatic palette hexes and on `oklch(from var(--…))` chroma re-injection in
   `src/` (approved exception files — category/card palettes, Price Tracker, Admin — are
   exempt). Opt out with a `chroma-ok: <reason>` disable comment (e.g. a brand asset).

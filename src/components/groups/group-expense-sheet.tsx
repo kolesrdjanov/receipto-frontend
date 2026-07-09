@@ -205,6 +205,7 @@ export function GroupExpenseSheet({
                 {members.map((m) => {
                   const selected = field.value === m.userId
                   return (
+                    // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: single-select avatar chip (aria-pressed), not a Button variant
                     <button
                       key={m.userId}
                       type="button"
@@ -250,6 +251,7 @@ export function GroupExpenseSheet({
                 {members.map((m) => {
                   const checked = field.value.includes(m.userId)
                   return (
+                    // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: checkbox row (role=checkbox) in the split checklist, not a Button variant
                     <button
                       key={m.userId}
                       type="button"

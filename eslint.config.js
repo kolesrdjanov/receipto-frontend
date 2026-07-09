@@ -14,6 +14,51 @@ const jsxA11yWarn = Object.fromEntries(
   Object.keys(jsxA11y.flatConfigs.recommended.rules).map((rule) => [rule, 'warn']),
 )
 
+// Local rule powering the Luma monochrome guardrail (config block below). It lives on
+// its own rule name (`luma/no-chroma`) instead of `no-restricted-syntax` because flat
+// config resolves rule options last-write-wins PER RULE NAME: putting the chroma
+// selectors on no-restricted-syntax made this block and the touch-target/raw-button
+// blocks silently disable each other wherever their file scopes overlapped (and their
+// severities differ, so the selectors can't be merged into one shared options list).
+const lumaPlugin = {
+  rules: {
+    'no-chroma': {
+      meta: {
+        type: 'problem',
+        schema: [],
+        messages: {
+          oklchFromVar:
+            'Never re-inject chroma onto a neutralized token (`oklch(from var(--…) L C h)` rendered pink once). Use --destructive for danger or the neutral tiers. Deliberate exception: `// eslint-disable-next-line luma/no-chroma -- chroma-ok: <reason>`.',
+          legacyHex:
+            'Luma is monochrome — red (--destructive) is the only chromatic hue. Legacy palette hexes are retired; use tokens (or the per-category/per-card data color, which flows from data, not literals). Deliberate exception: `// eslint-disable-next-line luma/no-chroma -- chroma-ok: <reason>`.',
+        },
+      },
+      create(context) {
+        const patterns = [
+          { regex: /oklch\(from var\(--/i, messageId: 'oklchFromVar' },
+          {
+            regex:
+              /#(0ea5e9|8b5cf6|06b6d4|10b981|22c55e|34d399|16a34a|059669|f59e0b|d97706|ec4899|f43f5e|6366f1|3b82f6|14b8a6|f97316|a855f7|eab308|08a373)/i,
+            messageId: 'legacyHex',
+          },
+        ]
+        const check = (node, text) => {
+          if (typeof text !== 'string') return
+          for (const { regex, messageId } of patterns) {
+            if (regex.test(text)) context.report({ node, messageId })
+          }
+        }
+        return {
+          Literal: (node) => check(node, node.value),
+          // Also cover template literals (`bg-[#22c55e] ${…}`), which the previous
+          // esquery Literal selector missed.
+          TemplateElement: (node) => check(node, node.value.raw),
+        }
+      },
+    },
+  },
+}
+
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -96,7 +141,9 @@ export default defineConfig([
     // audit actually found: (1) re-introducing legacy palette hexes, (2) `oklch(from
     // var(--…))` expressions that re-inject chroma onto neutralized tokens (rendered
     // pink once). For a deliberate exception add
-    // `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.
+    // `// eslint-disable-next-line luma/no-chroma -- chroma-ok: <reason>`.
+    // (Implemented as the local `luma` plugin above — NOT no-restricted-syntax — so it
+    // composes with the touch-target/raw-button blocks instead of clobbering them.)
     files: ['src/**/*.{ts,tsx}'],
     ignores: [
       'src/components/categories/primitives.tsx', // approved: category color palette
@@ -105,21 +152,9 @@ export default defineConfig([
       'src/components/items/**',
       'src/pages/admin/**', // low-priority admin charts
     ],
+    plugins: { luma: lumaPlugin },
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "Literal[value=/oklch\\(from var\\(--/i]",
-          message:
-            'Never re-inject chroma onto a neutralized token (`oklch(from var(--…) L C h)` rendered pink once). Use --destructive for danger or the neutral tiers. Deliberate exception: `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.',
-        },
-        {
-          selector:
-            'Literal[value=/#(0ea5e9|8b5cf6|06b6d4|10b981|22c55e|34d399|16a34a|059669|f59e0b|d97706|ec4899|f43f5e|6366f1|3b82f6|14b8a6|f97316|a855f7|eab308|08a373)/i]',
-          message:
-            'Luma is monochrome — red (--destructive) is the only chromatic hue. Legacy palette hexes are retired; use tokens (or the per-category/per-card data color, which flows from data, not literals). Deliberate exception: `// eslint-disable-next-line no-restricted-syntax -- chroma-ok: <reason>`.',
-        },
-      ],
+      'luma/no-chroma': 'error',
     },
   },
   {

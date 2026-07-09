@@ -43,6 +43,7 @@ export function EmailChip({ email, onChange, changeLabel }: { email: string; onC
     <div className="mt-3.5 inline-flex items-center gap-2.5 rounded-full border border-border bg-muted py-2 pl-4 pr-2 text-sm font-bold text-foreground">
       <span className="truncate">{email}</span>
       {onChange && (
+        // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: inline Change affordance inside the email pill (hit-area'd), not a standalone Button
         <button
           type="button"
           onClick={onChange}

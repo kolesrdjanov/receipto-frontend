@@ -54,7 +54,7 @@ export function GroupExpenseRow({
   const emoji = receipt.category?.icon || '🧾'
 
   return (
-    // raw-button-ok: list-row tap-face (opens the expense detail sheet)
+    // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: list-row tap-face (opens the expense detail sheet)
     <button
       type="button"
       onClick={onClick}
