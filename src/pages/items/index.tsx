@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/glass/empty-state'
@@ -172,6 +173,7 @@ export default function ItemsPage() {
 
   return (
     <AppLayout>
+      <PageContent>
       <div className="mb-6 md:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -389,6 +391,7 @@ export default function ItemsPage() {
           </Card>
         </>
       )}
+      </PageContent>
     </AppLayout>
   )
 }

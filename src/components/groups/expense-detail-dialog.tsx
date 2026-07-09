@@ -89,8 +89,8 @@ export function ExpenseDetailDialog({
         {/* Hero */}
         <div className="flex flex-col items-center pb-3.5 text-center">
           <span className="mb-3 grid size-14 place-items-center rounded-2xl bg-bg-subtle text-[28px]">{emoji}</span>
-          <div className="text-[34px] font-extrabold tracking-[-0.03em]">{formatMoney(amount, currency)}</div>
-          <div className="mt-1.5 text-[17px] font-bold">{receipt.storeName || t('receipts.unknownStore')}</div>
+          <div className="text-[34px] font-semibold tracking-[-0.03em]">{formatMoney(amount, currency)}</div>
+          <div className="mt-1.5 text-[17px] font-semibold">{receipt.storeName || t('receipts.unknownStore')}</div>
           <div className="mt-1 text-[13px] text-muted-foreground">
             {[receipt.category?.name, receipt.receiptDate ? formatDateTime(receipt.receiptDate) : null]
               .filter(Boolean)
@@ -103,17 +103,17 @@ export function ExpenseDetailDialog({
           <div className="mb-4 flex items-center gap-3 rounded-[12px] bg-bg-subtle px-3.5 py-3">
             <GMemberAvatar user={payer} self={payer.id === user?.id} size={34} />
             <div className="flex-1 text-[14px] text-fg-2">
-              <b className="font-bold text-foreground">
+              <b className="font-semibold text-foreground">
                 {payer.id === user?.id ? t('groups.you') : memberName(payer)}
               </b>{' '}
               {t('groups.expense.paidTheBill')}
             </div>
-            <span className="font-bold">{formatMoney(amount, currency)}</span>
+            <span className="font-semibold">{formatMoney(amount, currency)}</span>
           </div>
         )}
 
         {/* Split breakdown */}
-        <div className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
+        <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">
           {t('groups.expense.splitBetween', { count: participants.length, each: formatMoney(share, currency) })}
         </div>
         <div className="flex flex-col gap-0.5">
@@ -123,12 +123,12 @@ export function ExpenseDetailDialog({
               <span className="flex-1">
                 {m.userId === user?.id ? t('groups.you') : memberName(m.user)}
                 {m.userId === receipt.paidById && (
-                  <span className="ml-2 rounded-full bg-primary-soft px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.04em] text-primary">
+                  <span className="ml-2 rounded-full bg-primary-soft px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.04em] text-primary">
                     {t('groups.expense.payer')}
                   </span>
                 )}
               </span>
-              <span className="font-bold text-destructive">{formatMoney(share, currency)}</span>
+              <span className="font-semibold text-destructive">{formatMoney(share, currency)}</span>
             </div>
           ))}
         </div>

@@ -4,6 +4,7 @@ import { Info, X, CalendarClock, ArrowDownWideNarrow } from 'lucide-react'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -202,12 +203,13 @@ export default function RecurringExpenses() {
       <PageTransition>
         {/* Desktop sticky toolbar (breaks out of the page padding to sit flush) */}
         <PageToolbar
-          className="md:-mx-8 md:-mt-8 md:mb-6"
+          className="md:mb-6"
           title={t('recurring.title')}
           subtitle={t('recurring.subtitle')}
           actions={<AddButton onClick={handleAdd} label={t('recurring.addRecurring')} />}
         />
 
+        <PageContent>
         {/* Mobile page header */}
         <div className="mb-5 md:hidden">
           <h1 className="t-h1 text-[28px]">{t('nav.recurring', { defaultValue: 'Recurring' })}</h1>
@@ -243,7 +245,7 @@ export default function RecurringExpenses() {
             <div className="mb-5 hidden items-end justify-between gap-4 px-1 md:flex">
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-2.5">
-                  <span className="text-[28px] font-bold leading-none tracking-[-0.02em]">
+                  <span className="text-[28px] font-semibold leading-none tracking-[-0.02em]">
                     {formatAmount(monthlyTotal)}
                   </span>
                   <span className="text-[13px] font-medium text-muted-foreground">
@@ -288,7 +290,7 @@ export default function RecurringExpenses() {
             <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] text-muted-foreground">{t('recurring.stats.monthlyCommitment')}</span>
-                <span className="text-[26px] font-extrabold leading-none">{formatAmount(monthlyTotal)}</span>
+                <span className="text-[26px] font-semibold leading-none">{formatAmount(monthlyTotal)}</span>
               </div>
               <div className="mt-3.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px]">
                 <span className={cn('font-medium', overdueCount ? 'text-destructive' : 'text-muted-foreground')}>
@@ -332,6 +334,7 @@ export default function RecurringExpenses() {
             </p>
           </>
         )}
+        </PageContent>
       </PageTransition>
 
       {/* Add / Edit */}

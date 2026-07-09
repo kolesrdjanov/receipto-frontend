@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -87,6 +88,7 @@ export default function Templates() {
       <PageTransition>
         {header}
 
+        <PageContent>
         {isLoading ? (
           <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card md:mt-0">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -126,6 +128,7 @@ export default function Templates() {
             />
           </div>
         )}
+        </PageContent>
       </PageTransition>
 
       {/* Create / Edit form */}

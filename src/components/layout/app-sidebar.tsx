@@ -76,7 +76,7 @@ const navItem = cn(
 const navItemActive =
   'bg-subtle font-semibold text-foreground data-[active=true]:text-foreground [&>svg]:text-foreground hover:bg-subtle hover:text-foreground'
 
-const groupLabel = 'px-3 text-[11px] font-bold uppercase tracking-[0.07em] text-fg-faint'
+const groupLabel = 'px-3 text-[11px] font-semibold uppercase tracking-[0.07em] text-fg-faint'
 
 type NavDef = {
   to: string
@@ -284,7 +284,7 @@ export function AppSidebar({
                             <SidebarMenuSubButton
                               asChild
                               isActive={active}
-                              className="h-9 gap-2.5 text-[13.5px] font-medium text-muted-foreground data-[active=true]:bg-transparent data-[active=true]:font-bold data-[active=true]:text-foreground [&[data-active=true]_.subdot]:bg-foreground"
+                              className="h-9 gap-2.5 text-[13.5px] font-medium text-muted-foreground data-[active=true]:bg-transparent data-[active=true]:font-semibold data-[active=true]:text-foreground [&[data-active=true]_.subdot]:bg-foreground"
                             >
                               <Link to={sub.to} onClick={closeMobile}>
                                 <span className="subdot size-[5px] shrink-0 rounded-full bg-fg-faint" />
@@ -315,7 +315,7 @@ export function AppSidebar({
                 size="sm"
               />
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-[13.5px] font-bold">{userName}</span>
+                <span className="truncate text-[13.5px] font-semibold">{userName}</span>
                 <span className="flex items-center gap-1 text-[11.5px] font-semibold text-muted-foreground">
                   <RankIcon className={cn('size-3 shrink-0', rankVisual.className)} />
                   {rankName}
@@ -342,7 +342,7 @@ export function AppSidebar({
               type="button"
               variant="destructive-soft"
               onClick={logout}
-              className="h-[46px] w-full rounded-xl text-[14.5px] font-bold [&_svg]:size-[17px]"
+              className="h-[46px] w-full rounded-xl text-[14.5px] font-semibold [&_svg]:size-[17px]"
             >
               <LogOut />
               {t('nav.logout')}
@@ -365,7 +365,7 @@ export function AppSidebar({
                       size="sm"
                     />
                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                      <span className="truncate font-bold">{userName}</span>
+                      <span className="truncate font-semibold">{userName}</span>
                       <span className="flex items-center gap-1 truncate text-xs font-semibold text-muted-foreground">
                         <RankIcon className={cn('h-3 w-3 shrink-0', rankVisual.className)} />
                         {rankName}

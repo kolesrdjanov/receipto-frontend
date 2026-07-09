@@ -296,7 +296,7 @@ export function WarrantyCard({
       <div className="flex items-start gap-3">
         <KindTile name={w.productName} />
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[16px] font-bold tracking-[-0.01em]" title={w.productName}>
+          <div className="truncate text-[16px] font-semibold tracking-[-0.01em]" title={w.productName}>
             {w.productName}
           </div>
           <div className="mt-0.5 flex items-center gap-1 text-[12.5px] font-semibold text-muted-foreground">

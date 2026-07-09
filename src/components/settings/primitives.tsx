@@ -45,7 +45,7 @@ export function SettingsCard({
         <header className="mb-4">
           <h3
             className={cn(
-              'flex items-center gap-2 text-[17px] font-bold tracking-[-0.01em]',
+              'flex items-center gap-2 text-[17px] font-semibold tracking-[-0.01em]',
               danger && 'text-destructive',
             )}
           >
@@ -102,7 +102,7 @@ export function AccentRetired() {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-sm font-semibold">
           {t('settings.accentColor.retiredTitle')}
-          <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-warning-foreground">
+          <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warning-foreground">
             {t('settings.accentColor.retiredTag')}
           </span>
         </div>
@@ -167,7 +167,7 @@ export function RankChip({ rank, name }: { rank: ReceiptRank; name: string }) {
     <span
       title={`${t('settings.profile.rank.title')} — ${name}`}
       className={cn(
-        'inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-[9px] pr-3 text-[12.5px] font-bold',
+        'inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-[9px] pr-3 text-[12.5px] font-semibold',
         tone,
       )}
     >
@@ -298,7 +298,7 @@ export function SettingsNavRail<Id extends string>({
                   ? 'bg-destructive-soft text-destructive'
                   : 'text-destructive/85 hover:bg-destructive-soft/60'
                 : on
-                  ? 'bg-primary-soft font-bold text-primary'
+                  ? 'bg-primary-soft font-semibold text-primary'
                   : 'text-fg-2 hover:bg-bg-subtle hover:text-foreground',
             )}
           >

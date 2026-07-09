@@ -69,7 +69,7 @@ type FormData = z.output<RecurringSchema>
 const FORM_ID = 'recurring-expense-form'
 const FREQUENCIES: RecurringFrequency[] = ['weekly', 'monthly', 'quarterly', 'yearly']
 
-const fieldLabel = 'mb-1.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 export function RecurringExpenseModal({
   open,

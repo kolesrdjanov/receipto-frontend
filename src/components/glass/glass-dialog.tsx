@@ -183,8 +183,10 @@ export function GlassDialog({
                   {(actions || footer) && (
                     <div
                       className={cn(
+                        // Vertically symmetric (16px top and bottom, per the handoff's
+                        // 16px 20px footer); mobile only adds the safe-area inset.
                         'shrink-0 border-t border-border px-6 pt-4',
-                        isMobile ? 'pb-[calc(18px+env(safe-area-inset-bottom))]' : 'pb-6',
+                        isMobile ? 'pb-[calc(16px+env(safe-area-inset-bottom))]' : 'pb-4',
                       )}
                     >
                       {actions ? (

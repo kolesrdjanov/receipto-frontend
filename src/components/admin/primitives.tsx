@@ -47,7 +47,7 @@ export function AdminCardHead({
   return (
     <div className={cn('flex items-start justify-between gap-3 px-5 pt-5 sm:px-[22px]', className)}>
       <div className="min-w-0">
-        <h3 className="flex items-center gap-2 text-[17px] font-bold leading-[1.25] tracking-[-0.01em]">
+        <h3 className="flex items-center gap-2 text-[17px] font-semibold leading-[1.25] tracking-[-0.01em]">
           {Icon && <Icon className="size-[18px] shrink-0 text-primary" />}
           <span className="truncate">{title}</span>
         </h3>
@@ -98,7 +98,7 @@ export function Pill({
   className?: string
 }) {
   const base = cn(
-    'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11.5px] font-bold transition-colors',
+    'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold transition-colors',
     PILL_TONE[tone],
     onClick && 'cursor-pointer hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:brightness-110',
     className,
@@ -222,7 +222,7 @@ export function InsetStat({
     <div className={cn('rounded-xl border border-border bg-bg-subtle/50 p-4', className)}>
       <div className="t-xs text-muted-foreground">{label}</div>
       {value !== undefined && (
-        <div className="mt-1 text-[22px] font-extrabold leading-none tracking-[-0.02em]">{value}</div>
+        <div className="mt-1 text-[22px] font-semibold leading-none tracking-[-0.02em]">{value}</div>
       )}
       {children}
     </div>

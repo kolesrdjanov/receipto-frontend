@@ -1,65 +1,30 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { QrCode, Barcode, Eye, Pencil, Trash2, MoreVertical, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { QrCode, Barcode, Eye, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { RowActionItem } from '@/components/glass/primitives'
 import type { LoyaltyCard } from '@/hooks/loyalty-cards/use-loyalty-cards'
-import { CARD_COLORS, formatLabel } from './format'
+import { formatLabel } from './format'
 
-/** The code-type glyph tile — colour @ ~12% bg, icon in full colour. */
-export function CodeGlyph({ card, size = 40 }: { card: LoyaltyCard; size?: number }) {
-  const color = card.color || CARD_COLORS[0]
+/** The code-type glyph tile — neutral Luma tile (subtle bg, foreground icon). */
+export function CodeGlyph({ card, size = 42 }: { card: LoyaltyCard; size?: number }) {
   const Icon = card.codeType === 'qr' ? QrCode : Barcode
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-[11px]"
-      style={{ width: size, height: size, background: `color-mix(in srgb, ${color} 12%, transparent)` }}
+      className="grid shrink-0 place-items-center rounded-[11px] bg-bg-subtle text-foreground"
+      style={{ width: size, height: size }}
     >
-      <Icon className="size-5" style={{ color }} />
+      <Icon className="size-5" strokeWidth={1.9} />
     </span>
   )
 }
 
-/** Pill badge: "QR" / "CODE 128" / "EAN 13". */
+/** Outline pill badge: "QR" / "CODE 128" / "EAN 13" (handoff keeps these tiny labels at 700). */
 export function FormatBadge({ card }: { card: LoyaltyCard }) {
   return (
-    <span className="shrink-0 whitespace-nowrap rounded-full bg-bg-subtle px-2 py-[3px] text-[10px] font-bold uppercase tracking-[0.03em] text-muted-foreground">
+    <span className="inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-full border border-border px-2 text-[10px] font-bold uppercase tracking-[0.03em] text-muted-foreground">
       {formatLabel(card)}
     </span>
-  )
-}
-
-/** 10-preset swatch picker — selected swatch carries a ring + white check. */
-export function ColorSwatches({ value, onChange }: { value?: string; onChange: (hex: string) => void }) {
-  return (
-    <div className="flex flex-wrap gap-2.5">
-      {CARD_COLORS.map((hex) => {
-        const on = hex.toLowerCase() === (value || '').toLowerCase()
-        return (
-          <button
-            key={hex}
-            type="button"
-            aria-label={hex}
-            aria-pressed={on}
-            onClick={() => onChange(hex)}
-            className={cn(
-              'grid size-[34px] place-items-center rounded-full transition-transform',
-              'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card',
-              'hover:scale-[1.08] focus-visible:scale-[1.08]',
-            )}
-            style={{
-              background: hex,
-              boxShadow: on
-                ? `0 0 0 2px var(--card), 0 0 0 4px ${hex}`
-                : 'inset 0 0 0 1px oklch(0 0 0 / 0.08)',
-            }}
-          >
-            {on && <Check className="size-3.5 text-white" strokeWidth={3} />}
-          </button>
-        )
-      })}
-    </div>
   )
 }
 
@@ -99,7 +64,6 @@ interface LoyaltyCardItemProps extends CardActions {
 export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions }: LoyaltyCardItemProps) {
   const { t } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
-  const color = card.color || CARD_COLORS[0]
   const close = (fn?: (c: LoyaltyCard) => void) => () => {
     setMenuOpen(false)
     fn?.(card)
@@ -107,34 +71,27 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
 
   return (
     <div
-      className={cn(
-        'group cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1',
-        'transition-[box-shadow,border-color] duration-150 hover:shadow-glass-2',
-        'hover:[border-color:color-mix(in_srgb,var(--primary)_35%,transparent)]',
-      )}
+      className="group cursor-pointer rounded-2xl border border-border bg-card p-[15px] transition-colors duration-150 hover:border-border-strong"
       onClick={() => onShow?.(card)}
     >
-      <div className="h-[5px] w-full" style={{ background: color }} />
-
-      <div className="px-[15px] pb-3 pt-[15px]">
-        <div className="flex items-start gap-[11px]">
-          <CodeGlyph card={card} />
-          <div className="min-w-0 grow">
-            <div className="truncate text-[15px] font-bold leading-[1.25] tracking-[-0.01em]" title={card.cardName}>
-              {card.cardName}
-            </div>
-            <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
-              {card.codeValue}
-            </div>
+      <div className="flex items-start gap-[11px]">
+        <CodeGlyph card={card} />
+        <div className="min-w-0 grow">
+          <div className="truncate text-[15px] font-semibold leading-[1.25] tracking-[-0.01em]" title={card.cardName}>
+            {card.cardName}
           </div>
-          <FormatBadge card={card} />
+          <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
+            {card.codeValue}
+          </div>
         </div>
+        <FormatBadge card={card} />
+      </div>
 
-        <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-hairline-soft pt-3">
-          <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-fg-2">
-            <Eye className="size-3.5 text-muted-foreground" />
-            {t('loyaltyCards.tapToShow')}
-          </span>
+      <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-border pt-3">
+        <span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-fg-2">
+          <Eye className="size-3.5 text-muted-foreground" />
+          {t('loyaltyCards.tapToShow')}
+        </span>
 
           {/* Desktop: kebab popover. Mobile: kebab opens the action sheet. */}
           <div className="hidden shrink-0 md:block" onClick={(e) => e.stopPropagation()}>
@@ -169,7 +126,6 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
           >
             <MoreVertical className="size-[18px]" />
           </button>
-        </div>
       </div>
     </div>
   )
@@ -199,22 +155,19 @@ export function CardGrid({
   )
 }
 
-/** Loading skeleton matching the card layout (strip · glyph · name/code · footer). */
+/** Loading skeleton matching the card layout (glyph · name/code · footer). */
 export function CardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1">
-      <div className="h-[5px] w-full bg-bg-subtle" />
-      <div className="px-[15px] pb-3 pt-[15px]">
-        <div className="flex items-start gap-[11px]">
-          <div className="size-10 shrink-0 animate-pulse rounded-[11px] bg-bg-subtle" />
-          <div className="grow space-y-2">
-            <div className="h-3 w-[70%] animate-pulse rounded bg-bg-subtle" />
-            <div className="h-2.5 w-[50%] animate-pulse rounded bg-bg-subtle" />
-          </div>
+    <div className="rounded-2xl border border-border bg-card p-[15px]">
+      <div className="flex items-start gap-[11px]">
+        <div className="size-[42px] shrink-0 animate-pulse rounded-[11px] bg-bg-subtle" />
+        <div className="grow space-y-2">
+          <div className="h-3 w-[70%] animate-pulse rounded bg-bg-subtle" />
+          <div className="h-2.5 w-[50%] animate-pulse rounded bg-bg-subtle" />
         </div>
-        <div className="mt-3.5 border-t border-hairline-soft pt-3">
-          <div className="h-2.5 w-20 animate-pulse rounded bg-bg-subtle" />
-        </div>
+      </div>
+      <div className="mt-3.5 border-t border-border pt-3">
+        <div className="h-2.5 w-20 animate-pulse rounded bg-bg-subtle" />
       </div>
     </div>
   )

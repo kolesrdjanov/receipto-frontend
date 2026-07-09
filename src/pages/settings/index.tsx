@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { ThemeSegmented } from '@/components/layout/theme-segmented'
@@ -49,7 +50,7 @@ const languages: { value: Language; labelKey: string }[] = [
 ]
 
 // Shared label style — matches the form-modal labels used app-wide.
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 // Desktop section-nav items (one visible section at a time) + the mobile tab strip.
 type SectionId = 'profile' | 'appearance' | 'region' | 'notifications' | 'danger'
@@ -262,7 +263,7 @@ export default function Settings() {
           onPick={openFilePicker}
         />
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[23px] font-extrabold tracking-[-0.022em]">{userName}</div>
+          <div className="truncate text-[23px] font-semibold tracking-[-0.022em]">{userName}</div>
           <div className="mt-1 flex items-center gap-1.5 text-[13.5px] font-medium text-muted-foreground">
             <Mail className="size-[13px] shrink-0 text-fg-faint" />
             <span className="truncate">{effectiveUser.email}</span>
@@ -451,8 +452,9 @@ export default function Settings() {
     <AppLayout>
       <PageTransition>
         {/* Desktop sticky toolbar (md+); mobile uses its own header below. */}
-        <PageToolbar className="md:-mx-8 md:-mt-8 md:mb-6" title={t('settings.title')} subtitle={t('settings.subtitle')} />
+        <PageToolbar className="md:mb-6" title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
+        <PageContent>
         {isMobile ? (
           /* ---------- MOBILE: 3-tab segmented strip ---------- */
           <div className="space-y-5" key={profileKey}>
@@ -507,6 +509,7 @@ export default function Settings() {
             </div>
           </div>
         )}
+        </PageContent>
       </PageTransition>
 
       {/* Mobile delete confirm — bottom sheet */}

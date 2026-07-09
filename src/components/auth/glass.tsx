@@ -31,7 +31,7 @@ export function CardHead({
       ) : badge ? (
         <Badge icon={badge} kind={badgeKind} />
       ) : null}
-      <h1 className="text-[27px] font-bold leading-[1.1] tracking-[-0.022em] text-foreground">{title}</h1>
+      <h1 className="text-[27px] font-semibold leading-[1.1] tracking-[-0.022em] text-foreground">{title}</h1>
       {subtitle && <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{subtitle}</p>}
     </div>
   )
@@ -40,7 +40,7 @@ export function CardHead({
 /* Pill chip showing the destination email address, with an inline Change affordance */
 export function EmailChip({ email, onChange, changeLabel }: { email: string; onChange?: () => void; changeLabel?: string }) {
   return (
-    <div className="mt-3.5 inline-flex items-center gap-2.5 rounded-full border border-border bg-muted py-2 pl-4 pr-2 text-sm font-bold text-foreground">
+    <div className="mt-3.5 inline-flex items-center gap-2.5 rounded-full border border-border bg-muted py-2 pl-4 pr-2 text-sm font-semibold text-foreground">
       <span className="truncate">{email}</span>
       {onChange && (
         // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: inline Change affordance inside the email pill (hit-area'd), not a standalone Button

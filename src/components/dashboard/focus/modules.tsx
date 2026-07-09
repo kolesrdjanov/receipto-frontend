@@ -93,7 +93,7 @@ export function FocusHero({
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-baseline gap-x-3.5 gap-y-2">
-          <span className="font-display text-[42px] font-extrabold leading-none tracking-[-0.03em] text-foreground md:text-[52px]">
+          <span className="font-display text-[42px] font-semibold leading-none tracking-[-0.03em] text-foreground md:text-[52px]">
             {amountsVisible ? formatMoney(spent, displayCurrency) : <HiddenDots />}
           </span>
           <TrendPill value={vsLastMonth} className="h-6 gap-1 px-2.5 text-[12.5px] [&_svg]:size-3.5" />
@@ -119,10 +119,10 @@ export function FocusHero({
                     spent: amountsVisible ? formatMoney(spent, displayCurrency) : MASK,
                     budget: formatMoney(budget, displayCurrency),
                   }}
-                  components={[<b className="font-bold text-foreground" />]}
+                  components={[<b className="font-semibold text-foreground" />]}
                 />
               </span>
-              <span className="font-bold text-foreground">
+              <span className="font-semibold text-foreground">
                 {t('dashboard.focus.budgetLeft', {
                   amount: amountsVisible ? formatMoney(Math.max(remaining, 0), displayCurrency) : MASK,
                 })}
@@ -134,14 +134,14 @@ export function FocusHero({
 
       {/* Right zone — tinted safe-to-spend panel */}
       <div className="flex flex-col border-t border-border bg-subtle px-[22px] pb-5 pt-6 md:border-l md:border-t-0">
-        <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.05em] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
           <Wallet className="size-3.5" aria-hidden="true" />
           {t('dashboard.focus.safeToSpend')}
         </span>
 
         {!hasBudget ? (
           <>
-            <h3 className="mt-3 text-[18px] font-extrabold tracking-[-0.01em]">
+            <h3 className="mt-3 text-[18px] font-semibold tracking-[-0.01em]">
               {t('dashboard.focus.noBudgetTitle')}
             </h3>
             <p className="mt-1.5 text-[13px] text-muted-foreground">{t('dashboard.focus.noBudgetBody')}</p>
@@ -158,9 +158,9 @@ export function FocusHero({
           </>
         ) : showSafe ? (
           <>
-            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
+            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-semibold leading-none tracking-[-0.02em] md:text-[38px]">
               {amountsVisible ? formatMoney(safePerDay, displayCurrency) : MASK}
-              <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
+              <span className="text-[15px] font-semibold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
             </div>
             <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
               {t('dashboard.focus.safeCaption', { days: daysLeft, month: monthLabel })}
@@ -169,10 +169,10 @@ export function FocusHero({
               <span className="text-[12.5px] font-semibold text-muted-foreground">
                 {t('dashboard.focus.projectedMonthEnd')}
               </span>
-              <span className="inline-flex items-center gap-2 text-[15px] font-bold">
+              <span className="inline-flex items-center gap-2 text-[15px] font-semibold">
                 {amountsVisible ? formatMoney(projected, displayCurrency) : MASK}
                 {overPace > 0 && (
-                  <span className="rounded-full bg-destructive-soft px-2 py-0.5 text-[11.5px] font-bold text-[color:var(--destructive-foreground-on-soft)]">
+                  <span className="rounded-full bg-destructive-soft px-2 py-0.5 text-[11.5px] font-semibold text-[color:var(--destructive-foreground-on-soft)]">
                     {t('dashboard.focus.overBy', {
                       amount: amountsVisible ? formatMoney(overPace, displayCurrency) : MASK,
                     })}
@@ -183,9 +183,9 @@ export function FocusHero({
           </>
         ) : (
           <>
-            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-extrabold leading-none tracking-[-0.02em] md:text-[38px]">
+            <div className="mt-3 flex items-baseline gap-1.5 font-display text-[34px] font-semibold leading-none tracking-[-0.02em] md:text-[38px]">
               {amountsVisible ? formatMoney(Math.round(dailyAvg), displayCurrency) : MASK}
-              <span className="text-[15px] font-bold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
+              <span className="text-[15px] font-semibold text-muted-foreground">{t('dashboard.focus.perDay')}</span>
             </div>
             <p className="mt-2 max-w-[30ch] text-[12.5px] leading-snug text-muted-foreground">
               {t('dashboard.focus.avgPerDayCaption', { month: monthLabel })}
@@ -340,7 +340,7 @@ function FlowStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-[11.5px] font-semibold text-muted-foreground">{label}</span>
-      <span className="text-[17px] font-extrabold tracking-[-0.01em]">{value}</span>
+      <span className="text-[17px] font-semibold tracking-[-0.01em]">{value}</span>
     </div>
   )
 }
@@ -408,7 +408,7 @@ export function FocusCategories({ categories, total, displayCurrency, amountsVis
                 <div style={{ gridArea: 'bar' }} className="h-[7px] overflow-hidden rounded-full bg-bg-subtle dark:bg-black/25">
                   <div className="h-full rounded-full" style={{ width: `${share}%`, background: c.color }} />
                 </div>
-                <span style={{ gridArea: 'amt' }} className="whitespace-nowrap text-[12.5px] font-bold text-fg-2">
+                <span style={{ gridArea: 'amt' }} className="whitespace-nowrap text-[12.5px] font-semibold text-fg-2">
                   {amountsVisible ? formatMoney(c.value, displayCurrency) : MASK}
                 </span>
               </li>
@@ -494,9 +494,9 @@ export function FocusCoach({ displayCurrency }: { displayCurrency: string }) {
                   category: topCat,
                 }}
                 components={[
-                  <b className="font-bold" />,
-                  <span className="font-bold text-foreground" />,
-                  <b className="font-bold" />,
+                  <b className="font-semibold" />,
+                  <span className="font-semibold text-foreground" />,
+                  <b className="font-semibold" />,
                 ]}
               />
             </p>
@@ -527,7 +527,7 @@ function CoachChip({
     <div className="flex items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3">
       <Icon className="mt-0.5 size-[15px] shrink-0 text-muted-foreground" />
       <div className="min-w-0">
-        <p className="text-[13px] font-bold text-foreground">{title}</p>
+        <p className="text-[13px] font-semibold text-foreground">{title}</p>
         <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{desc}</p>
       </div>
     </div>
@@ -589,7 +589,7 @@ export function FocusBills({
       title={t('dashboard.focus.upcomingBills')}
       trailing={
         total > 0 ? (
-          <span className="text-[13px] font-bold text-foreground">{formatMoney(totalAmount, displayCurrency)}</span>
+          <span className="text-[13px] font-semibold text-foreground">{formatMoney(totalAmount, displayCurrency)}</span>
         ) : undefined
       }
     >
@@ -621,7 +621,7 @@ export function FocusBills({
                     {formatDue(item.dueDate)}
                   </div>
                 </div>
-                <span className="shrink-0 text-[13px] font-bold text-fg-2">
+                <span className="shrink-0 text-[13px] font-semibold text-fg-2">
                   {formatMoney(convert(item.amount, item.currency), displayCurrency)}
                 </span>
               </Link>
@@ -671,7 +671,7 @@ export function FocusRecent({ receipts }: { receipts: Receipt[] }) {
                   {formatDate(r.receiptDate || r.createdAt)}
                 </div>
               </div>
-              <span className="shrink-0 text-[13px] font-bold text-fg-2">
+              <span className="shrink-0 text-[13px] font-semibold text-fg-2">
                 {formatMoney(Number(r.totalAmount) || 0, r.currency)}
               </span>
             </Link>

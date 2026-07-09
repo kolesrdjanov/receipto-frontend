@@ -43,7 +43,7 @@ function MiniStat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-bg-subtle/50 px-3 py-2">
       <div className="t-xs text-muted-foreground">{label}</div>
-      <div className="mt-0.5 flex h-[22px] items-center text-[17px] font-bold leading-none">{value}</div>
+      <div className="mt-0.5 flex h-[22px] items-center text-[17px] font-semibold leading-none">{value}</div>
     </div>
   )
 }
@@ -284,7 +284,7 @@ export function UsersTable() {
             <div key={user.id} className="rounded-2xl border border-border bg-card p-4 shadow-glass-1">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="truncate text-[16px] font-bold">
+                  <h3 className="truncate text-[16px] font-semibold">
                     {user.firstName || user.lastName
                       ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                       : t('admin.users.noName')}

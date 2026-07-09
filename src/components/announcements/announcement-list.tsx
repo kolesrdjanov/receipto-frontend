@@ -55,7 +55,7 @@ export function AnnouncementDrawer({ open, onOpenChange }: AnnouncementDrawerPro
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <p className="text-sm font-semibold">{a.title}</p>
-                    <span className="inline-flex items-center rounded-full border border-current/30 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                    <span className="inline-flex items-center rounded-full border border-current/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
                       {t(`announcements.types.${a.type}`)}
                     </span>
                   </div>

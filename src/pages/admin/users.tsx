@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { AddButton } from '@/components/glass/empty-state'
@@ -32,7 +33,9 @@ export default function AdminUsers() {
           actions={<AddButton onClick={openCreate} label={t('admin.users.createUser')} icon={UserPlus} />}
         />
 
+        <PageContent>
         <UsersTable />
+        </PageContent>
       </PageTransition>
 
       <CreateUserModal open={createModalOpen} onOpenChange={setCreateModalOpen} />

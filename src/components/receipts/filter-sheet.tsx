@@ -24,7 +24,7 @@ interface FilterSheetProps {
 function Section({ label, last, children }: { label: string; last?: boolean; children: ReactNode }) {
   return (
     <div className={last ? '' : 'mb-4 border-b border-hairline-soft pb-4'}>
-      <div className="mb-[11px] text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">{label}</div>
+      <div className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">{label}</div>
       {children}
     </div>
   )
@@ -82,7 +82,7 @@ export function FilterSheet({ open, onOpenChange, filters, categories, onFilters
                   transition={{ duration: reduceMotion ? 0 : 0.3, ease: SHEET_EASE }}
                 >
                   <div className="mx-auto mb-3.5 h-[5px] w-9 shrink-0 rounded-full bg-border" />
-                  <DialogPrimitive.Title className="shrink-0 px-[22px] text-[19px] font-bold">{t('receipts.filters.title')}</DialogPrimitive.Title>
+                  <DialogPrimitive.Title className="shrink-0 px-[22px] text-[19px] font-semibold">{t('receipts.filters.title')}</DialogPrimitive.Title>
 
                   <div className="min-h-0 flex-1 overflow-y-auto px-[22px] pt-4">
                     <Section label={t('receipts.filters.category')}>

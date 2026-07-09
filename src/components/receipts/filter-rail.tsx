@@ -16,7 +16,7 @@ interface FilterRailProps {
 }
 
 function RailLabel({ children }: { children: React.ReactNode }) {
-  return <div className="mb-[11px] text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">{children}</div>
+  return <div className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">{children}</div>
 }
 
 export function FilterRail({ filters, categories, onFiltersChange, className }: FilterRailProps) {
@@ -41,7 +41,7 @@ export function FilterRail({ filters, categories, onFiltersChange, className }: 
       )}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[15px] font-bold">{t('receipts.filters.title')}</span>
+        <span className="text-[15px] font-semibold">{t('receipts.filters.title')}</span>
         <button type="button" onClick={() => onFiltersChange({})} className="text-[12.5px] font-semibold text-primary hover:underline">
           {t('receipts.filters.clearAll')}
         </button>

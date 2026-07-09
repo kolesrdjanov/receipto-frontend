@@ -72,7 +72,7 @@ type ReceiptFormInput = z.input<ReturnType<typeof createReceiptSchema>>
 type ReceiptForm = z.output<ReturnType<typeof createReceiptSchema>>
 
 const FORM_ID = 'receipt-form'
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 export function ReceiptModal({ open, onOpenChange, receipt, mode, prefillData, onRequestDelete }: ReceiptModalProps) {
   const { t } = useTranslation()

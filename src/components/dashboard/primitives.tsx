@@ -25,7 +25,7 @@ export function WidgetHead({
 }) {
   return (
     <div className={cn('mb-4 flex items-center justify-between gap-3', className)}>
-      <h3 className="flex min-w-0 items-center gap-2 text-[16px] font-bold leading-[1.25] tracking-[-0.01em]">
+      <h3 className="flex min-w-0 items-center gap-2 text-[16px] font-semibold leading-[1.25] tracking-[-0.01em]">
         <Icon
           className={cn('size-[17px] shrink-0', iconTone === 'primary' ? 'text-primary' : 'text-muted-foreground')}
         />

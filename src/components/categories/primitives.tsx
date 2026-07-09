@@ -156,7 +156,7 @@ export function CategoryRow({ category, wide, onEdit, onDelete, onOpenActions }:
       <CategoryCircle color={category.color} icon={category.icon} size={wide ? 48 : 46} />
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15.5px] font-bold leading-tight tracking-[-0.01em]">
+        <div className="truncate text-[15.5px] font-semibold leading-tight tracking-[-0.01em]">
           {category.name}
         </div>
         {category.description ? (

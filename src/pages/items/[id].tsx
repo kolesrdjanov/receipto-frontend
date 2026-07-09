@@ -104,7 +104,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">{formatMoney(itemStats.avgPrice, currency)}</p>
+              <p className="text-lg sm:text-2xl font-semibold">{formatMoney(itemStats.avgPrice, currency)}</p>
             </CardContent>
           </Card>
 
@@ -115,7 +115,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">
+              <p className="text-lg sm:text-2xl font-semibold">
                 <span className="block sm:inline">{formatMoney(itemStats.minPrice, currency)}</span>
                 <span className="hidden sm:inline"> - </span>
                 <span className="block sm:inline text-muted-foreground sm:text-foreground">
@@ -133,7 +133,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">{itemStats.purchaseCount}</p>
+              <p className="text-lg sm:text-2xl font-semibold">{itemStats.purchaseCount}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {itemStats.stores.length} {t('items.stores')}
               </p>
@@ -148,7 +148,7 @@ export default function ItemDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-lg sm:text-2xl font-bold">{formatMoney(itemStats.lastPrice, currency)}</p>
+              <p className="text-lg sm:text-2xl font-semibold">{formatMoney(itemStats.lastPrice, currency)}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {format(new Date(itemStats.lastPurchaseDate), 'MMM d, yyyy')}
               </p>

@@ -30,7 +30,7 @@ import { cn, formatMoney } from '@/lib/utils'
 
 const FORM_ID = 'category-form'
 // Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 interface CategoryModalProps {
   open: boolean
@@ -232,7 +232,7 @@ export function CategoryModal({ open, onOpenChange, category, mode, onRequestDel
             <div className="flex items-center gap-3 rounded-[14px] border border-hairline-soft bg-bg-subtle/70 px-3.5 py-3 dark:bg-muted/40">
               <CategoryCircle color={colorValue} icon={iconValue || '🏷️'} size={44} />
               <div className="min-w-0 flex-1">
-                <div className={cn('truncate text-[16px] font-bold tracking-[-0.01em]', nameValue ? 'text-foreground' : 'text-fg-faint')}>
+                <div className={cn('truncate text-[16px] font-semibold tracking-[-0.01em]', nameValue ? 'text-foreground' : 'text-fg-faint')}>
                   {nameValue || t('categories.modal.previewNamePlaceholder')}
                 </div>
                 {budgetValue && budgetValue > 0 ? (

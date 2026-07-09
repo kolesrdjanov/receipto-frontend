@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, Check, CreditCard, FolderOpen, Loader2, Mail, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { Button } from '@/components/ui/button'
@@ -133,12 +134,13 @@ export default function AdminUserDetailsPage() {
     <AppLayout>
       <PageTransition>
         <PageToolbar
-          className="md:-mx-8 md:-mt-8 md:mb-6"
+          className="md:mb-6"
           title={t('admin.users.userDetails')}
           subtitle={t('admin.users.detailsSubtitle')}
           actions={backAction}
         />
 
+        <PageContent>
         <div className="mb-5 md:hidden">
           <Link to="/admin/users" className="mb-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="size-4" />
@@ -164,7 +166,7 @@ export default function AdminUserDetailsPage() {
                   size="xl"
                 />
                 <div className="min-w-0">
-                  <h3 className="text-[19px] font-bold leading-tight tracking-[-0.01em]">
+                  <h3 className="text-[19px] font-semibold leading-tight tracking-[-0.01em]">
                     {userDetails.firstName || userDetails.lastName
                       ? `${userDetails.firstName || ''} ${userDetails.lastName || ''}`.trim()
                       : t('admin.users.noName')}
@@ -246,7 +248,7 @@ export default function AdminUserDetailsPage() {
                       </ResponsiveContainer>
                       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
                         <span className="t-xs text-muted-foreground">{t('admin.users.analytics.tracked')}</span>
-                        <span className="mt-0.5 text-[15px] font-extrabold leading-tight">{formatAmount(totalTrackedSpend)}</span>
+                        <span className="mt-0.5 text-[15px] font-semibold leading-tight">{formatAmount(totalTrackedSpend)}</span>
                       </div>
                     </div>
 
@@ -266,11 +268,11 @@ export default function AdminUserDetailsPage() {
                     <InsetStat label={t('admin.users.analytics.topCategory')}>
                       {topCategory ? (
                         <>
-                          <div className="mt-1 text-[15px] font-bold">{topCategory.icon} {topCategory.name}</div>
+                          <div className="mt-1 text-[15px] font-semibold">{topCategory.icon} {topCategory.name}</div>
                           <div className="mt-0.5 text-[13px] text-muted-foreground">{formatAmount(topCategory.value)}</div>
                         </>
                       ) : (
-                        <div className="mt-1 text-[15px] font-bold text-muted-foreground">–</div>
+                        <div className="mt-1 text-[15px] font-semibold text-muted-foreground">–</div>
                       )}
                     </InsetStat>
                     <InsetStat label={t('admin.users.analytics.convertedTo', { currency: preferredCurrency })} className="bg-bg-subtle/30" />
@@ -416,6 +418,7 @@ export default function AdminUserDetailsPage() {
             </Tabs>
           </div>
         ) : null}
+        </PageContent>
       </PageTransition>
     </AppLayout>
   )

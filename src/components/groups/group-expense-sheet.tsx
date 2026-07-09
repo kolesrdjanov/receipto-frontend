@@ -20,7 +20,7 @@ import { memberName } from '@/lib/groups'
 import { getErrorMessage } from '@/lib/api'
 import type { GroupMember } from '@/hooks/groups/use-groups'
 
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 const schema = z.object({
   storeName: z.string().trim().min(1),
@@ -168,7 +168,7 @@ export function GroupExpenseSheet({
               step="0.01"
               min="0"
               placeholder="0"
-              className="h-12 text-[22px] font-bold tracking-[-0.01em]"
+              className="h-12 text-[22px] font-semibold tracking-[-0.01em]"
               {...register('totalAmount')}
             />
             {errors.totalAmount && (

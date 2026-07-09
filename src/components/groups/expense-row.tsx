@@ -71,7 +71,7 @@ export function GroupExpenseRow({
         </span>
       </span>
       <span className="flex shrink-0 flex-col items-end">
-        <span className="text-[14.5px] font-bold">{formatMoney(amount, currency)}</span>
+        <span className="text-[14.5px] font-semibold">{formatMoney(amount, currency)}</span>
         <span className={cn('mt-1 text-[11px] font-semibold', tagColor)}>{tag}</span>
       </span>
     </button>

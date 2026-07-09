@@ -32,7 +32,7 @@ function ActionRow({
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[15.5px] font-bold text-foreground">{title}</span>
+        <span className="block text-[15.5px] font-semibold text-foreground">{title}</span>
         <span className="mt-0.5 block text-[12.5px] font-medium text-muted-foreground">{sub}</span>
       </span>
       <ChevronRight className="size-[18px] shrink-0 text-fg-faint" />

@@ -24,7 +24,7 @@ import {
 
 const FORM_ID = 'warranty-form'
 // Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 interface WarrantyModalProps {
   open: boolean

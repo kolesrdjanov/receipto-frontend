@@ -67,7 +67,7 @@ export function GMemberAvatar({
   return (
     <span
       className={cn(
-        'relative grid shrink-0 place-items-center rounded-full font-bold',
+        'relative grid shrink-0 place-items-center rounded-full font-semibold',
         self ? 'bg-primary text-primary-foreground' : 'bg-subtle text-foreground',
       )}
       style={{
@@ -107,7 +107,7 @@ export function GAvatarStack({
       ))}
       {extra > 0 && (
         <span
-          className="grid place-items-center rounded-full border border-border bg-bg-subtle font-bold text-fg-2"
+          className="grid place-items-center rounded-full border border-border bg-bg-subtle font-semibold text-fg-2"
           style={{
             marginLeft: -size * 0.28,
             width: size,
@@ -168,7 +168,7 @@ export function SoftCard({ className, children }: { className?: string; children
 /** Uppercase section label with an optional trailing action (e.g. a "See all" link). */
 export function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.06em] text-fg-faint">
+    <div className="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-faint">
       <span>{children}</span>
       {action}
     </div>
@@ -213,25 +213,25 @@ export function SettleRow({
         <div className="truncate text-[13px] text-fg-2">
           {youGet && (
             <>
-              <b className="font-bold text-foreground">{memberFirstName(settlement.from.user)}</b>{' '}
+              <b className="font-semibold text-foreground">{memberFirstName(settlement.from.user)}</b>{' '}
               {t('groups.settle.owesYou')}
             </>
           )}
           {youPay && (
             <>
               {t('groups.settle.youOwe')}{' '}
-              <b className="font-bold text-foreground">{memberFirstName(settlement.to.user)}</b>
+              <b className="font-semibold text-foreground">{memberFirstName(settlement.to.user)}</b>
             </>
           )}
           {!mine && (
             <>
-              <b className="font-bold text-foreground">{memberFirstName(settlement.from.user)}</b>
+              <b className="font-semibold text-foreground">{memberFirstName(settlement.from.user)}</b>
               <span className="px-1 opacity-50">→</span>
-              <b className="font-bold text-foreground">{memberFirstName(settlement.to.user)}</b>
+              <b className="font-semibold text-foreground">{memberFirstName(settlement.to.user)}</b>
             </>
           )}
         </div>
-        <div className="mt-0.5 text-[14.5px] font-extrabold text-foreground">
+        <div className="mt-0.5 text-[14.5px] font-semibold text-foreground">
           {formatMoney(settlement.amount, currency)}
         </div>
       </div>
@@ -268,7 +268,7 @@ export function MemberBalanceRow({
     <div className="flex items-center gap-3 py-1.5">
       <GMemberAvatar user={balance.user} self={you} size={40} />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[14.5px] font-bold">{you ? t('groups.you') : memberName(balance.user)}</div>
+        <div className="truncate text-[14.5px] font-semibold">{you ? t('groups.you') : memberName(balance.user)}</div>
         <div className="mt-0.5 text-[11.5px] text-muted-foreground">
           {t('groups.balances.paidShare', {
             paid: formatMoney(balance.totalPaid, currency),
@@ -285,7 +285,7 @@ export function MemberBalanceRow({
             </div>
           </>
         ) : (
-          <span className="text-[14px] font-bold text-muted-foreground">{t('groups.balances.settled')}</span>
+          <span className="text-[14px] font-semibold text-muted-foreground">{t('groups.balances.settled')}</span>
         )}
       </div>
     </div>
@@ -315,12 +315,12 @@ export function BalancePill({
     >
       {state === 'owed' && (
         <>
-          {t('groups.pill.owed')} <b className="font-extrabold">{formatMoney(amount, currency)}</b>
+          {t('groups.pill.owed')} <b className="font-semibold">{formatMoney(amount, currency)}</b>
         </>
       )}
       {state === 'owe' && (
         <>
-          {t('groups.pill.owe')} <b className="font-extrabold">{formatMoney(Math.abs(amount), currency)}</b>
+          {t('groups.pill.owe')} <b className="font-semibold">{formatMoney(Math.abs(amount), currency)}</b>
         </>
       )}
       {state === 'settled' && (
@@ -343,7 +343,7 @@ export function RolePill({ role }: { role: 'owner' | 'member' }) {
   return (
     <span
       className={cn(
-        'shrink-0 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.04em]',
+        'shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.04em]',
         ROLE_TONE[role] ?? ROLE_TONE.member,
       )}
     >

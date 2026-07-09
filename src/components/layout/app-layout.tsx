@@ -41,8 +41,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       <SidebarInset>
         {/* No global mobile top bar — the bottom-bar "More" tab (language · profile ·
             theme · support) is the single mobile-nav entry; each page supplies its own
-            header. Top safe-area padding lives on <main> so content clears the notch. */}
-        <main className="w-full max-w-[1180px] mx-auto px-4 pb-28 pt-[calc(env(safe-area-inset-top)_+_1.5rem)] md:px-8 md:pb-8 md:pt-8">
+            header. Top safe-area padding lives on <main> so content clears the notch.
+            Desktop carries NO padding or width cap here: the PageToolbar band spans the
+            full app width (handoff), and page content caps itself via <PageContent>. */}
+        <main className="w-full px-4 pb-28 pt-[calc(env(safe-area-inset-top)_+_1.5rem)] md:px-0 md:pb-0 md:pt-0">
           {children}
         </main>
 

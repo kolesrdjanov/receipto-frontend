@@ -83,7 +83,7 @@ export function StoreComparison({ productId }: StoreComparisonProps) {
               >
                 <div className="flex items-start sm:items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-bold text-muted-foreground shrink-0">
+                    <span className="text-xs font-semibold text-muted-foreground shrink-0">
                       {index + 1}.
                     </span>
                     <span className="font-medium text-sm sm:text-base truncate">{store.storeName}</span>

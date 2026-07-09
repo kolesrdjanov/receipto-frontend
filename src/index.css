@@ -433,6 +433,9 @@ body {
 .t-body-strong { font-size: 15px; line-height: 1.45; font-weight: 600; }
 .t-sm { font-size: 13px; line-height: 1.4; font-weight: 500; }
 .t-xs { font-size: 11px; line-height: 1.3; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+/* Canonical form-field label (handoff: 13/500 foreground, 7px below-gap). Every form
+   modal's local `fieldLabel` const points here — restyle labels in this one place. */
+.field-label { display: block; margin-bottom: 7px; font-size: 13px; line-height: 1.4; font-weight: 500; color: var(--foreground); }
 /* .t-num stays retired (no-op): amounts render in normal Geist, not tabular/mono.
    Geist Mono is applied only to codes / receipt IDs via the `font-mono` utility. */
 

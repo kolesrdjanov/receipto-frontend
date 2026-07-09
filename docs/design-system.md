@@ -55,9 +55,11 @@ Fully monochrome (chroma 0) except the destructive family:
   was a real bug — it rendered pink). Grep for `oklch(from` if a status tint ever looks
   colored.
 - Charts are monochrome: `--chart-1…5` is a grey ramp; the near-black tier marks the
-  peak/emphasis. Per-category and per-loyalty-card **data colors are the one retained
-  exception** (user-owned hex, independent of tokens; neutral fallbacks
-  `DEFAULT_CATEGORY_COLOR = #6B7280`, grey ramps for colorless categories).
+  peak/emphasis. Per-category **data color is the one retained exception** (user-owned
+  hex, independent of tokens; neutral fallback `DEFAULT_CATEGORY_COLOR = #6B7280`, grey
+  ramps for colorless categories). Per-loyalty-card color was **dropped** per the
+  handoff (cards are neutral — the QR/barcode glyph tile + format badge carry identity;
+  the backend `color` column is simply unused).
 
 ### Elevation & radii
 
@@ -173,8 +175,10 @@ per-screen. (Hooks/ESLint enforce the button/input/overlay rules; see `CLAUDE.md
   `loading` renders a leading spinner. Legacy `brand`/`brand-violet` alias `default`.
 - **Input / Textarea** (`ui/input.tsx`, `ui/textarea.tsx`) — 36px, `rounded-lg`, 1px
   `--border`, `bg-card`, placeholder `--fg-faint`; focus `border-ring` + 3px `ring/25`.
-  Field label class: `fieldLabel` (12/600 `--fg-2`). Select + DatePicker triggers reuse
-  the same outline look. Auth pages (only) use the 50px glass `Field`.
+  Field label: the shared `.field-label` class in `index.css` (13/500 `--foreground`,
+  7px below-gap — the handoff's label spec); every form modal's local `fieldLabel`
+  const points at it. Select + DatePicker triggers reuse the same outline look. Auth
+  pages (only) use the 50px glass `Field`.
 - **SelectCheck** (`glass/primitives.tsx`) — the app's checkbox: 20px, 6px radius, 2px
   `--border-strong`; checked inverts to primary with a stroke-3 check. There is no
   shadcn Checkbox.
@@ -239,9 +243,10 @@ site — replace that asset there when rebranding.
   footer avatar + rank + kebab popover.
 - **Page toolbar** (`page-toolbar.tsx` / `page-header.tsx`) — card bg, hairline bottom
   border; title + 13px muted subtitle; right-side actions per page (primary CTA hidden
-  when a screen has no add action). Content is capped at **1180px** by the `<main>`
-  wrapper in `app-layout.tsx` (some pages use tighter inner caps: groups 1080,
-  settings 1000, categories 880).
+  when a screen has no add action). The toolbar band spans the **full app width**
+  (never capped/centered); page content below it is capped at **1180px** by the shared
+  `<PageContent>` wrapper (`layout/page-content.tsx`) that every page renders inside
+  (some pages use tighter inner caps: groups 1080, settings 1000, categories 880).
 - **Mobile tab bar** (`mobile-tab-bar.tsx`) — card bg, hairline top border; Home ·
   Expenses · **center FAB** (50px primary circle) · Warranties · More. The FAB is a
   global context-action slot (`store/fab.ts`) each page rebinds: Expenses → scan/add,

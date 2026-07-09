@@ -190,7 +190,7 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
         <div className="flex items-start gap-3 rounded-[14px] border border-info-soft bg-info-soft/70 p-3.5">
           <Info className="mt-0.5 size-4 shrink-0 text-info" />
           <p className="text-[13px] font-medium leading-relaxed text-info-foreground">
-            <b className="font-extrabold">{t('categories.reassign.receiptsCount', { count: receipts!.length })}</b>
+            <b className="font-semibold">{t('categories.reassign.receiptsCount', { count: receipts!.length })}</b>
             {t('categories.reassign.bannerRest', { name: category?.name || '' })}
           </p>
         </div>
@@ -208,7 +208,7 @@ export function CategoryDeleteModal({ open, onOpenChange, category, onDeleted }:
           {receipts!.map((r) => (
             <div key={r.id} className="flex items-center justify-between gap-3 bg-card px-3.5 py-3">
               <div className="min-w-0">
-                <div className="truncate text-[14px] font-bold">{r.storeName || t('receipts.unknownStore')}</div>
+                <div className="truncate text-[14px] font-semibold">{r.storeName || t('receipts.unknownStore')}</div>
                 <div className="mt-0.5 text-[12px] text-muted-foreground">
                   <span>{fmtAmount(r)}</span> · {fmtDate(r.receiptDate)}
                 </div>

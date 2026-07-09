@@ -86,9 +86,10 @@ src/
   minimal shadow). Base `--primary`/`--ring` are neutral near-black (light) / near-white
   (dark); `--success`/`--warning`/`--info` and the `--brand-*` stops are neutralized. **Red
   (`--destructive`) is the only chromatic accent, reserved for destructive/expired/you-owe
-  states.** Don't resurrect per-user accents or emerald. Category **and** loyalty-card colors
-  are the retained per-item color exception (data-driven hex, independent of tokens). Charts
-  are monochrome (grey + near-black peak), not emerald.
+  states.** Don't resurrect per-user accents or emerald. Category color is the single retained
+  per-item color exception (data-driven hex, independent of tokens); loyalty-card color was
+  dropped per the handoff (neutral cards; backend `color` column unused). Charts are
+  monochrome (grey + near-black peak), not emerald.
 - OKLCH tokens via CSS variables; all Tailwind v4 config lives in `index.css`.
   **Geist** display/body + **Geist Mono** (`--font-mono`, codes/URLs only — `.t-num` is
   retired); radius base 0.625rem; two-tier shadow (`--shadow-1`/`--shadow-2`). See

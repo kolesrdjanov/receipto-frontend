@@ -137,7 +137,7 @@ export function LoyaltyCardScanner({ open, onOpenChange, onScan }: LoyaltyCardSc
 
                 {/* Top bar */}
                 <div className="flex items-center justify-between px-[18px] py-4 pt-[max(16px,env(safe-area-inset-top))]">
-                  <span className="text-[16px] font-bold text-white">{t('loyaltyCards.scanCard')}</span>
+                  <span className="text-[16px] font-semibold text-white">{t('loyaltyCards.scanCard')}</span>
                   <button
                     type="button"
                     onClick={() => onOpenChange(false)}

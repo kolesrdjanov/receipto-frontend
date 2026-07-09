@@ -36,7 +36,7 @@ type FormDataInput = z.input<MarkPaidSchema>
 type FormData = z.output<MarkPaidSchema>
 
 const FORM_ID = 'mark-paid-form'
-const fieldLabel = 'mb-1.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 function statusFromDueDate(dueDate: string): RecurringStatus {
   const diff = differenceInCalendarDays(new Date(dueDate + 'T00:00:00'), startOfToday())

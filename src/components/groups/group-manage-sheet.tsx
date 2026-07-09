@@ -51,7 +51,7 @@ interface GroupManageSheetProps {
 }
 
 const ROLE_ORDER: Record<string, number> = { owner: 0, member: 1 }
-const sectionLabel = 'mb-2 block text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint'
+const sectionLabel = 'mb-2 block text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint'
 
 /**
  * The single **Manage** sheet for a group — folds the old kebab menu, members sub-screen, invite
@@ -258,7 +258,7 @@ export function GroupManageSheet({
                 <div key={m.id} className="flex items-center gap-3 py-1.5">
                   <GMemberAvatar user={m.user} self={isSelf} size={38} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[14px] font-bold">
+                    <div className="truncate text-[14px] font-semibold">
                       {isSelf ? t('groups.you') : memberName(m.user)}
                     </div>
                     <div className="mt-0.5 truncate text-[11.5px] text-muted-foreground">{m.user?.email}</div>

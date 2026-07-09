@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 const ReceiptModal = lazy(() => import('@/components/receipts/receipt-modal').then(m => ({ default: m.ReceiptModal })))
 const TemplateSelectorModal = lazy(() => import('@/components/receipts/template-selector-modal').then(m => ({ default: m.TemplateSelectorModal })))
 const ReceiptViewerModal = lazy(() => import('@/components/receipts/receipt-viewer-modal').then(m => ({ default: m.ReceiptViewerModal })))
@@ -353,7 +354,7 @@ export default function Receipts() {
       <PageTransition>
       {/* Desktop sticky toolbar (breaks out of page padding to sit flush) */}
       <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
+        className="md:mb-6"
         title={t('receipts.title')}
         subtitle={
           <>
@@ -386,6 +387,7 @@ export default function Receipts() {
         }
       />
 
+      <PageContent>
       {/* Mobile frosted page header (replaces the global mobile header on this route) */}
       <ExpensesMobileHeader
         totalAmounts={totalAmounts}
@@ -643,6 +645,7 @@ export default function Receipts() {
         onClear={() => setSelectedIds(new Set())}
         removing={bulkDelete.isPending}
       />
+      </PageContent>
       </PageTransition>
     </AppLayout>
   )

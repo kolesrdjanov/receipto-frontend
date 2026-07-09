@@ -27,7 +27,7 @@ export function AuthLayout({ children, cardClassName }: AuthLayoutProps) {
         <Logo size="md" onPrimary />
 
         <div className="mt-auto">
-          <h1 className="max-w-[420px] text-[40px] font-extrabold leading-[1.05] tracking-[-0.025em]">
+          <h1 className="max-w-[420px] text-[40px] font-semibold leading-[1.05] tracking-[-0.025em]">
             {t('auth.brandTagline')}
           </h1>
           <ul className="mt-8 flex max-w-[400px] flex-col gap-3.5">

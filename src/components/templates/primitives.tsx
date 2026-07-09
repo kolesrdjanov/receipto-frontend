@@ -53,7 +53,7 @@ export function TemplateRow({ template, wide, onEdit, onDelete, onOpenActions }:
       <CatTile category={template.category} size={wide ? 46 : 44} radius={14} />
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15.5px] font-bold leading-tight tracking-[-0.01em]">{template.name}</div>
+        <div className="truncate text-[15.5px] font-semibold leading-tight tracking-[-0.01em]">{template.name}</div>
         <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
           <span className="truncate">{template.storeName}</span>
           {template.category?.name && (

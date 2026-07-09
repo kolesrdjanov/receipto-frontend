@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import Barcode from 'react-barcode'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
-import { getBarcodeFormat, CARD_COLORS } from '@/components/loyalty-cards/format'
+import { getBarcodeFormat } from '@/components/loyalty-cards/format'
 import type { LoyaltyCard } from '@/hooks/loyalty-cards/use-loyalty-cards'
 
 interface LoyaltyCardDisplayProps {
@@ -29,8 +29,6 @@ export function LoyaltyCardDisplay({ card, open, onOpenChange }: LoyaltyCardDisp
 
   if (!card) return null
 
-  const color = card.color || CARD_COLORS[0]
-
   return (
     <GlassDialog
       open={open}
@@ -42,8 +40,9 @@ export function LoyaltyCardDisplay({ card, open, onOpenChange }: LoyaltyCardDisp
       <div className="flex flex-col items-center gap-[18px]">
         {/* Bright white panel — white in any theme so the code scans reliably. */}
         <div className="flex w-full flex-col items-center gap-4 rounded-3xl border border-[oklch(0_0_0/0.06)] bg-white px-[22px] pb-[18px] pt-[22px] shadow-[0_8px_30px_oklch(0_0_0/0.14)]">
-          <div className="flex items-center gap-2 text-[17px] font-bold tracking-[-0.01em] text-[#0b0b0c]">
-            <span className="size-2.5 shrink-0 rounded-full" style={{ background: color }} />
+          <div className="flex items-center gap-2 text-[16px] font-semibold tracking-[-0.01em] text-[#0b0b0c]">
+            {/* Fixed near-black dot — the panel is always white so the code scans. */}
+            <span className="size-[9px] shrink-0 rounded-full bg-[#0b0b0c]" />
             {card.cardName}
           </div>
 

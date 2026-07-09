@@ -128,7 +128,6 @@
     "cardNamePlaceholder": "e.g. Maxi Loyalty Card",
     "codeValue": "Card Code",
     "codeValuePlaceholder": "Scan or enter card code",
-    "cardColor": "Card Color",
     "detectedFormat": "Detected format",
     "barcode": "Barcode",
     "scanCard": "Scan Card",

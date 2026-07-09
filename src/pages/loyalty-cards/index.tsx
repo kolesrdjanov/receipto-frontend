@@ -4,6 +4,7 @@ import { CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageHeader } from '@/components/layout/page-header'
+import { PageContent } from '@/components/layout/page-content'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
@@ -99,6 +100,7 @@ export default function LoyaltyCards() {
       <PageTransition>
         {header}
 
+        <PageContent>
         {isLoading ? (
           <div className="mt-4 grid gap-3.5 [grid-template-columns:repeat(auto-fill,minmax(150px,1fr))] md:mt-0 md:gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -139,6 +141,7 @@ export default function LoyaltyCards() {
             <p className="py-4 text-center text-[12px] text-fg-faint md:hidden">{t('loyaltyCards.footerHint')}</p>
           </>
         )}
+        </PageContent>
       </PageTransition>
 
       <Suspense fallback={null}>

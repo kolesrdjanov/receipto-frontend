@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tag } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -20,7 +21,7 @@ import { getErrorMessage } from '@/lib/api'
 function SummaryPill({ count, label }: { count: number; label: string }) {
   return (
     <span className="inline-flex h-[26px] items-center gap-1 rounded-full bg-bg-subtle px-[11px] text-[12px] font-semibold text-muted-foreground">
-      <b className="font-extrabold text-foreground">{count}</b> {label}
+      <b className="font-semibold text-foreground">{count}</b> {label}
     </span>
   )
 }
@@ -107,6 +108,7 @@ export default function Categories() {
       <PageTransition>
         {header}
 
+        <PageContent>
         {isLoading ? (
           <div className="mt-4 flex flex-col gap-4 md:mt-0">
             <div className="h-[84px] animate-pulse rounded-2xl border border-border bg-bg-subtle" />
@@ -144,7 +146,7 @@ export default function Categories() {
             {/* Budget overview — desktop: slim summary line, not stat cards (Luma §4) */}
             <div className="mb-5 hidden items-end justify-between gap-4 px-1 md:flex">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[28px] font-bold leading-none tracking-[-0.02em]">{fmtTotal(monthlyTotal)}</span>
+                <span className="text-[28px] font-semibold leading-none tracking-[-0.02em]">{fmtTotal(monthlyTotal)}</span>
                 <span className="text-[13px] font-medium text-muted-foreground">
                   {t('categories.summary.monthlyBudget')}
                 </span>
@@ -159,7 +161,7 @@ export default function Categories() {
             <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3.5 rounded-2xl border border-border bg-card px-[18px] py-4 shadow-glass-1 md:hidden">
               <div className="flex flex-col gap-[3px]">
                 <span className="text-[12px] font-semibold text-muted-foreground">{t('categories.summary.monthlyBudget')}</span>
-                <span className="text-[24px] font-extrabold leading-[1.05] tracking-[-0.015em]">{fmtTotal(monthlyTotal)}</span>
+                <span className="text-[24px] font-semibold leading-[1.05] tracking-[-0.015em]">{fmtTotal(monthlyTotal)}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 <SummaryPill count={list.length} label={t('categories.summary.categoriesPill')} />
@@ -192,6 +194,7 @@ export default function Categories() {
             <p className="py-4 text-center text-[12px] text-fg-faint md:hidden">{t('categories.footerHint')}</p>
           </>
         )}
+        </PageContent>
       </PageTransition>
 
       {/* Create / Edit form */}

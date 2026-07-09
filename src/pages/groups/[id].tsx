@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -180,15 +181,18 @@ export default function GroupDetail() {
   if (isLoading) {
     return (
       <AppLayout>
+        <PageContent>
         <div className="flex items-center justify-center py-16">
           <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
+        </PageContent>
       </AppLayout>
     )
   }
   if (!group) {
     return (
       <AppLayout>
+        <PageContent>
         <div className="flex flex-col items-center justify-center py-16">
           <p className="text-muted-foreground">{t('common.noData')}</p>
           <Button variant="link" onClick={() => navigate('/groups')}>
@@ -196,6 +200,7 @@ export default function GroupDetail() {
             {t('common.back')}
           </Button>
         </div>
+        </PageContent>
       </AppLayout>
     )
   }
@@ -426,7 +431,7 @@ export default function GroupDetail() {
             {group.icon || '👥'}
           </span>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[22px] font-extrabold tracking-[-0.02em]">{group.name}</div>
+            <div className="truncate text-[22px] font-semibold tracking-[-0.02em]">{group.name}</div>
             <div className="mt-1">{membersButton}</div>
           </div>
         </div>
@@ -445,7 +450,7 @@ export default function GroupDetail() {
   return (
     <AppLayout>
       <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
+        className="md:mb-6"
         title={group.name}
         subtitle={group.description || t('groups.membersCount', { count: acceptedMembers.length })}
         actions={
@@ -462,6 +467,7 @@ export default function GroupDetail() {
         }
       />
 
+      <PageContent>
       <div className="mx-auto max-w-[1080px]">
         <Button variant="ghost" size="sm" className="mb-3 -ml-2 text-muted-foreground" onClick={() => navigate('/groups')}>
           <ArrowLeft className="size-4" />
@@ -473,7 +479,7 @@ export default function GroupDetail() {
             {group.icon || '👥'}
           </span>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[25px] font-extrabold tracking-[-0.02em]">{group.name}</div>
+            <div className="truncate text-[25px] font-semibold tracking-[-0.02em]">{group.name}</div>
             {group.description && (
               <div className="mt-0.5 truncate text-[13px] text-muted-foreground">{group.description}</div>
             )}
@@ -493,6 +499,7 @@ export default function GroupDetail() {
           </div>
         </div>
       </div>
+      </PageContent>
 
       {overlays}
     </AppLayout>

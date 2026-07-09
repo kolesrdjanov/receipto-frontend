@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
 import { HeaderCurrencyPill, HeaderStepper } from '@/components/layout/header-actions'
@@ -247,17 +248,18 @@ export default function Dashboard() {
     <AppLayout>
       <PageTransition>
         <PageToolbar
-          className="md:-mx-8 md:-mt-8 md:mb-6"
+          className="md:mb-6"
           title={greeting}
           subtitle={t('dashboard.greetingSubtitle', { month: monthLong })}
           actions={controls}
         />
 
+        <PageContent>
         <AnnouncementBanner />
 
         {/* Mobile page header — greeting + month/currency controls */}
         <div className="mb-4 md:hidden">
-          <h1 className="text-[22px] font-extrabold tracking-[-0.02em]">{greeting}</h1>
+          <h1 className="text-[22px] font-semibold tracking-[-0.02em]">{greeting}</h1>
           <p className="t-sm mt-0.5 text-muted-foreground">
             {isEmpty ? t('dashboard.mobileGetStarted') : t('dashboard.greetingSubtitle', { month: monthLong })}
           </p>
@@ -353,6 +355,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+        </PageContent>
       </PageTransition>
 
       {scannerModals}
@@ -365,7 +368,7 @@ function KpiTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card p-[18px] shadow-glass-1">
       <span className="truncate text-[13px] font-medium text-muted-foreground">{label}</span>
-      <span className="truncate text-[24px] font-bold leading-none tracking-[-0.02em]">{value}</span>
+      <span className="truncate text-[24px] font-semibold leading-none tracking-[-0.02em]">{value}</span>
     </div>
   )
 }

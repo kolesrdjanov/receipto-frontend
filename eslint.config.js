@@ -147,7 +147,8 @@ export default defineConfig([
     files: ['src/**/*.{ts,tsx}'],
     ignores: [
       'src/components/categories/primitives.tsx', // approved: category color palette
-      'src/components/loyalty-cards/format.ts', // approved: card color presets
+      // (loyalty-cards/format.ts was exempt for its card-color presets — per-card
+      // colour is dropped per the handoff, so the file is chroma-clean now)
       'src/pages/items/**', // out of scope: Price Tracker
       'src/components/items/**',
       'src/pages/admin/**', // low-priority admin charts

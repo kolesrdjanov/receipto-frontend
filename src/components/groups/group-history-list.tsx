@@ -45,15 +45,15 @@ export function GroupHistoryList({
             </span>
             <div className="min-w-0 flex-1">
               <div className="text-[13.5px] text-fg-2">
-                <b className="font-bold text-foreground">{memberFirstName(s.fromUser)}</b> {t('groups.settlements.paidVerb')}{' '}
-                <b className="font-bold text-foreground">{memberFirstName(s.toUser)}</b>
+                <b className="font-semibold text-foreground">{memberFirstName(s.fromUser)}</b> {t('groups.settlements.paidVerb')}{' '}
+                <b className="font-semibold text-foreground">{memberFirstName(s.toUser)}</b>
               </div>
               <div className="mt-0.5 truncate text-[11.5px] text-muted-foreground">
                 {ago(s.settledAt)}
                 {s.note ? ` · ${s.note}` : ''}
               </div>
             </div>
-            <span className="shrink-0 font-bold">{formatMoney(s.amount, s.currency || displayCurrency)}</span>
+            <span className="shrink-0 font-semibold">{formatMoney(s.amount, s.currency || displayCurrency)}</span>
           </div>
       ))}
     </div>

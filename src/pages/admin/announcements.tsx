@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { AddButton } from '@/components/glass/empty-state'
@@ -32,7 +33,9 @@ export default function AdminAnnouncements() {
           actions={<AddButton onClick={openCreate} label={t('admin.announcements.createAnnouncement')} />}
         />
 
+        <PageContent>
         <AnnouncementsTable page={page} onPageChange={setPage} />
+        </PageContent>
       </PageTransition>
 
       <AnnouncementModal open={createModalOpen} onOpenChange={setCreateModalOpen} />

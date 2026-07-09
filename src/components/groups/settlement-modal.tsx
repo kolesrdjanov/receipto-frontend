@@ -25,7 +25,7 @@ interface SettlementModalProps {
   }
 }
 
-const fieldLabel = 'mb-2 block text-center text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint'
+const fieldLabel = 'mb-2 block text-center text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint'
 
 /** Record-payment (settle up) sheet/modal — two avatar pickers (From → To), a big amount field, an
  *  optional note, and a live preview. Prefills from a tapped settle-path row. */
@@ -81,9 +81,9 @@ export function SettlementModal({
 
   const Picker = ({ label, value, exclude, onChange }: { label: string; value: string; exclude: string; onChange: (id: string) => void }) => (
     <div className="flex flex-1 flex-col items-center gap-1.5">
-      <div className="text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">{label}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">{label}</div>
       <GMemberAvatar user={userOf(value)} self={value === user?.id} size={48} />
-      <div className="text-[14px] font-bold">{memberFirstName(userOf(value))}</div>
+      <div className="text-[14px] font-semibold">{memberFirstName(userOf(value))}</div>
       <div className="mt-1 flex flex-wrap justify-center gap-1.5">
         {accepted
           .filter((m) => m.userId !== exclude)
@@ -134,13 +134,13 @@ export function SettlementModal({
 
         <div className="flex items-baseline justify-center gap-2 py-3">
           <input
-            className="w-auto min-w-[60px] max-w-[220px] border-none bg-transparent text-right text-[34px] font-extrabold tracking-[-0.03em] text-foreground outline-none placeholder:text-fg-faint"
+            className="w-auto min-w-[60px] max-w-[220px] border-none bg-transparent text-right text-[34px] font-semibold tracking-[-0.03em] text-foreground outline-none placeholder:text-fg-faint"
             inputMode="decimal"
             placeholder="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
           />
-          <span className="text-[18px] font-bold text-muted-foreground">{currency}</span>
+          <span className="text-[18px] font-semibold text-muted-foreground">{currency}</span>
         </div>
 
         <div className="mt-1">
@@ -155,12 +155,12 @@ export function SettlementModal({
         {valid && (
           <div className="mt-3.5 flex items-center gap-2 rounded-[10px] bg-bg-subtle px-3.5 py-3 text-[13.5px]">
             <GMemberAvatar user={userOf(fromUserId)} self={fromUserId === user?.id} size={26} />
-            <b className="font-bold">{memberFirstName(userOf(fromUserId))}</b>
+            <b className="font-semibold">{memberFirstName(userOf(fromUserId))}</b>
             <ArrowRight className="size-[15px] text-fg-faint" />
             <GMemberAvatar user={userOf(toUserId)} self={toUserId === user?.id} size={26} />
-            <b className="font-bold">{memberFirstName(userOf(toUserId))}</b>
+            <b className="font-semibold">{memberFirstName(userOf(toUserId))}</b>
             <span className="flex-1" />
-            <span className="font-bold text-foreground">{formatMoney(parsedAmount, currency)}</span>
+            <span className="font-semibold text-foreground">{formatMoney(parsedAmount, currency)}</span>
           </div>
         )}
       </div>

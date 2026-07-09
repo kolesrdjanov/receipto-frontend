@@ -103,7 +103,7 @@ function ExpensePreview({ totalLabel }: { totalLabel: string }) {
         <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
           {totalLabel}
         </span>
-        <span className="text-[20px] font-bold tracking-[-0.01em] text-foreground">RSD 1.240</span>
+        <span className="text-[20px] font-semibold tracking-[-0.01em] text-foreground">RSD 1.240</span>
       </div>
     </PreviewShell>
   )
@@ -156,7 +156,7 @@ function WarrantyPreview() {
       <div className="mt-5">
         <div className="mb-1.5 flex items-center justify-between text-[11.5px] text-fg-faint">
           <span>03/2025</span>
-          <span className="font-bold text-foreground">68%</span>
+          <span className="font-semibold text-foreground">68%</span>
           <span>03/2027</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-bg-subtle">
@@ -179,16 +179,16 @@ function GroupsPreview({ settleLabel }: { settleLabel: string }) {
         <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
           Weekend Trip
         </span>
-        <span className="text-[22px] font-bold tracking-[-0.02em] text-foreground">+ RSD 1.400</span>
+        <span className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">+ RSD 1.400</span>
       </div>
       <div className="mt-4 flex flex-col">
         {rows.map((row) => (
           <div key={row.name} className="flex items-center gap-2.5 border-t border-border py-2.5">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-bg-subtle text-[11px] font-bold text-foreground">
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-bg-subtle text-[11px] font-semibold text-foreground">
               {row.initials}
             </span>
             <span className="flex-1 truncate text-[13.5px] font-semibold text-foreground">{row.name}</span>
-            <span className="text-[13px] font-bold text-foreground">{row.amount}</span>
+            <span className="text-[13px] font-semibold text-foreground">{row.amount}</span>
           </div>
         ))}
       </div>
@@ -243,7 +243,7 @@ function LangCard({
           : 'border-border bg-card hover:border-primary/50',
       )}
     >
-      <span className="text-[17px] font-bold leading-none">{primary}</span>
+      <span className="text-[17px] font-semibold leading-none">{primary}</span>
       <span className="text-xs text-muted-foreground">{secondary}</span>
       <span className="mt-1 flex h-4 items-center justify-center">
         {selected && <Check className="size-4 text-primary" strokeWidth={3} />}

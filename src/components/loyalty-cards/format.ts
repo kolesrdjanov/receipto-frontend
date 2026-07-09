@@ -1,22 +1,11 @@
 import type { LoyaltyCard } from '@/hooks/loyalty-cards/use-loyalty-cards'
 
-/**
- * The 10 preset card colours. Loyalty cards are the one place where per-item colour
- * is the point, so this palette is intentionally its own (verbatim from the original
- * loyalty modal) — distinct from the calmer category/recurring palette.
- */
-export const CARD_COLORS = [
-  '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
-  '#EC4899', '#06B6D4', '#F97316', '#6366F1', '#14B8A6',
-] as const
+// Per-card colour was dropped with the Luma redesign (handoff §6) — cards are neutral;
+// the code-type glyph + format badge carry the identity. The backend `color` column is
+// simply no longer written or read.
 
 /** Formats html5-qrcode reports as QR (vs 1-D barcodes). */
 export const QR_FORMATS = ['qr_code', 'data_matrix', 'aztec', 'pdf417']
-
-/** A random preset — new cards default to one (matches the original behaviour). */
-export function randomCardColor(): string {
-  return CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)]
-}
 
 /** Short uppercase badge label: "QR" for QR codes, else e.g. "CODE 128" / "EAN 13". */
 export function formatLabel(card: Pick<LoyaltyCard, 'codeType' | 'codeFormat'>): string {

@@ -29,7 +29,7 @@ interface PageHeaderProps {
 /**
  * Unified page header — the sticky frosted {@link PageToolbar} on desktop (md+) and the
  * inline title/subtitle/action block on mobile. Folds the two copies (and the repeated
- * `md:-mx-8 md:-mt-8 md:mb-6` breakout) that every list page used to inline. Pass `action`
+ * `md:mb-6` breakout) that every list page used to inline. Pass `action`
  * for the common Add-button case, or `actions`/`mobileActions` for anything custom.
  */
 export function PageHeader({
@@ -64,7 +64,7 @@ export function PageHeader({
   return (
     <>
       <PageToolbar
-        className={cn('md:-mx-8 md:-mt-8 md:mb-6', className)}
+        className={cn('md:mb-6', className)}
         title={title}
         subtitle={desktopSubtitle ?? subtitle}
         actions={desktopActions}

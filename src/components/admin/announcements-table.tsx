@@ -144,7 +144,7 @@ export function AnnouncementsTable({ page, onPageChange }: AnnouncementsTablePro
           {announcements.map((a) => (
             <div key={a.id} className="rounded-2xl border border-border bg-card p-4 shadow-glass-1">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="line-clamp-1 text-[15px] font-bold">{a.title.en}</h3>
+                <h3 className="line-clamp-1 text-[15px] font-semibold">{a.title.en}</h3>
                 {rowActions(a)}
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{a.message.en}</p>

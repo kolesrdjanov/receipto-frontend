@@ -46,7 +46,7 @@ export function ImportGuideDialog({ open, onOpenChange, onDownloadTemplate, onSe
         ),
       }}
     >
-      <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-fg-faint">
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">
         {t('receipts.import.guide.columns')}
       </div>
       <ul className="flex flex-col gap-1">

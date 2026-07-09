@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
@@ -62,7 +63,7 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: nu
           <Icon className="size-[17px]" />
         </span>
       </div>
-      <div className={cn('mt-2 text-[30px] font-extrabold leading-none', s.num)}>{value}</div>
+      <div className={cn('mt-2 text-[30px] font-semibold leading-none', s.num)}>{value}</div>
     </div>
   )
 }
@@ -272,6 +273,7 @@ export default function WarrantiesPage() {
           }
         />
 
+        <PageContent>
         {isLoading ? (
           <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -304,7 +306,7 @@ export default function WarrantiesPage() {
                   <div className="flex flex-col gap-0.5">
                     <span className="t-xs text-fg-faint">{t('warranties.tracked')}</span>
                     <span className="flex items-baseline gap-1.5">
-                      <span className="text-[30px] font-extrabold leading-none">{stats.total}</span>
+                      <span className="text-[30px] font-semibold leading-none">{stats.total}</span>
                       {/*<span className="text-[12px] text-muted-foreground">{t('warranties.warrantiesLabel')}</span>*/}
                     </span>
                   </div>
@@ -341,6 +343,7 @@ export default function WarrantiesPage() {
             <p className="py-4 text-center text-[12px] text-fg-faint md:hidden">{t('warranties.tapHint')}</p>
           </>
         )}
+        </PageContent>
       </PageTransition>
 
       {/* Hidden CSV input (triggered from the import dialog) */}

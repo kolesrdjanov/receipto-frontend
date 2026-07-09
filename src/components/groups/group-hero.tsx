@@ -82,15 +82,15 @@ export function GroupHero({
           <Glyph className="size-[22px]" strokeWidth={2.4} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             {t(cfg.labelKey)}
           </div>
           {myState === 'settled' ? (
-            <div className="mt-1.5 text-[19px] font-extrabold tracking-[-0.02em] text-foreground">
+            <div className="mt-1.5 text-[19px] font-semibold tracking-[-0.02em] text-foreground">
               {t('groups.headline.settledLong')}
             </div>
           ) : (
-            <div className={cn('mt-1.5 text-[28px] font-extrabold tracking-[-0.025em]', cfg.amount)}>
+            <div className={cn('mt-1.5 text-[28px] font-semibold tracking-[-0.025em]', cfg.amount)}>
               {formatMoney(Math.abs(myBalance?.balance ?? 0), displayCurrency)}
             </div>
           )}
@@ -112,7 +112,7 @@ export function GroupHero({
                 <Route className="size-[15px] text-foreground" />
               </span>
               <div className="min-w-0">
-                <div className="truncate text-[13px] font-bold">{t('groups.simplify.title')}</div>
+                <div className="truncate text-[13px] font-semibold">{t('groups.simplify.title')}</div>
                 <div className="mt-0.5 truncate text-[11.5px] text-muted-foreground">
                   {t('groups.simplify.clears', { count: ordered.length })}
                 </div>
@@ -141,7 +141,7 @@ export function GroupHero({
       {/* Balances — every member, always shown (no expander) */}
       {convertedBalances.length > 0 && (
         <div className="border-t border-hairline-soft px-4 pb-3.5 pt-3">
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             <Users className="size-[13px]" />
             {t('groups.hero.balances')}
           </div>

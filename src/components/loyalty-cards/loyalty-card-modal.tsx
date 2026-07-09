@@ -8,8 +8,8 @@ import { toast } from 'sonner'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ColorSwatches, CodeGlyph, FormatBadge } from '@/components/loyalty-cards/primitives'
-import { CARD_COLORS, QR_FORMATS, randomCardColor } from '@/components/loyalty-cards/format'
+import { CodeGlyph, FormatBadge } from '@/components/loyalty-cards/primitives'
+import { QR_FORMATS } from '@/components/loyalty-cards/format'
 import {
   useCreateLoyaltyCard,
   useUpdateLoyaltyCard,
@@ -25,7 +25,7 @@ const FORM_ID = 'loyalty-card-form'
 // Hidden element ID for html5-qrcode file scanning (needs a DOM element)
 const FILE_SCANNER_ID = 'loyalty-file-scanner'
 // Canonical form-modal field label — keep in sync with receipts/receipt-modal.tsx.
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 const createLoyaltyCardSchema = (t: (key: string, opts?: Record<string, unknown>) => string) =>
   z.object({
@@ -33,7 +33,6 @@ const createLoyaltyCardSchema = (t: (key: string, opts?: Record<string, unknown>
     codeValue: z.string().trim().min(1, t('common.validation.fieldRequired', { field: t('loyaltyCards.codeValue') })),
     codeType: z.enum(['qr', 'barcode']),
     codeFormat: z.string(),
-    color: z.string(),
   })
 
 type LoyaltyCardForm = z.infer<ReturnType<typeof createLoyaltyCardSchema>>
@@ -67,14 +66,13 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
     formState: { errors },
   } = useForm<LoyaltyCardForm>({
     resolver: zodResolver(schema),
-    defaultValues: { cardName: '', codeValue: '', codeType: 'barcode', codeFormat: 'code_128', color: CARD_COLORS[0] },
+    defaultValues: { cardName: '', codeValue: '', codeType: 'barcode', codeFormat: 'code_128' },
   })
 
   const cardName = watch('cardName')
   const codeValue = watch('codeValue')
   const codeType = watch('codeType')
   const codeFormat = watch('codeFormat')
-  const color = watch('color')
 
   useEffect(() => {
     if (!open) return
@@ -84,7 +82,6 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
         codeValue: card.codeValue,
         codeType: card.codeType,
         codeFormat: card.codeFormat,
-        color: card.color || CARD_COLORS[0],
       })
     } else {
       reset({
@@ -92,7 +89,6 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
         codeValue: '',
         codeType: 'barcode',
         codeFormat: 'code_128',
-        color: randomCardColor(),
       })
     }
   }, [open, card, reset])
@@ -166,7 +162,6 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
       codeType: form.codeType,
       codeFormat: form.codeFormat,
       codeValue: form.codeValue.trim(),
-      color: form.color,
     }
 
     try {
@@ -193,7 +188,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
   const canSubmit = !!cardName.trim() && !!codeValue.trim() && !isPending
   const primaryLabel = isEditing ? t('common.save') : t('loyaltyCards.addCard')
 
-  const previewCard = { cardName, codeType, codeFormat, codeValue, color } as LoyaltyCard
+  const previewCard = { cardName, codeType, codeFormat, codeValue } as LoyaltyCard
 
   const actions = {
     primary: (
@@ -313,32 +308,21 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
             )}
           </div>
 
-          {/* Card colour */}
-          <div>
-            <label className={fieldLabel}>
-              {t('loyaltyCards.cardColor')}
-            </label>
-            <ColorSwatches value={color} onChange={(c) => setValue('color', c)} />
-          </div>
-
-          {/* Live preview */}
+          {/* Live preview — mirrors the wallet card face */}
           {cardName.trim() && codeValue.trim() && (
             <div>
               <label className={fieldLabel}>
                 {t('loyaltyCards.preview')}
               </label>
-              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-glass-1">
-                <div className="h-[5px] w-full" style={{ background: color }} />
-                <div className="flex items-start gap-[11px] px-[15px] py-3.5">
-                  <CodeGlyph card={previewCard} />
-                  <div className="min-w-0 grow">
-                    <div className="truncate text-[15px] font-bold leading-[1.25] tracking-[-0.01em]">{cardName}</div>
-                    <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
-                      {codeValue}
-                    </div>
+              <div className="flex items-start gap-[11px] rounded-2xl border border-border bg-card p-[15px]">
+                <CodeGlyph card={previewCard} size={40} />
+                <div className="min-w-0 grow">
+                  <div className="truncate text-[15px] font-semibold leading-[1.25] tracking-[-0.01em]">{cardName}</div>
+                  <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
+                    {codeValue}
                   </div>
-                  <FormatBadge card={previewCard} />
                 </div>
+                <FormatBadge card={previewCard} />
               </div>
             </div>
           )}

@@ -30,7 +30,7 @@ interface AnnouncementModalProps {
 }
 
 const FORM_ID = 'announcement-form'
-const fieldLabel = 'mb-1.5 ml-0.5 block text-[12px] font-semibold text-fg-2'
+const fieldLabel = 'field-label'
 
 // NOTE: the original `required: true` rules had no message; the grouped error UI
 // renders `titleRequired` / `messageRequired` keys — reused here as the messages.

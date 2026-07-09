@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PageContent } from '@/components/layout/page-content'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
@@ -116,7 +117,7 @@ export default function Groups() {
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="truncate text-[16.5px] font-bold tracking-[-0.01em]">{g.name}</span>
+              <span className="truncate text-[16.5px] font-semibold tracking-[-0.01em]">{g.name}</span>
               {isArchivedCard && (
                 <span className="shrink-0 rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                   {t('groups.archive.archivedBadge')}
@@ -153,16 +154,17 @@ export default function Groups() {
   return (
     <AppLayout>
       <PageToolbar
-        className="md:-mx-8 md:-mt-8 md:mb-6"
+        className="md:mb-6"
         title={t('groups.title')}
         subtitle={t('groups.subtitle')}
         actions={<AddButton onClick={openCreate} label={t('groups.newGroup')} />}
       />
 
+      <PageContent>
       {/* Mobile header */}
       <div className="mb-4 flex items-start justify-between gap-3 md:hidden">
         <div className="min-w-0">
-          <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em]">{t('groups.title')}</h1>
+          <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.025em]">{t('groups.title')}</h1>
           <p className="mt-0.5 text-[13.5px] font-medium text-muted-foreground">{t('groups.subtitle')}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -200,7 +202,7 @@ export default function Groups() {
                         : t('groups.hub.acrossAll')}
                   </div>
                   <div
-                    className={`mt-1 whitespace-nowrap text-[23px] font-extrabold tracking-[-0.02em] ${
+                    className={`mt-1 whitespace-nowrap text-[23px] font-semibold tracking-[-0.02em] ${
                       overallState === 'owe'
                         ? 'text-[color:var(--destructive-foreground-on-soft)]'
                         : 'text-foreground'
@@ -229,7 +231,7 @@ export default function Groups() {
                   {inv.group.icon || '👥'}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[14.5px] font-bold">{inv.group.name}</div>
+                  <div className="truncate text-[14.5px] font-semibold">{inv.group.name}</div>
                   <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
                     {t('groups.hub.invitedYou', {
                       name: inv.invitedBy?.firstName || t('common.unknown'),
@@ -269,7 +271,7 @@ export default function Groups() {
             {archivedToggle && <div className="flex justify-center pt-1">{archivedToggle}</div>}
             {showArchived && archived.length > 0 && (
               <>
-                <div className="flex items-center gap-2 px-0.5 pt-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-fg-faint">
+                <div className="flex items-center gap-2 px-0.5 pt-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-faint">
                   <Archive className="size-3.5" />
                   {t('groups.archive.archivedBadge')}
                 </div>
@@ -281,6 +283,7 @@ export default function Groups() {
           </>
         )}
       </div>
+      </PageContent>
 
       <GroupModal open={isModalOpen} onOpenChange={setIsModalOpen} group={null} mode="create" />
     </AppLayout>
