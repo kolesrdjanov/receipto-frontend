@@ -6,7 +6,7 @@ import { queryKeys } from '@/lib/query-keys'
 export interface GroupMember {
   id: string
   userId: string
-  role: 'owner' | 'admin' | 'member'
+  role: 'owner' | 'member'
   status: 'pending' | 'accepted' | 'declined'
   invitedEmail?: string
   user?: {

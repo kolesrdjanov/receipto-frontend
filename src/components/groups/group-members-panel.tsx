@@ -15,7 +15,7 @@ interface GroupMembersPanelProps {
   onRemoveMember: (member: GroupMember) => void
 }
 
-const ROLE_ORDER: Record<string, number> = { owner: 0, admin: 1, member: 2 }
+const ROLE_ORDER: Record<string, number> = { owner: 0, member: 1 }
 
 /** Members management view: invite CTA, member list with roles, pending invites, invite link. */
 export function GroupMembersPanel({

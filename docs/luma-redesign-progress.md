@@ -97,15 +97,26 @@ Expenses shell + Dashboard shell (empty states) render correct Luma.
   spotlight/side variants — current is the clean on-system step-modal.
 - `[ ]` Admin (low priority) — inherits tokens; light cleanup only.
 
-### Phase 3b — Groups rework detail `[ ]`
+### Phase 3b — Groups rework detail `[~]` IN PROGRESS
 Keep `lib/groups.ts` (`simplifyDebts`, balance model) + `hooks/groups/*` untouched.
-- Drop Activity tab; delete `group-activity-timeline.tsx` (keep `groups.activities.loadMore` key).
-- Roles 3→2 (owner/member): trim `RolePill`/`ROLE_TONE`/`ROLE_ORDER`; `[id].tsx` `isAdmin`→`isOwner`.
-- Collapse ~11 overlays → 3 (Manage / Settle / Add-expense). Retire members sub-screen,
-  `hub-menu-dialog`, `group-menu-dialog`, `invite-dialog`, `group-history-dialog` (fold history inline).
-- New group-native Add-expense sheet (posts via existing `POST /receipts` groupId/paidById/splitAmong).
-- Conditional `HeaderCurrencyPill` (only when `useGroupStats` byCurrency > 1).
-- Monochrome balances: owe=danger, owed=foreground, settled=muted.
+- `[x]` Roles 3→2 (owner/member): `RolePill`/`ROLE_TONE` monochrome + typed `owner|member`,
+  `ROLE_ORDER` trimmed, `use-groups.ts` `GroupMember.role` typed `owner|member`, `[id].tsx`
+  `isAdmin` aliased to `isOwner` (temporary alias — remove during dialog collapse).
+- `[x]` Dropped Activity tab: deleted `group-activity-timeline.tsx`; `[id].tsx` detail is now
+  tabs-less (plain "Expenses · N" header + feed). `GroupTabs` (primitives) and `useGroupActivities`
+  (use-groups) are now UNUSED exports — remove when convenient. Backend activities endpoint left intact.
+- `[ ]` **Collapse ~11 overlays → 3 (Manage / Settle / Add-expense)** — NOT STARTED (the big one).
+  Retire the `screen==='members'` sub-screen (`[id].tsx` ~L48/71/399-438 + `membersView`),
+  `hub-menu-dialog`, `group-menu-dialog`, `invite-dialog`, `group-history-dialog` (fold history
+  inline under expenses). Build one **Manage** sheet (edit name/icon + members list w/ remove +
+  invite-link + Archive/Leave/Delete) and one group-native **Add-expense** sheet (What-for + amount
+  + currency + Paid-by chips + Split segmented + member checklist; posts via existing `POST /receipts`
+  with groupId/paidById/splitAmong — see `receipts/receipt-modal.tsx` for the field model). Settle
+  sheet already exists (`settlement-modal.tsx`).
+- `[ ]` Conditional `HeaderCurrencyPill` (only when `useGroupStats` byCurrency > 1).
+- `[ ]` Monochrome balances audit: owe=danger, owed=foreground, settled=muted (group-hero/primitives
+  mostly inherit tokens already; verify with data).
+- NOTE: do the overlay collapse on a box with backend+data so settle/split/manage flows are QA-able.
 
 ## Phase 4 — Backend `[x]` CODE-COMPLETE (not built/tested here — no node_modules/DB in this box)
 - `[x]` **A. Dropped user address** (`street`/`zipCode`/`city`): removed from `user.entity.ts`,

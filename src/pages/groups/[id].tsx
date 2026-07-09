@@ -35,9 +35,8 @@ import { InviteDialog } from '@/components/groups/invite-dialog'
 import { GroupHistoryDialog } from '@/components/groups/group-history-dialog'
 import { GroupHero } from '@/components/groups/group-hero'
 import { GroupExpensesList } from '@/components/groups/group-expenses-list'
-import { GroupActivityTimeline } from '@/components/groups/group-activity-timeline'
 import { GroupMembersPanel } from '@/components/groups/group-members-panel'
-import { GAvatarStack, GroupTabs } from '@/components/groups/primitives'
+import { GAvatarStack, SectionLabel } from '@/components/groups/primitives'
 import { toast } from 'sonner'
 import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Loader2 } from 'lucide-react'
 
@@ -45,7 +44,6 @@ const ReceiptModal = lazy(() =>
   import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
 )
 
-type Tab = 'expenses' | 'activity'
 type Screen = 'detail' | 'members'
 
 export default function GroupDetail() {
@@ -71,7 +69,6 @@ export default function GroupDetail() {
   const { openQrScannerWithContext, scannerModals } = useReceiptScanner()
 
   const [screen, setScreen] = useState<Screen>('detail')
-  const [tab, setTab] = useState<Tab>('expenses')
 
   // Overlays
   const [receiptModalOpen, setReceiptModalOpen] = useState(false)
@@ -99,7 +96,9 @@ export default function GroupDetail() {
 
   const currentMember = group?.members?.find((m) => m.userId === user?.id)
   const isOwner = currentMember?.role === 'owner'
-  const isAdmin = currentMember?.role === 'admin' || isOwner
+  // Admin tier retired (Luma): owner-gated actions use isOwner. Alias kept to minimize churn
+  // in this increment; the dialog-collapse rework will remove it.
+  const isAdmin = isOwner
   const isArchived = !!group?.isArchived
   const acceptedMembers = useMemo(
     () => group?.members?.filter((m) => m.status === 'accepted') || [],
@@ -237,31 +236,24 @@ export default function GroupDetail() {
     />
   )
 
+  // Detail is tabs-less now (Activity tab retired): a plain expenses header + the feed.
   const tabsNav = (
-    <GroupTabs
-      tabs={[
-        { id: 'expenses', label: t('groups.tabsNav.expenses'), badge: stats?.totalReceipts },
-        { id: 'activity', label: t('groups.tabsNav.activity') },
-      ]}
-      active={tab}
-      onChange={(s) => setTab(s as Tab)}
-    />
+    <div className="flex items-center justify-between px-1">
+      <SectionLabel>{t('groups.tabsNav.expenses')}</SectionLabel>
+      {stats?.totalReceipts != null && (
+        <span className="text-[12px] font-semibold text-fg-faint">{stats.totalReceipts}</span>
+      )}
+    </div>
   )
 
   const tabBody = (
-    <div key={tab}>
-      {tab === 'activity' ? (
-        <GroupActivityTimeline groupId={id} />
-      ) : (
-        <GroupExpensesList
-          groupId={id}
-          members={acceptedMembers}
-          currentUserId={user?.id}
-          displayCurrency={displayCurrency}
-          onOpenExpense={openExpenseDetail}
-        />
-      )}
-    </div>
+    <GroupExpensesList
+      groupId={id}
+      members={acceptedMembers}
+      currentUserId={user?.id}
+      displayCurrency={displayCurrency}
+      onOpenExpense={openExpenseDetail}
+    />
   )
 
   const membersView = (

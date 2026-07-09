@@ -386,13 +386,12 @@ export function GroupTabs({
 }
 
 const ROLE_TONE: Record<string, string> = {
-  owner: 'bg-warning-soft text-warning-foreground',
-  admin: 'bg-info-soft text-info-foreground',
-  member: 'bg-bg-subtle text-muted-foreground',
+  owner: 'bg-primary text-primary-foreground',
+  member: 'bg-subtle text-muted-foreground',
 }
 
-/** owner / admin / member role pill. */
-export function RolePill({ role }: { role: 'owner' | 'admin' | 'member' }) {
+/** owner / member role pill (Luma monochrome; the admin tier was retired). */
+export function RolePill({ role }: { role: 'owner' | 'member' }) {
   const { t } = useTranslation()
   return (
     <span
