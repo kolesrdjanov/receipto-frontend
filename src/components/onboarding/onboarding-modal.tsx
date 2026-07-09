@@ -406,7 +406,7 @@ export function OnboardingModal({ open, onOpenChange, variant = 'spotlight' }: O
                         type="button"
                         variant="ghost"
                         onClick={handlePrev}
-                        className="h-11 gap-2 rounded-full px-[18px] text-[15px] font-semibold text-foreground hover:bg-bg-subtle"
+                        className="h-11 gap-2 rounded-full px-[18px] text-[15px] text-foreground hover:bg-bg-subtle"
                       >
                         <ChevronLeft className="size-4" />
                         {t('common.back')}
@@ -418,7 +418,7 @@ export function OnboardingModal({ open, onOpenChange, variant = 'spotlight' }: O
                       type="button"
                       variant="default"
                       onClick={complete}
-                      className="h-11 gap-2 rounded-full px-[22px] text-[15px] font-semibold"
+                      className="h-11 gap-2 rounded-full px-[22px] text-[15px]"
                     >
                       {t('onboarding.getStarted')}
                     </Button>
@@ -427,7 +427,7 @@ export function OnboardingModal({ open, onOpenChange, variant = 'spotlight' }: O
                       type="button"
                       variant="default"
                       onClick={handleNext}
-                      className="h-11 gap-2 rounded-full px-[22px] text-[15px] font-semibold"
+                      className="h-11 gap-2 rounded-full px-[22px] text-[15px]"
                     >
                       {t('common.next')}
                       <ChevronRight className="size-4" />

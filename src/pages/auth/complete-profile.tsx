@@ -80,7 +80,7 @@ export default function CompleteProfile() {
           variant="brand"
           loading={updateMe.isPending}
           loadingText={t('common.saving')}
-          className="mt-5 h-[52px] w-full rounded-full text-base font-semibold"
+          className="mt-5 h-[52px] w-full rounded-full text-base"
         >
           {t('auth.completeProfile.submit')}
         </Button>

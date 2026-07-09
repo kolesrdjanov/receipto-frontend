@@ -139,7 +139,7 @@ export default function SignIn() {
             variant="brand"
             loading={requestCode.isPending}
             loadingText={t('auth.signIn.sending')}
-            className="mt-5 h-[52px] w-full rounded-full text-base font-semibold"
+            className="mt-5 h-[52px] w-full rounded-full text-base"
             data-testid="signin-submit-button"
           >
             {t('auth.signIn.sendCode')}

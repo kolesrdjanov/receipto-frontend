@@ -279,7 +279,7 @@ export default function Dashboard() {
                   type="button"
                   variant="default"
                   onClick={openQrScanner}
-                  className="h-9 shrink-0 rounded-lg px-4 text-[14px] font-medium [&_svg]:size-4"
+                  className="h-9 shrink-0 rounded-lg px-4 text-[14px] [&_svg]:size-4"
                 >
                   <QrCode />
                   {t('receipts.scanReceipt')}

@@ -342,7 +342,7 @@ export function AppSidebar({
               type="button"
               variant="destructive-soft"
               onClick={logout}
-              className="h-[46px] w-full rounded-xl text-[14.5px] font-semibold [&_svg]:size-[17px]"
+              className="h-[46px] w-full rounded-xl text-[14.5px] [&_svg]:size-[17px]"
             >
               <LogOut />
               {t('nav.logout')}

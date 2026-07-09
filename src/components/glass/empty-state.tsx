@@ -25,7 +25,7 @@ export function AddButton({
       type="button"
       variant="default"
       onClick={onClick}
-      className={cn('h-9 rounded-lg px-4 text-[14px] font-medium [&_svg]:size-4', className)}
+      className={cn('h-9 rounded-lg px-4 text-[14px] [&_svg]:size-4', className)}
       data-testid={testId}
     >
       <Icon strokeWidth={2} />

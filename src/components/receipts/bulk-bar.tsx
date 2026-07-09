@@ -44,7 +44,7 @@ export function BulkBar({
             type="button"
             variant="glass"
             onClick={onAssign}
-            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] font-semibold [&_svg]:size-[17px]"
+            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] [&_svg]:size-[17px]"
           >
             <Tag />
             {t('receipts.filters.category')}
@@ -54,7 +54,7 @@ export function BulkBar({
             variant="destructive-soft"
             onClick={onRemove}
             disabled={removing}
-            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] font-semibold transition-opacity [&_svg]:size-[17px] disabled:opacity-60"
+            className="h-[38px] gap-1.5 rounded-full px-3.5 text-[13px] transition-opacity [&_svg]:size-[17px] disabled:opacity-60"
           >
             {removing ? <Loader2 className="animate-spin" /> : <Trash2 />}
             {t('common.remove')}
@@ -91,7 +91,7 @@ export function BulkBar({
         variant="glass"
         size="pill"
         onClick={onAssign}
-        className="gap-1.5 text-[13px] font-semibold [&_svg]:size-[15px]"
+        className="gap-1.5 text-[13px] [&_svg]:size-[15px]"
       >
         <Tag />
         {t('receipts.assignCategory')}
@@ -102,7 +102,7 @@ export function BulkBar({
         size="pill"
         onClick={onRemove}
         disabled={removing}
-        className="gap-1.5 text-[13px] font-semibold transition-opacity [&_svg]:size-[15px] disabled:opacity-60"
+        className="gap-1.5 text-[13px] transition-opacity [&_svg]:size-[15px] disabled:opacity-60"
       >
         {removing ? <Loader2 className="animate-spin" /> : <Trash2 />}
         {t('receipts.removeSelected')}

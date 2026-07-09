@@ -379,7 +379,7 @@ export function GroupManageSheet({
                       type="button"
                       variant="outline"
                       onClick={share(s.kind)}
-                      className="h-auto flex-col gap-2 py-3 text-[11.5px] font-semibold"
+                      className="h-auto flex-col gap-2 py-3 text-[11.5px]"
                     >
                       <span className="grid size-[38px] place-items-center rounded-full bg-bg-subtle text-muted-foreground">
                         <s.icon className="size-5" />

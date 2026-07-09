@@ -9,7 +9,9 @@ const buttonVariants = cva(
   // Luma: flat controls, 10px radius (`rounded-lg` = --radius). Borders/fills do the
   // work — no drop shadows on buttons. `pill` stays `rounded-full`.
   // Don't re-add a radius utility at call sites — it's the default now.
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-[opacity,background-color,color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // Label weight is 400 by owner decision (deviates from the handoff's 14/500) —
+  // don't re-add font-medium/font-semibold at call sites.
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-normal transition-[opacity,background-color,color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
