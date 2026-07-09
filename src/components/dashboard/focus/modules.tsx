@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -44,6 +44,8 @@ export interface FocusHeroProps {
   amountsVisible: boolean
   onToggleAmounts: () => void
   isCurrentMonth: boolean
+  /** Demoted rank chip (Luma: no ribbon; a small chip sits in the hero corner). */
+  rankLabel?: string
 }
 
 export function FocusHero({
@@ -58,6 +60,7 @@ export function FocusHero({
   amountsVisible,
   onToggleAmounts,
   isCurrentMonth,
+  rankLabel,
 }: FocusHeroProps) {
   const { t } = useTranslation()
   const hasBudget = budget > 0
@@ -70,11 +73,15 @@ export function FocusHero({
     <section className="glass-card relative flex flex-col overflow-hidden px-[26px] pb-[22px] pt-6">
       <div className="dash-hero-sheen" aria-hidden />
 
-      <AmountsEyeToggle
-        visible={amountsVisible}
-        onToggle={onToggleAmounts}
-        className="absolute right-[18px] top-[18px] z-[2]"
-      />
+      <div className="absolute right-[18px] top-[18px] z-[2] flex items-center gap-2">
+        {rankLabel && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+            <Crown className="size-3" aria-hidden="true" />
+            {rankLabel}
+          </span>
+        )}
+        <AmountsEyeToggle visible={amountsVisible} onToggle={onToggleAmounts} />
+      </div>
 
       <div className="relative z-[1] text-[12.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
         {t('dashboard.focus.spentLabel', { month: monthLabel })}
@@ -119,13 +126,13 @@ export function FocusHero({
               />
             </span>
             {isCurrentMonth && overPace > 0 ? (
-              <span className="font-bold text-warning-foreground">
+              <span className="rounded-full bg-destructive-soft px-2 py-0.5 font-bold text-[color:var(--destructive-foreground-on-soft)]">
                 {t('dashboard.focus.budgetOverPace', {
                   amount: amountsVisible ? formatMoney(overPace, displayCurrency) : MASK,
                 })}
               </span>
             ) : (
-              <span className="font-bold text-success-foreground">
+              <span className="font-bold text-foreground">
                 {t('dashboard.focus.budgetLeft', {
                   amount: amountsVisible ? formatMoney(Math.max(remaining, 0), displayCurrency) : MASK,
                 })}
@@ -250,43 +257,7 @@ export function FocusSafeToSpend({
 }
 
 /* ============================================================
-   RANK RIBBON — slim amber status strip
-   ============================================================ */
-export interface FocusRankRibbonProps {
-  rankName: string
-  receiptCount: number
-  progress: number
-  isTopTier: boolean
-  toNextCount: number
-}
-
-export function FocusRankRibbon({ rankName, receiptCount, progress, isTopTier, toNextCount }: FocusRankRibbonProps) {
-  const { t } = useTranslation()
-  return (
-    <section className="flex items-center gap-3.5 rounded-2xl border border-warning/30 bg-warning-soft px-[18px] py-[13px]">
-      <span className="grid size-[38px] shrink-0 place-items-center rounded-xl bg-card shadow-glass-1">
-        <Crown className="size-[17px] text-warning-foreground" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2.5">
-          <span className="truncate text-[14px] font-bold text-foreground">{rankName}</span>
-          <span className="shrink-0 text-[12px] font-semibold text-muted-foreground">
-            {t('dashboard.focus.rankReceipts', { count: receiptCount })}
-          </span>
-        </div>
-        <div className="mt-2 h-[5px] overflow-hidden rounded-full bg-warning/25 dark:bg-black/25">
-          <div className="h-full rounded-full bg-warning" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
-      <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-card px-[11px] text-[11.5px] font-bold text-warning-foreground shadow-glass-1">
-        {isTopTier ? t('dashboard.focus.topTierTag') : t('dashboard.focus.toGoTag', { count: toNextCount })}
-      </span>
-    </section>
-  )
-}
-
-/* ============================================================
-   DAILY FLOW — calm area sparkline + stat strip
+   DAILY FLOW — monochrome shadcn bar chart + stat strip
    ============================================================ */
 export interface FocusDailyFlowProps {
   series: { date: string; amount: number }[]
@@ -308,37 +279,46 @@ export function FocusDailyFlow({
   loading,
 }: FocusDailyFlowProps) {
   const { t, i18n } = useTranslation()
+  const [hover, setHover] = useState<number | null>(null)
 
   const hasData = series.some((d) => d.amount > 0)
   const localeTag = i18n.language === 'sr' ? 'sr-Latn-RS' : 'en-US'
   const shortDate = (iso: string) =>
     new Date(iso + 'T00:00:00').toLocaleDateString(localeTag, { month: 'short', day: 'numeric' })
 
-  const { line, area, lastPoint } = useMemo(() => {
-    const W = 600
-    const H = 190
-    const pad = 14
-    const amounts = series.map((d) => d.amount)
-    const n = amounts.length
-    const max = Math.max(...amounts, 1)
-    const step = n > 1 ? W / (n - 1) : W
-    const pts = amounts.map((v, i) => [i * step, H - pad - (v / max) * (H - pad * 2.4)] as const)
-    const linePath = pts.length ? 'M' + pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L') : ''
-    const last = pts[pts.length - 1] ?? [0, H - pad]
-    const areaPath = pts.length ? `${linePath} L${last[0].toFixed(1)},${H} L0,${H} Z` : ''
-    return { line: linePath, area: areaPath, lastPoint: last }
-  }, [series])
+  // shadcn-style bar chart geometry: mid-grey bars, near-black peak, faint zero stubs,
+  // horizontal gridlines with a compact Y axis.
+  const W = 600
+  const H = 190
+  const padL = 34 // room for Y labels
+  const padT = 10
+  const padB = 8
+  const chartH = H - padT - padB
+  const n = series.length
+  const max = Math.max(...series.map((d) => d.amount), 1)
+  const peakIdx = series.reduce((best, d, i) => (d.amount > (series[best]?.amount ?? -1) ? i : best), 0)
+  const slotW = n > 0 ? (W - padL) / n : W
+  const barW = Math.max(2, Math.min(slotW * 0.56, 22))
+  const kfmt = (v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(Math.round(v)))
+  const ticks = [1, 0.75, 0.5, 0.25, 0]
 
-  const highestDay = series.reduce((m, d) => Math.max(m, d.amount), 0)
+  const highestDay = series[peakIdx]?.amount ?? 0
   const activeDays = series.filter((d) => d.amount > 0).length
   const firstLabel = series.length ? shortDate(series[0].date) : ''
   const lastLabel = series.length ? shortDate(series[series.length - 1].date) : ''
+  const hovered = hover != null ? series[hover] : null
 
   return (
     <FocusCard
       icon={Activity}
       title={t('dashboard.focus.dailyFlow')}
-      trailing={<FocusTrailing>{monthYearLabel}</FocusTrailing>}
+      trailing={
+        <FocusTrailing>
+          {hovered
+            ? `${shortDate(hovered.date)} · ${amountsVisible ? formatMoney(hovered.amount, displayCurrency) : MASK}`
+            : monthYearLabel}
+        </FocusTrailing>
+      }
     >
       {loading ? (
         <Shimmer className="h-[190px] rounded-2xl" />
@@ -349,32 +329,46 @@ export function FocusDailyFlow({
           <div className="h-[190px]">
             <svg
               viewBox="0 0 600 190"
-              preserveAspectRatio="none"
               className="block h-full w-full"
               role="img"
               aria-label={`${t('dashboard.focus.dailyFlow')} — ${firstLabel} – ${lastLabel}, ${activeDays} ${t('dashboard.focus.activeDays')}`}
+              onMouseLeave={() => setHover(null)}
             >
-              <defs>
-                <linearGradient id="focFlowFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="var(--primary)" stopOpacity="0.24" />
-                  <stop offset="1" stopColor="var(--primary)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              {area && <path d={area} fill="url(#focFlowFill)" />}
-              {line && (
-                <path
-                  d={line}
-                  fill="none"
-                  stroke="var(--primary)"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              )}
-              <circle cx={lastPoint[0]} cy={lastPoint[1]} r="4.5" fill="var(--primary)" />
+              {/* gridlines + Y axis */}
+              {ticks.map((frac) => {
+                const y = padT + chartH * (1 - frac)
+                return (
+                  <g key={frac}>
+                    <line x1={padL} y1={y} x2={W} y2={y} stroke="var(--border)" strokeWidth="1" />
+                    <text x={padL - 6} y={y + 3} textAnchor="end" fontSize="9" fill="var(--fg-faint)">
+                      {kfmt(max * frac)}
+                    </text>
+                  </g>
+                )
+              })}
+              {/* bars */}
+              {series.map((d, i) => {
+                const x = padL + i * slotW + (slotW - barW) / 2
+                const h = d.amount > 0 ? Math.max((d.amount / max) * chartH, 2) : 2
+                const y = padT + chartH - h
+                const isPeak = i === peakIdx && d.amount > 0
+                const isHover = hover === i
+                const fill = d.amount === 0
+                  ? 'var(--border-strong)'
+                  : isPeak || isHover
+                    ? 'var(--foreground)'
+                    : 'var(--fg-faint)'
+                return (
+                  <g key={d.date} onMouseEnter={() => setHover(i)}>
+                    {/* invisible hit target spanning the full slot height */}
+                    <rect x={padL + i * slotW} y={padT} width={slotW} height={chartH} fill="transparent" />
+                    <rect x={x} y={y} width={barW} height={h} rx={Math.min(barW / 2, 3)} fill={fill} />
+                  </g>
+                )
+              })}
             </svg>
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-fg-faint">
+          <div className="mt-2 flex items-center justify-between pl-[34px] text-[11px] font-semibold text-fg-faint">
             <span>{firstLabel}</span>
             <span>{isCurrentMonth ? `${t('dashboard.focus.today')} · ${lastLabel}` : lastLabel}</span>
           </div>

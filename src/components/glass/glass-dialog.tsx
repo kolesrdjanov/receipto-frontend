@@ -78,7 +78,7 @@ export function GlassDialog({
           <DialogPrimitive.Portal forceMount>
             <DialogPrimitive.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.45)] backdrop-blur-[5px] dark:bg-[oklch(0_0_0/0.55)]"
+                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.4)] dark:bg-[oklch(0_0_0/0.55)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -103,7 +103,7 @@ export function GlassDialog({
                   className={cn(
                     'pointer-events-auto relative flex flex-col overflow-hidden',
                     isMobile
-                      ? 'max-h-[92dvh] w-full rounded-t-[28px] border-t border-border bg-card shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]'
+                      ? 'max-h-[92dvh] w-full rounded-t-[24px] border-t border-border bg-card shadow-[0_-10px_44px_oklch(0_0_0/0.18)] dark:shadow-[0_-10px_44px_oklch(0_0_0/0.6)]'
                       : 'glass-card max-h-[88dvh]',
                     className,
                   )}
@@ -136,7 +136,7 @@ export function GlassDialog({
                       whileTap={{ scale: 0.82 }}
                       className="mx-auto mb-1 mt-3 flex h-6 w-full max-w-[140px] shrink-0 items-center justify-center"
                     >
-                      <span className="h-[5px] w-9 rounded-full bg-border" />
+                      <span className="h-1 w-10 rounded-full bg-border-strong" />
                     </motion.button>
                   )}
 

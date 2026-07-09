@@ -114,8 +114,8 @@ export function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-bg-subtle/70 px-3 text-left transition-[border-color,box-shadow] dark:bg-input/55",
-            "focus:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15",
+            "flex h-9 w-full items-center gap-2 rounded-lg border border-border bg-card px-3 text-left text-sm transition-[border-color,box-shadow]",
+            "focus:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}

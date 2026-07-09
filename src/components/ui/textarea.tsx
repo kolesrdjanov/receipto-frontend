@@ -9,8 +9,8 @@ const Textarea = React.forwardRef<
   return (
     <textarea
       className={cn(
-        // Filled glass field — matches DatePicker/Select/Input for app-wide consistency.
-        "flex min-h-[80px] w-full resize-none rounded-xl border border-border bg-bg-subtle/70 px-3 py-2.5 text-base transition-[border-color,box-shadow] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/55",
+        // Luma: matches Input — hairline border, card bg, 10px radius, ring focus.
+        "flex min-h-[80px] w-full resize-none rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-[border-color,box-shadow] placeholder:text-fg-faint focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive",
         className
       )}
       ref={ref}

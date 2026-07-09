@@ -8,6 +8,7 @@ import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { LogoMark } from '@/components/ui/logo'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import {
   Sidebar,
@@ -61,19 +62,19 @@ interface AppSidebarProps {
   hasAnnouncements: boolean
 }
 
-// Nav item — calm neutral at rest, accent-aware soft tint when active. The sidebar is
-// deliberately gradient-free (brand gradient lives only on the logo + the mobile FAB).
+// Nav item — Luma: calm neutral at rest, neutral subtle fill when active (monochrome;
+// no accent tint). The whole shell is flat.
 const navItem = cn(
-  'h-11 gap-3 rounded-xl px-3 text-[14px] font-semibold text-fg-2 [&>svg]:size-[19px] [&>svg]:text-muted-foreground',
-  'hover:bg-bg-subtle hover:text-foreground',
-  'group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!rounded-xl group-data-[collapsible=icon]:!p-0',
+  'h-10 gap-3 rounded-lg px-3 text-[14px] font-medium text-muted-foreground [&>svg]:size-[19px] [&>svg]:text-muted-foreground',
+  'hover:bg-subtle hover:text-foreground',
+  'group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:!size-11 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!rounded-lg group-data-[collapsible=icon]:!p-0',
 )
-// `data-[active=true]:text-primary` is required to beat the primitive's
+// `data-[active=true]:text-foreground` is required to beat the primitive's
 // `data-[active=true]:text-sidebar-accent-foreground` (same specificity, but tailwind-merge
-// only overrides it when our class carries the matching variant) — otherwise the label text
-// stays neutral instead of going accent. Mirrors the admin sub-item rule below.
+// only overrides it when our class carries the matching variant). Active = neutral subtle
+// fill + foreground text/icon + semibold.
 const navItemActive =
-  'bg-primary-soft text-primary data-[active=true]:text-primary [&>svg]:text-primary hover:bg-primary-soft hover:text-primary'
+  'bg-subtle font-semibold text-foreground data-[active=true]:text-foreground [&>svg]:text-foreground hover:bg-subtle hover:text-foreground'
 
 const groupLabel = 'px-3 text-[11px] font-bold uppercase tracking-[0.07em] text-fg-faint'
 
@@ -132,12 +133,13 @@ export function AppSidebar({
       : receiptRank === 'status_c'
         ? t('settings.profile.rank.names.statusC')
         : t('settings.profile.rank.names.noStatus')
+  // Luma: rank is monochrome — the glyph differentiates rank, not color.
   const rankVisual = receiptRank === 'status_a'
-    ? { icon: Crown, className: 'text-amber-500' }
+    ? { icon: Crown, className: 'text-foreground' }
     : receiptRank === 'status_b'
-      ? { icon: Sparkles, className: 'text-blue-500' }
+      ? { icon: Sparkles, className: 'text-foreground' }
       : receiptRank === 'status_c'
-        ? { icon: Compass, className: 'text-emerald-500' }
+        ? { icon: Compass, className: 'text-foreground' }
         : { icon: Compass, className: 'text-muted-foreground' }
   const RankIcon = rankVisual.icon
 
@@ -185,10 +187,12 @@ export function AppSidebar({
             className="flex min-w-0 flex-1 items-center gap-2.5 group-data-[collapsible=icon]:flex-none"
             aria-label={t('common.appName')}
           >
-            <img src="/logo-icon.svg" alt="" className="size-[30px] shrink-0" />
-            <span className="flex min-w-0 flex-col gap-1 group-data-[collapsible=icon]:hidden">
-              <img src="/logo-text.svg" alt={t('common.appName')} className="h-[18px] w-auto" />
-              <span className="truncate text-[11px] font-semibold leading-none text-fg-faint">
+            <LogoMark className="size-[30px] rounded-[9px]" glyphClassName="size-[17px]" />
+            <span className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-[16px] font-semibold leading-none tracking-[-0.01em] text-foreground">
+                {t('common.appName')}
+              </span>
+              <span className="truncate text-[11px] font-medium leading-none text-fg-faint">
                 {t('nav.version')} {__APP_VERSION__}
               </span>
             </span>
@@ -280,7 +284,7 @@ export function AppSidebar({
                             <SidebarMenuSubButton
                               asChild
                               isActive={active}
-                              className="h-9 gap-2.5 text-[13.5px] font-medium text-muted-foreground data-[active=true]:bg-transparent data-[active=true]:font-bold data-[active=true]:text-primary [&[data-active=true]_.subdot]:bg-primary"
+                              className="h-9 gap-2.5 text-[13.5px] font-medium text-muted-foreground data-[active=true]:bg-transparent data-[active=true]:font-bold data-[active=true]:text-foreground [&[data-active=true]_.subdot]:bg-foreground"
                             >
                               <Link to={sub.to} onClick={closeMobile}>
                                 <span className="subdot size-[5px] shrink-0 rounded-full bg-fg-faint" />

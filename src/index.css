@@ -50,12 +50,16 @@ body {
 }
 
 @theme inline {
-  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* Luma: Geist display/body, Geist Mono for codes/amounts */
+  --font-display: 'Geist', system-ui, sans-serif;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  /* Luma radii: controls 10px (lg = --radius), tiles 12px (xl), cards 16px (2xl) */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 6px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
   --color-background: var(--background);
@@ -75,6 +79,7 @@ body {
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -102,10 +107,12 @@ body {
   --color-warning-foreground: var(--warning-foreground);
   --color-info-foreground: var(--info-foreground);
   --color-bg-subtle: var(--bg-subtle);
+  --color-subtle: var(--subtle);
   --color-hairline-soft: var(--hairline-soft);
   --color-fg-faint: var(--fg-faint);
   --color-fg-2: var(--fg-2);
   --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-foreground-on-soft: var(--destructive-foreground-on-soft);
   --color-brand-violet: var(--brand-violet);
   --color-brand-violet-soft: var(--brand-violet-soft);
   --color-brand-violet-foreground: var(--brand-violet-foreground);
@@ -117,130 +124,139 @@ body {
 }
 
 :root {
-  --radius: 0.625rem;
-  /* Glass: the page is a subtly-tinted wash; elevated surfaces (cards, sidebar,
-     popovers) are pure white and read as lifted above it. */
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.625rem; /* 10px — Luma control radius */
+  /* Luma — flat monochrome. Page is a near-white wash; cards are pure white. */
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.205 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.205 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.16 165); /* emerald locked (accent retired) */
+  --popover-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.205 0 0); /* near-black */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.968 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.968 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.968 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.55 0.2 27);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.922 0 0);
+  --border-strong: oklch(0.87 0 0); /* switch track, scrollbar, notch handle */
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.55 0.16 165); /* emerald locked (accent retired) */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(1 0 0); /* white elevated panel over the tinted page */
-  --sidebar-foreground: oklch(0.145 0 0);
+  --ring: oklch(0.708 0 0);
+  /* charts — monochrome ramp (near-black → light grey) */
+  --chart-1: oklch(0.205 0 0);
+  --chart-2: oklch(0.45 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.75 0 0);
+  --chart-5: oklch(0.85 0 0);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.205 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.968 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* glass — semantic colors (additive; --destructive serves as danger) */
-  --success: oklch(0.65 0.16 155);
-  --success-soft: oklch(0.95 0.05 155);
-  --warning: oklch(0.75 0.16 75);
-  --warning-soft: oklch(0.96 0.05 80);
-  --info: oklch(0.65 0.13 230);
-  --info-soft: oklch(0.95 0.04 230);
-  /* readable text on the *-soft backgrounds (alerts/badges) */
-  --success-foreground: oklch(0.45 0.12 155);
-  --warning-foreground: oklch(0.45 0.1 75);
-  --info-foreground: oklch(0.45 0.1 230);
-  /* glass — depth tiers shadcn lacks */
-  --bg-subtle: oklch(0.965 0.003 250);
-  --hairline-soft: oklch(0.95 0.004 250);
-  --fg-faint: oklch(0.56 0.012 260); /* WCAG AA (~4.65:1 on white); was 0.7 (~2.3:1) */
-  --fg-2: oklch(0.45 0.01 260);            /* mid-tone text (between fg & muted) */
-  --destructive-soft: oklch(0.95 0.04 25);
-  --destructive-foreground-on-soft: oklch(0.5 0.18 25);
-  --brand-violet-soft: oklch(0.95 0.04 295);
-  --brand-violet-foreground: oklch(0.45 0.2 295);
-  --primary-soft: oklch(from var(--primary) 0.95 0.04 h);
-  /* glass — shadow scale */
-  --sh-1: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 0 oklch(0 0 0 / 0.02);
-  --sh-2: 0 4px 12px oklch(0 0 0 / 0.06), 0 2px 4px oklch(0 0 0 / 0.04);
-  --sh-3: 0 10px 28px oklch(0 0 0 / 0.1), 0 4px 8px oklch(0 0 0 / 0.05);
-  --sh-4: 0 24px 56px oklch(0 0 0 / 0.16), 0 8px 16px oklch(0 0 0 / 0.06);
+  /* semantic colors — neutralized for Luma (no green/amber). Kept defined so any
+     stray legacy usage renders monochrome; red lives only in --destructive. */
+  --success: oklch(0.205 0 0);
+  --success-soft: oklch(0.968 0 0);
+  --warning: oklch(0.205 0 0);
+  --warning-soft: oklch(0.968 0 0);
+  --info: oklch(0.205 0 0);
+  --info-soft: oklch(0.968 0 0);
+  --success-foreground: oklch(0.556 0 0);
+  --warning-foreground: oklch(0.556 0 0);
+  --info-foreground: oklch(0.556 0 0);
+  /* depth tiers */
+  --bg-subtle: oklch(0.968 0 0);
+  --subtle: oklch(0.968 0 0);
+  --hairline-soft: oklch(0.922 0 0);
+  --fg-faint: oklch(0.65 0 0);  /* tertiary / placeholder / timestamps */
+  --fg-2: oklch(0.45 0 0);      /* mid-tone text (between fg & muted) */
+  --destructive-soft: oklch(0.955 0.03 25);
+  --destructive-foreground-on-soft: oklch(0.5 0.2 27);
+  /* violet tone retired → neutral */
+  --brand-violet-soft: oklch(0.968 0 0);
+  --brand-violet-foreground: oklch(0.205 0 0);
+  --primary-soft: oklch(0.968 0 0); /* old bg-primary-soft sites → neutral subtle */
+  /* elevation — flat by default; borders do the work */
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.05);
+  --shadow-2: 0 8px 30px oklch(0 0 0 / 0.12);
+  /* legacy shadow aliases → collapse onto the two Luma tiers */
+  --sh-1: var(--shadow-1);
+  --sh-2: var(--shadow-1);
+  --sh-3: var(--shadow-2);
+  --sh-4: var(--shadow-2);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.165 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.78 0.15 165); /* emerald locked (accent retired) */
+  --primary: oklch(0.985 0 0); /* near-white — buttons invert in dark */
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.255 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --muted: oklch(0.255 0 0);
+  --muted-foreground: oklch(0.68 0 0);
+  --accent: oklch(0.255 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.68 0.19 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.78 0.15 165); /* emerald locked (accent retired) */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --border: oklch(1 0 0 / 0.10);
+  --border-strong: oklch(1 0 0 / 0.18);
+  --input: oklch(1 0 0 / 0.10);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.985 0 0);
+  --chart-2: oklch(0.8 0 0);
+  --chart-3: oklch(0.68 0 0);
+  --chart-4: oklch(0.55 0 0);
+  --chart-5: oklch(0.42 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.205 0 0);
+  --sidebar-accent: oklch(0.255 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-border: oklch(1 0 0 / 0.10);
   --sidebar-ring: oklch(0.556 0 0);
 
-  /* glass — semantic colors (dark) */
-  --success: oklch(0.78 0.15 155);
-  --success-soft: oklch(0.28 0.06 155);
-  --warning: oklch(0.8 0.16 75);
-  --warning-soft: oklch(0.3 0.06 75);
-  --info: oklch(0.75 0.14 230);
-  --info-soft: oklch(0.28 0.06 230);
-  /* readable text on the *-soft backgrounds (dark) */
-  --success-foreground: oklch(0.84 0.1 155);
-  --warning-foreground: oklch(0.84 0.1 75);
-  --info-foreground: oklch(0.84 0.08 230);
-  /* glass — depth tiers (dark) */
-  --bg-subtle: oklch(0.235 0.012 260);
-  --hairline-soft: oklch(1 0 0 / 0.06);
-  --fg-faint: oklch(0.62 0.012 260); /* WCAG AA on dark bg; was 0.5 (~2.8:1) */
-  --fg-2: oklch(0.78 0.01 260);
-  --destructive-soft: oklch(0.3 0.08 25);
+  /* semantic colors — neutralized (dark) */
+  --success: oklch(0.985 0 0);
+  --success-soft: oklch(0.255 0 0);
+  --warning: oklch(0.985 0 0);
+  --warning-soft: oklch(0.255 0 0);
+  --info: oklch(0.985 0 0);
+  --info-soft: oklch(0.255 0 0);
+  --success-foreground: oklch(0.68 0 0);
+  --warning-foreground: oklch(0.68 0 0);
+  --info-foreground: oklch(0.68 0 0);
+  /* depth tiers (dark) */
+  --bg-subtle: oklch(0.255 0 0);
+  --subtle: oklch(0.255 0 0);
+  --hairline-soft: oklch(1 0 0 / 0.10);
+  --fg-faint: oklch(0.6 0 0);
+  --fg-2: oklch(0.78 0 0);
+  --destructive-soft: oklch(0.3 0.07 25);
   --destructive-foreground-on-soft: oklch(0.82 0.12 25);
-  --brand-violet-soft: oklch(0.32 0.06 295);
-  --brand-violet-foreground: oklch(0.85 0.12 295);
-  --primary-soft: oklch(from var(--primary) 0.3 0.06 h);
-  /* glass — shadow scale (dark, heavier) */
-  --sh-1: 0 1px 2px oklch(0 0 0 / 0.3);
-  --sh-2: 0 4px 12px oklch(0 0 0 / 0.4), 0 2px 4px oklch(0 0 0 / 0.2);
-  --sh-3: 0 10px 28px oklch(0 0 0 / 0.5);
-  --sh-4: 0 24px 56px oklch(0 0 0 / 0.6);
+  --brand-violet-soft: oklch(0.255 0 0);
+  --brand-violet-foreground: oklch(0.985 0 0);
+  --primary-soft: oklch(0.255 0 0);
+  /* elevation (dark, heavier) */
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-2: 0 8px 30px oklch(0 0 0 / 0.5);
+  --sh-1: var(--shadow-1);
+  --sh-2: var(--shadow-1);
+  --sh-3: var(--shadow-2);
+  --sh-4: var(--shadow-2);
 }
 
 /* ============================================
@@ -294,10 +310,10 @@ body {
    LAYOUT ENHANCEMENTS
    ============================================ */
 
-/* Scrollbar styling */
+/* Scrollbar styling — neutral hairline (Luma) */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklch, var(--primary) 30%, var(--muted)) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -310,18 +326,21 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: color-mix(in oklch, var(--primary) 30%, var(--muted));
+  background: var(--border-strong);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklch, var(--primary) 50%, var(--muted));
+  background: var(--fg-faint);
 }
 
 /* Selection styling */
 ::selection {
-  background: color-mix(in oklch, var(--primary) 30%, transparent);
+  background: oklch(0.205 0 0 / 0.12);
   color: var(--foreground);
+}
+.dark ::selection {
+  background: oklch(1 0 0 / 0.18);
 }
 
 /* ============================================
@@ -392,171 +411,71 @@ body {
    Semantic type set (from the design foundations).
    Use these for headings/labels across the redesign.
    ============================================ */
-.t-display { font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; }
-.t-h1 { font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.022em; }
-.t-h2 { font-size: 24px; line-height: 1.2; font-weight: 700; letter-spacing: -0.018em; }
-.t-h3 { font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; }
-.t-title { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+/* Luma type scale */
+.t-display { font-size: 38px; line-height: 1.05; font-weight: 600; letter-spacing: -0.03em; }
+.t-h1 { font-size: 26px; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; }
+.t-h2 { font-size: 21px; line-height: 1.2; font-weight: 600; letter-spacing: -0.018em; }
+.t-h3 { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.012em; }
+.t-title { font-size: 16px; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; }
 .t-body { font-size: 15px; line-height: 1.45; font-weight: 400; }
 .t-body-strong { font-size: 15px; line-height: 1.45; font-weight: 600; }
 .t-sm { font-size: 13px; line-height: 1.4; font-weight: 500; }
-.t-xs { font-size: 11px; line-height: 1.3; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.t-xs { font-size: 11px; line-height: 1.3; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+/* .t-num stays retired (no-op): amounts render in normal Geist, not tabular/mono.
+   Geist Mono is applied only to codes / receipt IDs via the `font-mono` utility. */
 
 /* ============================================
-   AUTH REDESIGN — "GLASS"
-   Brand gradient + emerald lock + frosted card.
-   Built on the app's existing shadcn tokens; only
-   brand colors + --primary-soft are net-new.
+   LUMA — retired Glass/brand layer
+   The emerald "Glass" system (frosted cards, brand gradients, tinted tiles,
+   hero sheen, per-surface emerald lock) is retired. These classes are kept
+   as thin flat/neutral aliases so any remaining consumer renders monochrome;
+   most call sites are being migrated to plain tokens per screen.
    ============================================ */
 
+/* Brand stops neutralized → monochrome (kept only so oklch(from …) refs resolve). */
 :root {
-  /* Brand gradient stops (logo + primary CTA only) */
-  --brand-emerald: oklch(0.72 0.15 165);
-  --brand-cyan: oklch(0.74 0.13 205);
-  --brand-violet: oklch(0.66 0.2 295);
-  /* Like the other brand stops, no dark variant: the .icon-tile-* tints
-     recompute L/C via oklch(from …) and only carry the hue. */
-  --brand-pink: oklch(0.7 0.2 350);
+  --brand-emerald: var(--foreground);
+  --brand-cyan: var(--foreground);
+  --brand-violet: var(--foreground);
+  --brand-pink: var(--foreground);
 }
 
-/* Auth surface locks --primary to brand emerald regardless of the
-   user's chosen .accent-* (applied on <html>). Nearest-ancestor
-   custom property wins, so this class on the auth wrapper overrides it. */
+/* Auth/onboarding no longer lock an emerald primary — they inherit the
+   monochrome near-black (light) / near-white (dark) primary. No-op scopes
+   kept so the wrapper class selectors still match harmlessly. */
 .auth-emerald,
-.onboarding-emerald {
-  --primary: oklch(0.55 0.16 165);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-soft: oklch(0.95 0.04 165);
-  --ring: oklch(0.55 0.16 165);
-}
-.dark .auth-emerald,
-.dark .onboarding-emerald {
-  --primary: oklch(0.78 0.15 165);
-  --primary-foreground: oklch(0.16 0.02 260);
-  --primary-soft: oklch(0.3 0.06 165);
-  --ring: oklch(0.78 0.15 165);
-}
+.onboarding-emerald { /* inherits root monochrome tokens */ }
 
-/* Frosted floating form card (real backdrop-filter + opaque fallback) */
+/* Flat card (was frosted glass) — bg-card + hairline + 16px radius + floating shadow. */
 .glass-card {
-  background: oklch(from var(--card) l c h / 0.74);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6);
-  backdrop-filter: blur(28px) saturate(1.6);
-  border: 1px solid oklch(1 0 0 / 0.55);
-  border-radius: 28px;
-  box-shadow:
-    0 24px 56px oklch(0 0 0 / 0.16),
-    0 8px 16px oklch(0 0 0 / 0.06);
-}
-.dark .glass-card {
-  background: oklch(from var(--card) l c h / 0.6);
-  border-color: oklch(1 0 0 / 0.12);
-  box-shadow:
-    0 24px 56px oklch(0 0 0 / 0.6),
-    inset 0 1px 0 oklch(1 0 0 / 0.07);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2);
 }
 
-/* Brand gradient primary CTA */
-.btn-brand {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-emerald) 0%,
-    var(--brand-cyan) 50%,
-    var(--brand-violet) 100%
-  );
-  color: #fff;
-  box-shadow: 0 6px 20px oklch(from var(--brand-violet) l c h / 0.3);
-  transition: box-shadow 0.15s ease, transform 0.12s ease, opacity 0.15s ease;
-}
-.btn-brand:hover:not(:disabled) {
-  box-shadow: 0 10px 28px oklch(from var(--brand-violet) l c h / 0.4);
-}
-.btn-brand:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-/* Violet AI-action CTA — the "Apply" button on the AI category suggestion card.
-   Vivid violet fill + colored glow + glossy top highlight so it lifts off the
-   soft-violet card. Mirrors .btn-brand's gradient/glow/press language. */
+/* brand / violet CTAs → primary fill (also re-pointed in button.tsx CVA). */
+.btn-brand,
 .btn-violet {
-  background-image: linear-gradient(
-    135deg,
-    oklch(from var(--brand-violet) calc(l + 0.06) c h) 0%,
-    var(--brand-violet) 100%
-  );
-  color: #fff;
-  box-shadow:
-    0 4px 14px oklch(from var(--brand-violet) l c h / 0.4),
-    inset 0 1px 0 oklch(1 0 0 / 0.2);
-  transition: box-shadow 0.15s ease, transform 0.12s ease, filter 0.15s ease;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+  transition: opacity 0.15s ease;
 }
-.btn-violet:hover:not(:disabled) {
-  filter: brightness(1.06);
-  box-shadow:
-    0 8px 24px oklch(from var(--brand-violet) l c h / 0.55),
-    inset 0 1px 0 oklch(1 0 0 / 0.24);
-}
-.btn-violet:active:not(:disabled) {
-  transform: scale(0.96);
-  box-shadow: 0 3px 10px oklch(from var(--brand-violet) l c h / 0.4);
-}
+.btn-brand:hover:not(:disabled),
+.btn-violet:hover:not(:disabled) { opacity: 0.88; }
 
-/* Soft brand-gradient fill (mini-dash progress bar, blobs) */
-.bg-brand-gradient {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-emerald) 0%,
-    var(--brand-cyan) 50%,
-    var(--brand-violet) 100%
-  );
-}
+/* soft brand-gradient fill → solid primary. */
+.bg-brand-gradient { background: var(--primary); }
 
-/* ============================================
-   ACCENT-TINTED ICON TILE
-   Soft brand-tinted square. Consumed by the IconTile
-   primitive (onboarding now; dashboard later).
-   ============================================ */
-.icon-tile-emerald { background: oklch(from var(--brand-emerald) 0.94 0.05 h); color: oklch(from var(--brand-emerald) 0.45 c h); }
-.icon-tile-cyan    { background: oklch(from var(--brand-cyan) 0.94 0.05 h);    color: oklch(from var(--brand-cyan) 0.42 c h); }
-.icon-tile-violet  { background: oklch(from var(--brand-violet) 0.94 0.05 h);  color: oklch(from var(--brand-violet) 0.48 c h); }
-.icon-tile-pink    { background: oklch(from var(--brand-pink) 0.94 0.05 h);    color: oklch(from var(--brand-pink) 0.48 c h); }
-.icon-tile-info    { background: var(--info-soft);                             color: oklch(from var(--info) 0.45 c h); }
-.icon-tile-primary { background: var(--primary-soft);                          color: var(--primary); }
-.dark .icon-tile-emerald { background: oklch(from var(--brand-emerald) 0.3 0.06 h); color: oklch(from var(--brand-emerald) 0.82 0.1 h); }
-.dark .icon-tile-cyan    { background: oklch(from var(--brand-cyan) 0.3 0.06 h);    color: oklch(from var(--brand-cyan) 0.82 0.1 h); }
-.dark .icon-tile-violet  { background: oklch(from var(--brand-violet) 0.3 0.06 h);  color: oklch(from var(--brand-violet) 0.84 0.1 h); }
-.dark .icon-tile-pink    { background: oklch(from var(--brand-pink) 0.3 0.06 h);    color: oklch(from var(--brand-pink) 0.84 0.1 h); }
-.dark .icon-tile-info    { background: oklch(from var(--info) 0.3 0.06 h);          color: oklch(from var(--info) 0.84 0.08 h); }
-.dark .icon-tile-primary { color: oklch(from var(--primary) calc(l + 0.06) c h); }
+/* accent-tinted tiles → neutral subtle square + muted icon. */
+.icon-tile-emerald,
+.icon-tile-cyan,
+.icon-tile-violet,
+.icon-tile-pink,
+.icon-tile-info { background: var(--subtle); color: var(--muted-foreground); }
+.icon-tile-primary { background: var(--subtle); color: var(--foreground); }
 
-/* ============================================
-   DASHBOARD "FOCUS" — hero sheen
-   Soft brand glow contained inside the hero card (decorative,
-   pointer-events:none). The one place a brand-hued radial is used
-   on the dashboard; everything else stays calm/neutral.
-   ============================================ */
-.dash-hero-sheen {
-  position: absolute;
-  top: -120px;
-  right: -10px;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(8px);
-  background: radial-gradient(
-    circle at 60% 40%,
-    oklch(from var(--brand-emerald) 0.72 0.13 h / 0.22),
-    oklch(from var(--brand-cyan) 0.72 0.12 h / 0.14) 45%,
-    transparent 70%
-  );
-}
-.dark .dash-hero-sheen {
-  background: radial-gradient(
-    circle at 60% 40%,
-    oklch(from var(--brand-emerald) 0.6 0.12 h / 0.28),
-    oklch(from var(--brand-violet) 0.6 0.14 h / 0.16) 50%,
-    transparent 72%
-  );
-}
+/* dashboard hero sheen retired (flat). */
+.dash-hero-sheen { display: none; }
 

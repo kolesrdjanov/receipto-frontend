@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
@@ -26,7 +26,6 @@ import { CurrencySelect } from '@/components/ui/currency-select'
 import {
   Mail,
   Trash2,
-  MapPin,
   Wallet,
   Palette,
   Languages,
@@ -66,12 +65,6 @@ const TABS: { id: TabId; labelKey: string }[] = [
   { id: 'account', labelKey: 'settings.tabs.account' },
 ]
 
-function SectionLabel({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="px-1 pt-1 text-[11px] font-bold uppercase tracking-[0.07em] text-fg-faint">{children}</h2>
-  )
-}
-
 export default function Settings() {
   const { t } = useTranslation()
   const isMobile = useIsMobile(900)
@@ -108,21 +101,15 @@ export default function Settings() {
       firstName: effectiveUser?.firstName ?? '',
       lastName: effectiveUser?.lastName ?? '',
       userId: effectiveUser?.id ?? null,
-      street: me?.street ?? '',
-      zipCode: me?.zipCode ?? '',
-      city: me?.city ?? '',
       monthlyIncome: me?.monthlyIncome?.toString() ?? '',
       incomeCurrency: me?.incomeCurrency ?? '',
     }),
-    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.id, me?.street, me?.zipCode, me?.city, me?.monthlyIncome, me?.incomeCurrency],
+    [effectiveUser?.firstName, effectiveUser?.lastName, effectiveUser?.id, me?.monthlyIncome, me?.incomeCurrency],
   )
 
   const [draft, setDraft] = useState(() => ({
     firstName: initial.firstName,
     lastName: initial.lastName,
-    street: initial.street,
-    zipCode: initial.zipCode,
-    city: initial.city,
     monthlyIncome: initial.monthlyIncome,
     incomeCurrency: initial.incomeCurrency,
   }))
@@ -134,51 +121,24 @@ export default function Settings() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft((prev) => ({
         ...prev,
-        street: me.street ?? '',
-        zipCode: me.zipCode ?? '',
-        city: me.city ?? '',
         monthlyIncome: me.monthlyIncome?.toString() ?? '',
         incomeCurrency: me.incomeCurrency ?? '',
       }))
     }
-  }, [me?.street, me?.zipCode, me?.city, me?.monthlyIncome, me?.incomeCurrency])
+  }, [me?.monthlyIncome, me?.incomeCurrency])
 
   const isDirty =
     draft.firstName !== initial.firstName ||
     draft.lastName !== initial.lastName ||
-    draft.street !== initial.street ||
-    draft.zipCode !== initial.zipCode ||
-    draft.city !== initial.city ||
     draft.monthlyIncome !== initial.monthlyIncome ||
     draft.incomeCurrency !== initial.incomeCurrency
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  // Desktop section-nav scroll-spy + click-to-jump (page scrolls at the window level).
+  // Desktop nav rail switches the visible section (only one shows at a time — the de-clutter).
   const [activeSection, setActiveSection] = useState<SectionId>('profile')
   const [activeTab, setActiveTab] = useState<TabId>('profile')
-
-  useEffect(() => {
-    if (isMobile) return
-    const els = NAV.map(({ id }) => document.getElementById(`sec-${id}`)).filter(Boolean) as HTMLElement[]
-    if (!els.length) return
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActiveSection(e.target.id.replace('sec-', '') as SectionId)
-        })
-      },
-      { rootMargin: '-20% 0px -72% 0px', threshold: 0 },
-    )
-    els.forEach((el) => obs.observe(el))
-    return () => obs.disconnect()
-  }, [isMobile, effectiveUser])
-
-  const jumpTo = (id: SectionId) => {
-    setActiveSection(id)
-    document.getElementById(`sec-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   const handleSaveProfile = async () => {
     if (!effectiveUser) return
@@ -186,9 +146,6 @@ export default function Settings() {
       await updateMe.mutateAsync({
         firstName: draft.firstName.trim(),
         lastName: draft.lastName.trim(),
-        street: draft.street.trim(),
-        zipCode: draft.zipCode.trim(),
-        city: draft.city.trim(),
         monthlyIncome: draft.monthlyIncome ? Number(draft.monthlyIncome) : null,
         incomeCurrency: draft.incomeCurrency || null,
       })
@@ -354,25 +311,6 @@ export default function Settings() {
     </SettingsCard>
   )
 
-  const addressCard = effectiveUser && (
-    <SettingsCard icon={MapPin} title={t('settings.profile.address.title')} desc={t('settings.profile.address.description')}>
-      <div>
-        <label htmlFor="street" className={fieldLabel}>{t('settings.profile.address.street')}</label>
-        <Input id="street" value={draft.street} onChange={(e) => setDraft((p) => ({ ...p, street: e.target.value }))} autoComplete="street-address" />
-      </div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="zipCode" className={fieldLabel}>{t('settings.profile.address.zipCode')}</label>
-          <Input id="zipCode" value={draft.zipCode} onChange={(e) => setDraft((p) => ({ ...p, zipCode: e.target.value }))} autoComplete="postal-code" />
-        </div>
-        <div>
-          <label htmlFor="city" className={fieldLabel}>{t('settings.profile.address.city')}</label>
-          <Input id="city" value={draft.city} onChange={(e) => setDraft((p) => ({ ...p, city: e.target.value }))} autoComplete="address-level2" />
-        </div>
-      </div>
-    </SettingsCard>
-  )
-
   const incomeCard = effectiveUser && (
     <SettingsCard icon={Wallet} title={t('settings.profile.income')} desc={t('settings.profile.incomeDescription')}>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -391,7 +329,6 @@ export default function Settings() {
   const profileCards = (
     <>
       {profileHero}
-      {addressCard}
       {incomeCard}
       {effectiveUser && <SaveBar dirty={isDirty} saving={updateMe.isPending} onSave={handleSaveProfile} />}
     </>
@@ -507,39 +444,20 @@ export default function Settings() {
             </div>
           </div>
         ) : (
-          /* ---------- DESKTOP: sticky section-nav rail + scroll-spy ---------- */
+          /* ---------- DESKTOP: nav rail switches the visible section ---------- */
           <div className="mx-auto flex max-w-[1000px] items-start gap-[34px]" key={profileKey}>
             <SettingsNavRail
               items={NAV.map((item) => ({ id: item.id, label: t(item.labelKey), icon: item.icon, danger: item.danger }))}
               active={activeSection}
-              onJump={jumpTo}
+              onJump={(id) => setActiveSection(id as SectionId)}
             />
 
             <div className="flex min-w-0 flex-1 flex-col gap-4">
-              <SectionLabel>{t('settings.sections.profile')}</SectionLabel>
-              <section id="sec-profile" className="flex scroll-mt-[84px] flex-col gap-4">
-                {profileCards}
-              </section>
-
-              <div className="pt-3.5">
-                <SectionLabel>{t('settings.sections.app')}</SectionLabel>
-              </div>
-              <section id="sec-appearance" className="scroll-mt-[84px]">
-                {appearanceCard}
-              </section>
-              <section id="sec-region" className="scroll-mt-[84px]">
-                {regionCard}
-              </section>
-              <section id="sec-notifications" className="scroll-mt-[84px]">
-                {notificationsCard}
-              </section>
-
-              <div className="pt-3.5">
-                <SectionLabel>{t('settings.sections.account')}</SectionLabel>
-              </div>
-              <section id="sec-danger" className="scroll-mt-[84px]">
-                {dangerCard}
-              </section>
+              {activeSection === 'profile' && profileCards}
+              {activeSection === 'appearance' && appearanceCard}
+              {activeSection === 'region' && regionCard}
+              {activeSection === 'notifications' && notificationsCard}
+              {activeSection === 'danger' && dangerCard}
             </div>
           </div>
         )}

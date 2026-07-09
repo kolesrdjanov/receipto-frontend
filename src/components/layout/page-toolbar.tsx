@@ -13,8 +13,7 @@ export function PageToolbar({ title, subtitle, actions, className }: PageToolbar
   return (
     <div
       className={cn(
-        'sticky top-0 z-30 hidden items-center justify-between gap-4 border-b border-border px-8 py-[18px] md:flex',
-        'bg-card/72 [backdrop-filter:blur(22px)_saturate(1.5)] [-webkit-backdrop-filter:blur(22px)_saturate(1.5)]',
+        'sticky top-0 z-30 hidden items-center justify-between gap-4 border-b border-border bg-card px-7 py-[18px] md:flex',
         className,
       )}
     >

@@ -6,48 +6,46 @@ import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  // Default radius is the Glass `rounded-xl` (14px) — the single source of truth for
-  // button corners. `sm` keeps the tighter `rounded-md`; `pill` stays `rounded-full`.
-  // Don't re-add `className="rounded-xl"` at call sites — it's the default now.
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // Luma: flat controls, 10px radius (`rounded-lg` = --radius). Borders/fills do the
+  // work — no drop shadows on buttons. `pill` stays `rounded-full`.
+  // Don't re-add a radius utility at call sites — it's the default now.
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-[opacity,background-color,color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        // primary — near-black (light) / near-white (dark), hover fades
+        default: "bg-primary text-primary-foreground hover:opacity-88",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-destructive text-white hover:opacity-90",
+        // outline — card surface + hairline, hover fills subtle
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-border bg-card text-foreground hover:bg-subtle",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        // ── Glass design-system variants (the single source of truth for the
-        // redesigned button language — never hand-roll these styles again) ──
-        // `brand`            = gradient primary CTA (logo / primary action / FAB only)
-        // `glass`            = neutral bordered card pill (secondary actions, toolbars)
-        // `destructive-soft` = soft red action (logout, soft delete) on the soft bg
-        brand: "btn-brand text-white",
-        // `brand-violet`     = vivid violet AI-action CTA (AI category suggestion "Apply")
-        "brand-violet": "btn-violet text-white",
+          "bg-subtle text-foreground hover:opacity-88",
+        ghost: "text-foreground hover:bg-subtle",
+        link: "text-foreground underline-offset-4 hover:underline",
+        // ── Legacy variants retained for API compatibility ──
+        // `brand` / `brand-violet` — retired gradient CTAs, now alias primary
+        brand: "bg-primary text-primary-foreground hover:opacity-88",
+        "brand-violet": "bg-primary text-primary-foreground hover:opacity-88",
+        // `glass` — neutral bordered pill (secondary actions, toolbars) = outline look
         glass:
-          "border border-border bg-card text-fg-2 shadow-sm hover:bg-bg-subtle hover:text-foreground",
+          "border border-border bg-card text-foreground hover:bg-subtle",
+        // `destructive-soft` — soft red action (logout, soft delete)
         "destructive-soft":
           "bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)] hover:opacity-90",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 px-8",
-        // Icon button: 44x44 true touch target (WCAG 2.5.5 / Apple HIG). The glyph
-        // is sized by the global `[&_svg]:size-4` base; the box provides the tap area.
+        default: "h-9 px-3.5",
+        sm: "h-8 px-3 text-[13px]",
+        lg: "h-11 px-5 text-[15px]",
+        // Icon button: 44x44 true touch target (WCAG 2.5.5 / Apple HIG).
         icon: "size-11",
-        // Dense icon button (toolbars / table rows): compact 36px visual but a >=44px
-        // hit area via a centered pseudo-element, so touch usability is preserved.
+        // Dense icon button (toolbars / table rows): 36px visual, >=44px hit area
+        // via a centered pseudo-element.
         "icon-sm":
           "size-9 relative after:absolute after:left-1/2 after:top-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-['']",
-        // Rounded-full action pill used across the glass toolbars / bulk bars.
+        // Rounded-full action pill.
         pill: "h-9 rounded-full px-3.5",
       },
     },

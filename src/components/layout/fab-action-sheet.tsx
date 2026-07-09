@@ -59,14 +59,14 @@ export function FabActionSheet({ open, onOpenChange }: FabActionSheetProps) {
       <div className="flex flex-col gap-1">
         <ActionRow
           icon={QrCode}
-          iconClass="bg-primary-soft text-primary"
+          iconClass="bg-primary text-primary-foreground"
           title={t('nav.scanReceipt')}
           sub={t('fab.scanHint')}
           onClick={() => go('scan')}
         />
         <ActionRow
           icon={Pencil}
-          iconClass="bg-bg-subtle text-fg-2"
+          iconClass="bg-subtle text-foreground"
           title={t('receipts.addManually')}
           sub={t('fab.manualHint')}
           onClick={() => go('add')}

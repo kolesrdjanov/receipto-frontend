@@ -11,7 +11,6 @@ import { Shimmer } from '@/components/dashboard/primitives'
 import {
   FocusHero,
   FocusSafeToSpend,
-  FocusRankRibbon,
   FocusDailyFlow,
   FocusCategories,
   FocusCoach,
@@ -32,9 +31,11 @@ import { useExchangeRates } from '@/hooks/currencies/use-currency-converter'
 import { useSettingsStore } from '@/store/settings'
 import { QrCode } from 'lucide-react'
 import { getDaysInMonth } from 'date-fns'
-import { getNextRank, getProgressToNextRank, normalizeRank, type ReceiptRank } from '@/lib/rank'
+import { normalizeRank, type ReceiptRank } from '@/lib/rank'
 
-const FALLBACK_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+// Neutral fallbacks for categories with no assigned color (Luma monochrome ramp).
+// Categories that DO carry a color still render it (per-category color is retained).
+const FALLBACK_COLORS = ['#6b7280', '#9ca3af', '#4b5563', '#a1a1aa', '#71717a', '#52525b', '#818181', '#3f3f46']
 
 /** Currency selector + month stepper — shared by the desktop toolbar and the mobile header. */
 function DashboardControls({
@@ -204,8 +205,6 @@ export default function Dashboard() {
   // ── Rank ──
   const rankReceiptCount = me?.receiptCount ?? totalReceipts
   const rankCode = normalizeRank(me?.receiptRank as ReceiptRank | undefined, rankReceiptCount)
-  const nextRank = getNextRank(rankCode)
-  const rankProgress = getProgressToNextRank(rankCode, rankReceiptCount)
   const rankName =
     rankCode === 'status_a'
       ? t('settings.profile.rank.names.statusA')
@@ -267,9 +266,9 @@ export default function Dashboard() {
               action={
                 <Button
                   type="button"
-                  variant="brand"
+                  variant="default"
                   onClick={openQrScanner}
-                  className="h-10 shrink-0 rounded-full px-4 text-[15px] font-semibold [&_svg]:size-[18px]"
+                  className="h-9 shrink-0 rounded-lg px-4 text-[14px] font-medium [&_svg]:size-4"
                 >
                   <QrCode />
                   {t('receipts.scanReceipt')}
@@ -293,6 +292,7 @@ export default function Dashboard() {
                 amountsVisible={amountsVisible}
                 onToggleAmounts={toggleAmountsVisible}
                 isCurrentMonth={isCurrentMonth}
+                rankLabel={rankName}
               />
               <FocusSafeToSpend
                 budget={budget}
@@ -307,15 +307,6 @@ export default function Dashboard() {
                 isCurrentMonth={isCurrentMonth}
               />
             </div>
-
-            {/* Rank ribbon */}
-            <FocusRankRibbon
-              rankName={rankName}
-              receiptCount={rankReceiptCount}
-              progress={rankProgress}
-              isTopTier={!nextRank}
-              toNextCount={nextRank ? Math.max(nextRank.minReceipts - rankReceiptCount, 0) : 0}
-            />
 
             {/* Body — two independent columns (stack on mobile) */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr] md:items-start">
@@ -357,10 +348,9 @@ function FocusSkeleton() {
   return (
     <div className="mx-auto flex max-w-[1180px] flex-col gap-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr]">
-        <Shimmer className="h-[230px] rounded-[28px]" />
-        <Shimmer className="h-[230px] rounded-[28px]" />
+        <Shimmer className="h-[230px] rounded-2xl" />
+        <Shimmer className="h-[230px] rounded-2xl" />
       </div>
-      <Shimmer className="h-[64px] rounded-2xl" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.5fr_1fr]">
         <div className="flex flex-col gap-4">
           <Shimmer className="h-[320px] rounded-3xl" />

@@ -55,12 +55,11 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full font-semibold text-white',
-        (size === 'xl' || size === '2xl') && 'shadow-glass-2',
+        // Luma: neutral subtle circle with foreground initials
+        'flex items-center justify-center rounded-full bg-subtle font-semibold text-foreground',
         sizeClasses[size],
         className
       )}
-      style={{ backgroundImage: 'linear-gradient(135deg, var(--brand-cyan), var(--brand-violet))' }}
     >
       {initials}
     </div>

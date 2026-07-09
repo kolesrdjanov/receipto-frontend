@@ -148,9 +148,6 @@ export interface UserDetails {
   recurringPaymentCount: number
   recurringReceiptCount: number
   loyaltyCardCount: number
-  street: string | null
-  zipCode: string | null
-  city: string | null
 }
 
 const fetchUserDetails = async (userId: string): Promise<UserDetails> => {

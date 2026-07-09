@@ -38,9 +38,9 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        // Filled glass cell — matches the app-wide Input/Select look.
-        'relative grid size-12 place-items-center rounded-xl border border-border bg-bg-subtle/70 text-lg font-semibold text-foreground transition-[border-color,box-shadow] dark:bg-input/55',
-        isActive && 'z-10 border-primary ring-4 ring-primary/15',
+        // Luma OTP cell — hairline card cell; active slot gets a foreground ring.
+        'relative grid size-12 place-items-center rounded-lg border border-border bg-card text-lg font-semibold text-foreground transition-[border-color,box-shadow]',
+        isActive && 'z-10 border-ring ring-[3px] ring-ring/25',
         className,
       )}
       {...props}

@@ -4,9 +4,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 /**
- * Brand-gradient CTA pill — a thin preset of the shared `<Button variant="brand">`. The brand
- * gradient is reserved for the logo, this CTA, and the FAB — don't reuse it elsewhere. Shared so
- * every page stops re-declaring its own `AddButton`.
+ * Primary CTA — a thin preset of the shared `<Button>` (Luma primary fill). Shared so every
+ * page stops re-declaring its own `AddButton`.
  */
 export function AddButton({
   onClick,
@@ -24,12 +23,12 @@ export function AddButton({
   return (
     <Button
       type="button"
-      variant="brand"
+      variant="default"
       onClick={onClick}
-      className={cn('h-10 rounded-full px-4 text-[15px] font-semibold [&_svg]:size-[17px]', className)}
+      className={cn('h-9 rounded-lg px-4 text-[14px] font-medium [&_svg]:size-4', className)}
       data-testid={testId}
     >
-      <Icon strokeWidth={2.4} />
+      <Icon strokeWidth={2} />
       {label}
     </Button>
   )
@@ -60,7 +59,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'grid place-items-center rounded-3xl border border-border bg-card text-center shadow-glass-1',
+        'grid place-items-center rounded-2xl border border-border bg-card text-center shadow-glass-1',
         compact ? 'px-5 py-10' : 'px-6 py-16',
         className,
       )}
@@ -68,13 +67,13 @@ export function EmptyState({
     >
       <span
         className={cn(
-          'grid place-items-center bg-bg-subtle text-muted-foreground',
-          compact ? 'size-[56px] rounded-[18px]' : 'size-[76px] rounded-[22px]',
+          // Luma: 56px outlined icon tile (1px border, muted glyph)
+          'grid size-[56px] place-items-center rounded-2xl border border-border text-muted-foreground',
         )}
       >
-        <Icon className={compact ? 'size-7' : 'size-8'} strokeWidth={1.75} />
+        <Icon className="size-6" strokeWidth={1.75} />
       </span>
-      <h3 className={cn(compact ? 't-title mt-3.5' : 't-h3 mt-[18px]')}>{title}</h3>
+      <h3 className={cn('t-title', compact ? 'mt-3.5' : 'mt-[18px]')}>{title}</h3>
       {description && (
         <p className={cn('t-sm max-w-[320px] text-muted-foreground', compact ? 'mt-1.5' : 'mt-2')}>
           {description}

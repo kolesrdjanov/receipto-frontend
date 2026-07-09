@@ -44,14 +44,13 @@ export function Chip({
       aria-pressed={active}
       aria-label={ariaLabel}
       className={cn(
-        'hit-area inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50',
+        // Luma: 34px pill, hairline border, muted text; active inverts to primary.
+        'hit-area inline-flex h-[34px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
         active
-          ? tone === 'soft'
-            ? 'border-transparent bg-primary-soft text-primary'
-            : 'border-transparent bg-foreground text-background'
+          ? 'border-primary bg-primary text-primary-foreground'
           : tone === 'soft'
-            ? 'border-border bg-bg-subtle text-fg-2 hover:text-foreground'
-            : 'border-border bg-card text-fg-2 hover:bg-bg-subtle hover:text-foreground',
+            ? 'border-border bg-subtle text-muted-foreground hover:text-foreground'
+            : 'border-border bg-card text-muted-foreground hover:bg-subtle hover:text-foreground',
         className,
       )}
     >

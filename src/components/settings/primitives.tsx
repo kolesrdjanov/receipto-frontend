@@ -112,8 +112,8 @@ export function AccentRetired() {
       </div>
       <span
         aria-hidden
-        title="Brand accent (emerald)"
-        className="mt-0.5 size-[26px] shrink-0 rounded-full bg-brand-gradient shadow-sm"
+        title="Monochrome"
+        className="mt-0.5 size-[26px] shrink-0 rounded-full bg-primary"
       />
     </div>
   )

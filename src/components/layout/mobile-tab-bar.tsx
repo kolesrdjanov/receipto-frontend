@@ -24,7 +24,7 @@ function Tab({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: s
         cn(
           'flex flex-1 flex-col items-center gap-1 rounded-lg py-1.5 text-[10.5px] font-semibold transition-colors',
           'outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          isActive ? 'text-primary' : 'text-fg-faint',
+          isActive ? 'text-foreground' : 'text-fg-faint',
         )
       }
     >
@@ -40,7 +40,7 @@ interface MobileTabBarProps {
 }
 
 /**
- * Global mobile bottom navigation: Home · Expenses · gradient FAB · Warranties · More.
+ * Global mobile bottom navigation: Home · Expenses · primary FAB · Warranties · More.
  * The Warranties slot falls back to the next available Wallet destination when that
  * feature is disabled. The FAB defers to a page-registered action (e.g. Recurring/Expenses
  * open their own Add sheet) and otherwise opens the global Add/Scan sheet.
@@ -71,12 +71,12 @@ export function MobileTabBar({ onOpenAddSheet }: MobileTabBarProps) {
         <Tab to="/receipts" icon={Receipt} label={t('nav.receipts')} />
         <Button
           type="button"
-          variant="brand"
+          variant="default"
           onClick={onFab}
           aria-label={t('fab.title')}
-          className="-mt-[26px] grid size-[54px] shrink-0 place-items-center rounded-full p-0 [&_svg]:size-[26px]"
+          className="-mt-[24px] grid size-[50px] shrink-0 place-items-center rounded-full p-0 shadow-glass-2 [&_svg]:size-[24px]"
         >
-          <Plus strokeWidth={2.4} />
+          <Plus strokeWidth={2.2} />
         </Button>
         <Tab to={wallet.to} icon={wallet.icon} label={wallet.label} />
         <button

@@ -113,7 +113,7 @@ export function LanguageSwitcher({
             className={cn(
               'px-1.5 py-0.5 rounded transition-colors',
               language === lang.value
-                ? 'bg-primary/10 text-primary font-medium'
+                ? 'bg-subtle text-foreground font-medium'
                 : 'text-muted-foreground hover:text-foreground'
             )}
             aria-label={lang.value === 'en' ? 'Switch to English' : 'Prebaci na srpski'}

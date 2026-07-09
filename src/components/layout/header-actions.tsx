@@ -17,9 +17,9 @@ import { cn } from '@/lib/utils'
  * All sit at exactly 40px tall with `gap-2` between them (the PageToolbar default).
  */
 
-/** Shared trigger look for header pills: 40px, rounded-full, bordered card surface. */
+/** Shared trigger look for header pills: 40px, rounded-full, bordered card surface (flat). */
 export const HEADER_PILL =
-  'h-10 rounded-full border border-border bg-card text-fg-2 shadow-sm transition-colors hover:bg-bg-subtle hover:text-foreground'
+  'h-10 rounded-full border border-border bg-card text-fg-2 transition-colors hover:bg-bg-subtle hover:text-foreground'
 
 /**
  * 40px circular icon button for header toolbars (camera, overflow menu, import/export…).

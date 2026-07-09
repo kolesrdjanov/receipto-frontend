@@ -27,7 +27,7 @@ export function ThemeSegmented({ labeled = false, className }: ThemeSegmentedPro
       role="group"
       aria-label={t('settings.appearance.theme')}
       className={cn(
-        'inline-flex shrink-0 gap-0.5 rounded-full border border-hairline-soft bg-bg-subtle p-[3px]',
+        'inline-flex shrink-0 gap-0.5 rounded-[10px] bg-bg-subtle p-[3px]',
         className,
       )}
     >
@@ -41,8 +41,8 @@ export function ThemeSegmented({ labeled = false, className }: ThemeSegmentedPro
             aria-pressed={active}
             onClick={() => setTheme(value)}
             className={cn(
-              'inline-flex items-center justify-center gap-1.5 rounded-full transition-colors',
-              labeled ? 'h-9 px-3.5 text-[13px] font-semibold' : 'h-[26px] w-7',
+              'inline-flex items-center justify-center gap-1.5 rounded-[7px] transition-colors',
+              labeled ? 'h-[30px] px-3.5 text-[13px] font-medium' : 'h-[26px] w-7',
               active
                 ? 'bg-card text-foreground shadow-glass-1'
                 : 'text-muted-foreground hover:text-foreground',

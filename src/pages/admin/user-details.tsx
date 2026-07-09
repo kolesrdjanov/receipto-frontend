@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, Check, CreditCard, FolderOpen, Loader2, Mail, MapPin, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Calendar, Check, CreditCard, FolderOpen, Loader2, Mail, PieChart as PieChartIcon, Receipt, Repeat2, ShieldCheck } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageToolbar } from '@/components/layout/page-toolbar'
 import { PageTransition } from '@/components/ui/animated'
@@ -178,16 +178,6 @@ export default function AdminUserDetailsPage() {
                 <InfoItem icon={ShieldCheck} label={t('admin.users.roleLabel')} value={<span className="capitalize">{userDetails.role}</span>} />
                 <InfoItem icon={Calendar} label={t('admin.users.table.joined')} value={formatDateTime(userDetails.createdAt)} />
                 <InfoItem icon={Receipt} label={t('admin.users.table.receipts')} value={userDetails.receiptCount} />
-                <InfoItem
-                  icon={MapPin}
-                  label={t('admin.users.addressLabel')}
-                  value={
-                    userDetails.street || userDetails.city
-                      ? [userDetails.street, [userDetails.zipCode, userDetails.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')
-                      : t('admin.users.noAddress')
-                  }
-                  muted={!(userDetails.street || userDetails.city)}
-                />
               </div>
             </AdminCard>
 

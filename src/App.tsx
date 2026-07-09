@@ -14,24 +14,26 @@ import { useSettingsStore } from './store/settings'
 // red-soft for error, etc.) holding a strong status-colored glyph. Token-driven,
 // so it adapts to dark mode. No dismiss button — toasts auto-dismiss.
 const toasterIcons = {
-  success: <Check className="size-[18px]" strokeWidth={3} />,
-  error: <X className="size-[18px]" strokeWidth={3} />,
-  warning: <TriangleAlert className="size-[17px]" strokeWidth={2.5} />,
-  info: <Info className="size-[17px]" strokeWidth={2.5} />,
+  success: <Check className="size-3" strokeWidth={3} />,
+  error: <X className="size-3" strokeWidth={3} />,
+  warning: <TriangleAlert className="size-3" strokeWidth={2.5} />,
+  info: <Info className="size-3" strokeWidth={2.5} />,
 }
 
+// Luma toast: flat card + hairline + shadow-2, 12px radius; leading 22px status circle
+// (success = primary fill + check; error = danger-soft). Monochrome elsewhere.
 const toasterClassNames = {
   toast:
-    '!rounded-2xl !border !border-hairline-soft !bg-popover !text-foreground !shadow-glass-3 !p-3.5 !gap-3',
-  title: '!text-[14px] !font-semibold !leading-tight !text-foreground',
+    '!rounded-xl !border !border-border !bg-popover !text-foreground !shadow-glass-3 !p-3.5 !gap-3',
+  title: '!text-[13px] !font-semibold !leading-tight !text-foreground',
   description: '!text-[13px] !leading-snug !text-muted-foreground',
-  // The default icon slot becomes the tinted 36px chip; the per-type rows below set its colors.
-  icon: '!m-0 !size-9 !shrink-0 !items-center !justify-center !self-start !rounded-xl',
-  success: '[&_[data-icon]]:!bg-success-soft [&_[data-icon]]:!text-success',
-  error: '[&_[data-icon]]:!bg-destructive-soft [&_[data-icon]]:!text-destructive',
-  warning: '[&_[data-icon]]:!bg-warning-soft [&_[data-icon]]:!text-warning-foreground',
-  info: '[&_[data-icon]]:!bg-info-soft [&_[data-icon]]:!text-info-foreground',
-  loading: '[&_[data-icon]]:!bg-bg-subtle [&_[data-icon]]:!text-muted-foreground',
+  icon: '!m-0 !size-[22px] !shrink-0 !items-center !justify-center !self-start !rounded-full',
+  success: '[&_[data-icon]]:!bg-primary [&_[data-icon]]:!text-primary-foreground',
+  error:
+    '[&_[data-icon]]:!bg-destructive-soft [&_[data-icon]]:!text-[color:var(--destructive-foreground-on-soft)]',
+  warning: '[&_[data-icon]]:!bg-subtle [&_[data-icon]]:!text-foreground',
+  info: '[&_[data-icon]]:!bg-subtle [&_[data-icon]]:!text-foreground',
+  loading: '[&_[data-icon]]:!bg-subtle [&_[data-icon]]:!text-muted-foreground',
 }
 
 const queryClient = new QueryClient({

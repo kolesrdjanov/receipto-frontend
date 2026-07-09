@@ -25,19 +25,27 @@ export function Amount({
   )
 }
 
-/** Shared tone vocabulary for status pills/badges. Features map their own statuses to a Tone. */
-export type Tone = 'ok' | 'info' | 'warn' | 'danger' | 'violet' | 'primary' | 'neutral' | 'muted' | 'outline'
+/** Shared tone vocabulary for status pills/badges. Features map their own statuses to a Tone.
+ *  Luma collapses everything to four looks: neutral · outline · solid · danger. The legacy
+ *  keys (ok/info/warn/violet/primary) are retained for API compatibility and remapped. */
+export type Tone = 'ok' | 'info' | 'warn' | 'danger' | 'violet' | 'primary' | 'solid' | 'neutral' | 'muted' | 'outline'
+
+const NEUTRAL = 'bg-subtle text-muted-foreground'
+const SOLID = 'bg-primary text-primary-foreground'
+const DANGER = 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]'
+const OUTLINE = 'border border-border text-muted-foreground'
 
 const TONE_CLASS: Record<Tone, string> = {
-  ok: 'bg-success-soft text-success-foreground',
-  info: 'bg-info-soft text-info-foreground',
-  warn: 'bg-warning-soft text-warning-foreground',
-  danger: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]',
-  violet: 'bg-brand-violet-soft text-brand-violet-foreground',
-  primary: 'bg-primary-soft text-primary',
-  neutral: 'bg-bg-subtle text-muted-foreground',
-  muted: 'bg-bg-subtle text-fg-faint',
-  outline: 'border border-border text-fg-faint',
+  neutral: NEUTRAL,
+  muted: NEUTRAL,
+  ok: NEUTRAL,
+  info: NEUTRAL,
+  outline: OUTLINE,
+  solid: SOLID,
+  primary: SOLID,
+  warn: SOLID,
+  violet: SOLID,
+  danger: DANGER,
 }
 
 /**
@@ -62,8 +70,8 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full font-semibold',
-        small ? 'px-2 py-0.5 text-[10.5px]' : 'px-2.5 py-0.5 text-[11px]',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full font-medium leading-none',
+        small ? 'px-2 py-1 text-[10.5px]' : 'px-2.5 py-1 text-[11.5px]',
         TONE_CLASS[tone],
         className,
       )}
@@ -114,7 +122,7 @@ export function SelectCheck({ on, className }: { on?: boolean; className?: strin
     <span
       className={cn(
         'grid size-5 shrink-0 place-items-center rounded-md border-2 transition-colors',
-        on ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card',
+        on ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong bg-card',
         className,
       )}
     >

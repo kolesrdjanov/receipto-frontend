@@ -6,23 +6,10 @@ import { cn } from '@/lib/utils'
 /* ------------------------------------------------------------------ */
 /* Decorative brand wash — three blurred radial blobs, purely cosmetic */
 /* ------------------------------------------------------------------ */
-export function BrandWash({ className }: { className?: string }) {
-  return (
-    <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
-      <div
-        className="absolute -left-24 -top-28 size-[380px] rounded-full opacity-20 blur-[72px] dark:opacity-30"
-        style={{ background: 'var(--brand-emerald)' }}
-      />
-      <div
-        className="absolute -bottom-24 -right-20 size-[340px] rounded-full opacity-20 blur-[72px] dark:opacity-30"
-        style={{ background: 'var(--brand-violet)' }}
-      />
-      <div
-        className="absolute left-[34%] top-[42%] size-[300px] rounded-full opacity-[0.12] blur-[72px]"
-        style={{ background: 'var(--brand-cyan)' }}
-      />
-    </div>
-  )
+/** Retired in Luma (brand blobs removed for the flat monochrome auth panel).
+ *  Kept as a no-op so existing call sites don't break. */
+export function BrandWash(_props: { className?: string }) {
+  return null
 }
 
 /* ------------------------------------------------------------------ */
@@ -49,11 +36,11 @@ export const Field = React.forwardRef<HTMLInputElement, FieldProps>(
         </label>
         <div
           className={cn(
-            'flex h-[50px] items-center gap-2.5 rounded-[14px] border bg-muted/60 px-3.5 transition-[border-color,box-shadow]',
-            'focus-within:ring-4',
+            'flex h-[50px] items-center gap-2.5 rounded-xl border bg-card px-3.5 transition-[border-color,box-shadow]',
+            'focus-within:ring-[3px]',
             showError
-              ? 'border-destructive focus-within:border-destructive focus-within:ring-destructive/15'
-              : 'border-border focus-within:border-primary focus-within:ring-primary/15',
+              ? 'border-destructive focus-within:border-destructive focus-within:ring-destructive/25'
+              : 'border-border focus-within:border-ring focus-within:ring-ring/25',
           )}
         >
           {Icon && <Icon className="size-[17px] shrink-0 text-fg-faint" />}
@@ -222,9 +209,9 @@ export function Checkbox({ className, checked, ...props }: CheckboxProps) {
       <input type="checkbox" checked={checked} className="peer sr-only" {...props} />
       <span
         className={cn(
-          'grid size-5 place-items-center rounded-md border-2 transition-colors',
-          'peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-1',
-          checked ? 'border-primary bg-primary text-primary-foreground' : 'border-border',
+          'grid size-5 place-items-center rounded-md border-2 bg-card transition-colors',
+          'peer-focus-visible:ring-2 peer-focus-visible:ring-ring/50 peer-focus-visible:ring-offset-1',
+          checked ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong',
         )}
       >
         <Check className={cn('size-3.5', checked ? 'opacity-100' : 'opacity-0')} strokeWidth={3} />

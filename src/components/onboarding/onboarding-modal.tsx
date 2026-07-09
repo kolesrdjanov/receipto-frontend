@@ -88,7 +88,7 @@ function FeatureStep({ def }: { def: StepDef }) {
       </p>
       {tip && (
         <div className="mt-[18px] flex w-full items-start gap-2.5 rounded-xl bg-bg-subtle px-3.5 py-3 text-left">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-warning" />
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-foreground" />
           <span className="text-[12.5px] leading-[1.45] text-muted-foreground">{tip}</span>
         </div>
       )}
@@ -142,10 +142,10 @@ function LanguageStep({ language, onSelect }: { language: Language; onSelect: (l
   )
 }
 
-/** Brand-gradient nav CTA — auto-width pill preset of `<Button variant="brand">`. */
+/** Primary nav CTA — auto-width pill preset of the shared `<Button>` (Luma primary fill). */
 function GradientPill({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
-    <Button type="button" variant="brand" onClick={onClick} className={NAV_BTN}>
+    <Button type="button" variant="default" onClick={onClick} className={NAV_BTN}>
       {children}
     </Button>
   )
@@ -219,7 +219,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
           <DialogPrimitive.Portal forceMount key="onboarding">
             <DialogPrimitive.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.45)] backdrop-blur-[5px] dark:bg-[oklch(0_0_0/0.55)]"
+                className="fixed inset-0 z-50 bg-[oklch(0_0_0/0.4)] dark:bg-[oklch(0_0_0/0.55)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -261,7 +261,7 @@ export function OnboardingModal({ open, onOpenChange }: OnboardingModalProps) {
                     transition={{ duration: reduceMotion ? 0 : 0.3, ease: SHEET_EASE }}
                   >
                     <DialogPrimitive.Title className="sr-only">{a11yTitle}</DialogPrimitive.Title>
-                    <div className="mx-auto mb-4 h-[5px] w-9 rounded-full bg-border" />
+                    <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-strong" />
                     {body}
                   </motion.div>
                 )}

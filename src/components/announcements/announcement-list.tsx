@@ -88,7 +88,7 @@ export function AnnouncementDrawer({ open, onOpenChange }: AnnouncementDrawerPro
 
 export function useAnnouncementIndicator() {
   const { data: announcements } = useActiveAnnouncements()
-  const listCount = (announcements ?? []).filter(
+  const listCount = (Array.isArray(announcements) ? announcements : []).filter(
     (a) => a.displayMode === 'list' || a.displayMode === 'both',
   ).length
   return { hasAnnouncements: listCount > 0, count: listCount }
