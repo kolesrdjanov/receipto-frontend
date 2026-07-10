@@ -185,7 +185,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
                 value={pfrPart1}
                 onChange={(e) => handlePfrPart1Change(e.target.value)}
                 maxLength={8}
-                className="flex-1 font-mono text-center"
+                className="flex-1 text-center"
                 disabled
               />
               <span className="flex items-center text-muted-foreground">-</span>
@@ -195,7 +195,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
                 value={pfrPart2}
                 onChange={(e) => handlePfrPart2Change(e.target.value)}
                 maxLength={8}
-                className="flex-1 font-mono text-center"
+                className="flex-1 text-center"
                 disabled
               />
               <span className="flex items-center text-muted-foreground">-</span>
@@ -205,7 +205,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
                 value={pfrPart3}
                 onChange={(e) => handlePfrPart3Change(e.target.value)}
                 maxLength={6}
-                className="flex-1 font-mono text-center"
+                className="flex-1 text-center"
                 disabled
               />
             </div>
@@ -221,7 +221,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
                 value={counterPart1}
                 onChange={(e) => handleCounterPart1Change(e.target.value)}
                 maxLength={6}
-                className="w-24 font-mono text-center"
+                className="w-24 text-center"
                 disabled
               />
               <span className="text-muted-foreground">/</span>
@@ -231,11 +231,11 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
                 value={counterPart2}
                 onChange={(e) => handleCounterPart2Change(e.target.value)}
                 maxLength={6}
-                className="w-24 font-mono text-center"
+                className="w-24 text-center"
                 disabled
               />
               <div className="flex-1 flex items-center justify-center">
-                <span className="px-3 py-2 bg-muted rounded-md font-mono text-sm">ПП</span>
+                <span className="px-3 py-2 bg-muted rounded-md text-sm">ПП</span>
               </div>
             </div>
           </div>
@@ -248,7 +248,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
               placeholder="DD.MM.YYYY HH:MM:SS"
               value={pfrDate}
               onChange={(e) => setPfrDate(e.target.value)}
-              className="font-mono"
+              
               disabled
             />
             <p className="text-xs text-muted-foreground">{t('receipts.pfrEntry.dateTimeFormat')}</p>
@@ -262,7 +262,7 @@ export function PfrEntryModal({ open, onOpenChange, onSubmit }: PfrEntryModalPro
               placeholder="1.110,00"
               value={pfrAmount}
               onChange={(e) => setPfrAmount(e.target.value)}
-              className="font-mono"
+              
               disabled
             />
             <p className="text-xs text-muted-foreground">{t('receipts.pfrEntry.amountHint')}</p>

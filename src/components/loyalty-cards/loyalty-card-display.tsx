@@ -63,7 +63,7 @@ export function LoyaltyCardDisplay({ card, open, onOpenChange }: LoyaltyCardDisp
             )}
           </div>
 
-          <p className="select-all break-all text-center font-mono text-[13px] tracking-[0.06em] text-[#555]">
+          <p className="select-all break-all text-center text-[13px] tracking-[0.06em] text-[#555]">
             {card.codeValue}
           </p>
         </div>

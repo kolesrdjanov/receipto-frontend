@@ -356,7 +356,7 @@ export function GroupManageSheet({
             {inviteUrl && (
               <>
                 <div className="mt-2.5 flex h-[46px] items-center gap-2.5 rounded-xl border border-border bg-bg-subtle pl-3 pr-2">
-                  <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] font-medium">{inviteUrl}</span>
+                  <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">{inviteUrl}</span>
                   <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
                     {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                     {copied ? t('groups.inviteLink.copied') : t('groups.inviteLink.copy')}

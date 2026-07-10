@@ -38,7 +38,7 @@ interface CardActions {
 export function RowActionList({ card, onShow, onEdit, onDelete }: { card: LoyaltyCard } & CardActions) {
   const { t } = useTranslation()
   const item =
-    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors hover:bg-bg-subtle'
+    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors hover:bg-bg-subtle'
   return (
     <div className="flex flex-col gap-0.5">
       <button type="button" className={item} onClick={() => onShow?.(card)}>
@@ -80,7 +80,7 @@ export function LoyaltyCardItem({ card, onShow, onEdit, onDelete, onOpenActions 
           <div className="truncate text-[15px] font-semibold leading-[1.25] tracking-[-0.01em]" title={card.cardName}>
             {card.cardName}
           </div>
-          <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
+          <div className="mt-[3px] truncate text-[12px] tracking-[0.02em] text-muted-foreground">
             {card.codeValue}
           </div>
         </div>

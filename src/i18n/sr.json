@@ -1010,9 +1010,9 @@
       "clears_other": "{{count}} uplata izmiruje sve"
     },
     "pill": {
-      "owed": "duguju vam",
-      "owe": "vi dugujete",
-      "settled": "izmireno"
+      "owed": "Duguju",
+      "owe": "Dugujete",
+      "settled": "Izmireno"
     },
     "roles": {
       "owner": "vlasnik",
@@ -1059,6 +1059,7 @@
       "amountRequired": "Unesite iznos",
       "paidBy": "Platio/la",
       "split": "Podela",
+      "splitWays": "podeljeno na {{count}}",
       "splitEqually": "Podjednako",
       "splitByAmount": "Po iznosu",
       "splitByAmountSoon": "Podela po iznosima uskoro stiže",
@@ -1256,6 +1257,7 @@
     "mobileSubtitle": "Pratite garancije svojih proizvoda",
     "desktopSubtitle": "Pratite i upravljajte garancijama — nikada ne propustite istek.",
     "tracked": "Praćeno",
+    "summaryTracked": "praćenih garancija",
     "warrantiesLabel": "garancija",
     "warrantyCount": "{{count}} garancija",
     "sortedByExpiry": "sortirano po isteku",

@@ -430,7 +430,7 @@ export default function Settings() {
       {!isMobile && showDeleteConfirm ? (
         <div className="mt-4 space-y-3 rounded-xl border border-destructive/50 p-4">
           <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
-          <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="font-mono" />
+          <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)}  />
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={cancelDelete}>
               {t('common.cancel')}
@@ -542,7 +542,7 @@ export default function Settings() {
           {warningBox}
           <div className="space-y-2">
             <p className="text-sm font-semibold">{t('settings.dangerZone.confirmPrompt')}</p>
-            <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} className="font-mono" />
+            <Input type="text" placeholder="DELETE" value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)}  />
           </div>
         </div>
       </GlassDialog>

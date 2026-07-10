@@ -248,7 +248,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
             </label>
             <Input
               id="loyalty-code-value"
-              className="font-mono"
+              
               placeholder={t('loyaltyCards.codeValuePlaceholder')}
               {...register('codeValue')}
             />
@@ -318,7 +318,7 @@ export function LoyaltyCardModal({ open, onOpenChange, card, onRequestDelete }: 
                 <CodeGlyph card={previewCard} size={40} />
                 <div className="min-w-0 grow">
                   <div className="truncate text-[15px] font-semibold leading-[1.25] tracking-[-0.01em]">{cardName}</div>
-                  <div className="mt-[3px] truncate font-mono text-[12px] tracking-[0.02em] text-muted-foreground">
+                  <div className="mt-[3px] truncate text-[12px] tracking-[0.02em] text-muted-foreground">
                     {codeValue}
                   </div>
                 </div>

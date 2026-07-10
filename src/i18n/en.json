@@ -1007,9 +1007,9 @@
       "clears_other": "{{count}} payments clears everyone"
     },
     "pill": {
-      "owed": "you're owed",
-      "owe": "you owe",
-      "settled": "settled"
+      "owed": "Owed",
+      "owe": "Owe",
+      "settled": "Settled"
     },
     "roles": {
       "owner": "owner",
@@ -1055,6 +1055,7 @@
       "amountRequired": "Enter an amount",
       "paidBy": "Paid by",
       "split": "Split",
+      "splitWays": "split {{count}} ways",
       "splitEqually": "Equally",
       "splitByAmount": "By amount",
       "splitByAmountSoon": "Splitting by custom amounts is coming soon",
@@ -1252,6 +1253,7 @@
     "mobileSubtitle": "Track your product warranties",
     "desktopSubtitle": "Track and manage your product warranties — never miss an expiry window.",
     "tracked": "Tracked",
+    "summaryTracked": "warranties tracked",
     "warrantiesLabel": "warranties",
     "warrantyCount": "{{count}} warranties",
     "sortedByExpiry": "sorted by expiry",

@@ -239,7 +239,7 @@ export function SettleRow({
         <Button
           type="button"
           size="sm"
-          variant={youPay ? 'brand' : 'glass'}
+          variant="outline"
           className="shrink-0"
           onClick={() => onSettle(settlement)}
         >

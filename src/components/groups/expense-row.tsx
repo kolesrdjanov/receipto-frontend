@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { memberFirstName } from '@/lib/groups'
-import { cn, formatMoney } from '@/lib/utils'
-import { formatDateTime } from '@/lib/date-utils'
+import { formatMoney } from '@/lib/utils'
 import type { Receipt } from '@/hooks/receipts/use-receipts'
 import type { GroupMember } from '@/hooks/groups/use-groups'
 
@@ -10,8 +9,9 @@ function toNumber(v: string | number | undefined): number {
 }
 
 /**
- * One group expense (a receipt) as a tappable row: category emoji, store + "who paid · date",
- * amount, and a from-your-POV annotation (you lent / you owe / not involved).
+ * One group expense (a receipt) as a tappable row (handoff: emoji tile · store +
+ * "{payer} paid · split N ways" · total). The from-your-POV breakdown (you lent / owe)
+ * lives in the expense detail sheet this row opens.
  */
 export function GroupExpenseRow({
   receipt,
@@ -30,28 +30,16 @@ export function GroupExpenseRow({
   const accepted = members.filter((m) => m.status === 'accepted')
 
   const partCount = receipt.participants?.length || accepted.length || 1
-  const inSplit = receipt.participants?.length
-    ? receipt.participants.some((p) => p.userId === currentUserId)
-    : true
-  const share = amount / partCount
   const youPaid = (receipt.paidById ?? receipt.paidBy?.id) === currentUserId
-
-  let tag: string
-  let tagColor: string
-  if (youPaid) {
-    const lent = amount - (inSplit ? share : 0)
-    tag = t('groups.expense.youLent', { amount: formatMoney(lent, currency) })
-    tagColor = 'text-foreground'
-  } else if (inSplit) {
-    tag = t('groups.expense.youOwe', { amount: formatMoney(share, currency) })
-    tagColor = 'text-destructive'
-  } else {
-    tag = t('groups.expense.notInvolved')
-    tagColor = 'text-fg-faint'
-  }
-
-  const payerName = memberFirstName(receipt.paidBy)
+  const payerLabel = youPaid ? t('groups.you') : memberFirstName(receipt.paidBy)
   const emoji = receipt.category?.icon || '🧾'
+
+  const meta = [
+    payerLabel ? t('groups.expense.whoPaid', { name: payerLabel }) : null,
+    t('groups.expense.splitWays', { count: partCount }),
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     // eslint-disable-next-line no-restricted-syntax -- raw-button-ok: list-row tap-face (opens the expense detail sheet)
@@ -62,18 +50,12 @@ export function GroupExpenseRow({
     >
       <span className="grid size-[42px] shrink-0 place-items-center rounded-xl bg-bg-subtle text-[21px]">{emoji}</span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14.5px] font-semibold text-foreground">
+        <span className="block truncate text-[15px] font-semibold text-foreground">
           {receipt.storeName || t('receipts.unknownStore')}
         </span>
-        <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
-          {payerName ? t('groups.expense.whoPaid', { name: payerName }) : ''}
-          {receipt.receiptDate ? ` · ${formatDateTime(receipt.receiptDate)}` : ''}
-        </span>
+        <span className="mt-0.5 block truncate text-[12.5px] text-muted-foreground">{meta}</span>
       </span>
-      <span className="flex shrink-0 flex-col items-end">
-        <span className="text-[14.5px] font-semibold">{formatMoney(amount, currency)}</span>
-        <span className={cn('mt-1 text-[11px] font-semibold', tagColor)}>{tag}</span>
-      </span>
+      <span className="shrink-0 text-[15px] font-semibold">{formatMoney(amount, currency)}</span>
     </button>
   )
 }

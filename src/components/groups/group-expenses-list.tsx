@@ -87,10 +87,10 @@ export function GroupExpensesList({
       ) : (
         <>
           <div className="flex items-baseline justify-between gap-2.5 px-0.5">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-fg-faint">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-faint">
               {t('groups.expense.count', { count: total })}
             </span>
-            <span className="text-[18px] font-semibold tracking-[-0.02em]">
+            <span className="text-[20px] font-semibold tracking-[-0.02em]">
               {formatMoney(groupTotal, displayCurrency)}
             </span>
           </div>

@@ -42,19 +42,22 @@ function Calendar({
         week: "flex w-full mt-2",
         day: cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-          "[&:has([aria-selected])]:bg-accent",
+          // react-day-picker v9 puts `aria-selected` on the day CELL (this <td>), not the
+          // button — so style the button THROUGH the selected cell. Previously the primary
+          // fill landed on the cell while the ghost button kept dark text, making the
+          // selected date invisible (dark-on-dark).
+          "[&[aria-selected=true]>button]:bg-primary [&[aria-selected=true]>button]:text-primary-foreground [&[aria-selected=true]>button]:hover:bg-primary [&[aria-selected=true]>button]:hover:text-primary-foreground",
           "[&:has([aria-selected].outside)]:bg-accent/50",
           "first:[&:has([aria-selected])]:rounded-l-md",
           "last:[&:has([aria-selected])]:rounded-r-md"
         ),
         day_button: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal"
         ),
         range_start: "day-range-start rounded-l-md",
         range_end: "day-range-end rounded-r-md",
-        selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md",
+        selected: "rounded-md",
         today: "bg-accent text-accent-foreground rounded-md",
         outside:
           "outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-100",

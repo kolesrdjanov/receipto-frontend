@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PageContent } from '@/components/layout/page-content'
-import { PageToolbar } from '@/components/layout/page-toolbar'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { HeaderCurrencyPill, HeaderIconButton } from '@/components/layout/header-actions'
@@ -38,7 +37,7 @@ import { GroupExpensesList } from '@/components/groups/group-expenses-list'
 import { GroupHistoryList } from '@/components/groups/group-history-list'
 import { GAvatarStack, SectionLabel } from '@/components/groups/primitives'
 import { toast } from 'sonner'
-import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Loader2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, ChevronRight, Camera, Settings2, Loader2 } from 'lucide-react'
 
 const ReceiptModal = lazy(() =>
   import('@/components/receipts/receipt-modal').then((m) => ({ default: m.ReceiptModal })),
@@ -235,16 +234,8 @@ export default function GroupDetail() {
     />
   )
 
-  // Detail is tabs-less (Activity retired): a plain expenses header + the feed, then inline history.
-  const expensesHeader = (
-    <div className="flex items-center justify-between px-1">
-      <SectionLabel>{t('groups.tabsNav.expenses')}</SectionLabel>
-      {stats?.totalReceipts != null && (
-        <span className="text-[12px] font-semibold text-fg-faint">{stats.totalReceipts}</span>
-      )}
-    </div>
-  )
-
+  // Detail is tabs-less (Activity retired): the feed owns its "N expenses · total" header
+  // (GroupExpensesList), then inline settlement history below it.
   const expensesBody = (
     <GroupExpensesList
       groupId={id}
@@ -437,7 +428,6 @@ export default function GroupDetail() {
         </div>
         <div className="flex flex-col gap-3.5">
           {hero}
-          {expensesHeader}
           {expensesBody}
           {historySection}
         </div>
@@ -446,56 +436,57 @@ export default function GroupDetail() {
     )
   }
 
-  // DESKTOP detail — sticky hero aside + expenses feed + inline settlement history -------
+  // DESKTOP detail — in-content header (no toolbar, per the handoff), balance hero aside +
+  // expenses feed + inline settlement history. Capped at 1000px like the reference.
   return (
     <AppLayout>
-      <PageToolbar
-        className="md:mb-6"
-        title={group.name}
-        subtitle={group.description || t('groups.membersCount', { count: acceptedMembers.length })}
-        actions={
-          <>
+      <PageContent className="md:pt-6">
+      <div className="mx-auto max-w-[1000px]">
+        {/* Back + action cluster */}
+        <div className="mb-4 flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => navigate('/groups')}>
+            <ArrowLeft className="size-4" />
+            {t('groups.title')}
+          </Button>
+          <div className="ml-auto flex items-center gap-2">
             {currencyControl}
-            {!isArchived && (
-              <HeaderIconButton icon={Camera} label={t('receipts.scanQr')} onClick={openScan} />
-            )}
-            {!isArchived && (
-              <AddButton onClick={openAdd} label={t('groups.expense.addExpense')} />
-            )}
-            <HeaderIconButton icon={MoreHorizontal} label={t('groups.manage.title')} onClick={() => setManageOpen(true)} />
-          </>
-        }
-      />
+            {!isArchived && <HeaderIconButton icon={Camera} label={t('receipts.scanQr')} onClick={openScan} />}
+            {!isArchived && <AddButton onClick={openAdd} label={t('groups.expense.addExpense')} />}
+            <Button variant="outline" size="sm" onClick={() => setManageOpen(true)}>
+              <Settings2 className="size-4" />
+              {t('groups.manage.title')}
+            </Button>
+          </div>
+        </div>
 
-      <PageContent>
-      <div className="mx-auto max-w-[1080px]">
-        <Button variant="ghost" size="sm" className="mb-3 -ml-2 text-muted-foreground" onClick={() => navigate('/groups')}>
-          <ArrowLeft className="size-4" />
-          {t('groups.title')}
-        </Button>
-
-        <div className="flex items-center gap-3.5">
-          <span className="grid size-[54px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[29px]">
+        {/* Identity — tile + name + "N members · CUR" + avatar stack (opens Manage) */}
+        <div className="mb-5 flex items-center gap-3.5">
+          <span className="grid size-[52px] shrink-0 place-items-center rounded-2xl bg-bg-subtle text-[27px]">
             {group.icon || '👥'}
           </span>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[25px] font-semibold tracking-[-0.02em]">{group.name}</div>
-            {group.description && (
-              <div className="mt-0.5 truncate text-[13px] text-muted-foreground">{group.description}</div>
-            )}
+            <div className="truncate text-[24px] font-semibold tracking-[-0.02em]">{group.name}</div>
+            <div className="mt-0.5 truncate text-[13px] text-muted-foreground">
+              {t('groups.membersCount', { count: acceptedMembers.length })} · {displayCurrency}
+            </div>
           </div>
-          {membersButton}
+          {/* eslint-disable-next-line no-restricted-syntax -- raw-button-ok: avatar-stack shortcut into the Manage sheet */}
+          <button
+            type="button"
+            onClick={() => setManageOpen(true)}
+            className="shrink-0 rounded-full transition-opacity hover:opacity-80"
+            aria-label={t('groups.manage.title')}
+          >
+            <GAvatarStack members={acceptedMembers.map((m) => m.user)} max={5} size={32} currentUserId={user?.id} />
+          </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 items-start gap-[22px] lg:grid-cols-[360px_1fr]">
-          {/* Left: pinned balance + settle hero */}
-          <div className="lg:sticky lg:top-24">{hero}</div>
-
-          {/* Right: expenses feed + inline settlement history */}
-          <div className="flex min-w-0 flex-col gap-3.5">
-            <div className="max-w-[460px]">{expensesHeader}</div>
+        {/* Two columns: balance hero (362) + expenses feed (fluid) */}
+        <div className="grid grid-cols-1 items-start gap-[22px] lg:grid-cols-[362px_1fr]">
+          <div className="lg:sticky lg:top-6">{hero}</div>
+          <div className="flex min-w-0 flex-col gap-5">
             {expensesBody}
-            <div className="max-w-[460px]">{historySection}</div>
+            {historySection}
           </div>
         </div>
       </div>

@@ -1,12 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  ShieldX,
-  type LucideIcon,
-} from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/api'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -15,7 +9,7 @@ import { PageHeader } from '@/components/layout/page-header'
 import { PageTransition } from '@/components/ui/animated'
 import { GlassDialog } from '@/components/glass/glass-dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { WarrantyGrid, StatusTabs, CardActionList } from '@/components/warranties/primitives'
+import { WarrantyGrid, StatusTabs, CardActionList, WarrantySummary } from '@/components/warranties/primitives'
 import { sortWarranties } from '@/components/warranties/warranty-view'
 import {
   useWarranties,
@@ -29,7 +23,6 @@ import { WarrantyImportDialog } from '@/components/warranties/warranty-import-di
 import { EmptyState, AddButton } from '@/components/glass/empty-state'
 import { ImportExportMenu } from '@/components/glass/import-export-menu'
 import { useFabStore } from '@/store/fab'
-import { cn } from '@/lib/utils'
 
 const WarrantyModal = lazy(() =>
   import('@/components/warranties/warranty-modal').then((m) => ({ default: m.WarrantyModal })),
@@ -45,28 +38,6 @@ const CSV_TEMPLATE = `productName,storeName,purchaseDate,warrantyExpires,warrant
 "iPhone 15 Pro","iStyle",2024-03-20,,24,"Personal phone","https://example.com/warranty1.jpg"
 "Bosch Washing Machine","Tehnomanija",2024-02-10,2027-02-10,36,"","https://example.com/doc1.pdf;https://example.com/doc2.jpg"
 `
-
-const STAT_TONE: Record<string, { tile: string; num: string }> = {
-  total: { tile: 'bg-bg-subtle text-foreground', num: 'text-foreground' },
-  active: { tile: 'bg-success-soft text-success-foreground', num: 'text-success-foreground' },
-  expiring: { tile: 'bg-warning-soft text-warning-foreground', num: 'text-warning-foreground' },
-  expired: { tile: 'bg-destructive-soft text-[color:var(--destructive-foreground-on-soft)]', num: 'text-destructive' },
-}
-
-function StatCard({ label, value, icon: Icon, tone }: { label: string; value: number; icon: LucideIcon; tone: keyof typeof STAT_TONE }) {
-  const s = STAT_TONE[tone]
-  return (
-    <div className="rounded-2xl border border-border bg-card p-[18px] shadow-glass-1">
-      <div className="flex items-start justify-between">
-        <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
-        <span className={cn('grid size-8 place-items-center rounded-lg', s.tile)}>
-          <Icon className="size-[17px]" />
-        </span>
-      </div>
-      <div className={cn('mt-2 text-[30px] font-semibold leading-none', s.num)}>{value}</div>
-    </div>
-  )
-}
 
 function SkeletonCard() {
   return (
@@ -289,41 +260,8 @@ export default function WarrantiesPage() {
           />
         ) : (
           <>
-            {/* Desktop stat cards */}
-            {stats && (
-              <div className="mb-6 hidden gap-4 md:grid md:grid-cols-4">
-                <StatCard label={t('warranties.stats.total')} value={stats.total} icon={Shield} tone="total" />
-                <StatCard label={t('warranties.stats.active')} value={stats.active} icon={ShieldCheck} tone="active" />
-                <StatCard label={t('warranties.stats.expiringSoon')} value={stats.expiringSoon} icon={ShieldAlert} tone="expiring" />
-                <StatCard label={t('warranties.stats.expired')} value={stats.expired} icon={ShieldX} tone="expired" />
-              </div>
-            )}
-
-            {/* Mobile summary strip */}
-            {stats && (
-              <div className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-glass-1 md:hidden">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="t-xs text-fg-faint">{t('warranties.tracked')}</span>
-                    <span className="flex items-baseline gap-1.5">
-                      <span className="text-[30px] font-semibold leading-none">{stats.total}</span>
-                      {/*<span className="text-[12px] text-muted-foreground">{t('warranties.warrantiesLabel')}</span>*/}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap justify-end gap-1.5">
-                    <span className="inline-flex h-7 items-center gap-1 rounded-full bg-success-soft px-2.5 text-[11.5px] font-medium text-success-foreground">
-                      <b>{stats.active}</b> {t('warranties.countActive')}
-                    </span>
-                    <span className="inline-flex h-7 items-center gap-1 rounded-full bg-warning-soft px-2.5 text-[11.5px] font-medium text-warning-foreground">
-                      <b>{stats.expiringSoon}</b> {t('warranties.countExpiring')}
-                    </span>
-                    <span className="inline-flex h-7 items-center gap-1 rounded-full bg-destructive-soft px-2.5 text-[11.5px] font-medium text-[color:var(--destructive-foreground-on-soft)]">
-                      <b>{stats.expired}</b> {t('warranties.countExpired')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Slim summary line (handoff): total + tracked + tone badges */}
+            {stats && <WarrantySummary stats={stats} />}
 
             {/* Filter row */}
             <div className="mb-4 flex items-center justify-between gap-3">

@@ -15,7 +15,7 @@ function KebabItem({
       disabled={disabled}
       title={title}
       className={cn(
-        'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[14px] font-semibold transition-colors',
+        'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[14px] font-medium transition-colors',
         'disabled:pointer-events-none disabled:opacity-45',
         danger ? 'text-destructive hover:bg-destructive/10' : 'text-foreground hover:bg-bg-subtle',
       )}

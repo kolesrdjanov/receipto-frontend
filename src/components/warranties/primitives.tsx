@@ -173,7 +173,39 @@ export function FileThumbStrip({ files, onOpen }: { files: WarrantyFile[]; onOpe
 }
 
 /* ------------------------------------------------------------------ */
-/* StatusTabs — scrollable pill tabs with count chips                   */
+/* WarrantySummary — slim summary line (count + tracked + tone badges)  */
+/* Handoff: NOT a 4-up stat grid. Big total, then active (neutral) /    */
+/* expiring (solid) / expired (danger) badges, right-aligned.            */
+/* ------------------------------------------------------------------ */
+export function WarrantySummary({
+  stats,
+}: {
+  stats: { total: number; active: number; expiringSoon: number; expired: number }
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="mb-[18px] flex flex-wrap items-center gap-x-4 gap-y-2.5">
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-[22px] font-semibold tracking-[-0.02em]">{stats.total}</span>
+        <span className="text-[13px] text-muted-foreground">{t('warranties.summaryTracked')}</span>
+      </div>
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        <GlassStatusBadge tone="neutral">
+          {stats.active} {t('warranties.countActive')}
+        </GlassStatusBadge>
+        <GlassStatusBadge tone="solid">
+          {stats.expiringSoon} {t('warranties.countExpiring')}
+        </GlassStatusBadge>
+        <GlassStatusBadge tone="danger">
+          {stats.expired} {t('warranties.countExpired')}
+        </GlassStatusBadge>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* StatusTabs — segmented control (handoff `.seg`) with inline counts   */
 /* ------------------------------------------------------------------ */
 type TabKey = 'all' | 'active' | 'expiring' | 'expired'
 const TAB_KEYS: TabKey[] = ['all', 'active', 'expiring', 'expired']
@@ -189,7 +221,7 @@ export function StatusTabs({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-[10px] bg-bg-subtle p-[3px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {TAB_KEYS.map((key) => {
         const on = key === value
         return (
@@ -198,19 +230,12 @@ export function StatusTabs({
             type="button"
             onClick={() => onChange(key)}
             className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors',
-              on ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground hover:bg-bg-subtle',
+              'inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-[7px] px-3.5 text-[13px] font-medium transition-colors',
+              on ? 'bg-card text-foreground shadow-glass-1' : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {t(`warranties.tabs.${key}`)}
-            <span
-              className={cn(
-                'min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px]',
-                on ? 'bg-primary-soft text-primary' : 'bg-bg-subtle text-fg-faint',
-              )}
-            >
-              {counts[key]}
-            </span>
+            <span className="text-[11px] opacity-70">{counts[key]}</span>
           </button>
         )
       })}
@@ -289,7 +314,7 @@ export function WarrantyCard({
     <div
       onClick={() => onEdit(w)}
       className={cn(
-        'flex cursor-pointer flex-col rounded-[18px] border border-border bg-card p-[18px] shadow-glass-1 transition-[box-shadow,border-color] hover:border-primary/35 hover:shadow-glass-2',
+        'flex cursor-pointer flex-col rounded-2xl border border-border bg-card p-[18px] transition-colors hover:border-border-strong',
         dim && 'opacity-[0.72]',
       )}
     >
